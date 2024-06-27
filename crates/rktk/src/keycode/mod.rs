@@ -7,6 +7,7 @@ pub mod media;
 pub mod modifier;
 pub mod mouse;
 pub mod special;
+pub mod utils;
 
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyCode {

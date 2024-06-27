@@ -1,11 +1,6 @@
 use rktk::constant::LAYER_COUNT;
-use rktk::keycode::key::*;
-use rktk::keycode::layer::*;
-use rktk::keycode::media::*;
-use rktk::keycode::modifier::*;
-use rktk::keycode::mouse::*;
-use rktk::keycode::special::*;
 use rktk::keycode::*;
+use rktk::keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*};
 
 const L2ENTER: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
@@ -26,15 +21,6 @@ const L4GRV: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Grave),
     KeyCode::Layer(LayerOp::Move(4)),
 ));
-
-#[allow(non_snake_case)]
-pub const fn SF(k: KeyDef) -> KeyDef {
-    if let KeyDef::Key(KeyAction::Tap(KeyCode::Key(key))) = k {
-        KeyDef::Key(KeyAction::Tap(KeyCode::WithModifier(Modifier::LShft, key)))
-    } else {
-        panic!("Not supported key type")
-    }
-}
 
 #[rustfmt::skip]
 const L0: LayerMap = [

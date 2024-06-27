@@ -32,7 +32,18 @@ pub async fn start(
 
         let mut master_events = key_scanner.scan().await;
 
-        let state_report = state.update(&mut master_events, &mut [], (0, 0));
+        let mouse_event = if let Some(mouse) = &mut mouse {
+            if let Ok(e) = mouse.read().await {
+                Some(e)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let state_report =
+            state.update(&mut master_events, &mut [], mouse_event.unwrap_or_default());
 
         if let Some(report) = state_report.keyboard_report {
             let _ = usb.send_report(HidReport::Keyboard(report)).await;
