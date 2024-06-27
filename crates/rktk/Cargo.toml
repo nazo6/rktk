@@ -1,0 +1,9 @@
+[package]
+name = "rktk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+heapless = { workspace = true }
+embassy-time = { workspace = true }
+usbd-hid = { workspace = true }

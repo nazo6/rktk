@@ -1,0 +1,15 @@
+[package]
+name = "rktk-drivers-common"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+embedded-hal-async = { workspace = true }
+embedded-hal = { workspace = true }
+embassy-time = { workspace = true }
+rktk = { path = "../rktk" }
+heapless = { workspace = true }
+embassy-usb = { workspace = true }
+usbd-hid = { workspace = true }
+embassy-sync = { workspace = true }
+embassy-executor = { workspace = true }

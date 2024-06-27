@@ -1,0 +1,15 @@
+[package]
+name = "rktk-drivers-rp2040"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rktk = { path = "../rktk" }
+rktk-drivers-common = { path = "../rktk-drivers-common" }
+embassy-rp = { workspace = true }
+embassy-time = { workspace = true }
+embassy-usb = { workspace = true }
+embassy-executor = { workspace = true }
+embassy-sync = { workspace = true }
+embassy-futures = { workspace = true }
+static_cell = "2.1.0"
