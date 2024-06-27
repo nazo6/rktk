@@ -5,6 +5,12 @@ pub struct KeyChangeEventOneHand {
     pub pressed: bool,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Hand {
+    Left,
+    Right,
+}
+
 pub trait Keyscan {
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEventOneHand, 16>;
 }

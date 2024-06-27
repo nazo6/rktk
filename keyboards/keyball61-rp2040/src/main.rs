@@ -6,22 +6,29 @@ use core::panic::PanicInfo;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::Flex;
-use rktk::interface::keyscan::Keyscan;
 use rktk_drivers_rp2040::{
+    double_tap::DoubleTapResetRp,
     interrupts::Irqs,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
     usb::{UsbConfig, UsbDriver, UsbUserOpts},
 };
 
+mod keymap;
+
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
 
-    let ball = create_pmw3360(
+    let dtr = DoubleTapResetRp;
+
+    let Ok(ball) = create_pmw3360(
         p.SPI0, p.PIN_22, p.PIN_23, p.PIN_20, p.DMA_CH0, p.DMA_CH1, p.PIN_21,
     )
-    .await;
+    .await
+    else {
+        panic!("Failed to create PMW3360");
+    };
 
     let rows = [
         Flex::new(p.PIN_4),
@@ -37,7 +44,7 @@ async fn main(_spawner: Spawner) {
         Flex::new(p.PIN_26),
     ];
 
-    let mut key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(rows, cols, (2, 6));
+    let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(rows, cols, (2, 6));
 
     let mut config = UsbConfig::new(0xc0de, 0xcafe);
     config.manufacturer = Some("Yowkees/nazo6");
@@ -54,6 +61,8 @@ async fn main(_spawner: Spawner) {
     let driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
 
     let usb = UsbDriver::create_and_start(usb_opts, driver).await;
+
+    rktk::task::start(Some(dtr), key_scanner, Some(ball), usb, keymap::KEYMAP).await;
 }
 
 #[panic_handler]

@@ -6,6 +6,11 @@ target = "thumbv6m-none-eabi"
 
 [env]
 DEFMT_LOG = "info"
+RKTK_COL_PIN_COUNT = "4"
+RKTK_ROW_PIN_COUNT = "5"
+RKTK_COLS = "7"
+RKTK_ROWS = "5"
+RKTK_LAYER_COUNT = "5"
 
 [unstable]
 build-std = ["core"]
