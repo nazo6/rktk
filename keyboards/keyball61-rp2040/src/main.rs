@@ -8,13 +8,21 @@ use embassy_executor::Spawner;
 use embassy_rp::gpio::Flex;
 use rktk_drivers_rp2040::{
     double_tap::DoubleTapResetRp,
-    interrupts::Irqs,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
     usb::{UsbConfig, UsbDriver, UsbUserOpts},
 };
 
 mod keymap;
+
+use embassy_rp::{
+    bind_interrupts,
+    peripherals::{I2C1, PIO0, PIO1, USB},
+};
+
+bind_interrupts!(pub struct Irqs {
+    USBCTRL_IRQ => embassy_rp::usb::InterruptHandler<USB>;
+});
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {

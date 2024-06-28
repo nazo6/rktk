@@ -1,0 +1,23 @@
+cargo-features = ["per-package-target"]
+
+[package]
+name = "rktk-drivers-nrf52"
+version = "0.1.0"
+edition = "2021"
+forced-target = "thumbv7em-none-eabihf"
+
+[dependencies]
+rktk = { path = "../rktk" }
+rktk-drivers-common = { path = "../rktk-drivers-common" }
+embassy-time = { workspace = true }
+embassy-usb = { workspace = true }
+embassy-executor = { workspace = true }
+embassy-sync = { workspace = true }
+embassy-futures = { workspace = true }
+static_cell = "2.1.0"
+embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+  "defmt",
+  "unstable-pac",
+  "time",
+  "nrf52840",
+] }

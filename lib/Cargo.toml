@@ -1,6 +1,10 @@
 [workspace]
-members = ["crates/*"]
-exclude = ["keyboards/keyball61-rp2040"]
+members = [
+  "rktk",
+  "rktk-drivers-common",
+  "rktk-drivers-nrf52",
+  "rktk-drivers-rp2040",
+]
 resolver = "2"
 
 [workspace.dependencies]
@@ -10,12 +14,7 @@ embassy-embedded-hal = { version = "0.1.0", git = "https://github.com/embassy-rs
   "defmt",
 ] }
 embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy", features = [
-  "task-arena-size-32768",
-  "arch-cortex-m",
-  "executor-thread",
-  "executor-interrupt",
   "defmt",
-  "integrated-timers",
 ] }
 embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy", features = [
   "defmt",
@@ -26,12 +25,6 @@ embassy-usb = { version = "0.2.0", git = "https://github.com/embassy-rs/embassy"
 ] }
 embassy-futures = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
 embassy-sync = { version = "0.6.0", git = "https://github.com/embassy-rs/embassy" }
-embassy-rp = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
-  "defmt",
-  "unstable-pac",
-  "time-driver",
-  "critical-section-impl",
-] }
 heapless = "0.8.0"
 usbd-hid = "0.7.0"
 static_cell = "2.1.0"
