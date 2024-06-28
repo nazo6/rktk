@@ -9,3 +9,10 @@ pub trait Mouse {
         Err(RktkError::NotSupported)
     }
 }
+
+pub struct DummyMouse;
+impl Mouse for DummyMouse {
+    async fn read(&mut self) -> Result<(i8, i8), RktkError> {
+        Err(RktkError::NotSupported)
+    }
+}

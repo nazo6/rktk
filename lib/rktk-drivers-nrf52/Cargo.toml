@@ -20,4 +20,7 @@ embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy"
   "unstable-pac",
   "time",
   "nrf52840",
+  "gpiote",
 ] }
+
+[features]

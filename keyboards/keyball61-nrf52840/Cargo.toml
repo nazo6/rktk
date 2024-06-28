@@ -1,0 +1,35 @@
+[package]
+name = "keyball61-nrf52840"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rktk-drivers-nrf52 = { path = "../../lib/rktk-drivers-nrf52" }
+rktk = { path = "../../lib/rktk" }
+cortex-m = { version = "0.7.6", features = [
+  "inline-asm",
+  "critical-section-single-core",
+] }
+cortex-m-rt = "0.7.0"
+defmt-rtt = "0.4.1"
+embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+  "nfc-pins-as-gpio",
+  "time",
+  "unstable-pac",
+  "time-driver-rtc1",
+] }
+embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy", features = [
+  "task-arena-size-32768",
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+  "defmt",
+  "integrated-timers",
+] }
+once_cell = { version = "1.19.0", default-features = false, features = [
+  "atomic-polyfill",
+] }
+embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy", features = [
+  "defmt",
+  "defmt-timestamp-uptime",
+] }
