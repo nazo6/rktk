@@ -75,7 +75,7 @@ impl LocalStateManager for KeyboardLocalState {
 
     fn report(
         self,
-        common_state: &CommonState,
+        _common_state: &CommonState,
         common_local_state: &CommonLocalState,
         global_state: &mut Self::GlobalState,
     ) -> Option<Self::Report> {

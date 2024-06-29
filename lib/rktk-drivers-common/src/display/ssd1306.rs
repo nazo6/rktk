@@ -1,4 +1,5 @@
 use display_interface::DisplayError;
+use embedded_graphics::geometry::Point;
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
 use rktk::interface::display::Display;
@@ -38,6 +39,10 @@ impl<I2C: I2cAsync + I2cSync, SIZE: DisplaySize> Display for Ssd1306Display<I2C,
 
     fn clear_buffer(&mut self) {
         self.0.clear_buffer()
+    }
+
+    fn calculate_point(col: i32, row: i32) -> Point {
+        Point::new((col - 1) * 6, (row - 1) * 10)
     }
 }
 

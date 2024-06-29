@@ -52,6 +52,8 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver, SP: SplitDriver>(
     let m2s_tx = m2s_chan.sender();
     let m2s_rx = m2s_chan.receiver();
 
+    crate::utils::display_state!(Master, is_master);
+
     if is_master {
         join(
             split_handler::start(split, s2m_tx, m2s_rx),

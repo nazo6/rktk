@@ -7,9 +7,9 @@ use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::{gpio::Flex, pio::Pio};
 use keymap::KEYMAP;
-use rktk::task::{display::DISPLAY_CONTROLLER, Drivers};
+use rktk::task::Drivers;
 use rktk_drivers_rp2040::{
-    display::ssd1306::{create_ssd1306, Ssd1306DisplayRp},
+    display::ssd1306::create_ssd1306,
     double_tap::DoubleTapResetRp,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
@@ -21,7 +21,7 @@ mod keymap;
 
 use embassy_rp::{
     bind_interrupts,
-    peripherals::{I2C1, PIO0, PIO1, USB},
+    peripherals::{I2C1, PIO0, USB},
 };
 
 bind_interrupts!(pub struct Irqs {
@@ -100,7 +100,6 @@ async fn main(_spawner: Spawner) {
 }
 
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    DISPLAY_CONTROLLER.signal(rktk::task::display::DisplayMessage::Message("Panic"));
+fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }

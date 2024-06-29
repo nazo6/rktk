@@ -1,7 +1,7 @@
 use super::pressed::Pressed;
 use rktk::interface::{
     error::RktkError,
-    keyscan::{KeyChangeEventOneHand, Keyscan},
+    keyscan::{Hand, KeyChangeEventOneHand, Keyscan},
 };
 
 pub enum Pull {
@@ -149,5 +149,27 @@ impl<
         })
         .await;
         events
+    }
+
+    async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
+        if self.left_detect_jumper_key.1 >= 4 {
+            let row = &mut self.rows[self.left_detect_jumper_key.0];
+            let col = &mut self.cols[self.left_detect_jumper_key.1 - 3];
+
+            col.set_as_input();
+            col.set_pull(Pull::Down);
+
+            row.set_as_output();
+            row.set_high();
+            row.wait_for_high().await;
+
+            if col.is_high() {
+                Hand::Left
+            } else {
+                Hand::Right
+            }
+        } else {
+            panic!("Invalid left detect jumper config");
+        }
     }
 }

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 // TODO: This is temporary
 
 use embassy_time::Duration;

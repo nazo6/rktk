@@ -6,7 +6,6 @@ use embassy_futures::select::{select, Either};
 use embassy_rp::{peripherals::USB, usb::Driver};
 pub use embassy_usb::Config as UsbConfig;
 use embassy_usb::UsbDevice;
-use rktk::task::display::DISPLAY_CONTROLLER;
 pub use rktk_drivers_common::usb::interface::*;
 use rktk_drivers_common::usb::{driver::CommonUsbDriver, RemoteWakeupSignal};
 

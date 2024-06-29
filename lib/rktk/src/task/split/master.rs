@@ -11,10 +11,7 @@ use crate::{
     },
     keycode::Layer,
     state::State,
-    task::{
-        display::{DisplayMessage, DISPLAY_CONTROLLER},
-        MIN_KB_SCAN_INTERVAL,
-    },
+    task::MIN_KB_SCAN_INTERVAL,
 };
 
 use super::{M2sTx, S2mRx};
@@ -27,9 +24,10 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver>(
     mut mouse: Option<M>,
     mut usb: USB,
 ) {
-    let mut state = State::new(keymap, crate::interface::keyscan::Hand::Right);
+    let hand = key_scanner.current_hand().await;
+    let mut state = State::new(keymap, hand);
 
-    DISPLAY_CONTROLLER.signal(DisplayMessage::Message("Master Start"));
+    crate::print!("Master start");
 
     let mut slave_events = heapless::Vec::<_, 16>::new();
 
@@ -80,10 +78,13 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver>(
 
         let state_report = state.update(&mut master_events, &mut slave_events, mouse_move);
 
+        crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+
         if let Some(report) = state_report.keyboard_report {
             let _ = usb.send_report(HidReport::Keyboard(report)).await;
         }
         if let Some(report) = state_report.mouse_report {
+            crate::utils::display_state!(MouseMove, (report.x, report.y));
             let _ = usb.send_report(HidReport::Mouse(report)).await;
         }
         if let Some(report) = state_report.media_keyboard_report {
@@ -92,11 +93,6 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver>(
 
         let took = start.elapsed();
         if took < MIN_KB_SCAN_INTERVAL {
-            // use core::fmt::Write;
-            //
-            // let mut str = heapless::String::<64>::new();
-            // write!(str, "{took}").unwrap();
-            // DISPLAY_CONTROLLER.signal(DisplayMessage::DynamicMessage(str));
             Timer::after(MIN_KB_SCAN_INTERVAL - took).await;
         }
     }

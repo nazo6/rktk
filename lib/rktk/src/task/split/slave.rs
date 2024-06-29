@@ -4,10 +4,7 @@ use embassy_time::Timer;
 use crate::{
     config::MIN_MOUSE_SCAN_INTERVAL,
     interface::{keyscan::Keyscan, mouse::Mouse, split::SlaveToMaster},
-    task::{
-        display::{DisplayMessage, DISPLAY_CONTROLLER},
-        MIN_KB_SCAN_INTERVAL,
-    },
+    task::MIN_KB_SCAN_INTERVAL,
 };
 
 use super::{M2sRx, S2mTx};
@@ -18,7 +15,7 @@ pub async fn start<KS: Keyscan, M: Mouse>(
     mut key_scanner: KS,
     mut mouse: Option<M>,
 ) {
-    DISPLAY_CONTROLLER.signal(DisplayMessage::Message("Slave Start"));
+    crate::print!("Slave start");
     join(
         async {
             if let Some(mouse) = &mut mouse {

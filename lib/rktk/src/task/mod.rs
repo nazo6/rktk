@@ -60,10 +60,17 @@ pub async fn start<
             }
         },
         async {
-            if let Some(mouse) = &mut drivers.mouse {
-                let _ = mouse.init().await;
-                let _ = mouse.set_cpi(600).await;
-            }
+            let mouse_available = if let Some(mouse) = &mut drivers.mouse {
+                let init_ok = mouse.init().await.is_ok();
+                if mouse.init().await.is_ok() {
+                    let _ = mouse.set_cpi(600).await;
+                }
+                init_ok
+            } else {
+                false
+            };
+
+            crate::utils::display_state!(MouseAvailable, mouse_available);
 
             split::start(
                 keymap,
