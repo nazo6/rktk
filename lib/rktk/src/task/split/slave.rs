@@ -1,10 +1,14 @@
-use embassy_futures::join::join;
+use embassy_futures::join::join3;
 use embassy_time::Timer;
 
 use crate::{
     config::MIN_MOUSE_SCAN_INTERVAL,
-    interface::{keyscan::Keyscan, mouse::Mouse, split::SlaveToMaster},
-    task::MIN_KB_SCAN_INTERVAL,
+    interface::{
+        keyscan::Keyscan,
+        mouse::Mouse,
+        split::{MasterToSlave, SlaveToMaster},
+    },
+    task::{backlight::BACKLIGHT_CTRL, MIN_KB_SCAN_INTERVAL},
 };
 
 use super::{M2sRx, S2mTx};
@@ -16,7 +20,7 @@ pub async fn start<KS: Keyscan, M: Mouse>(
     mut mouse: Option<M>,
 ) {
     crate::print!("Slave start");
-    join(
+    join3(
         async {
             if let Some(mouse) = &mut mouse {
                 loop {
@@ -57,6 +61,17 @@ pub async fn start<KS: Keyscan, M: Mouse>(
                 let took = start.elapsed();
                 if took < MIN_KB_SCAN_INTERVAL {
                     Timer::after(MIN_KB_SCAN_INTERVAL - took).await;
+                }
+            }
+        },
+        async {
+            loop {
+                let data = m2s_rx.receive().await;
+                match data {
+                    MasterToSlave::Backlight(ctrl) => {
+                        BACKLIGHT_CTRL.signal(ctrl);
+                    }
+                    MasterToSlave::Message(_) => {}
                 }
             }
         },

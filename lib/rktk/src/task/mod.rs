@@ -5,12 +5,13 @@ use crate::{
     config::DOUBLE_TAP_THRESHOLD,
     constant::LAYER_COUNT,
     interface::{
-        display::Display, double_tap::DoubleTapReset, keyscan::Keyscan, mouse::Mouse,
-        split::SplitDriver, usb::UsbDriver,
+        backlight::BacklightDriver, display::Display, double_tap::DoubleTapReset, keyscan::Keyscan,
+        mouse::Mouse, split::SplitDriver, usb::UsbDriver,
     },
     keycode::Layer,
 };
 
+mod backlight;
 pub mod display;
 mod split;
 
@@ -23,6 +24,7 @@ pub struct Drivers<
     USB: UsbDriver,
     D: Display,
     SP: SplitDriver,
+    BL: BacklightDriver,
 > {
     pub key_scanner: KS,
     pub double_tap_reset: Option<DTR>,
@@ -30,6 +32,7 @@ pub struct Drivers<
     pub usb: USB,
     pub display: Option<D>,
     pub split: SP,
+    pub backlight: Option<BL>,
 }
 
 // Start main task.
@@ -45,8 +48,9 @@ pub async fn start<
     USB: UsbDriver,
     D: Display,
     SP: SplitDriver,
+    BL: BacklightDriver,
 >(
-    mut drivers: Drivers<DTR, KS, M, USB, D, SP>,
+    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL>,
     keymap: [Layer; LAYER_COUNT],
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {
@@ -78,6 +82,7 @@ pub async fn start<
                 drivers.mouse,
                 drivers.split,
                 drivers.usb,
+                drivers.backlight,
             )
             .await;
         },

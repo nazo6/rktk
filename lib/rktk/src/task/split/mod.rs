@@ -9,10 +9,11 @@ use embassy_sync::{
 use embassy_time::Timer;
 
 use crate::{
-    config::{SPLIT_CHANNEL_SIZE, SPLIT_USB_TIMEOUT},
+    config::{LEFT_LED_NUM, RIGHT_LED_NUM, SPLIT_CHANNEL_SIZE, SPLIT_USB_TIMEOUT},
     constant::LAYER_COUNT,
     interface::{
-        keyscan::Keyscan,
+        backlight::BacklightDriver,
+        keyscan::{Hand, Keyscan},
         mouse::Mouse,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
         usb::UsbDriver,
@@ -32,39 +33,58 @@ type M2sChannel = Channel<CriticalSectionRawMutex, MasterToSlave, SPLIT_CHANNEL_
 type M2sRx<'a> = Receiver<'a, CriticalSectionRawMutex, MasterToSlave, SPLIT_CHANNEL_SIZE>;
 type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, SPLIT_CHANNEL_SIZE>;
 
-pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver, SP: SplitDriver>(
+pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver, SP: SplitDriver, BL: BacklightDriver>(
     keymap: [Layer; LAYER_COUNT],
-    key_scanner: KS,
+    mut key_scanner: KS,
     mouse: Option<M>,
     split: SP,
     mut usb: USB,
+    backlight: Option<BL>,
 ) {
-    let is_master = match select(usb.wait_ready(), Timer::after(SPLIT_USB_TIMEOUT)).await {
-        Either::First(_) => true,
-        Either::Second(_) => false,
-    };
+    let hand = key_scanner.current_hand().await;
+    crate::utils::display_state!(Hand, hand);
 
-    let s2m_chan: S2mChannel = Channel::new();
-    let s2m_tx = s2m_chan.sender();
-    let s2m_rx = s2m_chan.receiver();
+    join(
+        async move {
+            if let Some(backlight) = backlight {
+                match hand {
+                    Hand::Right => super::backlight::start::<RIGHT_LED_NUM>(backlight).await,
+                    Hand::Left => super::backlight::start::<LEFT_LED_NUM>(backlight).await,
+                }
+            }
+        },
+        async move {
+            let is_master = match select(usb.wait_ready(), Timer::after(SPLIT_USB_TIMEOUT)).await {
+                Either::First(_) => true,
+                Either::Second(_) => false,
+            };
 
-    let m2s_chan: M2sChannel = Channel::new();
-    let m2s_tx = m2s_chan.sender();
-    let m2s_rx = m2s_chan.receiver();
+            let hand = key_scanner.current_hand().await;
 
-    crate::utils::display_state!(Master, is_master);
+            crate::utils::display_state!(Master, is_master);
 
-    if is_master {
-        join(
-            split_handler::start(split, s2m_tx, m2s_rx),
-            master::start(m2s_tx, s2m_rx, keymap, key_scanner, mouse, usb),
-        )
-        .await;
-    } else {
-        join(
-            split_handler::start(split, m2s_tx, s2m_rx),
-            slave::start(s2m_tx, m2s_rx, key_scanner, mouse),
-        )
-        .await;
-    }
+            let s2m_chan: S2mChannel = Channel::new();
+            let s2m_tx = s2m_chan.sender();
+            let s2m_rx = s2m_chan.receiver();
+
+            let m2s_chan: M2sChannel = Channel::new();
+            let m2s_tx = m2s_chan.sender();
+            let m2s_rx = m2s_chan.receiver();
+
+            if is_master {
+                join(
+                    split_handler::start(split, s2m_tx, m2s_rx),
+                    master::start(m2s_tx, s2m_rx, keymap, key_scanner, mouse, usb, hand),
+                )
+                .await;
+            } else {
+                join(
+                    split_handler::start(split, m2s_tx, s2m_rx),
+                    slave::start(s2m_tx, m2s_rx, key_scanner, mouse),
+                )
+                .await;
+            }
+        },
+    )
+    .await;
 }

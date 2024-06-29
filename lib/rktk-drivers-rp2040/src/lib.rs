@@ -1,5 +1,6 @@
 #![no_std]
 
+pub mod backlight;
 pub mod display;
 pub mod double_tap;
 pub mod keyscan;

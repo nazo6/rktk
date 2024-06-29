@@ -10,6 +10,7 @@ resolver = "2"
 [workspace.dependencies]
 embedded-hal = "1.0.0"
 embedded-hal-async = "1.0.0"
+
 embassy-embedded-hal = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
   "defmt",
 ] }
@@ -25,6 +26,16 @@ embassy-usb = { version = "0.2.0", git = "https://github.com/embassy-rs/embassy"
 ] }
 embassy-futures = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
 embassy-sync = { version = "0.6.0", git = "https://github.com/embassy-rs/embassy" }
-heapless = "0.8.0"
+
 usbd-hid = "0.7.0"
+
+heapless = "0.8.0"
 static_cell = "2.1.0"
+fixed = "1.27.0"
+fixed-macro = "1.2.0"
+
+display-interface = "0.5.0"
+embedded-graphics = "0.8.1"
+ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
+
+smart-leds = "0.4.0"

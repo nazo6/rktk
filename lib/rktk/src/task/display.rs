@@ -3,7 +3,7 @@ use core::fmt::Write as _;
 use embassy_futures::select::{select, Either};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 
-use crate::interface::display::Display;
+use crate::interface::{display::Display, keyscan::Hand};
 
 pub enum DisplayMessage {
     Clear,
@@ -12,6 +12,7 @@ pub enum DisplayMessage {
     MouseAvailable(bool),
     MouseMove((i8, i8)),
     HighestLayer(u8),
+    Hand(Hand),
 }
 
 pub static DISPLAY_CONTROLLER: Channel<CriticalSectionRawMutex, DisplayMessage, 5> = Channel::new();
@@ -56,6 +57,17 @@ pub(super) async fn start<D: Display>(mut display: D) {
                     let mut str = heapless::String::<2>::new();
                     write!(str, "{:1}", layer).unwrap();
                     let _ = display.update_text(&str, D::calculate_point(5, 1)).await;
+                }
+                DisplayMessage::Hand(hand) => {
+                    let _ = display
+                        .update_text(
+                            match hand {
+                                Hand::Left => "L",
+                                Hand::Right => "R",
+                            },
+                            D::calculate_point(3, 1),
+                        )
+                        .await;
                 }
             },
             Either::Second(str) => {

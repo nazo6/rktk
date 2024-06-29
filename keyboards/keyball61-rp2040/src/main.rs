@@ -5,10 +5,11 @@ use core::panic::PanicInfo;
 
 use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_rp::{gpio::Flex, pio::Pio};
+use embassy_rp::{gpio::Flex, peripherals::PIO1, pio::Pio};
 use keymap::KEYMAP;
 use rktk::task::Drivers;
 use rktk_drivers_rp2040::{
+    backlight::ws2812_pio::Ws2812Pio,
     display::ssd1306::create_ssd1306,
     double_tap::DoubleTapResetRp,
     keyscan::duplex_matrix::create_duplex_matrix,
@@ -28,6 +29,7 @@ bind_interrupts!(pub struct Irqs {
     USBCTRL_IRQ => embassy_rp::usb::InterruptHandler<USB>;
     I2C1_IRQ => embassy_rp::i2c::InterruptHandler<I2C1>;
     PIO0_IRQ_0 => embassy_rp::pio::InterruptHandler<PIO0>;
+    PIO1_IRQ_0 => embassy_rp::pio::InterruptHandler<PIO1>;
 });
 
 #[embassy_executor::main]
@@ -87,6 +89,9 @@ async fn main(_spawner: Spawner) {
     let pio = Pio::new(p.PIO0, Irqs);
     let split = PioHalfDuplexSplitDriver::new(pio, p.PIN_1);
 
+    let pio = Pio::new(p.PIO1, Irqs);
+    let backlight = Ws2812Pio::new(pio, p.PIN_0, p.DMA_CH2);
+
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Some(dtr),
@@ -94,6 +99,7 @@ async fn main(_spawner: Spawner) {
         usb,
         display: Some(display),
         split,
+        backlight: Some(backlight),
     };
 
     rktk::task::start(drivers, KEYMAP).await;

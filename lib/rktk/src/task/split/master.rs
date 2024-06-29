@@ -4,14 +4,15 @@ use embassy_time::Timer;
 use crate::{
     constant::LAYER_COUNT,
     interface::{
+        backlight::{BacklightCtrl, BacklightMode},
         keyscan::{KeyChangeEventOneHand, Keyscan},
         mouse::Mouse,
-        split::SlaveToMaster,
+        split::{MasterToSlave, SlaveToMaster},
         usb::{HidReport, UsbDriver},
     },
     keycode::Layer,
     state::State,
-    task::MIN_KB_SCAN_INTERVAL,
+    task::{backlight::BACKLIGHT_CTRL, MIN_KB_SCAN_INTERVAL},
 };
 
 use super::{M2sTx, S2mRx};
@@ -23,11 +24,13 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver>(
     mut key_scanner: KS,
     mut mouse: Option<M>,
     mut usb: USB,
+    hand: crate::interface::keyscan::Hand,
 ) {
-    let hand = key_scanner.current_hand().await;
     let mut state = State::new(keymap, hand);
 
     crate::print!("Master start");
+
+    let mut latest_led: Option<BacklightCtrl> = None;
 
     let mut slave_events = heapless::Vec::<_, 16>::new();
 
@@ -90,6 +93,23 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver>(
         if let Some(report) = state_report.media_keyboard_report {
             let _ = usb.send_report(HidReport::MediaKeyboard(report)).await;
         }
+
+        let led = match state_report.highest_layer {
+            1 => BacklightCtrl::Start(BacklightMode::SolidColor(0, 0, 1)),
+            2 => BacklightCtrl::Start(BacklightMode::SolidColor(1, 0, 0)),
+            3 => BacklightCtrl::Start(BacklightMode::SolidColor(0, 1, 0)),
+            4 => BacklightCtrl::Start(BacklightMode::SolidColor(1, 1, 0)),
+            _ => BacklightCtrl::Start(BacklightMode::SolidColor(0, 0, 0)),
+        };
+
+        if let Some(latest_led) = &latest_led {
+            if led != *latest_led {
+                BACKLIGHT_CTRL.signal(led.clone());
+                let _ = m2s_tx.try_send(MasterToSlave::Backlight(led.clone()));
+            }
+        }
+
+        latest_led = Some(led);
 
         let took = start.elapsed();
         if took < MIN_KB_SCAN_INTERVAL {

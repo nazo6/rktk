@@ -4,16 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+rktk = { path = "../rktk" }
+
 embedded-hal-async = { workspace = true }
 embedded-hal = { workspace = true }
 embassy-time = { workspace = true }
-rktk = { path = "../rktk" }
-heapless = { workspace = true }
 embassy-usb = { workspace = true }
-usbd-hid = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-executor = { workspace = true }
-ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
-display-interface = "0.5.0"
-embedded-graphics = "0.8.1"
-static_cell = { version = "2.1.0" }
+
+usbd-hid = { workspace = true }
+
+ssd1306 = { workspace = true }
+display-interface = { workspace = true }
+embedded-graphics = { workspace = true }
+
+heapless = { workspace = true }
+static_cell = { workspace = true }
