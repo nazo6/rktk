@@ -27,7 +27,9 @@ pub struct StateReport {
 
 pub struct State {
     common_state: CommonState,
-    master_hand: Hand,
+    /// Specifies which hand is the master when the keyboard is split.
+    /// If None, the keyboard is not split.
+    split_master_hand: Option<Hand>,
     pressed: AllPressed,
     mouse: manager::mouse::MouseState,
     keyboard: manager::keyboard::KeyboardState,
@@ -58,9 +60,9 @@ macro_rules! loop_end {
 pub const TAP_THRESHOLD: embassy_time::Duration = embassy_time::Duration::from_millis(200);
 
 impl State {
-    pub fn new(layers: [Layer; LAYER_COUNT], master_hand: Hand) -> Self {
+    pub fn new(layers: [Layer; LAYER_COUNT], master_hand: Option<Hand>) -> Self {
         Self {
-            master_hand,
+            split_master_hand: master_hand,
             common_state: CommonState::new(layers),
 
             pressed: AllPressed::new(),
@@ -71,6 +73,8 @@ impl State {
         }
     }
 
+    /// Updates state with the given events.
+    /// If the keyboard is not split, slave_events should be empty.
     pub fn update(
         &mut self,
         master_events: &mut [KeyChangeEventOneHand],
@@ -87,10 +91,11 @@ impl State {
         let mut lls = manager::layer::LayerLocalState::new();
 
         let events = {
-            let (left_events, right_events) = if self.master_hand == Hand::Left {
-                (master_events, slave_events)
-            } else {
+            let (left_events, right_events) = if self.split_master_hand == Some(Hand::Right) {
                 (slave_events, master_events)
+            } else {
+                // If the keyboard is not split, the master hand is the left hand (zero-index)
+                (master_events, slave_events)
             };
             right_events.iter_mut().for_each(|event| {
                 event.col = ((COLS - 1) as u8 - event.col) + COLS as u8;

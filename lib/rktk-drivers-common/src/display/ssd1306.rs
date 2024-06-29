@@ -2,7 +2,7 @@ use display_interface::DisplayError;
 use embedded_graphics::geometry::Point;
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
-use rktk::interface::display::Display;
+use rktk::interface::display::DisplayDriver;
 use ssd1306::{
     mode::{BufferedGraphicsMode, DisplayConfig as _},
     prelude::I2CInterface,
@@ -16,19 +16,19 @@ pub struct Ssd1306Display<I2C: I2cAsync + I2cSync, SIZE: DisplaySize>(
 );
 
 impl<I2C: I2cAsync + I2cSync, SIZE: DisplaySize> Ssd1306Display<I2C, SIZE> {
-    pub fn new(i2c: I2C, size: SIZE) -> Result<Self, DisplayError> {
+    pub fn new(i2c: I2C, size: SIZE) -> Self {
         let interface = I2CDisplayInterface::new(i2c);
 
-        let mut display =
-            Ssd1306::new(interface, size, DisplayRotation::Rotate0).into_buffered_graphics_mode();
-        display.init()?;
-
-        Ok(Self(display))
+        Self(Ssd1306::new(interface, size, DisplayRotation::Rotate0).into_buffered_graphics_mode())
     }
 }
 
-impl<I2C: I2cAsync + I2cSync, SIZE: DisplaySize> Display for Ssd1306Display<I2C, SIZE> {
+impl<I2C: I2cAsync + I2cSync, SIZE: DisplaySize> DisplayDriver for Ssd1306Display<I2C, SIZE> {
     type DerefTarget = Ssd1306<I2CInterface<I2C>, SIZE, BufferedGraphicsMode<SIZE>>;
+
+    async fn init(&mut self) -> Result<(), DisplayError> {
+        self.0.init()
+    }
 
     fn flush(&mut self) -> Result<(), DisplayError> {
         self.0.flush()

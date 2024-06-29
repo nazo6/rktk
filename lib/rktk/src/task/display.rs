@@ -3,16 +3,16 @@ use core::fmt::Write as _;
 use embassy_futures::select::{select, Either};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 
-use crate::interface::{display::Display, keyscan::Hand};
+use crate::interface::{display::DisplayDriver, keyscan::Hand};
 
 pub enum DisplayMessage {
     Clear,
     Message(&'static str),
-    Master(bool),
+    Master(Option<bool>),
     MouseAvailable(bool),
     MouseMove((i8, i8)),
     HighestLayer(u8),
-    Hand(Hand),
+    Hand(Option<Hand>),
 }
 
 pub static DISPLAY_CONTROLLER: Channel<CriticalSectionRawMutex, DisplayMessage, 5> = Channel::new();
@@ -22,8 +22,11 @@ pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<
     3,
 > = Channel::new();
 
-pub(super) async fn start<D: Display>(mut display: D) {
+pub(super) async fn start<D: DisplayDriver>(mut display: D) {
     let _ = display.init().await;
+    let _ = display
+        .update_text("Hello world!", D::calculate_point(1, 3))
+        .await;
     loop {
         match select(
             DISPLAY_CONTROLLER.receive(),
@@ -40,7 +43,14 @@ pub(super) async fn start<D: Display>(mut display: D) {
                 }
                 DisplayMessage::Master(master) => {
                     let _ = display
-                        .update_text(if master { "M" } else { "S" }, D::calculate_point(1, 1))
+                        .update_text(
+                            match master {
+                                Some(true) => "M",
+                                Some(false) => "S",
+                                None => "_",
+                            },
+                            D::calculate_point(1, 1),
+                        )
                         .await;
                 }
                 DisplayMessage::MouseAvailable(mouse) => {
@@ -62,8 +72,9 @@ pub(super) async fn start<D: Display>(mut display: D) {
                     let _ = display
                         .update_text(
                             match hand {
-                                Hand::Left => "L",
-                                Hand::Right => "R",
+                                Some(Hand::Left) => "L",
+                                Some(Hand::Right) => "R",
+                                None => "_",
                             },
                             D::calculate_point(3, 1),
                         )

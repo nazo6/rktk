@@ -1,6 +1,4 @@
-use embassy_sync::{
-    blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, signal::Signal,
-};
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use smart_leds::RGB8;
 
 use crate::interface::backlight::{BacklightCtrl, BacklightDriver, BacklightMode};

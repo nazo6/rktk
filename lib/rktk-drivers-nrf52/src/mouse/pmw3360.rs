@@ -5,8 +5,8 @@ use embassy_nrf::{
     spis::{Phase, Polarity},
     Peripheral,
 };
-use rktk::interface::mouse::Mouse;
-use rktk_drivers_common::mouse::pmw3360::{Pmw3360, Pmw3360Error};
+use rktk::interface::mouse::MouseDriver;
+use rktk_drivers_common::mouse::pmw3360::Pmw3360;
 
 pub async fn create_pmw3360<'d, T: Instance + 'd>(
     spim: impl Peripheral<P = T> + 'd,
@@ -15,7 +15,7 @@ pub async fn create_pmw3360<'d, T: Instance + 'd>(
     miso: impl Peripheral<P = impl Pin + 'd> + 'd,
     mosi: impl Peripheral<P = impl Pin + 'd> + 'd,
     ncs: impl Peripheral<P = impl Pin> + 'd,
-) -> Result<impl Mouse + 'd, Pmw3360Error<Spim<'d, T>>> {
+) -> impl MouseDriver + 'd {
     let mut config = Config::default();
     config.frequency = Frequency::M8;
     config.mode.polarity = Polarity::IdleHigh;
@@ -23,5 +23,5 @@ pub async fn create_pmw3360<'d, T: Instance + 'd>(
     let ncs = Output::new(ncs, Level::High, OutputDrive::Standard);
 
     let spi = Spim::new(spim, _irq, sck, miso, mosi, config);
-    Pmw3360::new(spi, ncs).await
+    Pmw3360::new(spi, ncs)
 }

@@ -1417,6 +1417,7 @@ dependencies = [
 name = "rktk-drivers-nrf52"
 version = "0.1.0"
 dependencies = [
+ "display-interface",
  "embassy-executor",
  "embassy-futures",
  "embassy-nrf",
@@ -1425,6 +1426,7 @@ dependencies = [
  "embassy-usb",
  "rktk",
  "rktk-drivers-common",
+ "ssd1306",
  "static_cell",
 ]
 

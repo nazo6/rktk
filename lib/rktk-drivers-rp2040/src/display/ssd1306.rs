@@ -1,4 +1,3 @@
-use display_interface::DisplayError;
 use embassy_rp::{
     i2c::{Async, I2c, Instance, InterruptHandler, SclPin, SdaPin},
     interrupt::typelevel::Binding,
@@ -15,7 +14,7 @@ pub fn create_ssd1306<'a, I: Instance, SIZE: DisplaySize>(
     sda: impl Peripheral<P = impl SdaPin<I>> + 'a,
     scl: impl Peripheral<P = impl SclPin<I>> + 'a,
     size: SIZE,
-) -> Result<Ssd1306DisplayRp<'a, I, SIZE>, DisplayError> {
+) -> Ssd1306DisplayRp<'a, I, SIZE> {
     let mut i2c_config = embassy_rp::i2c::Config::default();
     i2c_config.frequency = 400_000;
 

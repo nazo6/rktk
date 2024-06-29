@@ -18,3 +18,8 @@ pub enum BacklightMode {
 pub trait BacklightDriver {
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]);
 }
+
+pub struct DummyBacklightDriver;
+impl BacklightDriver for DummyBacklightDriver {
+    async fn write<const N: usize>(&mut self, _colors: &[RGB8; N]) {}
+}

@@ -44,8 +44,7 @@ async fn main(_spawner: Spawner) {
         p.PIN_2,
         p.PIN_3,
         ssd1306::size::DisplaySize128x32,
-    )
-    .expect("Failed to create SSD1306");
+    );
 
     let ball = create_pmw3360(
         p.SPI0, p.PIN_22, p.PIN_23, p.PIN_20, p.DMA_CH0, p.DMA_CH1, p.PIN_21,
@@ -98,7 +97,7 @@ async fn main(_spawner: Spawner) {
         mouse: Some(ball),
         usb,
         display: Some(display),
-        split,
+        split: Some(split),
         backlight: Some(backlight),
     };
 

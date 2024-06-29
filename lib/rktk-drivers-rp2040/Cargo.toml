@@ -23,6 +23,5 @@ display-interface = { workspace = true }
 fixed = { workspace = true }
 fixed-macro = { workspace = true }
 smart-leds = { workspace = true }
-
 pio-proc = "0.2.2"
 pio = "0.2.1"

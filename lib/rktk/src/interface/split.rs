@@ -10,6 +10,16 @@ pub trait SplitDriver {
     async fn send(&mut self, buf: &[u8]) -> Result<(), RktkError>;
 }
 
+pub struct DummySplitDriver;
+impl SplitDriver for DummySplitDriver {
+    async fn wait_recv(&mut self, _buf: &mut [u8]) -> Result<(), RktkError> {
+        Err(RktkError::NotSupported)
+    }
+    async fn send(&mut self, _buf: &[u8]) -> Result<(), RktkError> {
+        Err(RktkError::NotSupported)
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub enum MasterToSlave {
     Backlight(BacklightCtrl),

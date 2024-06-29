@@ -1,6 +1,6 @@
 use super::error::RktkError;
 
-pub trait Mouse {
+pub trait MouseDriver {
     async fn init(&mut self) -> Result<(), RktkError> {
         Ok(())
     }
@@ -14,7 +14,7 @@ pub trait Mouse {
 }
 
 pub struct DummyMouse;
-impl Mouse for DummyMouse {
+impl MouseDriver for DummyMouse {
     async fn read(&mut self) -> Result<(i8, i8), RktkError> {
         Err(RktkError::NotSupported)
     }

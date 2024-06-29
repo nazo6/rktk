@@ -1,5 +1,3 @@
-pub mod handler;
-
 use core::sync::atomic::AtomicBool;
 
 use embassy_futures::select::{select, Either};

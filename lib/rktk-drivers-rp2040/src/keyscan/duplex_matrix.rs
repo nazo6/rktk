@@ -1,5 +1,5 @@
 use embassy_rp::gpio::Flex;
-use rktk::interface::keyscan::Keyscan;
+use rktk::interface::keyscan::KeyscanDriver;
 use rktk_drivers_common::keyscan::duplex_matrix::{DuplexMatrixScanner, FlexPin};
 
 struct FlexWrap<'a>(Flex<'a>);
@@ -51,7 +51,7 @@ pub fn create_duplex_matrix<
     rows: [Flex<'a>; ROW_PIN_COUNT],
     cols: [Flex<'a>; COL_PIN_COUNT],
     left_detect_jumper_key: (usize, usize),
-) -> impl Keyscan + 'a {
+) -> impl KeyscanDriver + 'a {
     let rows = rows.map(FlexWrap);
     let cols = cols.map(FlexWrap);
     DuplexMatrixScanner::<'a, FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(

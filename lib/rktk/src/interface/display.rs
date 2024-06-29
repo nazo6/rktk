@@ -15,7 +15,7 @@ const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::ne
     .background_color(BinaryColor::Off)
     .build();
 
-pub trait Display: DerefMut<Target = Self::DerefTarget> {
+pub trait DisplayDriver: DerefMut<Target = Self::DerefTarget> {
     type DerefTarget: DrawTarget<Color = BinaryColor>;
 
     async fn init(&mut self) -> Result<(), DisplayError> {

@@ -5,7 +5,7 @@ use core::{
 };
 
 use embassy_time::{Duration, Timer};
-use rktk::interface::double_tap::DoubleTapReset;
+use rktk::interface::double_tap::DoubleTapResetDriver;
 
 const BOOTLOADER_MAGIC: u32 = 0xDEADBEEF;
 
@@ -14,7 +14,7 @@ static mut FLAG: UnsafeCell<MaybeUninit<u32>> = UnsafeCell::new(MaybeUninit::uni
 
 pub struct DoubleTapResetRp;
 
-impl DoubleTapReset for DoubleTapResetRp {
+impl DoubleTapResetDriver for DoubleTapResetRp {
     async fn execute(&self, timeout: Duration) {
         unsafe {
             if read_volatile(FLAG.get().cast::<u32>()) == BOOTLOADER_MAGIC {

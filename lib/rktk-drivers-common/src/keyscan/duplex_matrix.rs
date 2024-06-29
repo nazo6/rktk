@@ -1,14 +1,12 @@
 use super::pressed::Pressed;
-use rktk::interface::{
-    error::RktkError,
-    keyscan::{Hand, KeyChangeEventOneHand, Keyscan},
-};
+use rktk::interface::keyscan::{Hand, KeyChangeEventOneHand, KeyscanDriver};
 
 pub enum Pull {
     Up,
     Down,
 }
 
+#[allow(async_fn_in_trait)]
 pub trait FlexPin {
     fn set_as_input(&mut self);
     fn set_as_output(&mut self);
@@ -140,7 +138,7 @@ impl<
         const COL_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > Keyscan for DuplexMatrixScanner<'a, F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    > KeyscanDriver for DuplexMatrixScanner<'a, F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEventOneHand, 16> {
         let mut events = heapless::Vec::new();

@@ -4,8 +4,8 @@ use embassy_time::Timer;
 use crate::{
     config::MIN_MOUSE_SCAN_INTERVAL,
     interface::{
-        keyscan::Keyscan,
-        mouse::Mouse,
+        keyscan::KeyscanDriver,
+        mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
     },
     task::{backlight::BACKLIGHT_CTRL, MIN_KB_SCAN_INTERVAL},
@@ -13,7 +13,7 @@ use crate::{
 
 use super::{M2sRx, S2mTx};
 
-pub async fn start<KS: Keyscan, M: Mouse>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
     mut key_scanner: KS,

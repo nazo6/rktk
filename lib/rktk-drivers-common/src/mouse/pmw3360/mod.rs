@@ -8,7 +8,7 @@ use embassy_time::Timer;
 use embedded_hal::{digital::OutputPin, spi::ErrorType};
 use embedded_hal_async::spi::SpiBus;
 use registers as reg;
-use rktk::interface::{mouse::Mouse, DriverBuilder};
+use rktk::interface::{mouse::MouseDriver, DriverBuilder};
 
 #[derive(Default)]
 pub struct BurstData {
@@ -273,7 +273,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Mouse for Pmw3360<'d, S, OP> {
+impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> {
     async fn init(&mut self) -> Result<(), rktk::interface::error::RktkError> {
         self.power_up().await.map_err(|_| {
             rktk::interface::error::RktkError::GeneralError("Failed to power up PMW3360")
