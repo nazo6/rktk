@@ -6,16 +6,16 @@ use super::{KeyAction, KeyCode};
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum LayerOp {
-    Move(usize),
-    Toggle(usize),
+    Move(u8),
+    Toggle(u8),
 }
 
-pub const fn MV(n: usize) -> KeyDef {
+pub const fn MV(n: u8) -> KeyDef {
     // assert!(n < LAYER_NUM);
     KeyDef::Key(KeyAction::Tap(KeyCode::Layer(LayerOp::Move(n))))
 }
 
-pub const fn TG(n: usize) -> KeyDef {
+pub const fn TG(n: u8) -> KeyDef {
     // assert!(n < LAYER_NUM);
     KeyDef::Key(KeyAction::Tap(KeyCode::Layer(LayerOp::Toggle(n))))
 }

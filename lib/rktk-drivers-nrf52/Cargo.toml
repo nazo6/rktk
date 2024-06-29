@@ -18,7 +18,6 @@ static_cell = "2.1.0"
 embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
   "defmt",
   "unstable-pac",
-  "time",
   "nrf52840",
   "gpiote",
 ] }

@@ -32,15 +32,16 @@ impl LocalStateManager for LayerLocalState {
             KeyCode::Layer(layer_op) => match event.change_type {
                 KeyStatusChangeType::Released(_) => match layer_op {
                     LayerOp::Move(l) => {
-                        common_state.layer_active[*l] = false;
+                        common_state.layer_active[*l as usize] = false;
                     }
                     LayerOp::Toggle(l) => {
-                        common_state.layer_active[*l] = !common_state.layer_active[*l];
+                        common_state.layer_active[*l as usize] =
+                            !common_state.layer_active[*l as usize];
                     }
                 },
                 _ => match layer_op {
                     LayerOp::Move(l) => {
-                        common_state.layer_active[*l] = true;
+                        common_state.layer_active[*l as usize] = true;
                     }
                     _ => {}
                 },
