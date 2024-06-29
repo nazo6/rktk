@@ -1322,6 +1322,7 @@ dependencies = [
  "heapless",
  "rktk",
  "ssd1306",
+ "static_cell",
  "usbd-hid",
 ]
 

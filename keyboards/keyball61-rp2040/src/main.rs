@@ -13,7 +13,7 @@ use rktk_drivers_rp2040::{
     double_tap::DoubleTapResetRp,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
-    usb::{UsbConfig, UsbDriver, UsbUserOpts},
+    usb::{new_usb, UsbConfig, UsbUserOpts},
 };
 
 mod keymap;
@@ -43,13 +43,9 @@ async fn main(_spawner: Spawner) {
     )
     .expect("Failed to create SSD1306");
 
-    let Ok(ball) = create_pmw3360(
+    let ball = create_pmw3360(
         p.SPI0, p.PIN_22, p.PIN_23, p.PIN_20, p.DMA_CH0, p.DMA_CH1, p.PIN_21,
-    )
-    .await
-    else {
-        panic!("Failed to create PMW3360");
-    };
+    );
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
@@ -83,7 +79,7 @@ async fn main(_spawner: Spawner) {
         };
         let driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
 
-        UsbDriver::create_and_start(usb_opts, driver).await
+        new_usb(usb_opts, driver).await
     };
 
     let drivers = Drivers {

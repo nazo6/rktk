@@ -8,7 +8,7 @@ use embassy_time::Timer;
 use embedded_hal::{digital::OutputPin, spi::ErrorType};
 use embedded_hal_async::spi::SpiBus;
 use registers as reg;
-use rktk::interface::mouse::Mouse;
+use rktk::interface::{mouse::Mouse, DriverBuilder};
 
 #[derive(Default)]
 pub struct BurstData {
@@ -39,17 +39,13 @@ pub struct Pmw3360<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
 }
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
-    pub async fn new(spi: S, cs_pin: OP) -> Result<Self, Pmw3360Error<S>> {
-        let mut pmw3360 = Self {
+    pub fn new(spi: S, cs_pin: OP) -> Self {
+        Self {
             _marker: core::marker::PhantomData,
             spi,
             cs_pin,
-            rw_flag: true,
-        };
-
-        pmw3360.power_up().await?;
-
-        Ok(pmw3360)
+            rw_flag: false,
+        }
     }
 
     pub async fn burst_read(&mut self) -> Result<BurstData, S::Error> {
@@ -278,6 +274,14 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
 }
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Mouse for Pmw3360<'d, S, OP> {
+    async fn init(&mut self) -> Result<(), rktk::interface::error::RktkError> {
+        self.power_up().await.map_err(|_| {
+            rktk::interface::error::RktkError::GeneralError("Failed to power up PMW3360")
+        })?;
+
+        Ok(())
+    }
+
     async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
         self.burst_read()
             .await
@@ -286,7 +290,8 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Mouse for Pmw3360<'d, S, OP> {
     }
 
     async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::interface::error::RktkError> {
-        Err(rktk::interface::error::RktkError::NotSupported)
+        self.set_cpi(cpi).await;
+        Ok(())
     }
 
     async fn get_cpi(&mut self) -> Result<u16, rktk::interface::error::RktkError> {

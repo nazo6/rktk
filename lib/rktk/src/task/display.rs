@@ -7,6 +7,7 @@ use crate::interface::display::Display;
 pub enum DisplayMessage {
     Clear,
     Message(&'static str),
+    DynamicMessage(heapless::String<64>),
 }
 
 pub static DISPLAY_CONTROLLER: Signal<CriticalSectionRawMutex, DisplayMessage> = Signal::new();
@@ -20,7 +21,14 @@ pub(super) async fn start<D: Display>(display: D) {
                 display.clear().await.unwrap();
             }
             DisplayMessage::Message(msg) => {
-                display.draw_text_blocking(msg).unwrap();
+                let _ = display
+                    .update_text(msg, embedded_graphics::geometry::Point { x: 0, y: 0 })
+                    .await;
+            }
+            DisplayMessage::DynamicMessage(msg) => {
+                let _ = display
+                    .update_text(&msg, embedded_graphics::geometry::Point { x: 0, y: 0 })
+                    .await;
             }
         }
     }

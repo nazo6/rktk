@@ -4,3 +4,9 @@ pub mod error;
 pub mod keyscan;
 pub mod mouse;
 pub mod usb;
+
+pub trait DriverBuilder {
+    type Output;
+    type Error;
+    async fn build(self) -> Result<Self::Output, Self::Error>;
+}

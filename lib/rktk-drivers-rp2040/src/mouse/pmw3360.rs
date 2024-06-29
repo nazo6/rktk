@@ -4,10 +4,9 @@ use embassy_rp::{
     spi::{Async, ClkPin, Instance, MisoPin, MosiPin, Spi},
     Peripheral,
 };
-use rktk::interface::mouse::Mouse;
-use rktk_drivers_common::mouse::pmw3360::{Pmw3360, Pmw3360Error};
+use rktk_drivers_common::mouse::pmw3360::Pmw3360;
 
-pub async fn create_pmw3360<'d, T: Instance + 'd>(
+pub fn create_pmw3360<'d, T: Instance + 'd>(
     inner: impl Peripheral<P = T> + 'd,
     clk: impl Peripheral<P = impl ClkPin<T> + 'd> + 'd,
     mosi: impl Peripheral<P = impl MosiPin<T> + 'd> + 'd,
@@ -15,7 +14,7 @@ pub async fn create_pmw3360<'d, T: Instance + 'd>(
     tx_dma: impl Peripheral<P = impl Channel> + 'd,
     rx_dma: impl Peripheral<P = impl Channel> + 'd,
     ncs: impl Peripheral<P = impl Pin> + 'd,
-) -> Result<impl Mouse + 'd, Pmw3360Error<Spi<'d, T, Async>>> {
+) -> Pmw3360<'static, Spi<'d, T, Async>, Output<'d>> {
     let mut config = embassy_rp::spi::Config::default();
     config.frequency = 2_000_000;
     config.polarity = embassy_rp::spi::Polarity::IdleHigh;
@@ -23,5 +22,5 @@ pub async fn create_pmw3360<'d, T: Instance + 'd>(
     let ncs = Output::new(ncs, embassy_rp::gpio::Level::High);
 
     let spi = Spi::new(inner, clk, mosi, miso, tx_dma, rx_dma, config);
-    Pmw3360::new(spi, ncs).await
+    Pmw3360::new(spi, ncs)
 }
