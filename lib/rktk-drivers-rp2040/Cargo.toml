@@ -18,3 +18,5 @@ embassy-rp = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy",
   "time-driver",
   "critical-section-impl",
 ] }
+ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
+display-interface = "0.5.0"

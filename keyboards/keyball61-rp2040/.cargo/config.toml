@@ -15,3 +15,6 @@ RKTK_LAYER_COUNT = "5"
 [unstable]
 build-std = ["core"]
 build-std-features = ["panic_immediate_abort"]
+
+[profile.release]
+panic = 'abort'

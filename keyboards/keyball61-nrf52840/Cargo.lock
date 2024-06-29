@@ -1093,7 +1093,10 @@ name = "rktk"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.6.0",
+ "display-interface",
+ "embassy-sync 0.6.0",
  "embassy-time",
+ "embedded-graphics",
  "heapless",
  "konst",
  "paste",
@@ -1104,14 +1107,17 @@ dependencies = [
 name = "rktk-drivers-common"
 version = "0.1.0"
 dependencies = [
+ "display-interface",
  "embassy-executor",
  "embassy-sync 0.6.0",
  "embassy-time",
  "embassy-usb",
+ "embedded-graphics",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
  "heapless",
  "rktk",
+ "ssd1306",
  "usbd-hid",
 ]
 

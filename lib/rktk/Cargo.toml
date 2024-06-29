@@ -10,3 +10,7 @@ usbd-hid = { workspace = true }
 paste = "1.0.15"
 bitflags = "2.6.0"
 konst = "0.3.9"
+embedded-graphics = "0.8.1"
+embassy-sync = { workspace = true }
+display-interface = "0.5.0"
+embassy-futures = { workspace = true }
