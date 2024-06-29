@@ -37,7 +37,7 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver, SP: SplitDriver, BL: B
     keymap: [Layer; LAYER_COUNT],
     mut key_scanner: KS,
     mouse: Option<M>,
-    split: SP,
+    mut split: SP,
     mut usb: USB,
     backlight: Option<BL>,
 ) {
@@ -54,12 +54,12 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver, SP: SplitDriver, BL: B
             }
         },
         async move {
+            let _ = split.init().await;
+
             let is_master = match select(usb.wait_ready(), Timer::after(SPLIT_USB_TIMEOUT)).await {
                 Either::First(_) => true,
                 Either::Second(_) => false,
             };
-
-            let hand = key_scanner.current_hand().await;
 
             crate::utils::display_state!(Master, is_master);
 

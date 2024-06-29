@@ -27,7 +27,10 @@ pub async fn start<'a, SP: SplitDriver, R: DeserializeOwned, S: Serialize>(
         match select(split.wait_recv(&mut recv_buf), to_send_receiver.receive()).await {
             Either::First(_) => {
                 if let Ok(data) = from_bytes(&recv_buf) {
+                    crate::print!("RecvOk: {}", embassy_time::Instant::now());
                     let _ = received_sender.send(data).await;
+                } else {
+                    crate::print!("RecvErr: {}", embassy_time::Instant::now());
                 }
             }
             Either::Second(send_data) => {

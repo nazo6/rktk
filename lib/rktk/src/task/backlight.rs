@@ -1,13 +1,16 @@
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, signal::Signal};
+use embassy_sync::{
+    blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, signal::Signal,
+};
 use smart_leds::RGB8;
 
 use crate::interface::backlight::{BacklightCtrl, BacklightDriver, BacklightMode};
 
-pub(super) static BACKLIGHT_CTRL: Signal<CriticalSectionRawMutex, BacklightCtrl> = Signal::new();
+pub(super) static BACKLIGHT_CTRL: Channel<CriticalSectionRawMutex, BacklightCtrl, 3> =
+    Channel::new();
 
 pub async fn start<const BACKLIGHT_COUNT: usize>(mut bl: impl BacklightDriver) {
     loop {
-        let ctrl = BACKLIGHT_CTRL.wait().await;
+        let ctrl = BACKLIGHT_CTRL.receive().await;
         match ctrl {
             BacklightCtrl::Start(led_animation) => {
                 match led_animation {

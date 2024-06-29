@@ -10,7 +10,7 @@ macro_rules! print {
 
         let mut str = heapless::String::<256>::new();
         write!(str, $($arg)*).unwrap();
-        DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.signal(str);
+        let _ = DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.try_send(str);
     }};
 }
 

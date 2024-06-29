@@ -64,22 +64,24 @@ pub async fn start<
             }
         },
         async {
-            let mouse_available = if let Some(mouse) = &mut drivers.mouse {
+            let mouse = if let Some(mut mouse) = drivers.mouse {
                 let init_ok = mouse.init().await.is_ok();
                 if mouse.init().await.is_ok() {
                     let _ = mouse.set_cpi(600).await;
+                    Some(mouse)
+                } else {
+                    None
                 }
-                init_ok
             } else {
-                false
+                None
             };
 
-            crate::utils::display_state!(MouseAvailable, mouse_available);
+            crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
             split::start(
                 keymap,
                 drivers.key_scanner,
-                drivers.mouse,
+                mouse,
                 drivers.split,
                 drivers.usb,
                 drivers.backlight,

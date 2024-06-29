@@ -104,7 +104,7 @@ pub async fn start<KS: Keyscan, M: Mouse, USB: UsbDriver>(
 
         if let Some(latest_led) = &latest_led {
             if led != *latest_led {
-                BACKLIGHT_CTRL.signal(led.clone());
+                let _ = BACKLIGHT_CTRL.try_send(led.clone());
                 let _ = m2s_tx.try_send(MasterToSlave::Backlight(led.clone()));
             }
         }

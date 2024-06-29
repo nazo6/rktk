@@ -27,12 +27,14 @@ pub async fn start<KS: Keyscan, M: Mouse>(
                     let start = embassy_time::Instant::now();
 
                     if let Ok(data) = mouse.read().await {
-                        let e = SlaveToMaster::Mouse {
-                            // x and y are swapped
-                            x: data.0,
-                            y: data.1,
-                        };
-                        s2m_tx.send(e).await;
+                        if data != (0, 0) {
+                            let e = SlaveToMaster::Mouse {
+                                // x and y are swapped
+                                x: data.0,
+                                y: data.1,
+                            };
+                            s2m_tx.send(e).await;
+                        }
                     }
 
                     let took = start.elapsed();
@@ -69,7 +71,7 @@ pub async fn start<KS: Keyscan, M: Mouse>(
                 let data = m2s_rx.receive().await;
                 match data {
                     MasterToSlave::Backlight(ctrl) => {
-                        BACKLIGHT_CTRL.signal(ctrl);
+                        let _ = BACKLIGHT_CTRL.try_send(ctrl);
                     }
                     MasterToSlave::Message(_) => {}
                 }
