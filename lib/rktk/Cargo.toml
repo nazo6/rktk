@@ -14,3 +14,5 @@ embedded-graphics = "0.8.1"
 embassy-sync = { workspace = true }
 display-interface = "0.5.0"
 embassy-futures = { workspace = true }
+postcard = "1.0.8"
+serde = { version = "1.0.203", default-features = false, features = ["derive"] }

@@ -5,7 +5,7 @@ use core::panic::PanicInfo;
 
 use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_rp::gpio::Flex;
+use embassy_rp::{gpio::Flex, pio::Pio};
 use keymap::KEYMAP;
 use rktk::task::{display::DISPLAY_CONTROLLER, Drivers};
 use rktk_drivers_rp2040::{
@@ -13,6 +13,7 @@ use rktk_drivers_rp2040::{
     double_tap::DoubleTapResetRp,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
+    split::pio_half_duplex::PioHalfDuplexSplitDriver,
     usb::{new_usb, UsbConfig, UsbUserOpts},
 };
 
@@ -26,6 +27,7 @@ use embassy_rp::{
 bind_interrupts!(pub struct Irqs {
     USBCTRL_IRQ => embassy_rp::usb::InterruptHandler<USB>;
     I2C1_IRQ => embassy_rp::i2c::InterruptHandler<I2C1>;
+    PIO0_IRQ_0 => embassy_rp::pio::InterruptHandler<PIO0>;
 });
 
 #[embassy_executor::main]
@@ -82,12 +84,16 @@ async fn main(_spawner: Spawner) {
         new_usb(usb_opts, driver).await
     };
 
+    let pio = Pio::new(p.PIO0, Irqs);
+    let split = PioHalfDuplexSplitDriver::new(pio, p.PIN_1);
+
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Some(dtr),
         mouse: Some(ball),
         usb,
         display: Some(display),
+        split,
     };
 
     rktk::task::start(drivers, KEYMAP).await;

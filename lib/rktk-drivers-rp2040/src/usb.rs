@@ -24,7 +24,6 @@ async fn start_usb(
     mut device: UsbDevice<'static, Driver<'static, USB>>,
     signal: &'static RemoteWakeupSignal,
 ) {
-    DISPLAY_CONTROLLER.signal(rktk::task::display::DisplayMessage::Message("usb init"));
     loop {
         device.run_until_suspend().await;
         match select(device.wait_resume(), signal.wait()).await {
