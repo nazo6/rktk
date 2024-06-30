@@ -1377,7 +1377,7 @@ dependencies = [
 
 [[package]]
 name = "rktk"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "bitflags 2.6.0",
  "display-interface",
@@ -1396,7 +1396,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-common"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "display-interface",
  "embassy-executor",
@@ -1415,7 +1415,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-nrf52"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "display-interface",
  "embassy-executor",
@@ -1432,7 +1432,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-rp2040"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "display-interface",
  "embassy-executor",

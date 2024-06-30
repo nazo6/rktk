@@ -1,7 +1,11 @@
 [package]
 name = "rktk-drivers-rp2040"
-version = "0.1.0"
-edition = "2021"
+description = "rktk drivers for RP2040"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
 
 [dependencies]
 rktk = { path = "../rktk" }

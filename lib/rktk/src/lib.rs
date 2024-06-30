@@ -1,4 +1,4 @@
-#![doc = include_str!("../../../README.md")]
+#![doc = include_str!("../README.md")]
 //!
 //! # `rktk` crate
 //! `rktk` crate is hardware-agnostic library to build keyboard firmware. It receives the driver
