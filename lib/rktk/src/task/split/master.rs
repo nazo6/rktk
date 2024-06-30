@@ -2,6 +2,7 @@ use embassy_futures::join::join;
 use embassy_time::Timer;
 
 use crate::{
+    config::MIN_KB_SCAN_INTERVAL,
     constant::LAYER_COUNT,
     interface::{
         backlight::{BacklightCtrl, BacklightMode},
@@ -12,7 +13,7 @@ use crate::{
     },
     keycode::Layer,
     state::{State, StateReport},
-    task::{backlight::BACKLIGHT_CTRL, MIN_KB_SCAN_INTERVAL},
+    task::backlight::BACKLIGHT_CTRL,
 };
 
 use super::{M2sTx, S2mRx};

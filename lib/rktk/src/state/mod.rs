@@ -1,3 +1,5 @@
+//! Keyboard state management.
+
 #![allow(clippy::single_match)]
 
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};

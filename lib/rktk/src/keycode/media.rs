@@ -2,6 +2,7 @@ use super::macros::{normal, with_consts};
 
 with_consts!(
     Media,
+    /// Media key definitions.
     #[derive(PartialEq, Eq, Clone, Copy, Debug)]
     pub enum Media {
         Zero = 0x00,

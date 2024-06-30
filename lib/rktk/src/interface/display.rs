@@ -15,6 +15,10 @@ const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::ne
     .background_color(BinaryColor::Off)
     .build();
 
+/// Interface for display drivers.
+///
+/// TODO: Allow sync-only drivers?
+/// TODO: Make text style configurable.
 pub trait DisplayDriver: DerefMut<Target = Self::DerefTarget> {
     type DerefTarget: DrawTarget<Color = BinaryColor>;
 
@@ -36,5 +40,54 @@ pub trait DisplayDriver: DerefMut<Target = Self::DerefTarget> {
     async fn update_text(&mut self, text: &str, point: Point) -> Result<(), DisplayError> {
         let _ = Text::with_baseline(text, point, TEXT_STYLE, Baseline::Top).draw(self.deref_mut());
         self.flush_async().await
+    }
+}
+
+pub enum DummyDisplay {}
+impl Dimensions for DummyDisplay {
+    fn bounding_box(&self) -> embedded_graphics::primitives::Rectangle {
+        unimplemented!()
+    }
+}
+impl DrawTarget for DummyDisplay {
+    type Color = BinaryColor;
+
+    type Error = ();
+
+    fn draw_iter<I>(&mut self, _pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
+        unimplemented!()
+    }
+}
+
+/// Dummy driver that is only used to be given as a type argument.
+pub enum DummyDisplayDriver {}
+impl DisplayDriver for DummyDisplayDriver {
+    type DerefTarget = DummyDisplay;
+    fn flush(&mut self) -> Result<(), DisplayError> {
+        unimplemented!()
+    }
+    fn clear_buffer(&mut self) {
+        unimplemented!()
+    }
+    fn calculate_point(_col: i32, _row: i32) -> Point {
+        unimplemented!()
+    }
+    async fn flush_async(&mut self) -> Result<(), DisplayError> {
+        unimplemented!()
+    }
+}
+
+impl core::ops::Deref for DummyDisplayDriver {
+    type Target = DummyDisplay;
+    fn deref(&self) -> &Self::Target {
+        unimplemented!()
+    }
+}
+impl core::ops::DerefMut for DummyDisplayDriver {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unimplemented!()
     }
 }

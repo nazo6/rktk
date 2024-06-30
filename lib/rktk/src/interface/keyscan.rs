@@ -11,6 +11,7 @@ pub enum Hand {
     Right,
 }
 
+/// Key scanner driver interface.
 pub trait KeyscanDriver {
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEventOneHand, 16>;
     async fn current_hand(&mut self) -> Hand;

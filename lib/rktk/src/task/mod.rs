@@ -1,5 +1,6 @@
+//! Program entrypoint.
+
 use embassy_futures::join::join;
-use embassy_time::Duration;
 
 use crate::{
     config::DOUBLE_TAP_THRESHOLD,
@@ -16,8 +17,12 @@ pub mod display;
 mod no_split;
 mod split;
 
-pub const MIN_KB_SCAN_INTERVAL: Duration = Duration::from_millis(5);
-
+/// All drivers required to run the keyboard.
+///
+/// Only the `key_scanner` and `usb` drivers are required.
+/// For other drivers, if the value is None, it will be handled appropriately.
+///
+/// TODO: Add bluetooth driver and make usb optional.
 pub struct Drivers<
     DTR: DoubleTapResetDriver,
     KS: KeyscanDriver,
@@ -36,12 +41,14 @@ pub struct Drivers<
     pub backlight: Option<BL>,
 }
 
-// Start main task.
-// This task does all the processing for rktk.
-//
-// NOTE: For optimal boot time and proper operation of the Double Tap driver, do not do any heavy processing before executing this function.
-// Driver authors should use the init method defined in each driver's trace to perform initialization
-// instead of the associated functions such as new that are performed on the keyboard crate side.
+/// Receives the [`Drivers`] and executes the main process of the keyboard.
+/// This function should not be called more than once.
+///
+/// NOTE: For optimal boot time and proper operation of the Double Tap driver, do not do any heavy processing before executing this function.
+/// Driver authors should use the init method defined in each driver's trait to perform initialization
+/// instead of the associated functions such as new that are performed on the keyboard crate side.
+///
+/// TODO: To avoid using both `new` and `init` methods, receive builder instead of driver.
 pub async fn start<
     DTR: DoubleTapResetDriver,
     KS: KeyscanDriver,

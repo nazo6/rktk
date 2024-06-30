@@ -1,3 +1,5 @@
+//! rktk drivers for RP2040
+
 #![no_std]
 
 pub mod backlight;

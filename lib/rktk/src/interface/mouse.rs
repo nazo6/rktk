@@ -13,7 +13,8 @@ pub trait MouseDriver {
     }
 }
 
-pub struct DummyMouseDriver;
+/// Dummy driver that is only used to be given as a type argument.
+pub enum DummyMouseDriver {}
 impl MouseDriver for DummyMouseDriver {
     async fn read(&mut self) -> Result<(i8, i8), RktkError> {
         Err(RktkError::NotSupported)

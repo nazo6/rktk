@@ -2,13 +2,13 @@ use embassy_futures::join::join3;
 use embassy_time::Timer;
 
 use crate::{
-    config::MIN_MOUSE_SCAN_INTERVAL,
+    config::{MIN_KB_SCAN_INTERVAL, MIN_MOUSE_SCAN_INTERVAL},
     interface::{
         keyscan::KeyscanDriver,
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
     },
-    task::{backlight::BACKLIGHT_CTRL, MIN_KB_SCAN_INTERVAL},
+    task::backlight::BACKLIGHT_CTRL,
 };
 
 use super::{M2sRx, S2mTx};
