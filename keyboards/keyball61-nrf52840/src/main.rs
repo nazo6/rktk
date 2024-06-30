@@ -13,8 +13,8 @@ use embassy_nrf::{gpio::Flex, peripherals::SPI2, usb::vbus_detect::SoftwareVbusD
 use once_cell::sync::OnceCell;
 use rktk::{
     interface::{
-        backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver, mouse::DummyMouse,
-        split::DummySplitDriver,
+        backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver,
+        mouse::DummyMouseDriver, split::DummySplitDriver,
     },
     task::Drivers,
 };
@@ -90,7 +90,7 @@ async fn main(_spawner: Spawner) {
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
-        mouse: Option::<DummyMouse>::None,
+        mouse: Option::<DummyMouseDriver>::None,
         usb,
         display: Some(display),
         split: Option::<DummySplitDriver>::None,

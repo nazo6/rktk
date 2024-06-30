@@ -16,6 +16,7 @@ pub struct DoubleTapResetRp;
 
 impl DoubleTapResetDriver for DoubleTapResetRp {
     async fn execute(&self, timeout: Duration) {
+        // CREDIT: rumcake (https://github.com/Univa/rumcake/blob/2fa47dce9ab2b2406dd5465ccc9ce7b23e5ffdb0/rumcake/src/hw/mod.rs)
         unsafe {
             if read_volatile(FLAG.get().cast::<u32>()) == BOOTLOADER_MAGIC {
                 write_volatile(FLAG.get().cast(), 0);

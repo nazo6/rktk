@@ -13,8 +13,8 @@ pub trait MouseDriver {
     }
 }
 
-pub struct DummyMouse;
-impl MouseDriver for DummyMouse {
+pub struct DummyMouseDriver;
+impl MouseDriver for DummyMouseDriver {
     async fn read(&mut self) -> Result<(i8, i8), RktkError> {
         Err(RktkError::NotSupported)
     }
