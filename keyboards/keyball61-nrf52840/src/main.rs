@@ -40,8 +40,6 @@ bind_interrupts!(pub struct Irqs {
 
 static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 
-static BUILD_TIME: &str = build_time::build_time_local!("              %H%M%S");
-
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let p = embassy_nrf::init(Default::default());
@@ -101,8 +99,6 @@ async fn main(_spawner: Spawner) {
         split: Some(DummySplitDriver),
         backlight: Option::<DummyBacklightDriver>::None,
     };
-
-    rktk::print_str!(BUILD_TIME);
 
     rktk::task::start(drivers, keymap::KEYMAP).await;
 }

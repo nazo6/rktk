@@ -1,145 +1,52 @@
 use embassy_nrf::gpio::{Flex, OutputDrive, Pull};
-use rktk::interface::keyscan::{Hand, KeyChangeEventOneHand, KeyscanDriver};
+use rktk::interface::keyscan::KeyscanDriver;
+use rktk_drivers_common::keyscan::duplex_matrix::{DuplexMatrixScanner, FlexPin};
 
-use super::pressed::Pressed;
-
-pub struct DuplexMatrixScannerNrf<
-    'd,
-    const ROW_PIN_COUNT: usize,
-    const COL_PIN_COUNT: usize,
-    const COLS: usize,
-    const ROWS: usize,
-> {
-    rows: [Flex<'d>; ROW_PIN_COUNT],
-    cols: [Flex<'d>; COL_PIN_COUNT],
-    pressed: Pressed<COLS, ROWS>,
-    left_detect_jumper_key: (usize, usize),
+struct FlexWrap<'a> {
+    pin: Flex<'a>,
+    pull: Pull,
+    drive: OutputDrive,
 }
 
-impl<
-        'd,
-        const ROW_PIN_COUNT: usize,
-        const COL_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > DuplexMatrixScannerNrf<'d, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
-{
-    /// Detect the hand and initialize the scanner.
-    pub fn new(
-        rows: [Flex<'d>; ROW_PIN_COUNT],
-        cols: [Flex<'d>; COL_PIN_COUNT],
-        left_detect_jumper_key: (usize, usize),
-    ) -> Self {
-        Self {
-            rows,
-            cols,
-            left_detect_jumper_key,
-            pressed: Pressed::new(),
-        }
-    }
-}
-
-impl<
-        'a,
-        const ROW_PIN_COUNT: usize,
-        const COL_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > KeyscanDriver for DuplexMatrixScannerNrf<'a, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
-{
-    async fn scan(&mut self) -> heapless::Vec<KeyChangeEventOneHand, 16> {
-        let mut events = heapless::Vec::new();
-
-        // col -> row scan
-        {
-            for row in self.rows.iter_mut() {
-                row.set_as_input(Pull::Down);
-            }
-
-            for (j, col) in self.cols.iter_mut().enumerate() {
-                // col -> rowスキャンではcol=3は該当キーなし
-                if j == 3 {
-                    continue;
-                }
-
-                col.set_as_output(OutputDrive::Standard);
-                col.set_high();
-                embassy_time::Timer::after_ticks(10).await;
-
-                for (i, row) in self.rows.iter_mut().enumerate() {
-                    if let Some(change) = self.pressed.set_pressed(row.is_high(), i as u8, j as u8)
-                    {
-                        let _ = events.push(KeyChangeEventOneHand {
-                            row: i as u8,
-                            col: j as u8,
-                            pressed: change,
-                        });
-                    }
-                }
-                col.set_low();
-                embassy_time::Timer::after_ticks(10).await;
-                col.set_as_input(Pull::Down);
-            }
-        }
-
-        // row -> col scan
-        {
-            for col in self.cols.iter_mut() {
-                col.set_as_input(Pull::Down);
-            }
-
-            for (i, row) in self.rows.iter_mut().enumerate() {
-                row.set_as_output(OutputDrive::Standard);
-                row.set_low();
-                row.set_high();
-                embassy_time::Timer::after_ticks(10).await;
-
-                for (j, col) in self.cols.iter_mut().enumerate() {
-                    // In left side, this is always high.
-                    if (i, j + 3) == self.left_detect_jumper_key {
-                        continue;
-                    }
-
-                    if let Some(change) =
-                        self.pressed
-                            .set_pressed(col.is_high(), i as u8, (j + 3) as u8)
-                    {
-                        let _ = events.push(KeyChangeEventOneHand {
-                            row: i as u8,
-                            col: (j + 3) as u8,
-                            pressed: change,
-                        });
-                    }
-                }
-
-                row.set_low();
-                embassy_time::Timer::after_ticks(10).await;
-                row.set_as_input(Pull::Down);
-            }
-        }
-
-        events
+impl<'a> FlexPin for FlexWrap<'a> {
+    fn set_as_input(&mut self) {
+        let pull = match self.pull {
+            Pull::Up => Pull::Up,
+            Pull::Down => Pull::Down,
+            Pull::None => Pull::None,
+        };
+        self.pin.set_as_input(pull);
     }
 
-    async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
-        if self.left_detect_jumper_key.1 >= 4 {
-            let row = &mut self.rows[self.left_detect_jumper_key.0];
-            let col = &mut self.cols[self.left_detect_jumper_key.1 - 3];
+    fn set_as_output(&mut self) {
+        self.pin.set_as_output(self.drive);
+    }
 
-            col.set_as_input(Pull::Down);
+    fn set_low(&mut self) {
+        self.pin.set_low();
+    }
 
-            row.set_high();
-            row.set_as_output(OutputDrive::Standard);
-            embassy_time::Timer::after_ticks(10).await;
+    fn set_high(&mut self) {
+        self.pin.set_high();
+    }
 
-            if col.is_high() {
-                Hand::Left
-            } else {
-                Hand::Right
-            }
-        } else {
-            panic!("Invalid left detect jumper config");
-        }
+    fn is_high(&self) -> bool {
+        self.pin.is_high()
+    }
+
+    async fn wait_for_high(&mut self) {
+        self.pin.wait_for_high().await;
+    }
+
+    async fn wait_for_low(&mut self) {
+        self.pin.wait_for_low().await;
+    }
+
+    fn set_pull(&mut self, pull: rktk_drivers_common::keyscan::duplex_matrix::Pull) {
+        self.pull = match pull {
+            rktk_drivers_common::keyscan::duplex_matrix::Pull::Up => Pull::Up,
+            rktk_drivers_common::keyscan::duplex_matrix::Pull::Down => Pull::Down,
+        };
     }
 }
 
@@ -154,9 +61,20 @@ pub fn create_duplex_matrix<
     cols: [Flex<'a>; COL_PIN_COUNT],
     left_detect_jumper_key: (usize, usize),
 ) -> impl KeyscanDriver + 'a {
-    DuplexMatrixScannerNrf::<'a, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
+    let rows = rows.map(|pin| FlexWrap {
+        pin,
+        pull: Pull::None,
+        drive: OutputDrive::Standard,
+    });
+    let cols = cols.map(|pin| FlexWrap {
+        pin,
+        pull: Pull::None,
+        drive: OutputDrive::Standard,
+    });
+    DuplexMatrixScanner::<'a, FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
         rows,
         cols,
         left_detect_jumper_key,
+        false,
     )
 }

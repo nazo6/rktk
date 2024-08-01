@@ -39,7 +39,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver, BL: Backli
 
             loop {
                 let start = embassy_time::Instant::now();
-                //
+
                 let mut mouse_move: (i8, i8) = (0, 0);
 
                 let (mut master_events, _) = join(key_scanner.scan(), async {
