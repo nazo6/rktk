@@ -50,7 +50,6 @@ impl<
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEventOneHand, 16> {
         let mut events = heapless::Vec::new();
 
-        rktk::print!("cb1");
         // col -> row scan
         {
             for row in self.rows.iter_mut() {
@@ -82,7 +81,6 @@ impl<
                 col.set_as_input(Pull::Down);
             }
         }
-        rktk::print!("cb2");
 
         // row -> col scan
         {
@@ -120,14 +118,10 @@ impl<
             }
         }
 
-        rktk::print!("cb3");
-
-        rktk::print!("cb4");
         events
     }
 
     async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
-        rktk::print!("ch1");
         if self.left_detect_jumper_key.1 >= 4 {
             let row = &mut self.rows[self.left_detect_jumper_key.0];
             let col = &mut self.cols[self.left_detect_jumper_key.1 - 3];

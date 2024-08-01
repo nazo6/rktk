@@ -77,6 +77,7 @@ impl State {
 
     /// Updates state with the given events.
     /// If the keyboard is not split, slave_events should be empty.
+    #[inline(always)]
     pub fn update(
         &mut self,
         master_events: &mut [KeyChangeEventOneHand],
@@ -128,7 +129,7 @@ impl State {
         loop_end!(
             &mut self.common_state,
             &mut cls,
-            (mls, &mut self.mouse),
+            // (mls, &mut self.mouse),
             (kls, &mut self.keyboard),
             (mkls, &mut self.media_keyboard),
             (lls, &mut ())
