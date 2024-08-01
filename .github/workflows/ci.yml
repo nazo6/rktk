@@ -39,7 +39,7 @@ jobs:
     - uses: cargo-bins/cargo-binstall@main
 
     - name: Install cargo-make
-      run: cargo binstall cargo-make 
+      run: cargo binstall cargo-make --no-confirm
 
     - name: Run check
       run: cargo make check-ci

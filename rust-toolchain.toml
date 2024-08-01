@@ -1,4 +1,4 @@
 [toolchain]
-channel = "nightly"
+channel = "nightly-2024-08-01"
 components = ["rustfmt", "rust-analyzer"]
 targets = ["thumbv6m-none-eabi", "thumbv7em-none-eabihf"]
