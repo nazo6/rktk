@@ -7,30 +7,14 @@ run_task = { name = [
   "kb-keyball61-rp2040-check",
 ] }
 
-[tasks.check-ci]
-run_task = { name = [
-  "lib-rktk-check",
-  "lib-rktk-clippy",
-  "lib-nrf-check",
-  "lib-nrf-clippy",
-  "lib-rp2040-check",
-  "lib-rp2040-clippy",
-] }
-
 [tasks.lib-rktk-check]
-script = 'cd ./lib/rktk && cargo check'
-[tasks.lib-rktk-clippy]
 script = 'cd ./lib/rktk && cargo check'
 
 [tasks.lib-nrf-check]
 script = 'cd ./lib/rktk-drivers-nrf52 && cargo check'
-[tasks.lib-nrf-clippy]
-script = 'cd ./lib/rktk-drivers-nrf52 && cargo clippy'
 
 [tasks.lib-rp2040-check]
 script = 'cd ./lib/rktk-drivers-rp2040 && cargo check'
-[tasks.lib-rp2040-clippy]
-script = 'cd ./lib/rktk-drivers-rp2040 && cargo clippy'
 
 [tasks.kb-keyball61-rp2040-run]
 script = 'cd ./keyboards/keyball61-rp2040 && cargo run --release'

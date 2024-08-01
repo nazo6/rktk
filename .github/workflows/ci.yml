@@ -13,16 +13,36 @@ jobs:
   lib-check:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: lib
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
     - uses: Swatinem/rust-cache@v2
 
-    - uses: cargo-bins/cargo-binstall@main
+    - name: "Run clippy for rktk"
+      uses: giraffate/clippy-action@v1
+      with:
+        reporter: 'github-pr-check'
+        workdir: "rktk"
 
-    - name: Install cargo-make
-      run: cargo binstall cargo-make --no-confirm
+    - name: "Run clippy for rktk-drivers-common"
+      uses: giraffate/clippy-action@v1
+      with:
+        reporter: 'github-pr-check'
+        workdir: "rktk-drivers-common"
 
-    - name: Run check
-      run: cargo make check-ci
+    - name: "Run clippy for rktk-drivers-nrf52"
+      uses: giraffate/clippy-action@v1
+      with:
+        reporter: 'github-pr-check'
+        workdir: "rktk-drivers-nrf52"
+
+    - name: "Run clippy for rktk-drivers-rp2040"
+      uses: giraffate/clippy-action@v1
+      with:
+        reporter: 'github-pr-check'
+        workdir: "rktk-drivers-rp2040"
