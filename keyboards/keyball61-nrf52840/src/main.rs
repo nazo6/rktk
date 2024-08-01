@@ -46,7 +46,7 @@ static BUILD_TIME: &str = build_time::build_time_local!("              %H%M%S");
 async fn main(_spawner: Spawner) {
     let p = embassy_nrf::init(Default::default());
 
-    // let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09).await;
+    let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09).await;
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
@@ -95,7 +95,7 @@ async fn main(_spawner: Spawner) {
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
-        mouse: Option::<DummyMouseDriver>::None,
+        mouse: Some(ball),
         usb,
         display: Some(display),
         split: Option::<DummySplitDriver>::None,
