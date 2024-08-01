@@ -57,10 +57,10 @@ async fn main(_spawner: Spawner) {
             Flex::new(p.P1_04),
         ],
         [
-            Flex::new(p.P1_15),
-            Flex::new(p.P0_02),
-            Flex::new(p.P0_29),
             Flex::new(p.P0_31),
+            Flex::new(p.P0_29),
+            Flex::new(p.P0_02),
+            Flex::new(p.P1_15),
         ],
         (2, 6),
     );
@@ -98,7 +98,7 @@ async fn main(_spawner: Spawner) {
         mouse: Some(ball),
         usb,
         display: Some(display),
-        split: Option::<DummySplitDriver>::None,
+        split: Some(DummySplitDriver),
         backlight: Option::<DummyBacklightDriver>::None,
     };
 

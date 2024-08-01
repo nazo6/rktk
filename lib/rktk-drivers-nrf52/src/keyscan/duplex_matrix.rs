@@ -64,7 +64,7 @@ impl<
 
                 col.set_as_output(OutputDrive::Standard);
                 col.set_high();
-                // col.wait_for_high().await;
+                embassy_time::Timer::after_ticks(10).await;
 
                 for (i, row) in self.rows.iter_mut().enumerate() {
                     if let Some(change) = self.pressed.set_pressed(row.is_high(), i as u8, j as u8)
@@ -77,7 +77,7 @@ impl<
                     }
                 }
                 col.set_low();
-                // col.wait_for_low().await;
+                embassy_time::Timer::after_ticks(10).await;
                 col.set_as_input(Pull::Down);
             }
         }
@@ -92,7 +92,7 @@ impl<
                 row.set_as_output(OutputDrive::Standard);
                 row.set_low();
                 row.set_high();
-                // row.wait_for_high().await;
+                embassy_time::Timer::after_ticks(10).await;
 
                 for (j, col) in self.cols.iter_mut().enumerate() {
                     // In left side, this is always high.
@@ -113,7 +113,7 @@ impl<
                 }
 
                 row.set_low();
-                // row.wait_for_low().await;
+                embassy_time::Timer::after_ticks(10).await;
                 row.set_as_input(Pull::Down);
             }
         }
@@ -130,7 +130,7 @@ impl<
 
             row.set_high();
             row.set_as_output(OutputDrive::Standard);
-            // row.wait_for_high().await;
+            embassy_time::Timer::after_ticks(10).await;
 
             if col.is_high() {
                 Hand::Left

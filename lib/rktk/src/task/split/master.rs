@@ -110,6 +110,10 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver>(
         })
         .await;
 
+        if let Some(fe) = master_events.get(0) {
+            crate::print!("{},{}", fe.row, fe.col);
+        }
+
         let state_report = state.update(&mut master_events, &mut slave_events, mouse_move);
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);

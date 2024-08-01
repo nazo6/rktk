@@ -10,11 +10,16 @@ pub trait SplitDriver {
     async fn send(&mut self, buf: &[u8]) -> Result<(), RktkError>;
 }
 
-/// Dummy driver that is only used to be given as a type argument.
-pub struct DummySplitDriver {}
+/// Dummy driver.
+/// This driver has two usage:
+/// 1. Just a type notation. ex: `Option::<DummySplitDriver>::None`
+/// 2. Use as a driver for testing: `let mut driver = DummySplitDriver;`
+pub struct DummySplitDriver;
 impl SplitDriver for DummySplitDriver {
     async fn wait_recv(&mut self, _buf: &mut [u8]) -> Result<(), RktkError> {
-        Err(RktkError::NotSupported)
+        loop {
+            embassy_time::Timer::after_secs(1000000).await;
+        }
     }
     async fn send(&mut self, _buf: &[u8]) -> Result<(), RktkError> {
         Err(RktkError::NotSupported)
