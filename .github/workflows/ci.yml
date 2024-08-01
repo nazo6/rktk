@@ -21,14 +21,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - uses: dtolnay/rust-toolchain@nightly
-
     - uses: Swatinem/rust-cache@v2
 
     - uses: cargo-bins/cargo-binstall@main
 
     - name: Install cargo-make
-      run: cargo binstall cargo-make --force
+      run: cargo binstall cargo-make --no-confirm
 
     - name: Run check
       run: cargo make check-ci
