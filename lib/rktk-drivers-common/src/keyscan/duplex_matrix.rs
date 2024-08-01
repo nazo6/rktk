@@ -31,6 +31,10 @@ pub struct DuplexMatrixScanner<
     cols: [F; COL_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
     left_detect_jumper_key: (usize, usize),
+    /// In rp2040, wait_for_{low,high} can be used for output mode.
+    /// On the other hand, in nrf, this doesn't work and never returns.
+    /// In such case, set this to false and will be fallback to just wait some time
+    output_awaitable: bool,
 }
 
 impl<
@@ -47,6 +51,7 @@ impl<
         rows: [F; ROW_PIN_COUNT],
         cols: [F; COL_PIN_COUNT],
         left_detect_jumper_key: (usize, usize),
+        output_awaitable: bool,
     ) -> Self {
         Self {
             _phantom: core::marker::PhantomData,
@@ -54,6 +59,23 @@ impl<
             cols,
             left_detect_jumper_key,
             pressed: Pressed::new(),
+            output_awaitable,
+        }
+    }
+
+    async fn wait_for_low(output_awaitable: bool, pin: &mut F) {
+        if output_awaitable {
+            pin.wait_for_low().await;
+        } else {
+            embassy_time::Timer::after_ticks(10).await;
+        }
+    }
+
+    async fn wait_for_high(output_awaitable: bool, pin: &mut F) {
+        if output_awaitable {
+            pin.wait_for_high().await;
+        } else {
+            embassy_time::Timer::after_ticks(10).await;
         }
     }
 
@@ -74,7 +96,7 @@ impl<
                 col.set_as_output();
                 col.set_low();
                 col.set_high();
-                col.wait_for_high().await;
+                Self::wait_for_high(self.output_awaitable, col).await;
 
                 for (i, row) in self.rows.iter_mut().enumerate() {
                     if let Some(change) = self.pressed.set_pressed(row.is_high(), i as u8, j as u8)
@@ -87,7 +109,7 @@ impl<
                     }
                 }
                 col.set_low();
-                col.wait_for_low().await;
+                Self::wait_for_low(self.output_awaitable, col).await;
                 col.set_as_input();
             }
         }
@@ -103,7 +125,7 @@ impl<
                 row.set_as_output();
                 row.set_low();
                 row.set_high();
-                row.wait_for_high().await;
+                Self::wait_for_high(self.output_awaitable, row).await;
 
                 for (j, col) in self.cols.iter_mut().enumerate() {
                     // In left side, this is always high.
@@ -124,7 +146,7 @@ impl<
                 }
 
                 row.set_low();
-                row.wait_for_low().await;
+                Self::wait_for_low(self.output_awaitable, row).await;
                 row.set_as_input();
             }
         }
@@ -159,7 +181,7 @@ impl<
 
             row.set_as_output();
             row.set_high();
-            row.wait_for_high().await;
+            Self::wait_for_high(self.output_awaitable, row).await;
 
             if col.is_high() {
                 Hand::Left

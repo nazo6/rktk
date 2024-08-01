@@ -14,6 +14,14 @@ macro_rules! print {
     }};
 }
 
+#[macro_export]
+macro_rules! print_str {
+    ($str:tt) => {{
+        use $crate::task::display::*;
+        let _ = DISPLAY_CONTROLLER.try_send(DisplayMessage::Message($str));
+    }};
+}
+
 macro_rules! display_state {
     ($mes_type:ident,$val:expr) => {{
         use $crate::task::display::*;

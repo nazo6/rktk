@@ -31,7 +31,11 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver, BL: Backli
         async move {
             let mut state = State::new(keymap, None);
 
-            crate::print!("No-split start");
+            crate::print!("Start",);
+
+            let hand = key_scanner.current_hand().await;
+
+            crate::print!("{:?}", hand);
 
             loop {
                 let start = embassy_time::Instant::now();

@@ -1250,6 +1250,7 @@ dependencies = [
  "embassy-sync 0.6.0",
  "embassy-time",
  "embassy-usb",
+ "heapless 0.8.0",
  "rktk",
  "rktk-drivers-common",
  "ssd1306",

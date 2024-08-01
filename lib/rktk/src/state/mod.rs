@@ -77,6 +77,7 @@ impl State {
 
     /// Updates state with the given events.
     /// If the keyboard is not split, slave_events should be empty.
+    #[inline(always)]
     pub fn update(
         &mut self,
         master_events: &mut [KeyChangeEventOneHand],

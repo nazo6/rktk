@@ -74,20 +74,20 @@ pub const KEYMAP: [Layer; LAYER_COUNT] = [
         map: L0,
         arrowball: false,
     },
-    // Layer {
-    //     map: L1,
-    //     arrowball: false,
-    // },
-    // Layer {
-    //     map: L2,
-    //     arrowball: false,
-    // },
-    // Layer {
-    //     map: L3,
-    //     arrowball: true,
-    // },
-    // Layer {
-    //     map: L4,
-    //     arrowball: true,
-    // },
+    Layer {
+        map: L1,
+        arrowball: false,
+    },
+    Layer {
+        map: L2,
+        arrowball: false,
+    },
+    Layer {
+        map: L3,
+        arrowball: true,
+    },
+    Layer {
+        map: L4,
+        arrowball: true,
+    },
 ];

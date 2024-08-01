@@ -20,14 +20,16 @@ embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
   "defmt",
-  "unstable-pac",
-  "nrf52840",
   "gpiote",
+  "time-driver-rtc1",
+  "nrf52840",
+  "nfc-pins-as-gpio",
 ] }
 
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }
 
 static_cell = { workspace = true }
+heapless = { workspace = true }
 
 [features]

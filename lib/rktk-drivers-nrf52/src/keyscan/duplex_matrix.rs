@@ -75,5 +75,6 @@ pub fn create_duplex_matrix<
         rows,
         cols,
         left_detect_jumper_key,
+        false,
     )
 }

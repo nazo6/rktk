@@ -5,7 +5,7 @@ pub struct KeyChangeEventOneHand {
     pub pressed: bool,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Hand {
     Left,
     Right,
