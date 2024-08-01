@@ -7,6 +7,14 @@ run_task = { name = [
   "kb-keyball61-rp2040-check",
 ] }
 
+[tasks.check-ci]
+script = '''
+cd ./lib/rktk && cargo clippy
+cd ./lib/rktk-drivers-nrf52 && cargo clippy
+cd ./lib/rktk-drivers-rp2040 && cargo clippy
+cd ./lib/rktk-drivers-common && cargo clippy
+'''
+
 [tasks.lib-rktk-check]
 script = 'cd ./lib/rktk && cargo check'
 
