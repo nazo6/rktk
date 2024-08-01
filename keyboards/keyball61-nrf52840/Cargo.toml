@@ -47,3 +47,4 @@ once_cell = { version = "1.19.0", default-features = false, features = [
 embedded-graphics = "0.8.1"
 ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
 display-interface = "0.5.0"
+build-time = "0.1.3"
