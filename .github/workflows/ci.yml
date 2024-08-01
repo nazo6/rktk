@@ -37,8 +37,10 @@ jobs:
 
     - uses: cargo-bins/cargo-binstall@main
 
-    - name: Install cargo-make
-      run: cargo binstall cargo-make --no-confirm
 
     - name: Run check
-      run: cargo make check-ci
+      run: |
+        cd ./lib/rktk && cargo clippy
+        cd ../rktk-drivers-nrf52 && cargo clippy
+        cd ../rktk-drivers-rp2040 && cargo clippy
+        cd ../rktk-drivers-common && cargo clippy
