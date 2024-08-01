@@ -2,7 +2,10 @@
 #![no_main]
 #![feature(impl_trait_in_assoc_type)]
 
-use core::panic::PanicInfo;
+use core::{
+    ops::{Deref, DerefMut as _},
+    panic::PanicInfo,
+};
 
 use defmt_rtt as _;
 
@@ -19,7 +22,7 @@ use rktk::{
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
-    display::ssd1306::create_ssd1306,
+    display::ssd1306::{create_ssd1306, Ssd1306Display},
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
     usb::{new_usb, UsbConfig, UsbUserOpts},
@@ -106,6 +109,20 @@ async fn main(_spawner: Spawner) {
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    rktk::print_str!("panicaaa");
+    use embassy_nrf::peripherals::{P0_17, P0_20, TWISPI0};
+    use rktk::interface::display::DisplayDriver as _;
+    use ssd1306::mode::DisplayConfig as _;
+
+    let mut display = unsafe {
+        create_ssd1306(
+            TWISPI0::steal(),
+            Irqs,
+            P0_17::steal(),
+            P0_20::steal(),
+            ssd1306::size::DisplaySize128x32,
+        )
+    };
+    let _ = display.deref_mut().init();
+    let _ = display.update_text_sync("panic", embedded_graphics::prelude::Point { x: 0, y: 0 });
     loop {}
 }

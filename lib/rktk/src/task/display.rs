@@ -24,9 +24,6 @@ pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<
 
 pub(super) async fn start<D: DisplayDriver>(mut display: D) {
     let _ = display.init().await;
-    let _ = display
-        .update_text("Hello world!", D::calculate_point(1, 3))
-        .await;
     loop {
         match select(
             DISPLAY_CONTROLLER.receive(),
