@@ -1,4 +1,4 @@
-name: Rust_CI
+name: Rust check
 
 on:
   push:
@@ -21,18 +21,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: dtolnay/rust-toolchain@nightly
+
+    - uses: Swatinem/rust-cache@v2
+
+    - uses: cargo-bins/cargo-binstall@main
 
     - name: Install cargo-make
-      run: cargo install cargo-make
+      run: cargo binstall cargo-make --force
+
     - name: Run check
       run: cargo make check-ci
