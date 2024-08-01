@@ -36,21 +36,25 @@ jobs:
       with:
         reporter: 'github-pr-check'
         workdir: "lib/rktk"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: "Run clippy for rktk-drivers-common"
       uses: giraffate/clippy-action@v1
       with:
         reporter: 'github-pr-check'
         workdir: "lib/rktk-drivers-common"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: "Run clippy for rktk-drivers-nrf52"
       uses: giraffate/clippy-action@v1
       with:
         reporter: 'github-pr-check'
         workdir: "lib/rktk-drivers-nrf52"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: "Run clippy for rktk-drivers-rp2040"
       uses: giraffate/clippy-action@v1
       with:
         reporter: 'github-pr-check'
         workdir: "lib/rktk-drivers-rp2040"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
