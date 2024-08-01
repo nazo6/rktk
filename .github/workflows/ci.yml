@@ -1,4 +1,7 @@
-name: Rust check
+name: Rust clippy
+
+permissions:
+    checks: write
 
 on:
   push:
