@@ -4,7 +4,7 @@ use embassy_nrf::{
     twim::{Config, Frequency, Instance, InterruptHandler, Twim},
     Peripheral,
 };
-use rktk_drivers_common::display::ssd1306::Ssd1306Display;
+pub use rktk_drivers_common::display::ssd1306::Ssd1306Display;
 use ssd1306::size::DisplaySize;
 
 pub fn create_ssd1306<'d, T: Instance, SIZE: DisplaySize>(

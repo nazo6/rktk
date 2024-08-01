@@ -41,6 +41,11 @@ pub trait DisplayDriver: DerefMut<Target = Self::DerefTarget> {
         let _ = Text::with_baseline(text, point, TEXT_STYLE, Baseline::Top).draw(self.deref_mut());
         self.flush_async().await
     }
+
+    fn update_text_sync(&mut self, text: &str, point: Point) -> Result<(), DisplayError> {
+        let _ = Text::with_baseline(text, point, TEXT_STYLE, Baseline::Top).draw(self.deref_mut());
+        self.flush()
+    }
 }
 
 pub enum DummyDisplay {}
