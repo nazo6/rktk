@@ -1,0 +1,36 @@
+[tasks.check-all]
+run_task = { name = [
+  "lib-rktk-check",
+  "lib-nrf-check",
+  "lib-rp2040-check",
+  "kb-keyball61-nrf52840-check",
+  "kb-keyball61-rp2040-check",
+] }
+
+[tasks.lib-rktk-check]
+script = 'cd ./lib/rktk && cargo check'
+
+[tasks.lib-nrf-check]
+script = 'cd ./lib/rktk-drivers-nrf52 && cargo check'
+
+[tasks.lib-rp2040-check]
+script = 'cd ./lib/rktk-drivers-rp2040 && cargo check'
+
+[tasks.kb-keyball61-rp2040-run]
+script = 'cd ./keyboards/keyball61-rp2040 && cargo run --release'
+
+[tasks.kb-keyball61-nrf52840-run]
+script = '''
+cd ./keyboards/keyball61-nrf52840
+cargo build --release
+cd target\thumbv7em-none-eabihf\release
+..\..\..\utils\arm-none-eabi-objcopy.exe -Oihex keyball61-nrf52840 keyball61-nrf52840.hex
+python3 ..\..\..\utils\uf2conv.py keyball61-nrf52840.hex -c -b 0x27000 -f 0xADA52840
+copy flash.uf2 E:\
+'''
+
+[tasks.kb-keyball61-nrf52840-check]
+script = 'cd ./keyboards/keyball61-nrf52840 && cargo check'
+
+[tasks.kb-keyball61-rp2040-check]
+script = 'cd ./keyboards/keyball61-rp2040 && cargo check'
