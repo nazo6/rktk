@@ -15,7 +15,7 @@ embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-static_cell = "2.1.0"
+static_cell = { workspace = true }
 embassy-rp = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
   "defmt",
   "unstable-pac",
