@@ -10,9 +10,9 @@ run_task = { name = [
 [tasks.check-ci]
 script = '''
 cd ./lib/rktk && cargo clippy
-cd ./lib/rktk-drivers-nrf52 && cargo clippy
-cd ./lib/rktk-drivers-rp2040 && cargo clippy
-cd ./lib/rktk-drivers-common && cargo clippy
+cd ../rktk-drivers-nrf52 && cargo clippy
+cd ../rktk-drivers-rp2040 && cargo clippy
+cd ../rktk-drivers-common && cargo clippy
 '''
 
 [tasks.lib-rktk-check]
