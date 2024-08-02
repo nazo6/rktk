@@ -25,17 +25,22 @@ pub async fn start<'a, SP: SplitDriver, R: DeserializeOwned, S: Serialize>(
 
     loop {
         match select(split.wait_recv(&mut recv_buf), to_send_receiver.receive()).await {
-            Either::First(_) => {
-                if let Ok(data) = from_bytes(&recv_buf) {
-                    crate::print!("RecvOk: {}", embassy_time::Instant::now());
+            Either::First(res) => {
+                if let Err(e) = res {
+                    crate::print!("RE: {:?} {}", e, embassy_time::Instant::now());
+                } else if let Ok(data) = from_bytes(&recv_buf) {
+                    crate::print!("R: {}", embassy_time::Instant::now());
                     let _ = received_sender.send(data).await;
                 } else {
-                    crate::print!("RecvErr: {}", embassy_time::Instant::now());
+                    crate::print!("RE: {}", embassy_time::Instant::now());
                 }
             }
             Either::Second(send_data) => {
                 if let Ok(bytes) = to_slice(&send_data, &mut send_buf) {
-                    let _ = split.send(bytes).await;
+                    match split.send(bytes).await {
+                        Ok(_) => crate::print!("S: {}", embassy_time::Instant::now()),
+                        Err(e) => crate::print!("SE: {:?} {}", e, embassy_time::Instant::now()),
+                    }
                 }
             }
         }

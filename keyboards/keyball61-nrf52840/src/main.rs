@@ -12,19 +12,22 @@ use defmt_rtt as _;
 use embassy_executor::Spawner;
 use nrf_softdevice as _;
 
-use embassy_nrf::{gpio::Flex, peripherals::SPI2, usb::vbus_detect::SoftwareVbusDetect};
+use embassy_nrf::{
+    gpio::{Flex, Pin},
+    peripherals::SPI2,
+    ppi::Group,
+    usb::vbus_detect::SoftwareVbusDetect,
+};
 use once_cell::sync::OnceCell;
 use rktk::{
-    interface::{
-        backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver,
-        mouse::DummyMouseDriver, split::DummySplitDriver,
-    },
+    interface::{backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver},
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
-    display::ssd1306::{create_ssd1306, Ssd1306Display},
+    display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
+    split::uart_half_duplex::UartHalfDuplexSplitDriver,
     usb::{new_usb, UsbConfig, UsbUserOpts},
 };
 
@@ -36,6 +39,7 @@ bind_interrupts!(pub struct Irqs {
     USBD => embassy_nrf::usb::InterruptHandler<USBD>;
     SPIM2_SPIS2_SPI2 => embassy_nrf::spim::InterruptHandler<SPI2>;
     SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0 => embassy_nrf::twim::InterruptHandler<embassy_nrf::peripherals::TWISPI0>;
+    UARTE0_UART0 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE0>;
 });
 
 static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
@@ -90,13 +94,23 @@ async fn main(_spawner: Spawner) {
         ssd1306::size::DisplaySize128x32,
     );
 
+    let split = UartHalfDuplexSplitDriver::new(
+        p.P0_08.degrade(),
+        p.UARTE0,
+        Irqs,
+        p.TIMER0,
+        p.PPI_CH0,
+        p.PPI_CH1,
+        p.PPI_GROUP0.degrade(),
+    );
+
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse: Some(ball),
         usb,
         display: Some(display),
-        split: Some(DummySplitDriver),
+        split: Some(split),
         backlight: Option::<DummyBacklightDriver>::None,
     };
 
