@@ -1,7 +1,7 @@
 use embassy_time::{Duration, Instant};
 
 use crate::{
-    constant::{COLS, ROWS},
+    config::{COLS, ROWS},
     interface::keyscan::KeyChangeEventOneHand,
 };
 

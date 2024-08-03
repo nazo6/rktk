@@ -3,7 +3,7 @@ use core::array::from_fn;
 use embassy_time::Instant;
 
 use crate::{
-    constant::{COLS, LAYER_COUNT, ROWS},
+    config::{COLS, LAYER_COUNT, ROWS},
     keycode::{KeyAction, KeyDef, Layer},
 };
 

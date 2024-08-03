@@ -2,8 +2,7 @@ use embassy_futures::join::join;
 use embassy_time::Timer;
 
 use crate::{
-    config::MIN_KB_SCAN_INTERVAL,
-    constant::LAYER_COUNT,
+    config::{LAYER_COUNT, SCAN_INTERVAL_KEYBOARD},
     interface::{
         backlight::{BacklightCtrl, BacklightMode},
         keyscan::{KeyChangeEventOneHand, KeyscanDriver},
@@ -128,8 +127,8 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver>(
         handle_led(&state_report, m2s_tx, &mut latest_led);
 
         let took = start.elapsed();
-        if took < MIN_KB_SCAN_INTERVAL {
-            Timer::after(MIN_KB_SCAN_INTERVAL - took).await;
+        if took < SCAN_INTERVAL_KEYBOARD {
+            Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
         }
     }
 }

@@ -1,4 +1,4 @@
-use rktk::constant::LAYER_COUNT;
+use rktk::config::LAYER_COUNT;
 use rktk::keycode::*;
 use rktk::keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*};
 

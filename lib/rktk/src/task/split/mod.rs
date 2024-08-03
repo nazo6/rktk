@@ -9,8 +9,7 @@ use embassy_sync::{
 use embassy_time::Timer;
 
 use crate::{
-    config::{LEFT_LED_NUM, RIGHT_LED_NUM, SPLIT_CHANNEL_SIZE, SPLIT_USB_TIMEOUT},
-    constant::LAYER_COUNT,
+    config::{LAYER_COUNT, LEFT_LED_COUNT, RIGHT_LED_COUNT, SPLIT_CHANNEL_SIZE, SPLIT_USB_TIMEOUT},
     interface::{
         backlight::BacklightDriver,
         keyscan::{Hand, KeyscanDriver},
@@ -54,8 +53,8 @@ pub async fn start<
         async move {
             if let Some(backlight) = backlight {
                 match hand {
-                    Hand::Right => super::backlight::start::<RIGHT_LED_NUM>(backlight).await,
-                    Hand::Left => super::backlight::start::<LEFT_LED_NUM>(backlight).await,
+                    Hand::Right => super::backlight::start::<RIGHT_LED_COUNT>(backlight).await,
+                    Hand::Left => super::backlight::start::<LEFT_LED_COUNT>(backlight).await,
                 }
             }
         },

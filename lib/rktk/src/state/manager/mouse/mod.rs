@@ -1,7 +1,7 @@
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
-    config::AUTO_MOUSE_LAYER,
+    config::DEFAULT_AUTO_MOUSE_LAYER,
     keycode::{key::Key, special::Special, KeyCode},
     state::{
         common::{CommonLocalState, CommonState},
@@ -110,7 +110,7 @@ impl LocalStateManager for MouseLocalState {
             self.mouse_event = (0, 0);
         } else {
             global_mouse_state.arrowball_move = (0, 0);
-            common_state.layer_active[AUTO_MOUSE_LAYER] = global_mouse_state.aml.enabled(
+            common_state.layer_active[DEFAULT_AUTO_MOUSE_LAYER] = global_mouse_state.aml.enabled(
                 common_local_state.now,
                 self.mouse_event,
                 self.mouse_button != 0 || global_mouse_state.scroll_mode,

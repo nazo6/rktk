@@ -11,6 +11,8 @@ RKTK_ROW_PIN_COUNT = "5"
 RKTK_COLS = "7"
 RKTK_ROWS = "5"
 RKTK_LAYER_COUNT = "5"
+RKTK_RIGHT_LED_COUNT = "34"
+RKTK_LEFT_LED_COUNT = "37"
 
 [unstable]
 build-std = ["core"]

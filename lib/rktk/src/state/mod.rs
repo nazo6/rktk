@@ -5,7 +5,7 @@
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{
-    constant::{COLS, LAYER_COUNT},
+    config::{COLS, DEFAULT_TAP_THRESHOLD, LAYER_COUNT},
     interface::keyscan::{Hand, KeyChangeEventOneHand},
     keycode::{KeyAction, KeyCode, Layer},
     state::{common::CommonLocalState, manager::interface::LocalStateManager as _},
@@ -57,9 +57,6 @@ macro_rules! loop_end {
         loop_end!($cs, $cls, $(($s, $sg)),+);
     };
 }
-
-// TODO: make this configurable
-pub const TAP_THRESHOLD: embassy_time::Duration = embassy_time::Duration::from_millis(200);
 
 impl State {
     pub fn new(layers: [Layer; LAYER_COUNT], master_hand: Option<Hand>) -> Self {
@@ -154,7 +151,7 @@ impl State {
             KeyStatusChangeType::Pressing(duration) => match key_action {
                 KeyAction::Tap(kc) => Some(kc),
                 KeyAction::TapHold(_tkc, hkc) => {
-                    if duration > TAP_THRESHOLD {
+                    if duration > DEFAULT_TAP_THRESHOLD {
                         Some(hkc)
                     } else {
                         None
@@ -164,7 +161,7 @@ impl State {
             KeyStatusChangeType::Released(duration) => match key_action {
                 KeyAction::Tap(kc) => Some(kc),
                 KeyAction::TapHold(tkc, hkc) => {
-                    if duration > TAP_THRESHOLD {
+                    if duration > DEFAULT_TAP_THRESHOLD {
                         Some(hkc)
                     } else {
                         Some(tkc)

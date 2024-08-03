@@ -2,7 +2,7 @@
 
 use embassy_time::Instant;
 
-use crate::config::{AUTO_MOUSE_DURATION, AUTO_MOUSE_THRESHOLD};
+use crate::config::{DEFAULT_AUTO_MOUSE_DURATION, DEFAULT_AUTO_MOUSE_THRESHOLD};
 
 pub struct Aml {
     start: Option<Instant>,
@@ -21,7 +21,7 @@ impl Aml {
         if let Some(start) = self.start {
             if mouse_event != (0, 0) || continue_aml {
                 self.start = Some(now);
-            } else if now.duration_since(start) > AUTO_MOUSE_DURATION {
+            } else if now.duration_since(start) > DEFAULT_AUTO_MOUSE_DURATION {
                 self.start = None;
                 self.move_acc = 0;
             }
@@ -32,7 +32,7 @@ impl Aml {
                 self.move_acc += mouse_event.0.unsigned_abs() + mouse_event.1.unsigned_abs();
             }
 
-            if self.move_acc > AUTO_MOUSE_THRESHOLD {
+            if self.move_acc > DEFAULT_AUTO_MOUSE_THRESHOLD {
                 self.start = Some(now);
                 self.move_acc = 0;
             }

@@ -2,7 +2,7 @@ use embassy_futures::join::join3;
 use embassy_time::Timer;
 
 use crate::{
-    config::{MIN_KB_SCAN_INTERVAL, MIN_MOUSE_SCAN_INTERVAL},
+    config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTEVAL_MOUSE},
     interface::{
         keyscan::KeyscanDriver,
         mouse::MouseDriver,
@@ -38,8 +38,8 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
                     }
 
                     let took = start.elapsed();
-                    if took < MIN_MOUSE_SCAN_INTERVAL {
-                        Timer::after(MIN_MOUSE_SCAN_INTERVAL - took).await;
+                    if took < SCAN_INTEVAL_MOUSE {
+                        Timer::after(SCAN_INTEVAL_MOUSE - took).await;
                     }
                 }
             }
@@ -61,8 +61,8 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
                 }
 
                 let took = start.elapsed();
-                if took < MIN_KB_SCAN_INTERVAL {
-                    Timer::after(MIN_KB_SCAN_INTERVAL - took).await;
+                if took < SCAN_INTERVAL_KEYBOARD {
+                    Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
                 }
             }
         },

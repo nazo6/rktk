@@ -7,7 +7,7 @@
 //! ```
 //! This is too complex for normal usage, so these normal keys as provided as constants.
 
-use crate::constant::{COLS, ROWS};
+use crate::config::{COLS, ROWS};
 
 pub mod key;
 pub mod layer;

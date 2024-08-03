@@ -3,8 +3,7 @@
 use embassy_futures::join::join;
 
 use crate::{
-    config::DOUBLE_TAP_THRESHOLD,
-    constant::LAYER_COUNT,
+    config::{DOUBLE_TAP_THRESHOLD, LAYER_COUNT},
     interface::{
         backlight::BacklightDriver, display::DisplayDriver, double_tap::DoubleTapResetDriver,
         keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, usb::UsbDriver,
