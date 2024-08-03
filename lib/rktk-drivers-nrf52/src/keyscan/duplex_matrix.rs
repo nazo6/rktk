@@ -10,6 +10,7 @@ struct FlexWrap<'a> {
 
 impl<'a> FlexPin for FlexWrap<'a> {
     fn set_as_input(&mut self) {
+        #[allow(clippy::needless_match)]
         let pull = match self.pull {
             Pull::Up => Pull::Up,
             Pull::Down => Pull::Down,

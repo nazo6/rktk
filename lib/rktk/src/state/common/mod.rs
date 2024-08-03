@@ -1,4 +1,4 @@
-use core::array::from_fn;
+// use core::array::from_fn;
 
 use embassy_time::Instant;
 
@@ -7,14 +7,14 @@ use crate::{
     keycode::{KeyAction, KeyDef, Layer},
 };
 
-use self::key::KeyState;
+// use self::key::KeyState;
 
-mod key;
+// mod key;
 
 pub(super) struct CommonState {
     pub layers: [Layer; LAYER_COUNT],
     pub layer_active: [bool; LAYER_COUNT],
-    pub key_state: [[KeyState; COLS * 2]; ROWS],
+    // pub key_state: [[KeyState; COLS * 2]; ROWS],
 }
 
 impl CommonState {
@@ -22,7 +22,7 @@ impl CommonState {
         Self {
             layers,
             layer_active: [false; LAYER_COUNT],
-            key_state: from_fn(|_| from_fn(|_| KeyState::default())),
+            // key_state: from_fn(|_| from_fn(|_| KeyState::default())),
         }
     }
 

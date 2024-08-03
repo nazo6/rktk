@@ -1,14 +1,16 @@
 #![allow(dead_code)]
 
+mod error;
 mod registers;
 mod srom_liftoff;
 mod srom_tracking;
 
 use embassy_time::Timer;
-use embedded_hal::{digital::OutputPin, spi::ErrorType};
+use embedded_hal::digital::OutputPin;
 use embedded_hal_async::spi::SpiBus;
+use error::Pmw3360Error;
 use registers as reg;
-use rktk::interface::{mouse::MouseDriver, DriverBuilder};
+use rktk::interface::mouse::MouseDriver;
 
 #[derive(Default)]
 pub struct BurstData {
@@ -21,12 +23,6 @@ pub struct BurstData {
     pub max_raw_data: u8,
     pub min_raw_data: u8,
     pub shutter: u16,
-}
-
-#[derive(Debug)]
-pub enum Pmw3360Error<SE: ErrorType> {
-    InvalidSignature,
-    Spi(SE::Error),
 }
 
 pub struct Pmw3360<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
@@ -48,7 +44,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         }
     }
 
-    pub async fn burst_read(&mut self) -> Result<BurstData, S::Error> {
+    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S, OP>> {
         // TODO: propagate errors
 
         // Write any value to Motion_burst register
@@ -59,9 +55,12 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         }
 
         // Lower NCS
-        self.cs_pin.set_low();
+        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // Send Motion_burst address
-        self.spi.transfer_in_place(&mut [reg::MOTION_BURST]).await?;
+        self.spi
+            .transfer_in_place(&mut [reg::MOTION_BURST])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
 
         // tSRAD_MOTBR
         Timer::after_micros(35).await;
@@ -77,7 +76,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         }
 
         // Raise NCS
-        self.cs_pin.set_high();
+        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
         // tBEXIT
         Timer::after_micros(1).await;
 
@@ -97,7 +96,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(data)
     }
 
-    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), S::Error> {
+    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S, OP>> {
         let val: u16;
         if cpi < 100 {
             val = 0
@@ -115,7 +114,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok((val + 1) * 100)
     }
 
-    pub async fn check_signature(&mut self) -> Result<bool, S::Error> {
+    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
         // TODO: propagate errors
 
         let srom = self.read(reg::SROM_ID).await.unwrap_or(0);
@@ -127,7 +126,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     #[allow(dead_code)]
-    pub async fn self_test(&mut self) -> Result<bool, S::Error> {
+    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
         self.write(reg::SROM_ENABLE, 0x15).await?;
         Timer::after_micros(10000).await;
 
@@ -137,21 +136,27 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(u == 0xBE && l == 0xEF)
     }
 
-    async fn write(&mut self, address: u8, data: u8) -> Result<(), S::Error> {
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S, OP>> {
         // TODO: propagate errors
 
-        self.cs_pin.set_low();
+        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
 
         // send adress of the register, with MSBit = 1 to indicate it's a write
-        self.spi.transfer_in_place(&mut [address | 0x80]).await?;
+        self.spi
+            .transfer_in_place(&mut [address | 0x80])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
         // send data
-        self.spi.transfer_in_place(&mut [data]).await?;
+        self.spi
+            .transfer_in_place(&mut [data])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
 
         // tSCLK-NCS (write)
         Timer::after_micros(35).await;
-        self.cs_pin.set_high();
+        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
 
         // tSWW/tSWR minus tSCLK-NCS (write)
         Timer::after_micros(145).await;
@@ -161,14 +166,17 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(())
     }
 
-    async fn read(&mut self, address: u8) -> Result<u8, S::Error> {
+    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S, OP>> {
         // TODO: propagate errors
-        self.cs_pin.set_low();
+        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
 
         // send adress of the register, with MSBit = 0 to indicate it's a read
-        self.spi.transfer_in_place(&mut [address & 0x7f]).await?;
+        self.spi
+            .transfer_in_place(&mut [address & 0x7f])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
 
         // tSRAD
         Timer::after_micros(160).await;
@@ -181,7 +189,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
 
         // tSCLK-NCS (read)
         Timer::after_micros(1).await;
-        self.cs_pin.set_high();
+        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
 
         //  tSRW/tSRR minus tSCLK-NCS
         Timer::after_micros(20).await;
@@ -191,15 +199,15 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(ret)
     }
 
-    async fn power_up_inner(&mut self) -> Result<bool, S::Error> {
+    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
         // TODO: propagate errors
         // sensor reset not active
         // self.reset_pin.set_high().ok();
 
         // reset the spi bus on the sensor
-        self.cs_pin.set_high();
+        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
         Timer::after_micros(50).await;
-        self.cs_pin.set_low();
+        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         Timer::after_micros(50).await;
 
         // Write to reset register
@@ -228,8 +236,8 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(is_valid_signature)
     }
 
-    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S>> {
-        let is_valid_signature = self.power_up_inner().await.map_err(Pmw3360Error::Spi)?;
+    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S, OP>> {
+        let is_valid_signature = self.power_up_inner().await?;
         if is_valid_signature {
             Ok(())
         } else {
@@ -237,7 +245,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         }
     }
 
-    async fn upload_fw(&mut self) -> Result<(), S::Error> {
+    async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S, OP>> {
         // TODO: propagate errors
         // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
         self.write(reg::CONFIG_2, 0x00).await?;
@@ -252,22 +260,26 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         self.write(reg::SROM_ENABLE, 0x18).await?;
 
         // lower NCS
-        self.cs_pin.set_low();
+        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
 
         // first byte is address
         self.spi
             .transfer_in_place(&mut [reg::SROM_LOAD_BURST | 0x80])
-            .await?;
+            .await
+            .map_err(Pmw3360Error::Spi)?;
         Timer::after_micros(15).await;
 
         // send the rest of the firmware
         for element in srom_tracking::FW.iter() {
-            self.spi.transfer_in_place(&mut [*element]).await?;
+            self.spi
+                .transfer_in_place(&mut [*element])
+                .await
+                .map_err(Pmw3360Error::Spi)?;
             Timer::after_micros(15).await;
         }
 
         Timer::after_micros(2).await;
-        self.cs_pin.set_high();
+        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
         Timer::after_micros(200).await;
         Ok(())
     }
@@ -290,7 +302,9 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> 
     }
 
     async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::interface::error::RktkError> {
-        self.set_cpi(cpi).await;
+        self.set_cpi(cpi).await.map_err(|_| {
+            rktk::interface::error::RktkError::GeneralError("Failed to set cpi to PMW3360")
+        })?;
         Ok(())
     }
 

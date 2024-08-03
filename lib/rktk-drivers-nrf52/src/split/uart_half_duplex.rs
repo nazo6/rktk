@@ -1,6 +1,6 @@
 use embassy_nrf::{
     buffered_uarte::{BufferedUarteRx, BufferedUarteTx, InterruptHandler},
-    gpio::{AnyPin, Flex, Input, Output},
+    gpio::{AnyPin, Input, Output},
     interrupt,
     ppi::AnyGroup,
     uarte::{Baudrate, Instance, Parity},
@@ -82,10 +82,10 @@ impl<
     async fn wait_recv(
         &mut self,
         buf: &mut [u8],
-        is_master: bool,
+        _is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
         {
-            let pin = Input::new(&mut self.pin, embassy_nrf::gpio::Pull::Up);
+            let _pin = Input::new(&mut self.pin, embassy_nrf::gpio::Pull::Up);
         }
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD115200;
@@ -106,7 +106,7 @@ impl<
         loop {
             rx.read_exact(&mut reader)
                 .await
-                .map_err(|e| rktk::interface::error::RktkError::GeneralError("read error"))?;
+                .map_err(|_| rktk::interface::error::RktkError::GeneralError("read error"))?;
             if reader[0] == 0 {
                 buf[i] = reader[0];
                 break;
@@ -125,7 +125,7 @@ impl<
         _is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
         {
-            let pin = Output::new(
+            let _pin = Output::new(
                 &mut self.pin,
                 embassy_nrf::gpio::Level::High,
                 embassy_nrf::gpio::OutputDrive::Standard,

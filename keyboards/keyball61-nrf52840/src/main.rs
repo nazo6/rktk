@@ -2,10 +2,7 @@
 #![no_main]
 #![feature(impl_trait_in_assoc_type)]
 
-use core::{
-    ops::{Deref, DerefMut as _},
-    panic::PanicInfo,
-};
+use core::{ops::DerefMut as _, panic::PanicInfo};
 
 use defmt_rtt as _;
 
@@ -19,12 +16,9 @@ use embassy_nrf::{
     usb::vbus_detect::SoftwareVbusDetect,
 };
 use once_cell::sync::OnceCell;
-use rktk::{
-    interface::{backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver},
-    task::Drivers,
-};
+use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
 use rktk_drivers_nrf52::{
-    backlight::{ws2812_bitbang::Ws2812Bitbang, ws2812_pwm::Ws2812Pwm},
+    backlight::ws2812_pwm::Ws2812Pwm,
     display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,

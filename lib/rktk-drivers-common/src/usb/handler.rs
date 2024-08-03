@@ -20,7 +20,7 @@ impl UsbDeviceHandler {
 
 // 参考: https://www.itf.co.jp/tech/road-to-usb-master/usb-status
 impl Handler for UsbDeviceHandler {
-    fn enabled(&mut self, enabled: bool) {
+    fn enabled(&mut self, _enabled: bool) {
         self.configured.store(false, Ordering::Relaxed);
         SUSPENDED.store(false, Ordering::Release);
     }
