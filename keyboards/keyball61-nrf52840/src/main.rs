@@ -24,6 +24,7 @@ use rktk::{
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
+    backlight::{ws2812_bitbang::Ws2812Bitbang, ws2812_pwm::Ws2812Pwm},
     display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
@@ -46,7 +47,8 @@ static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
-    let p = embassy_nrf::init(Default::default());
+    let config = embassy_nrf::config::Config::default();
+    let p = embassy_nrf::init(config);
 
     let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09).await;
 
@@ -104,6 +106,9 @@ async fn main(_spawner: Spawner) {
         p.PPI_GROUP0.degrade(),
     );
 
+    let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
+    // let backlight = Ws2812Bitbang::new(p.P0_06.degrade());
+
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
@@ -111,7 +116,7 @@ async fn main(_spawner: Spawner) {
         usb,
         display: Some(display),
         split: Some(split),
-        backlight: Option::<DummyBacklightDriver>::None,
+        backlight: Some(backlight),
     };
 
     rktk::task::start(drivers, keymap::KEYMAP).await;

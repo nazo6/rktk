@@ -58,7 +58,7 @@ pub async fn start<
                 if let Ok(bytes) = to_slice_cobs(&send_data, &mut send_buf) {
                     match split.send(bytes, is_master).await {
                         Ok(_) => {
-                            crate::print!("S{} {}", fmt_array(bytes), embassy_time::Instant::now())
+                            // crate::print!("S{} {}", fmt_array(bytes), embassy_time::Instant::now())
                         }
                         Err(e) => crate::print!("SE: {:?} {}", e, embassy_time::Instant::now()),
                     }

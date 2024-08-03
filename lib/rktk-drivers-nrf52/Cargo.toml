@@ -32,5 +32,7 @@ display-interface = { workspace = true }
 
 static_cell = { workspace = true }
 heapless = { workspace = true }
+bitvec = { version = "1.0.1", default-features = false }
+smart-leds = { workspace = true }
 
 [features]
