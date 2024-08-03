@@ -94,7 +94,6 @@ impl<
                 }
 
                 col.set_as_output();
-                col.set_low();
                 col.set_high();
                 Self::wait_for_high(self.output_awaitable, col).await;
 
@@ -123,7 +122,6 @@ impl<
 
             for (i, row) in self.rows.iter_mut().enumerate() {
                 row.set_as_output();
-                row.set_low();
                 row.set_high();
                 Self::wait_for_high(self.output_awaitable, row).await;
 
