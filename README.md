@@ -56,17 +56,17 @@ bluetooth.
 
 #### Split
 
-| Driver          | RP2040 | NRF52840 |
-| --------------- | ------ | -------- |
-| Half-duplex pio | ✅     |          |
-| Bitbang         | ❌     | ❌       |
+| Driver                         | RP2040 | NRF52840 |
+| ------------------------------ | ------ | -------- |
+| Single wire Half-duplex (PIO)  | ✅     |          |
+| Single wire Half-duplex (UART) |        | 🟡       |
 
 #### Backlight
 
-| Driver     | RP2040 | NRF52840 |
-| ---------- | ------ | -------- |
-| ws2812 pio | ✅     |          |
-| Bitbang    | ❌     | ❌       |
+| Driver       | RP2040 | NRF52840 |
+| ------------ | ------ | -------- |
+| WS2812 (PIO) | ✅     |          |
+| WS2812 (PWM) |        | 🟡       |
 
 #### USB
 
