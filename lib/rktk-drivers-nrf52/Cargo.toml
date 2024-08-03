@@ -25,6 +25,7 @@ embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy"
   "nrf52840",
   "nfc-pins-as-gpio",
 ] }
+embedded-io-async = { workspace = true }
 
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }

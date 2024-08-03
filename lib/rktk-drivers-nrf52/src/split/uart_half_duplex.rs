@@ -3,9 +3,10 @@ use embassy_nrf::{
     gpio::{AnyPin, Flex},
     interrupt,
     ppi::AnyGroup,
-    uarte::Instance,
+    uarte::{Baudrate, Instance, Parity},
     Peripheral,
 };
+use embedded_io_async::Read as _;
 use rktk::interface::split::SplitDriver;
 
 pub struct UartHalfDuplexSplitDriver<
@@ -26,8 +27,8 @@ pub struct UartHalfDuplexSplitDriver<
     ppi_ch1: CH1P,
     ppi_ch2: CH2P,
     ppi_group: AnyGroup,
-    read_buffer: [u8; 8],
-    write_buffer: [u8; 8],
+    read_buffer: [u8; 64],
+    write_buffer: [u8; 64],
 }
 
 impl<
@@ -59,8 +60,8 @@ impl<
             ppi_ch1,
             ppi_ch2,
             ppi_group,
-            read_buffer: [0; 8],
-            write_buffer: [0; 8],
+            read_buffer: [0; 64],
+            write_buffer: [0; 64],
         }
     }
 }
@@ -78,12 +79,22 @@ impl<
     > SplitDriver
     for UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
 {
-    async fn wait_recv(&mut self, buf: &mut [u8]) -> Result<(), rktk::interface::error::RktkError> {
-        // {
-        //     let mut flex = Flex::new(&mut self.pin);
-        //     flex.set_as_input(embassy_nrf::gpio::Pull::Up);
-        // }
-        let config = embassy_nrf::uarte::Config::default();
+    async fn wait_recv(
+        &mut self,
+        buf: &mut [u8],
+        is_master: bool,
+    ) -> Result<(), rktk::interface::error::RktkError> {
+        {
+            let mut flex = Flex::new(&mut self.pin);
+            flex.set_as_input(if is_master {
+                embassy_nrf::gpio::Pull::Up
+            } else {
+                embassy_nrf::gpio::Pull::None
+            });
+        }
+        let mut config = embassy_nrf::uarte::Config::default();
+        config.baudrate = Baudrate::BAUD14400;
+        config.parity = Parity::INCLUDED;
         let mut rx = BufferedUarteRx::new(
             &mut self.uarte,
             &mut self.timer,
@@ -95,22 +106,36 @@ impl<
             config,
             &mut self.read_buffer,
         );
-        rx.read(buf).await.map_err(|e| {
-            rktk::print!("{:?} {}", e, embassy_time::Instant::now());
-            rktk::interface::error::RktkError::GeneralError("read error")
-        })?;
+        let mut reader = [0u8];
+        let mut i = 0;
+        loop {
+            rx.read_exact(&mut reader)
+                .await
+                .map_err(|e| rktk::interface::error::RktkError::GeneralError("read error"))?;
+            if reader[0] == 0 {
+                buf[i] = reader[0];
+                break;
+            } else {
+                buf[i] = reader[0];
+                i += 1;
+            }
+        }
+
         Ok(())
     }
 
-    async fn send(&mut self, buf: &[u8]) -> Result<(), rktk::interface::error::RktkError> {
-        // {
-        //     let mut flex = Flex::new(&mut self.pin);
-        //     flex.set_as_input_output(
-        //         embassy_nrf::gpio::Pull::None,
-        //         embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
-        //     );
-        // }
-        let config = embassy_nrf::uarte::Config::default();
+    async fn send(
+        &mut self,
+        buf: &[u8],
+        _is_master: bool,
+    ) -> Result<(), rktk::interface::error::RktkError> {
+        {
+            let mut flex = Flex::new(&mut self.pin);
+            flex.set_as_output(embassy_nrf::gpio::OutputDrive::Standard);
+        }
+        let mut config = embassy_nrf::uarte::Config::default();
+        config.baudrate = Baudrate::BAUD14400;
+        config.parity = Parity::INCLUDED;
         let mut tx = BufferedUarteTx::new(
             &mut self.uarte,
             self.irq.clone(),
@@ -121,6 +146,9 @@ impl<
         tx.write(buf)
             .await
             .map_err(|_| rktk::interface::error::RktkError::GeneralError("write error"))?;
+        tx.flush()
+            .await
+            .map_err(|_| rktk::interface::error::RktkError::GeneralError("flush error"))?;
         Ok(())
     }
 }

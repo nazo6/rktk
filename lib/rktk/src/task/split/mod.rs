@@ -79,13 +79,13 @@ pub async fn start<
 
             if is_master {
                 join(
-                    split_handler::start(split, s2m_tx, m2s_rx),
+                    split_handler::start(split, s2m_tx, m2s_rx, is_master),
                     master::start(m2s_tx, s2m_rx, keymap, key_scanner, mouse, usb, hand),
                 )
                 .await;
             } else {
                 join(
-                    split_handler::start(split, m2s_tx, s2m_rx),
+                    split_handler::start(split, m2s_tx, s2m_rx, is_master),
                     slave::start(s2m_tx, m2s_rx, key_scanner, mouse),
                 )
                 .await;

@@ -1464,6 +1464,7 @@ dependencies = [
  "embassy-sync",
  "embassy-time",
  "embassy-usb",
+ "embedded-io-async",
  "heapless 0.8.0",
  "rktk",
  "rktk-drivers-common",
