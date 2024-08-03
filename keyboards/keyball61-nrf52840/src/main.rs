@@ -20,10 +20,7 @@ use embassy_nrf::{
 };
 use once_cell::sync::OnceCell;
 use rktk::{
-    interface::{
-        backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver,
-        split::DummySplitDriver,
-    },
+    interface::{backlight::DummyBacklightDriver, double_tap::DummyDoubleTapResetDriver},
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
@@ -113,7 +110,7 @@ async fn main(_spawner: Spawner) {
         mouse: Some(ball),
         usb,
         display: Some(display),
-        split: Some(DummySplitDriver),
+        split: Some(split),
         backlight: Option::<DummyBacklightDriver>::None,
     };
 

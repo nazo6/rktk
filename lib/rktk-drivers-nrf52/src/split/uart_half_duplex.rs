@@ -1,6 +1,6 @@
 use embassy_nrf::{
     buffered_uarte::{BufferedUarteRx, BufferedUarteTx, InterruptHandler},
-    gpio::{AnyPin, Flex},
+    gpio::{AnyPin, Flex, Input, Output},
     interrupt,
     ppi::AnyGroup,
     uarte::{Baudrate, Instance, Parity},
@@ -85,15 +85,10 @@ impl<
         is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
         {
-            let mut flex = Flex::new(&mut self.pin);
-            flex.set_as_input(if is_master {
-                embassy_nrf::gpio::Pull::Up
-            } else {
-                embassy_nrf::gpio::Pull::None
-            });
+            let pin = Input::new(&mut self.pin, embassy_nrf::gpio::Pull::Up);
         }
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD14400;
+        config.baudrate = Baudrate::BAUD115200;
         config.parity = Parity::INCLUDED;
         let mut rx = BufferedUarteRx::new(
             &mut self.uarte,
@@ -130,11 +125,14 @@ impl<
         _is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
         {
-            let mut flex = Flex::new(&mut self.pin);
-            flex.set_as_output(embassy_nrf::gpio::OutputDrive::Standard);
+            let pin = Output::new(
+                &mut self.pin,
+                embassy_nrf::gpio::Level::High,
+                embassy_nrf::gpio::OutputDrive::Standard,
+            );
         }
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD14400;
+        config.baudrate = Baudrate::BAUD115200;
         config.parity = Parity::INCLUDED;
         let mut tx = BufferedUarteTx::new(
             &mut self.uarte,
