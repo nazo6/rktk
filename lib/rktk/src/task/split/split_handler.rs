@@ -3,7 +3,7 @@ use embassy_sync::{
     blocking_mutex::raw::CriticalSectionRawMutex,
     channel::{Receiver, Sender},
 };
-use postcard::{from_bytes, from_bytes_cobs, to_slice, to_slice_cobs};
+use postcard::{from_bytes_cobs, to_slice_cobs};
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::config::SPLIT_CHANNEL_SIZE;
@@ -40,11 +40,6 @@ pub async fn start<
                 if let Err(e) = res {
                     crate::print!("RER: {:?} {}", e, embassy_time::Instant::now());
                 } else if let Ok(data) = from_bytes_cobs(&mut recv_buf) {
-                    // crate::print!(
-                    //     "R:{} {}",
-                    //     fmt_array(&recv_buf),
-                    //     embassy_time::Instant::now()
-                    // );
                     let _ = received_sender.send(data).await;
                 } else {
                     crate::print!(
@@ -56,11 +51,8 @@ pub async fn start<
             }
             Either::Second(send_data) => {
                 if let Ok(bytes) = to_slice_cobs(&send_data, &mut send_buf) {
-                    match split.send(bytes, is_master).await {
-                        Ok(_) => {
-                            // crate::print!("S{} {}", fmt_array(bytes), embassy_time::Instant::now())
-                        }
-                        Err(e) => crate::print!("SE: {:?} {}", e, embassy_time::Instant::now()),
+                    if let Err(e) = split.send(bytes, is_master).await {
+                        crate::print!("SE: {:?} {}", e, embassy_time::Instant::now())
                     }
                 }
             }

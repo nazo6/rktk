@@ -67,7 +67,7 @@ impl<
         if output_awaitable {
             pin.wait_for_low().await;
         } else {
-            embassy_time::Timer::after_ticks(10).await;
+            embassy_time::Timer::after_ticks(20).await;
         }
     }
 
@@ -75,7 +75,7 @@ impl<
         if output_awaitable {
             pin.wait_for_high().await;
         } else {
-            embassy_time::Timer::after_ticks(10).await;
+            embassy_time::Timer::after_ticks(20).await;
         }
     }
 
@@ -83,8 +83,8 @@ impl<
         // col -> row scan
         {
             for row in self.rows.iter_mut() {
-                row.set_as_input();
                 row.set_pull(Pull::Down);
+                row.set_as_input();
             }
 
             for (j, col) in self.cols.iter_mut().enumerate() {
@@ -93,8 +93,8 @@ impl<
                     continue;
                 }
 
-                col.set_as_output();
                 col.set_high();
+                col.set_as_output();
                 Self::wait_for_high(self.output_awaitable, col).await;
 
                 for (i, row) in self.rows.iter_mut().enumerate() {
@@ -121,8 +121,8 @@ impl<
             }
 
             for (i, row) in self.rows.iter_mut().enumerate() {
-                row.set_as_output();
                 row.set_high();
+                row.set_as_output();
                 Self::wait_for_high(self.output_awaitable, row).await;
 
                 for (j, col) in self.cols.iter_mut().enumerate() {
@@ -166,6 +166,7 @@ impl<
             events.push(e).ok();
         })
         .await;
+        // rktk::print!("{:?}                    ", self.pressed);
         events
     }
 
