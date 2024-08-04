@@ -40,6 +40,7 @@ pub async fn start<
                 if let Err(e) = res {
                     crate::print!("RER: {:?} {}", e, embassy_time::Instant::now());
                 } else if let Ok(data) = from_bytes_cobs(&mut recv_buf) {
+                    crate::print!("R: {:?} {}", data, embassy_time::Instant::now());
                     let _ = received_sender.send(data).await;
                 } else {
                     crate::print!(

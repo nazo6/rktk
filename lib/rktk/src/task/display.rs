@@ -22,6 +22,20 @@ pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<
     3,
 > = Channel::new();
 
+async fn print_message<D: DisplayDriver>(display: &mut D, msg: &str) {
+    display.draw_text("                        ", D::calculate_point(1, 3));
+    display.draw_text("                        ", D::calculate_point(2, 3));
+
+    if let Some((l1, l2)) = msg.split_at_checked(20) {
+        display.draw_text(l1, D::calculate_point(1, 2));
+        display.draw_text(l2, D::calculate_point(1, 3));
+    } else {
+        display.draw_text(msg, D::calculate_point(1, 2));
+    }
+
+    let _ = display.flush_async().await;
+}
+
 pub(super) async fn start<D: DisplayDriver>(mut display: D) {
     let _ = display.init().await;
     loop {
@@ -36,7 +50,7 @@ pub(super) async fn start<D: DisplayDriver>(mut display: D) {
                     display.clear().await.unwrap();
                 }
                 DisplayMessage::Message(msg) => {
-                    let _ = display.update_text(msg, D::calculate_point(1, 3)).await;
+                    let _ = print_message(&mut display, msg).await;
                 }
                 DisplayMessage::Master(master) => {
                     let _ = display
@@ -79,7 +93,7 @@ pub(super) async fn start<D: DisplayDriver>(mut display: D) {
                 }
             },
             Either::Second(str) => {
-                let _ = display.update_text(&str, D::calculate_point(1, 3)).await;
+                let _ = print_message(&mut display, &str).await;
             }
         }
     }

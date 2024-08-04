@@ -37,6 +37,10 @@ pub trait DisplayDriver: DerefMut<Target = Self::DerefTarget> {
         self.flush_async().await
     }
 
+    fn draw_text(&mut self, text: &str, point: Point) {
+        let _ = Text::with_baseline(text, point, TEXT_STYLE, Baseline::Top).draw(self.deref_mut());
+    }
+
     async fn update_text(&mut self, text: &str, point: Point) -> Result<(), DisplayError> {
         let _ = Text::with_baseline(text, point, TEXT_STYLE, Baseline::Top).draw(self.deref_mut());
         self.flush_async().await
