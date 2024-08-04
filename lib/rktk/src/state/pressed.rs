@@ -1,12 +1,9 @@
 use embassy_time::{Duration, Instant};
 
-use crate::{
-    config::{COLS, ROWS},
-    interface::keyscan::KeyChangeEventOneHand,
-};
+use crate::{config::static_config::CONFIG, interface::keyscan::KeyChangeEventOneHand};
 
 pub struct AllPressed {
-    state: [[Option<Instant>; COLS * 2]; ROWS],
+    state: [[Option<Instant>; CONFIG.cols * 2]; CONFIG.rows],
 }
 
 pub struct KeyStatusUpdateEvent {
@@ -27,7 +24,7 @@ pub enum KeyStatusChangeType {
 impl AllPressed {
     pub fn new() -> Self {
         Self {
-            state: [[None; COLS * 2]; ROWS],
+            state: [[None; CONFIG.cols * 2]; CONFIG.rows],
         }
     }
     pub fn compose_events_and_update_pressed<'a>(
@@ -37,7 +34,7 @@ impl AllPressed {
     ) -> heapless::Vec<KeyStatusUpdateEvent, 32> {
         let mut composed = heapless::Vec::new();
         for event in events {
-            if event.row as usize >= ROWS || event.col as usize >= (COLS * 2) {
+            if event.row as usize >= CONFIG.rows || event.col as usize >= (CONFIG.cols * 2) {
                 continue;
             }
             let key_state = &mut self.state[event.row as usize][event.col as usize];
@@ -99,8 +96,8 @@ pub struct PressedIter<'a> {
 impl<'a> Iterator for PressedIter<'a> {
     type Item = (u8, u8, &'a Instant);
     fn next(&mut self) -> Option<Self::Item> {
-        for i in self.idx_row..ROWS {
-            for j in self.idx_col..(COLS * 2) {
+        for i in self.idx_row..(CONFIG.rows) {
+            for j in self.idx_col..(CONFIG.cols * 2) {
                 let key_state = &self.pressed.state[i][j];
                 if let Some(press_start) = key_state {
                     self.idx_row = i;

@@ -3,7 +3,7 @@
 use embassy_time::Instant;
 
 use crate::{
-    config::{COLS, LAYER_COUNT, ROWS},
+    config::static_config::CONFIG,
     keycode::{KeyAction, KeyDef, Layer},
 };
 
@@ -12,16 +12,16 @@ use crate::{
 // mod key;
 
 pub(super) struct CommonState {
-    pub layers: [Layer; LAYER_COUNT],
-    pub layer_active: [bool; LAYER_COUNT],
-    // pub key_state: [[KeyState; COLS * 2]; ROWS],
+    pub layers: [Layer; CONFIG.layer_count],
+    pub layer_active: [bool; CONFIG.layer_count],
+    // pub key_state: [[KeyState; CONFIG.cols * 2]; ROWS],
 }
 
 impl CommonState {
-    pub fn new(layers: [Layer; LAYER_COUNT]) -> Self {
+    pub fn new(layers: [Layer; CONFIG.layer_count]) -> Self {
         Self {
             layers,
-            layer_active: [false; LAYER_COUNT],
+            layer_active: [false; CONFIG.layer_count],
             // key_state: from_fn(|_| from_fn(|_| KeyState::default())),
         }
     }
@@ -31,7 +31,7 @@ impl CommonState {
     }
 
     pub fn get_keycode(&self, row: u8, col: u8, layer: usize) -> Option<KeyAction> {
-        if row >= ROWS as u8 || col >= (COLS * 2) as u8 {
+        if row >= (CONFIG.rows) as u8 || col >= (CONFIG.cols * 2) as u8 {
             return None;
         }
 

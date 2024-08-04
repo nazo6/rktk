@@ -1,8 +1,11 @@
 #![allow(clippy::collapsible_if)]
 
-use embassy_time::Instant;
+use embassy_time::{Duration, Instant};
 
-use crate::config::{DEFAULT_AUTO_MOUSE_DURATION, DEFAULT_AUTO_MOUSE_THRESHOLD};
+use crate::config::static_config::CONFIG;
+
+const DEFAULT_AUTO_MOUSE_DURATION: Duration =
+    Duration::from_millis(CONFIG.default_auto_mouse_duration);
 
 pub struct Aml {
     start: Option<Instant>,
@@ -32,7 +35,7 @@ impl Aml {
                 self.move_acc += mouse_event.0.unsigned_abs() + mouse_event.1.unsigned_abs();
             }
 
-            if self.move_acc > DEFAULT_AUTO_MOUSE_THRESHOLD {
+            if self.move_acc > CONFIG.default_auto_mouse_threshold {
                 self.start = Some(now);
                 self.move_acc = 0;
             }

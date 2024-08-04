@@ -9,7 +9,7 @@ use embassy_sync::{
 use embassy_time::Timer;
 
 use crate::{
-    config::{LAYER_COUNT, LEFT_LED_COUNT, RIGHT_LED_COUNT, SPLIT_CHANNEL_SIZE, SPLIT_USB_TIMEOUT},
+    config::static_config::CONFIG,
     interface::{
         backlight::BacklightDriver,
         keyscan::{Hand, KeyscanDriver},
@@ -24,13 +24,15 @@ mod master;
 mod slave;
 mod split_handler;
 
-type S2mChannel = Channel<CriticalSectionRawMutex, SlaveToMaster, SPLIT_CHANNEL_SIZE>;
-type S2mRx<'a> = Receiver<'a, CriticalSectionRawMutex, SlaveToMaster, SPLIT_CHANNEL_SIZE>;
-type S2mTx<'a> = Sender<'a, CriticalSectionRawMutex, SlaveToMaster, SPLIT_CHANNEL_SIZE>;
+type S2mChannel = Channel<CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
+type S2mRx<'a> =
+    Receiver<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
+type S2mTx<'a> = Sender<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
 
-type M2sChannel = Channel<CriticalSectionRawMutex, MasterToSlave, SPLIT_CHANNEL_SIZE>;
-type M2sRx<'a> = Receiver<'a, CriticalSectionRawMutex, MasterToSlave, SPLIT_CHANNEL_SIZE>;
-type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, SPLIT_CHANNEL_SIZE>;
+type M2sChannel = Channel<CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
+type M2sRx<'a> =
+    Receiver<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
+type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 
 pub async fn start<
     KS: KeyscanDriver,
@@ -39,7 +41,7 @@ pub async fn start<
     SP: SplitDriver,
     BL: BacklightDriver,
 >(
-    keymap: [Layer; LAYER_COUNT],
+    keymap: [Layer; CONFIG.layer_count],
     mut key_scanner: KS,
     mouse: Option<M>,
     mut split: SP,
@@ -53,15 +55,24 @@ pub async fn start<
         async move {
             if let Some(backlight) = backlight {
                 match hand {
-                    Hand::Right => super::backlight::start::<RIGHT_LED_COUNT>(backlight).await,
-                    Hand::Left => super::backlight::start::<LEFT_LED_COUNT>(backlight).await,
+                    Hand::Right => {
+                        super::backlight::start::<{ CONFIG.right_led_count }>(backlight).await
+                    }
+                    Hand::Left => {
+                        super::backlight::start::<{ CONFIG.left_led_count }>(backlight).await
+                    }
                 }
             }
         },
         async move {
             let _ = split.init().await;
 
-            let is_master = match select(usb.wait_ready(), Timer::after(SPLIT_USB_TIMEOUT)).await {
+            let is_master = match select(
+                usb.wait_ready(),
+                Timer::after_millis(CONFIG.split_usb_timeout),
+            )
+            .await
+            {
                 Either::First(_) => true,
                 Either::Second(_) => false,
             };

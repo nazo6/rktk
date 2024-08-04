@@ -7,7 +7,7 @@
 //! ```
 //! This is too complex for normal usage, so these normal keys as provided as constants.
 
-use crate::config::{COLS, ROWS};
+use crate::config::static_config::CONFIG;
 
 pub mod key;
 pub mod layer;
@@ -54,8 +54,8 @@ pub const _____: KeyDef = KeyDef::Inherit;
 pub const XXXXX: KeyDef = KeyDef::None;
 
 pub struct Layer {
-    pub map: [[KeyDef; COLS * 2]; ROWS],
+    pub map: [[KeyDef; CONFIG.cols * 2]; CONFIG.rows],
     pub arrowball: bool,
 }
 
-pub type LayerMap = [[KeyDef; COLS * 2]; ROWS];
+pub type LayerMap = [[KeyDef; CONFIG.cols * 2]; CONFIG.rows];

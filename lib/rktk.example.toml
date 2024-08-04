@@ -1,0 +1,4 @@
+"$schema" = "../../lib/rktk/schema.json"
+
+cols = 3
+rows = 3
