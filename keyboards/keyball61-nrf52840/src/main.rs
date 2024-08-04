@@ -17,12 +17,7 @@ use embassy_nrf::{
     usb::vbus_detect::SoftwareVbusDetect,
 };
 use once_cell::sync::OnceCell;
-use rktk::{
-    interface::{
-        ble::DummyBleDriver, double_tap::DummyDoubleTapResetDriver, split::DummySplitDriver,
-    },
-    task::Drivers,
-};
+use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm,
     ble::NrfBleDriver,
@@ -41,14 +36,30 @@ bind_interrupts!(pub struct Irqs {
     USBD => embassy_nrf::usb::InterruptHandler<USBD>;
     SPIM2_SPIS2_SPI2 => embassy_nrf::spim::InterruptHandler<SPI2>;
     SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0 => embassy_nrf::twim::InterruptHandler<embassy_nrf::peripherals::TWISPI0>;
-    // UARTE0 is used by softdevice and using it causes panic.
-    UARTE1 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE1>;
+    UARTE0_UART0 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE0>;
 });
 
 static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
+    // - About limitation of softdevice
+    // By enabling softdevice, some interrupt priority level (P0,P1,P4)
+    // and peripherals are reserved by softdevice, and using them causes panic.
+    //
+    // Example reserved peripherals are:
+    // - TIMER0
+    // - CLOCK
+    // - RTC0
+    // ... and more
+    //
+    // ref:
+    // List of reserved peripherals: https://docs.nordicsemi.com/bundle/sds_s140/page/SDS/s1xx/sd_resource_reqs/hw_block_interrupt_vector.html
+    // Peripheral register addresses: https://docs.nordicsemi.com/bundle/ps_nrf52840/page/memory.html
+    //
+    // When panic occurs by peripheral conflict, PC address that caused panic is logged.
+    // By investigating the address using decompiler tools like ghidra, you can find the peripheral that caused the panic.
+
     let mut config = embassy_nrf::config::Config::default();
     config.gpiote_interrupt_priority = Priority::P2;
     config.time_interrupt_priority = Priority::P2;
@@ -107,9 +118,9 @@ async fn main(_spawner: Spawner) {
 
     let split = UartHalfDuplexSplitDriver::new(
         p.P0_08.degrade(),
-        p.UARTE1,
+        p.UARTE0,
         Irqs,
-        p.TIMER0,
+        p.TIMER1,
         p.PPI_CH0,
         p.PPI_CH1,
         p.PPI_GROUP0.degrade(),
@@ -125,7 +136,7 @@ async fn main(_spawner: Spawner) {
         mouse: Some(ball),
         usb,
         display: Some(display),
-        split: Option::<DummySplitDriver>::None,
+        split: Some(split),
         backlight: Some(backlight),
         ble: Some(ble),
     };
