@@ -1,25 +1,20 @@
-use embassy_futures::{
-    join::join,
-    select::{select, Either},
-};
-use embassy_sync::{
-    blocking_mutex::raw::CriticalSectionRawMutex,
-    channel::{Channel, Receiver, Sender},
-};
-use embassy_time::Timer;
-
 use crate::{
     config::static_config::CONFIG,
     interface::{
         backlight::BacklightDriver,
-        ble::BleDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
-        usb::UsbDriver,
     },
     keycode::Layer,
 };
+use embassy_futures::join::join;
+use embassy_sync::{
+    blocking_mutex::raw::CriticalSectionRawMutex,
+    channel::{Channel, Receiver, Sender},
+};
+
+use super::report::ReportSender;
 
 mod master;
 mod slave;
@@ -35,21 +30,14 @@ type M2sRx<'a> =
     Receiver<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 
-pub async fn start<
-    KS: KeyscanDriver,
-    M: MouseDriver,
-    USB: UsbDriver,
-    SP: SplitDriver,
-    BL: BacklightDriver,
-    BT: BleDriver,
->(
-    keymap: [Layer; CONFIG.layer_count],
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, SP: SplitDriver, BL: BacklightDriver>(
+    report_sender: ReportSender<'_>,
     mut key_scanner: KS,
     mouse: Option<M>,
     mut split: SP,
-    mut usb: USB,
     backlight: Option<BL>,
-    mut ble: Option<BT>,
+    keymap: [Layer; CONFIG.layer_count],
+    host_connected: bool,
 ) {
     let hand = key_scanner.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
@@ -70,20 +58,7 @@ pub async fn start<
         async move {
             let _ = split.init().await;
 
-            let is_master = if let Some(ble) = &mut ble {
-                let _ = ble.wait_ready().await;
-                true
-            } else {
-                match select(
-                    usb.wait_ready(),
-                    Timer::after_millis(CONFIG.split_usb_timeout),
-                )
-                .await
-                {
-                    Either::First(_) => true,
-                    Either::Second(_) => false,
-                }
-            };
+            let is_master = host_connected;
 
             crate::utils::display_state!(Master, Some(is_master));
 
@@ -98,7 +73,15 @@ pub async fn start<
             if is_master {
                 join(
                     split_handler::start(split, s2m_tx, m2s_rx, is_master),
-                    master::start(m2s_tx, s2m_rx, keymap, key_scanner, mouse, usb, hand),
+                    master::start(
+                        m2s_tx,
+                        s2m_rx,
+                        report_sender,
+                        key_scanner,
+                        mouse,
+                        keymap,
+                        hand,
+                    ),
                 )
                 .await;
             } else {

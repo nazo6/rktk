@@ -4,20 +4,19 @@ use embassy_time::Timer;
 use crate::{
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
     interface::{
-        backlight::BacklightDriver,
-        keyscan::KeyscanDriver,
-        mouse::MouseDriver,
-        usb::{HidReport, UsbDriver},
+        backlight::BacklightDriver, keyscan::KeyscanDriver, mouse::MouseDriver, usb::HidReport,
     },
     keycode::Layer,
     state::State,
 };
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver, BL: BacklightDriver>(
+use super::report::ReportSender;
+
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, BL: BacklightDriver>(
+    report_sender: ReportSender<'_>,
     keymap: [Layer; CONFIG.layer_count],
     mut key_scanner: KS,
     mut mouse: Option<M>,
-    mut usb: USB,
     backlight: Option<BL>,
 ) {
     join(
@@ -56,14 +55,14 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver, BL: Backli
                 crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
                 if let Some(report) = state_report.keyboard_report {
-                    let _ = usb.send_report(HidReport::Keyboard(report)).await;
+                    let _ = report_sender.try_send(HidReport::Keyboard(report));
                 }
                 if let Some(report) = state_report.mouse_report {
                     crate::utils::display_state!(MouseMove, (report.x, report.y));
-                    let _ = usb.send_report(HidReport::Mouse(report)).await;
+                    let _ = report_sender.try_send(HidReport::Mouse(report));
                 }
                 if let Some(report) = state_report.media_keyboard_report {
-                    let _ = usb.send_report(HidReport::MediaKeyboard(report)).await;
+                    let _ = report_sender.try_send(HidReport::MediaKeyboard(report));
                 }
 
                 let took = start.elapsed();

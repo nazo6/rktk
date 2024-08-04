@@ -17,7 +17,10 @@ use embassy_nrf::{
     usb::vbus_detect::SoftwareVbusDetect,
 };
 use once_cell::sync::OnceCell;
-use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
+use rktk::{
+    interface::{double_tap::DummyDoubleTapResetDriver, usb::DummyUsbDriver},
+    task::Drivers,
+};
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm,
     ble::NrfBleDriver,
@@ -134,7 +137,7 @@ async fn main(_spawner: Spawner) {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse: Some(ball),
-        usb,
+        usb: Option::<DummyUsbDriver>::None,
         display: Some(display),
         split: Some(split),
         backlight: Some(backlight),
@@ -164,20 +167,19 @@ fn panic(info: &PanicInfo) -> ! {
 
     let mut str = heapless::String::<256>::new();
 
-    write!(str, "{}", info.message()).unwrap();
+    write!(str, "P!{}\n", info.message()).unwrap();
 
-    // if let Some(location) = info.location() {
-    //     let file = location.file();
-    //     if file.len() > 20 {
-    //         write!(str, "{}", &file[file.len() - 20..]).unwrap();
-    //     } else {
-    //         write!(str, "{}", file).unwrap();
-    //     }
-    //     write!(str, "\n{}", location.line()).unwrap()
-    // }
-    let _ = display.update_text_sync(
-        &str[110..],
-        embedded_graphics::prelude::Point { x: 0, y: 0 },
-    );
-    loop {}
+    if let Some(location) = info.location() {
+        let file = location.file();
+        if file.len() > 20 {
+            write!(str, "{}", &file[file.len() - 20..]).unwrap();
+        } else {
+            write!(str, "{}", file).unwrap();
+        }
+        write!(str, "\n{}", location.line()).unwrap()
+    }
+
+    let _ = display.update_text_sync(&str, embedded_graphics::prelude::Point { x: 0, y: 0 });
+
+    cortex_m::asm::udf()
 }

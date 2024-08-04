@@ -13,9 +13,9 @@ use super::services::{
 };
 
 pub struct Server {
-    _dis: DeviceInformationService,
-    bas: BatteryService,
-    hid: HidService,
+    pub _dis: DeviceInformationService,
+    pub bas: BatteryService,
+    pub hid: HidService,
 }
 
 impl Server {

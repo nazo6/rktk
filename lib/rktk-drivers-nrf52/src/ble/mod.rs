@@ -1,5 +1,7 @@
 use core::mem;
 
+use embassy_futures::{join::join, select::select};
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use nrf_softdevice::{
     ble::{
         advertisement_builder::{
@@ -9,15 +11,18 @@ use nrf_softdevice::{
         gatt_server, peripheral,
         security::SecurityHandler,
     },
-    raw, Softdevice,
+    raw::{self},
+    Softdevice,
 };
 
-use rktk::interface::ble::BleDriver;
+use rktk::interface::{ble::BleDriver, usb::HidReport};
 use server::Server;
 
 mod constant;
 mod server;
 mod services;
+
+static REPORT_CHAN: Channel<CriticalSectionRawMutex, HidReport, 8> = Channel::new();
 
 pub struct NrfBleDriver {}
 
@@ -59,7 +64,7 @@ impl NrfBleDriver {
             ..Default::default()
         };
 
-        let sd = Softdevice::enable(&config);
+        let sd: &'static mut Softdevice = Softdevice::enable(&config);
 
         let server = server::Server::new(sd, "12345678").unwrap();
         spawner.spawn(softdevice_task(sd)).unwrap();
@@ -76,6 +81,8 @@ impl BleDriver for NrfBleDriver {
         &mut self,
         report: rktk::interface::usb::HidReport,
     ) -> Result<(), rktk::interface::error::RktkError> {
+        let _ = REPORT_CHAN.send(report).await;
+
         Ok(())
     }
 }
@@ -122,11 +129,61 @@ async fn server_task(sd: &'static Softdevice, server: Server) -> ! {
         scan_data: &SCAN_DATA,
     };
 
-    let conn = peripheral::advertise_pairable(sd, adv, &config, &SEC)
-        .await
-        .unwrap();
-
     loop {
-        let e = gatt_server::run(&conn, &server, |_| {}).await;
+        let mut cnt = 0;
+        let conn = loop {
+            match peripheral::advertise_pairable(sd, adv, &config, &SEC).await {
+                Ok(conn) => break conn,
+                Err(peripheral::AdvertiseError::Timeout) => {
+                    rktk::print!("Timeout");
+                    cnt += 1;
+                    if cnt > 10 {
+                        panic!("Failed to pair (10 tries)");
+                    }
+                }
+                Err(e) => {
+                    rktk::print!("Pair error: {:?}", e);
+                    continue;
+                }
+            }
+        };
+
+        // rktk::print!("Paired: {:X?}", conn.peer_address().bytes);
+
+        select(
+            async {
+                let _e = gatt_server::run(&conn, &server, |_| {}).await;
+            },
+            async {
+                loop {
+                    rktk::print!("dbg2");
+                    match REPORT_CHAN.receive().await {
+                        HidReport::Keyboard(r) => {
+                            rktk::print!("dbg3");
+                            let report = [
+                                r.modifier,
+                                0,
+                                r.keycodes[0],
+                                r.keycodes[1],
+                                r.keycodes[2],
+                                r.keycodes[3],
+                                r.keycodes[4],
+                                r.keycodes[5],
+                            ];
+                            server.hid.send_report(&conn, &report);
+                        }
+                        HidReport::MediaKeyboard(_) => {
+                            rktk::print!("dbg4");
+                        }
+                        HidReport::Mouse(_) => {
+                            rktk::print!("dbg5");
+                        }
+                    }
+                }
+            },
+        )
+        .await;
+
+        rktk::print!("Disconnected");
     }
 }

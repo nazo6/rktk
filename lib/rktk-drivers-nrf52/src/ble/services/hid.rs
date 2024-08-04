@@ -206,4 +206,10 @@ impl HidService {
             info!("HID input media keys: {:?}", data);
         }
     }
+
+    pub fn send_report(&self, conn: &Connection, report: &[u8]) {
+        rktk::print!("SR: {:?}", report);
+
+        gatt_server::notify_value(conn, self.input_keyboard, report);
+    }
 }
