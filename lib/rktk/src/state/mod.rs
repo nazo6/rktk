@@ -2,10 +2,11 @@
 
 #![allow(clippy::single_match)]
 
+use embassy_time::Duration;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{
-    config::{COLS, DEFAULT_TAP_THRESHOLD, LAYER_COUNT},
+    config::static_config::CONFIG,
     interface::keyscan::{Hand, KeyChangeEventOneHand},
     keycode::{KeyAction, KeyCode, Layer},
     state::{common::CommonLocalState, manager::interface::LocalStateManager as _},
@@ -59,7 +60,7 @@ macro_rules! loop_end {
 }
 
 impl State {
-    pub fn new(layers: [Layer; LAYER_COUNT], master_hand: Option<Hand>) -> Self {
+    pub fn new(layers: [Layer; CONFIG.layer_count], master_hand: Option<Hand>) -> Self {
         Self {
             split_master_hand: master_hand,
             common_state: CommonState::new(layers),
@@ -98,7 +99,7 @@ impl State {
                 (master_events, slave_events)
             };
             right_events.iter_mut().for_each(|event| {
-                event.col = ((COLS - 1) as u8 - event.col) + COLS as u8;
+                event.col = ((CONFIG.cols - 1) as u8 - event.col) + CONFIG.cols as u8;
             });
             let both_events = right_events.iter().chain(left_events.iter());
 
@@ -141,6 +142,8 @@ impl State {
     }
 
     fn resolve_key(&mut self, event: &KeyStatusUpdateEvent, layer: usize) -> Option<KeyCode> {
+        const DEFAULT_TAP_THRESHOLD: Duration = Duration::from_millis(CONFIG.default_tap_threshold);
+
         let key_action = self.common_state.get_keycode(event.row, event.col, layer)?;
 
         match event.change_type {

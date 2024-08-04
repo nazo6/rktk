@@ -2,7 +2,7 @@ use embassy_futures::join::join;
 use embassy_time::Timer;
 
 use crate::{
-    config::{LAYER_COUNT, LEFT_LED_COUNT, SCAN_INTERVAL_KEYBOARD},
+    config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
     interface::{
         backlight::BacklightDriver,
         keyscan::KeyscanDriver,
@@ -14,7 +14,7 @@ use crate::{
 };
 
 pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver, BL: BacklightDriver>(
-    keymap: [Layer; LAYER_COUNT],
+    keymap: [Layer; CONFIG.layer_count],
     mut key_scanner: KS,
     mut mouse: Option<M>,
     mut usb: USB,
@@ -24,7 +24,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver, BL: Backli
         async move {
             if let Some(backlight) = backlight {
                 // TODO: Use non-split keyboard specific value
-                super::backlight::start::<LEFT_LED_COUNT>(backlight).await;
+                super::backlight::start::<{ CONFIG.left_led_count }>(backlight).await;
             }
         },
         async move {

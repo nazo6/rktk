@@ -2,7 +2,7 @@ use embassy_futures::join::join;
 use embassy_time::Timer;
 
 use crate::{
-    config::{LAYER_COUNT, SCAN_INTERVAL_KEYBOARD},
+    config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
     interface::{
         backlight::{BacklightCtrl, BacklightMode},
         keyscan::{KeyChangeEventOneHand, KeyscanDriver},
@@ -78,7 +78,7 @@ fn handle_led(
 pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver>(
     m2s_tx: M2sTx<'_>,
     s2m_rx: S2mRx<'_>,
-    keymap: [Layer; LAYER_COUNT],
+    keymap: [Layer; CONFIG.layer_count],
     mut key_scanner: KS,
     mut mouse: Option<M>,
     mut usb: USB,

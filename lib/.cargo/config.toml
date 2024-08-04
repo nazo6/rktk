@@ -1,7 +1,3 @@
 [env]
 DEFMT_LOG = "info"
-RKTK_COL_PIN_COUNT = "4"
-RKTK_ROW_PIN_COUNT = "5"
-RKTK_COLS = "7"
-RKTK_ROWS = "5"
-RKTK_LAYER_COUNT = "5"
+RKTK_CONFIG_PATH = { value = "rktk.example.toml", relative = true }

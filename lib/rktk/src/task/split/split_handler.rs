@@ -6,7 +6,7 @@ use embassy_sync::{
 use postcard::{from_bytes_cobs, to_slice_cobs};
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::config::SPLIT_CHANNEL_SIZE;
+use crate::config::static_config::CONFIG;
 
 use super::super::split::*;
 
@@ -22,8 +22,8 @@ pub async fn start<
     S: Serialize + core::fmt::Debug,
 >(
     mut split: SP,
-    received_sender: Sender<'a, CriticalSectionRawMutex, R, SPLIT_CHANNEL_SIZE>,
-    to_send_receiver: Receiver<'a, CriticalSectionRawMutex, S, SPLIT_CHANNEL_SIZE>,
+    received_sender: Sender<'a, CriticalSectionRawMutex, R, { CONFIG.split_channel_size }>,
+    to_send_receiver: Receiver<'a, CriticalSectionRawMutex, S, { CONFIG.split_channel_size }>,
     is_master: bool,
 ) {
     let mut recv_buf = [0u8; MAX_DATA_SIZE];

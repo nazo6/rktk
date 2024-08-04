@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StaticConfig",
+  "type": "object",
+  "required": [
+    "cols",
+    "rows"
+  ],
+  "properties": {
+    "cols": {
+      "description": "The number of columns in the keyboard matrix.",
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "default_auto_mouse_duration": {
+      "description": "Default duration of auto mouse mode (ms)",
+      "default": 500,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "default_auto_mouse_layer": {
+      "description": "When auto mouse mode is enabled, this layer is used",
+      "default": 1,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "default_auto_mouse_threshold": {
+      "description": "Mouse movement threshold to enable auto mouse mode",
+      "default": 1,
+      "type": "integer",
+      "format": "uint8",
+      "minimum": 0.0
+    },
+    "default_cpi": {
+      "description": "Default CPI value for mouse",
+      "default": 400,
+      "type": "integer",
+      "format": "uint16",
+      "minimum": 0.0
+    },
+    "default_scroll_divider_x": {
+      "description": "Scroll divider for x axis",
+      "default": 20,
+      "type": "integer",
+      "format": "int8"
+    },
+    "default_scroll_divider_y": {
+      "description": "Scroll divider for y axis",
+      "default": -12,
+      "type": "integer",
+      "format": "int8"
+    },
+    "default_tap_threshold": {
+      "description": "Threshold for tap (ms)",
+      "default": 200,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "double_tap_threshold": {
+      "description": "Threshold for double tap (ms).",
+      "default": 500,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "layer_count": {
+      "description": "The number of layers in the keyboard.",
+      "default": 5,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "left_led_count": {
+      "description": "Backlight led count for left side. This is also used for non-split keyboard.",
+      "default": 0,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "right_led_count": {
+      "description": "Backlight led count for right side",
+      "default": 0,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "rows": {
+      "description": "The number of rows in the keyboard matrix.",
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "scan_interval_keyboard": {
+      "description": "Time (ms) to wait for the next keyboard scan",
+      "default": 5,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "scan_interval_mouse": {
+      "description": "Time (ms) to wait for the next mouse scan",
+      "default": 5,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "split_channel_size": {
+      "description": "The size of the split channel. Usually, you don't need to change this value.",
+      "default": 64,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "split_usb_timeout": {
+      "description": "Timeout for detecting split USB connection (ms).",
+      "default": 200,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    }
+  }
+}

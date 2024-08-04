@@ -1,9 +1,10 @@
 //! Program entrypoint.
 
 use embassy_futures::join::join;
+use embassy_time::Duration;
 
 use crate::{
-    config::{DOUBLE_TAP_THRESHOLD, LAYER_COUNT},
+    config::static_config::CONFIG,
     interface::{
         backlight::BacklightDriver, display::DisplayDriver, double_tap::DoubleTapResetDriver,
         keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, usb::UsbDriver,
@@ -58,10 +59,11 @@ pub async fn start<
     BL: BacklightDriver,
 >(
     mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL>,
-    keymap: [Layer; LAYER_COUNT],
+    keymap: [Layer; CONFIG.layer_count],
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {
-        dtr.execute(DOUBLE_TAP_THRESHOLD).await;
+        dtr.execute(Duration::from_millis(CONFIG.double_tap_threshold))
+            .await;
     }
 
     join(

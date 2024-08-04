@@ -1,4 +1,4 @@
-use rktk::config::LAYER_COUNT;
+use rktk::config::static_config::CONFIG;
 use rktk::keycode::*;
 use rktk::keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*};
 
@@ -69,7 +69,7 @@ const L4: LayerMap = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
 ];
 
-pub const KEYMAP: [Layer; LAYER_COUNT] = [
+pub const KEYMAP: [Layer; CONFIG.layer_count] = [
     Layer {
         map: L0,
         arrowball: false,

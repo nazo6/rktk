@@ -13,6 +13,7 @@ RKTK_ROWS = "5"
 RKTK_LAYER_COUNT = "5"
 RKTK_RIGHT_LED_COUNT = "34"
 RKTK_LEFT_LED_COUNT = "37"
+RKTK_CONFIG_PATH = { value = "rktk.toml", relative = true }
 
 [unstable]
 build-std = ["core"]
