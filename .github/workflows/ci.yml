@@ -35,9 +35,6 @@ jobs:
           ./lib/target
         key: ${{ steps.rust-toolchain.outputs.cachekey }}-${{ runner.os }}-cargo-${{ hashFiles('lib/Cargo.lock') }}
 
-    - uses: cargo-bins/cargo-binstall@main
-
-
     - name: Run check
       run: |
         cd ./lib/rktk && cargo clippy
