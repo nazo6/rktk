@@ -27,8 +27,8 @@ pub struct UartHalfDuplexSplitDriver<
     ppi_ch1: CH1P,
     ppi_ch2: CH2P,
     ppi_group: AnyGroup,
-    read_buffer: [u8; 64],
-    write_buffer: [u8; 64],
+    read_buffer: [u8; 256],
+    write_buffer: [u8; 256],
 }
 
 impl<
@@ -60,8 +60,8 @@ impl<
             ppi_ch1,
             ppi_ch2,
             ppi_group,
-            read_buffer: [0; 64],
-            write_buffer: [0; 64],
+            read_buffer: [0; 256],
+            write_buffer: [0; 256],
         }
     }
 }
@@ -88,8 +88,8 @@ impl<
             let _pin = Input::new(&mut self.pin, embassy_nrf::gpio::Pull::Up);
         }
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD115200;
-        config.parity = Parity::INCLUDED;
+        config.baudrate = Baudrate::BAUD230400;
+        config.parity = Parity::EXCLUDED;
         let mut rx = BufferedUarteRx::new(
             &mut self.uarte,
             &mut self.timer,
@@ -128,12 +128,12 @@ impl<
             let _pin = Output::new(
                 &mut self.pin,
                 embassy_nrf::gpio::Level::High,
-                embassy_nrf::gpio::OutputDrive::Standard,
+                embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
             );
         }
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD115200;
-        config.parity = Parity::INCLUDED;
+        config.baudrate = Baudrate::BAUD230400;
+        config.parity = Parity::EXCLUDED;
         let mut tx = BufferedUarteTx::new(
             &mut self.uarte,
             self.irq.clone(),
@@ -147,6 +147,7 @@ impl<
         tx.flush()
             .await
             .map_err(|_| rktk::interface::error::RktkError::GeneralError("flush error"))?;
+        embassy_time::Timer::after_ticks(5).await;
         Ok(())
     }
 }
