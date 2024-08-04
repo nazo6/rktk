@@ -6,8 +6,9 @@ use embassy_time::Duration;
 use crate::{
     config::static_config::CONFIG,
     interface::{
-        backlight::BacklightDriver, display::DisplayDriver, double_tap::DoubleTapResetDriver,
-        keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, usb::UsbDriver,
+        backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
+        double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
+        split::SplitDriver, usb::UsbDriver,
     },
     keycode::Layer,
 };
@@ -31,6 +32,7 @@ pub struct Drivers<
     D: DisplayDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
+    BT: BleDriver,
 > {
     pub key_scanner: KS,
     pub double_tap_reset: Option<DTR>,
@@ -39,6 +41,7 @@ pub struct Drivers<
     pub display: Option<D>,
     pub split: Option<SP>,
     pub backlight: Option<BL>,
+    pub ble: Option<BT>,
 }
 
 /// Receives the [`Drivers`] and executes the main process of the keyboard.
@@ -57,8 +60,9 @@ pub async fn start<
     D: DisplayDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
+    BT: BleDriver,
 >(
-    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL>,
+    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL, BT>,
     keymap: [Layer; CONFIG.layer_count],
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {
@@ -94,6 +98,7 @@ pub async fn start<
                     split,
                     drivers.usb,
                     drivers.backlight,
+                    drivers.ble,
                 )
                 .await;
             } else {

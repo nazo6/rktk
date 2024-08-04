@@ -38,6 +38,9 @@ async fn print_message<D: DisplayDriver>(display: &mut D, msg: &str) {
 
 pub(super) async fn start<D: DisplayDriver>(mut display: D) {
     let _ = display.init().await;
+    let _ = display
+        .update_text("Hello world", D::calculate_point(1, 3))
+        .await;
     loop {
         match select(
             DISPLAY_CONTROLLER.receive(),

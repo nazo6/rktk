@@ -25,6 +25,14 @@ embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy"
   "nrf52840",
   "nfc-pins-as-gpio",
 ] }
+nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice", features = [
+  "ble-peripheral",
+  "ble-gatt-server",
+  "ble-sec",
+  "s140",
+  # TODO: make this rust-analyzer only
+  "nrf52840",
+] }
 embedded-io-async = { workspace = true }
 
 ssd1306 = { workspace = true }
@@ -34,5 +42,6 @@ static_cell = { workspace = true }
 heapless = { workspace = true }
 bitvec = { version = "1.0.1", default-features = false }
 smart-leds = { workspace = true }
+defmt = { workspace = true }
 
 [features]
