@@ -6,14 +6,7 @@ target = "thumbv7em-none-eabihf"
 
 [env]
 DEFMT_LOG = "info"
-RKTK_COL_PIN_COUNT = "4"
-RKTK_ROW_PIN_COUNT = "5"
-RKTK_COLS = "7"
-RKTK_ROWS = "5"
-RKTK_LAYER_COUNT = "5"
-RKTK_RIGHT_LED_COUNT = "34"
-RKTK_LEFT_LED_COUNT = "37"
-RKTK_CONFIG_PATH = { value = "rktk.toml", relative = true }
+RKTK_CONFIG_PATH = { value = "../rktk.keyball.toml", relative = true }
 
 [unstable]
 build-std = ["core"]
