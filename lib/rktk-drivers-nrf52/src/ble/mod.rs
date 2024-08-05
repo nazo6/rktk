@@ -165,20 +165,9 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
                 rktk::print!("{:?}", e);
             },
             async {
-                let mut start = embassy_time::Instant::now();
-                let mut cnt = 0;
                 loop {
                     let report = REPORT_CHAN.receive().await;
                     let _ = server.hid.send_report(&conn, report);
-                    cnt += 1;
-
-                    // if embassy_time::Instant::now() - start
-                    //     > embassy_time::Duration::from_millis(1000)
-                    // {
-                    //     rktk::print!("Sent {} reports", cnt);
-                    //     start = embassy_time::Instant::now();
-                    //     cnt = 0;
-                    // }
                 }
             },
         )

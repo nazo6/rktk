@@ -96,7 +96,7 @@ impl HidService {
             Metadata::new(Properties::new().read().write().write_without_response()),
         )?;
         let output_keyboard_desc = output_keyboard.add_descriptor(
-            Uuid::new_16(0x2908),
+            HID_REPORT_REF,
             Attribute::new([BleCompositeReportType::Keyboard as u8, 2u8])
                 .security(SecurityMode::JustWorks),
         )?;
@@ -108,7 +108,7 @@ impl HidService {
             Metadata::new(Properties::new().read().notify()),
         )?;
         let input_media_keys_desc = input_media_keys.add_descriptor(
-            Uuid::new_16(0x2908),
+            HID_REPORT_REF,
             Attribute::new([BleCompositeReportType::Media as u8, 1u8])
                 .security(SecurityMode::JustWorks),
         )?;
@@ -120,7 +120,7 @@ impl HidService {
             Metadata::new(Properties::new().read().write().notify()),
         )?;
         let input_mouse_desc = input_mouse.add_descriptor(
-            Uuid::new_16(0x2908),
+            HID_REPORT_REF,
             Attribute::new([BleCompositeReportType::Mouse as u8, 1u8])
                 .security(SecurityMode::JustWorks),
         )?;
@@ -147,9 +147,7 @@ impl HidService {
         })
     }
 
-    pub fn on_write(&self, conn: &Connection, handle: u16, data: &[u8]) {
-        // todo
-    }
+    pub fn on_write(&self, _conn: &Connection, _handle: u16, _data: &[u8]) {}
 
     pub fn send_report(
         &self,

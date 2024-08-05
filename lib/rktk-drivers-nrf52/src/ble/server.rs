@@ -37,7 +37,7 @@ impl Server {
         )?;
 
         let bas = BatteryService::new(sd)?;
-        bas.battery_level_set(sd, 100);
+        let _ = bas.battery_level_set(sd, 100);
 
         let hid = HidService::new(sd)?;
 

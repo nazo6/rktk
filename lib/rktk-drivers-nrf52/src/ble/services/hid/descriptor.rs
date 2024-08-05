@@ -80,5 +80,5 @@ pub(crate) enum BleCompositeReportType {
     Keyboard = 0x01,
     Mouse = 0x02,
     Media = 0x03,
-    System = 0x04,
+    // System = 0x04,
 }
