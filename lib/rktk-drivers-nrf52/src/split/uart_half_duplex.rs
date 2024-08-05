@@ -147,6 +147,12 @@ impl<
         tx.flush()
             .await
             .map_err(|_| rktk::interface::error::RktkError::GeneralError("flush error"))?;
+        drop(tx);
+        let _pin = Output::new(
+            &mut self.pin,
+            embassy_nrf::gpio::Level::High,
+            embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
+        );
         embassy_time::Timer::after_ticks(5).await;
         Ok(())
     }
