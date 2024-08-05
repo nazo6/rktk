@@ -27,7 +27,7 @@ static REPORT_CHAN: Channel<CriticalSectionRawMutex, HidReport, 8> = Channel::ne
 pub struct NrfBleDriver {}
 
 impl NrfBleDriver {
-    pub async fn new_and_init() -> Self {
+    pub async fn new_and_init(name: &'static str) -> Self {
         let spawner = embassy_executor::Spawner::for_current_executor().await;
 
         let config = nrf_softdevice::Config {
@@ -53,7 +53,7 @@ impl NrfBleDriver {
                 _bitfield_1: raw::ble_gap_cfg_role_count_t::new_bitfield_1(0),
             }),
             gap_device_name: Some(raw::ble_gap_cfg_device_name_t {
-                p_value: b"HelloRust" as *const u8 as _,
+                p_value: name.as_ptr() as _,
                 current_len: 9,
                 max_len: 9,
                 write_perm: unsafe { mem::zeroed() },
@@ -68,7 +68,7 @@ impl NrfBleDriver {
 
         let server = server::Server::new(sd, "12345678").unwrap();
         spawner.spawn(softdevice_task(sd)).unwrap();
-        spawner.spawn(server_task(sd, server)).unwrap();
+        spawner.spawn(server_task(sd, server, name)).unwrap();
 
         Self {}
     }
@@ -97,17 +97,17 @@ impl SecurityHandler for HidSecurityHandler {}
 static SEC: HidSecurityHandler = HidSecurityHandler {};
 
 #[embassy_executor::task]
-async fn server_task(sd: &'static Softdevice, server: Server) -> ! {
-    static ADV_DATA: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
+async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str) -> ! {
+    let adv_data: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
         .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])
         .services_16(
             ServiceList::Incomplete,
             &[
-                ServiceUuid16::BATTERY,
+                // ServiceUuid16::BATTERY,
                 ServiceUuid16::HUMAN_INTERFACE_DEVICE,
             ],
         )
-        .full_name("HelloRust")
+        .full_name(name)
         // Change the appearance (icon of the bluetooth device) to a keyboard
         .raw(AdvertisementDataType::APPEARANCE, &[0xC1, 0x03])
         .build();
@@ -117,7 +117,7 @@ async fn server_task(sd: &'static Softdevice, server: Server) -> ! {
             ServiceList::Complete,
             &[
                 ServiceUuid16::DEVICE_INFORMATION,
-                ServiceUuid16::BATTERY,
+                // ServiceUuid16::BATTERY,
                 ServiceUuid16::HUMAN_INTERFACE_DEVICE,
             ],
         )
@@ -125,7 +125,7 @@ async fn server_task(sd: &'static Softdevice, server: Server) -> ! {
 
     let config = peripheral::Config::default();
     let adv = peripheral::ConnectableAdvertisement::ScannableUndirected {
-        adv_data: &ADV_DATA,
+        adv_data: &adv_data,
         scan_data: &SCAN_DATA,
     };
 
@@ -156,10 +156,8 @@ async fn server_task(sd: &'static Softdevice, server: Server) -> ! {
             },
             async {
                 loop {
-                    rktk::print!("dbg2");
                     match REPORT_CHAN.receive().await {
                         HidReport::Keyboard(r) => {
-                            rktk::print!("dbg3");
                             let report = [
                                 r.modifier,
                                 0,
@@ -172,12 +170,8 @@ async fn server_task(sd: &'static Softdevice, server: Server) -> ! {
                             ];
                             server.hid.send_report(&conn, &report);
                         }
-                        HidReport::MediaKeyboard(_) => {
-                            rktk::print!("dbg4");
-                        }
-                        HidReport::Mouse(_) => {
-                            rktk::print!("dbg5");
-                        }
+                        HidReport::MediaKeyboard(_) => {}
+                        HidReport::Mouse(_) => {}
                     }
                 }
             },

@@ -131,7 +131,7 @@ async fn main(_spawner: Spawner) {
 
     let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
 
-    let ble = NrfBleDriver::new_and_init().await;
+    let ble = NrfBleDriver::new_and_init("keyball61").await;
 
     let drivers = Drivers {
         key_scanner,
@@ -145,6 +145,11 @@ async fn main(_spawner: Spawner) {
     };
 
     rktk::task::start(drivers, keymap::KEYMAP).await;
+}
+
+pub fn wait(ms: u64) {
+    let expires_at = embassy_time::Instant::now() + embassy_time::Duration::from_millis(ms);
+    while embassy_time::Instant::now() < expires_at {}
 }
 
 #[panic_handler]
@@ -165,21 +170,40 @@ fn panic(info: &PanicInfo) -> ! {
     };
     let _ = display.deref_mut().init();
 
-    let mut str = heapless::String::<256>::new();
-
-    write!(str, "P!{}\n", info.message()).unwrap();
+    let mut str = heapless::String::<512>::new();
 
     if let Some(location) = info.location() {
         let file = location.file();
         if file.len() > 20 {
-            write!(str, "{}", &file[file.len() - 20..]).unwrap();
+            let _ = write!(str, "{}", &file[file.len() - 20..]);
         } else {
-            write!(str, "{}", file).unwrap();
+            let _ = write!(str, "{}", file);
         }
-        write!(str, "\n{}", location.line()).unwrap()
+        let _ = write!(str, "\nPANIC: {}", location.line());
     }
 
-    let _ = display.update_text_sync(&str, embedded_graphics::prelude::Point { x: 0, y: 0 });
+    let _ = display.update_text_sync(&str, embedded_graphics::prelude::Point { x: 0, y: 10 });
+
+    let mut str = heapless::String::<512>::new();
+
+    writeln!(str, "{}", info.message()).unwrap();
+    if str.len() > 20 {
+        let mut idx = 0;
+        loop {
+            let _ = display.update_text_sync(
+                &str[idx..],
+                embedded_graphics::prelude::Point { x: 0, y: 0 },
+            );
+            if str.len() - idx <= 20 {
+                idx = 0;
+            } else {
+                idx += 1;
+            }
+            wait(200);
+        }
+    } else {
+        let _ = display.update_text_sync(&str, embedded_graphics::prelude::Point { x: 0, y: 0 });
+    }
 
     cortex_m::asm::udf()
 }

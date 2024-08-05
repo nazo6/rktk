@@ -14,7 +14,7 @@ use super::services::{
 
 pub struct Server {
     pub _dis: DeviceInformationService,
-    pub bas: BatteryService,
+    // pub bas: BatteryService,
     pub hid: HidService,
 }
 
@@ -36,13 +36,14 @@ impl Server {
             },
         )?;
 
-        let bas = BatteryService::new(sd)?;
+        // let bas = BatteryService::new(sd)?;
+        // bas.battery_level_set(sd, 100);
 
         let hid = HidService::new(sd)?;
 
         Ok(Self {
             _dis: dis,
-            bas,
+            // bas,
             hid,
         })
     }
@@ -60,7 +61,7 @@ impl gatt_server::Server for Server {
         data: &[u8],
     ) -> Option<Self::Event> {
         self.hid.on_write(conn, handle, data);
-        self.bas.on_write(handle, data);
+        // self.bas.on_write(handle, data);
         None
     }
 }

@@ -27,7 +27,6 @@ pub async fn start_report_task<'a, USB: UsbDriver, BT: BleDriver>(
         },
         (None, Some(mut bt)) => loop {
             let report = report_receiver.receive().await;
-            crate::print!("{:?}", report);
             let _ = bt.send_report(report).await;
         },
         (Some(mut usb), Some(mut bt)) => {
