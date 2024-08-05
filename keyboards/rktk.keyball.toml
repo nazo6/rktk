@@ -1,7 +1,9 @@
-"$schema" = "../../lib/rktk/schema.json"
+"$schema" = "../lib/rktk/schema.json"
 
 cols = 7
 rows = 5
 
 right_led_count = 34
 left_led_count = 37
+
+scan_interval_keyboard = 5

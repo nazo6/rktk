@@ -127,6 +127,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
         handle_led(&state_report, m2s_tx, &mut latest_led);
 
         let took = start.elapsed();
+
         if took < SCAN_INTERVAL_KEYBOARD {
             Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
         }

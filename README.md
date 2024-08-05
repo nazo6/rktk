@@ -30,7 +30,7 @@ bluetooth.
 | Display            | 🟡     |
 | Backlight LED      | 🟡     |
 | USB                | ✅     |
-| Bluetooth          | ❌     |
+| Bluetooth          | 🟡     |
 | VIA/Vial support   | ❌     |
 | Double-tap reset   | ✅     |
 
@@ -76,9 +76,9 @@ bluetooth.
 
 #### Bluetooth
 
-| RP2040 | NRF52840 |
-| ------ | -------- |
-|        | ❌       |
+| Driver         | RP2040 | NRF52840 |
+| -------------- | ------ | -------- |
+| NRF Softdevice |        | 🟡       |
 
 #### Double tap reset
 
@@ -118,3 +118,4 @@ difficult to create your own keyboard by referring to the
   and
   [qmk](https://github.com/qmk/qmk_firmware/blob/master/platforms/chibios/drivers/vendor/RP/RP2040/serial_vendor.c)
   for pio half-duplex
+- [rmk](https://github.com/HaoboGu/rmk) for bluetooth implemention
