@@ -11,6 +11,7 @@ use embedded_graphics::{
 ///
 /// TODO: Allow sync-only drivers?
 pub trait DisplayDriver: DrawTarget + Sized {
+    const MAX_TEXT_WIDTH: usize;
     const TEXT_STYLE: MonoTextStyle<'static, Self::Color>;
 
     fn flush(&mut self) -> Result<(), DisplayError>;
@@ -36,6 +37,23 @@ pub trait DisplayDriver: DrawTarget + Sized {
     fn update_text_sync(&mut self, text: &str, point: Point) -> Result<(), DisplayError> {
         let _ = Text::with_baseline(text, point, Self::TEXT_STYLE, Baseline::Top).draw(self);
         self.flush()
+    }
+
+    /// Print a message on the display.
+    ///
+    /// In default implementation, the message is split into two lines if it is longer than the width.
+    async fn print_message(&mut self, msg: &str) {
+        self.draw_text("                        ", Self::calculate_point(1, 2));
+        self.draw_text("                        ", Self::calculate_point(1, 3));
+
+        if let Some((l1, l2)) = msg.split_at_checked(Self::MAX_TEXT_WIDTH) {
+            self.draw_text(l1, Self::calculate_point(1, 2));
+            self.draw_text(l2, Self::calculate_point(1, 3));
+        } else {
+            self.draw_text(msg, Self::calculate_point(1, 2));
+        }
+
+        let _ = self.flush_async().await;
     }
 }
 
@@ -63,6 +81,8 @@ impl DisplayDriver for DummyDisplayDriver {
         .text_color(BinaryColor::On)
         .background_color(BinaryColor::Off)
         .build();
+    const MAX_TEXT_WIDTH: usize = 10;
+
     fn flush(&mut self) -> Result<(), DisplayError> {
         unimplemented!()
     }

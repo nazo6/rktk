@@ -161,16 +161,9 @@ async fn main(_spawner: Spawner) {
     rktk::task::start(drivers, keymap::KEYMAP).await;
 }
 
-pub fn wait(ms: u64) {
-    let expires_at = embassy_time::Instant::now() + embassy_time::Duration::from_millis(ms);
-    while embassy_time::Instant::now() < expires_at {}
-}
-
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    use core::fmt::Write;
     use embassy_nrf::peripherals::{P0_17, P0_20, TWISPI0};
-    use rktk::interface::display::DisplayDriver as _;
 
     let display = unsafe {
         create_ssd1306(
@@ -180,43 +173,11 @@ fn panic(info: &PanicInfo) -> ! {
             P0_20::steal(),
             ssd1306::size::DisplaySize128x32,
         )
-    };
-    let mut display = display.build_sync().unwrap();
-
-    let mut str = heapless::String::<512>::new();
-
-    if let Some(location) = info.location() {
-        let file = location.file();
-        if file.len() > 20 {
-            let _ = write!(str, "{}", &file[file.len() - 20..]);
-        } else {
-            let _ = write!(str, "{}", file);
-        }
-        let _ = write!(str, "\nPANIC: {}", location.line());
     }
+    .build_sync()
+    .unwrap();
 
-    let _ = display.update_text_sync(&str, embedded_graphics::prelude::Point { x: 0, y: 10 });
-
-    let mut str = heapless::String::<512>::new();
-
-    writeln!(str, "{}", info.message()).unwrap();
-    if str.len() > 20 {
-        let mut idx = 0;
-        loop {
-            let _ = display.update_text_sync(
-                &str[idx..],
-                embedded_graphics::prelude::Point { x: 0, y: 0 },
-            );
-            if str.len() - idx <= 20 {
-                idx = 0;
-            } else {
-                idx += 1;
-            }
-            wait(200);
-        }
-    } else {
-        let _ = display.update_text_sync(&str, embedded_graphics::prelude::Point { x: 0, y: 0 });
-    }
+    rktk::panicking::display_panic_message(display, info);
 
     cortex_m::asm::udf()
 }

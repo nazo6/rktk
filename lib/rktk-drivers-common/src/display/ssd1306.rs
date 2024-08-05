@@ -59,6 +59,13 @@ where
     I2C: I2cAsync + I2cSync,
     SIZE: DisplaySize,
 {
+    const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::new()
+        .font(&FONT_6X10)
+        .text_color(BinaryColor::On)
+        .background_color(BinaryColor::Off)
+        .build();
+    const MAX_TEXT_WIDTH: usize = 20;
+
     fn flush(&mut self) -> Result<(), DisplayError> {
         self.0.flush()
     }
@@ -73,12 +80,6 @@ where
     fn calculate_point(col: i32, row: i32) -> Point {
         Point::new((col - 1) * 6, (row - 1) * 10)
     }
-
-    const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::new()
-        .font(&FONT_6X10)
-        .text_color(BinaryColor::On)
-        .background_color(BinaryColor::Off)
-        .build();
 }
 
 impl<I2C, SIZE> Dimensions for Ssd1306Display<I2C, SIZE>
