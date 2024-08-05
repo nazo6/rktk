@@ -1678,7 +1678,9 @@ dependencies = [
  "rktk-drivers-common",
  "smart-leds",
  "ssd1306",
+ "ssmarshal",
  "static_cell",
+ "usbd-hid",
 ]
 
 [[package]]

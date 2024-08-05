@@ -1,6 +1,6 @@
 use core::mem;
 
-use embassy_futures::{join::join, select::select};
+use embassy_futures::select::select;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use nrf_softdevice::{
     ble::{
@@ -9,7 +9,7 @@ use nrf_softdevice::{
             ServiceList, ServiceUuid16,
         },
         gatt_server, peripheral,
-        security::{IoCapabilities, SecurityHandler},
+        security::SecurityHandler,
     },
     raw::{self},
     Softdevice,
@@ -130,16 +130,7 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
         .raw(AdvertisementDataType::TXPOWER_LEVEL, &[0x02])
         .build();
 
-    static SCAN_DATA: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
-        // .services_16(
-        //     ServiceList::Complete,
-        //     &[
-        //         ServiceUuid16::DEVICE_INFORMATION,
-        //         // ServiceUuid16::BATTERY,
-        //         ServiceUuid16::HUMAN_INTERFACE_DEVICE,
-        //     ],
-        // )
-        .build();
+    static SCAN_DATA: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new().build();
 
     let config = peripheral::Config::default();
     let adv = peripheral::ConnectableAdvertisement::ScannableUndirected {
@@ -166,7 +157,7 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
             }
         };
 
-        // rktk::print!("Paired: {:X?}", conn.peer_address().bytes);
+        rktk::print!("Paired: {:X?}", conn.peer_address().bytes);
 
         select(
             async {
@@ -175,23 +166,8 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
             },
             async {
                 loop {
-                    match REPORT_CHAN.receive().await {
-                        HidReport::Keyboard(r) => {
-                            let report = [
-                                r.modifier,
-                                0,
-                                r.keycodes[0],
-                                r.keycodes[1],
-                                r.keycodes[2],
-                                r.keycodes[3],
-                                r.keycodes[4],
-                                r.keycodes[5],
-                            ];
-                            server.hid.send_report(&conn, &report);
-                        }
-                        HidReport::MediaKeyboard(_) => {}
-                        HidReport::Mouse(_) => {}
-                    }
+                    let report = REPORT_CHAN.receive().await;
+                    server.hid.send_report(&conn, report);
                 }
             },
         )
