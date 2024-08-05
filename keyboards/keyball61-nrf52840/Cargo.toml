@@ -52,3 +52,4 @@ heapless = "0.8.0"
 usb = []
 # Enables ble driver. If this feature is enabled, this side is always master.
 ble-master = []
+default = ["ble-master", "usb"]

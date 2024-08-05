@@ -14,16 +14,24 @@ use embassy_nrf::{
     interrupt::{self, InterruptExt, Priority},
     peripherals::SPI2,
     ppi::Group,
+    usb::vbus_detect::SoftwareVbusDetect,
 };
-use rktk::{
-    interface::{ble::DummyBleDriver, double_tap::DummyDoubleTapResetDriver, usb::DummyUsbDriver},
-    task::Drivers,
-};
+use once_cell::sync::OnceCell;
+use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360,
     split::uart_half_duplex::UartHalfDuplexSplitDriver,
 };
+
+#[cfg(not(feature = "ble-master"))]
+use rktk::interface::ble::DummyBleDriver;
+#[cfg(not(feature = "usb"))]
+use rktk::interface::usb::DummyUsbDriver;
+#[cfg(feature = "ble-master")]
+use rktk_drivers_nrf52::ble::NrfBleDriver;
+#[cfg(feature = "usb")]
+use rktk_drivers_nrf52::usb::{new_usb, UsbConfig, UsbUserOpts};
 
 mod keymap;
 
@@ -36,7 +44,7 @@ bind_interrupts!(pub struct Irqs {
     UARTE0_UART0 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE0>;
 });
 
-// static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
+static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {

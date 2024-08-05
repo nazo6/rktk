@@ -29,8 +29,8 @@ pub async fn start_report_task<USB: UsbDriver, BT: BleDriver>(
             let report = report_receiver.receive().await;
             let _ = bt.send_report(report).await;
         },
-        (Some(mut usb), Some(mut bt)) => {
-            //
+        (Some(_usb), Some(_bt)) => {
+            // TODO: Implement this
         }
     }
 }

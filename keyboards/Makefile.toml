@@ -2,10 +2,10 @@
 script = 'cd ./keyball61-rp2040 && cargo run --release'
 
 [tasks.nrf-build-usb]
-script = 'cd ./keyball61-nrf52840 && cargo build --release --features usb'
+script = 'cd ./keyball61-nrf52840 && cargo build --release --features usb --no-default-features'
 
 [tasks.nrf-build-ble]
-script = 'cd ./keyball61-nrf52840 && cargo build --release --features ble-master'
+script = 'cd ./keyball61-nrf52840 && cargo build --release --features ble-master --no-default-features'
 
 [tasks.nrf-build-uf2]
 script = '''
