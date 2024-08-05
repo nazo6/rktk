@@ -7,7 +7,7 @@ use nrf_softdevice::{
             characteristic::{Attribute, Metadata, Properties},
             RegisterError,
         },
-        Connection, Uuid,
+        Connection, SecurityMode, Uuid,
     },
     Softdevice,
 };
@@ -110,57 +110,63 @@ impl HidService {
 
         let hid_info = service_builder.add_characteristic(
             HID_INFO,
-            Attribute::new([0x11u8, 0x1u8, 0x00u8, 0x01u8]),
+            Attribute::new([0x11u8, 0x1u8, 0x00u8, 0x01u8]).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().read()),
         )?;
         let hid_info_handle = hid_info.build();
 
         let report_map = service_builder.add_characteristic(
             REPORT_MAP,
-            Attribute::new(HID_REPORT_DESCRIPTOR),
+            Attribute::new(HID_REPORT_DESCRIPTOR).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().read()),
         )?;
         let report_map_handle = report_map.build();
 
         let hid_control = service_builder.add_characteristic(
             HID_CONTROL_POINT,
-            Attribute::new([0u8]),
+            Attribute::new([0u8]).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().write_without_response()),
         )?;
         let hid_control_handle = hid_control.build();
 
         let protocol_mode = service_builder.add_characteristic(
             PROTOCOL_MODE,
-            Attribute::new([1u8]),
+            Attribute::new([1u8]).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().read().write_without_response()),
         )?;
         let protocol_mode_handle = protocol_mode.build();
 
         let mut input_keyboard = service_builder.add_characteristic(
             HID_REPORT,
-            Attribute::new([0u8; 8]),
+            Attribute::new([0u8; 8]).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().read().notify()),
         )?;
-        let input_keyboard_desc = input_keyboard
-            .add_descriptor(Uuid::new_16(0x2908), Attribute::new([KEYBOARD_ID, 1u8]))?; // First is ID (e.g. 1 for keyboard 2 for media keys), second is in/out
+        let input_keyboard_desc = input_keyboard.add_descriptor(
+            Uuid::new_16(0x2908),
+            Attribute::new([KEYBOARD_ID, 1u8]).security(SecurityMode::JustWorks),
+        )?; // First is ID (e.g. 1 for keyboard 2 for media keys), second is in/out
         let input_keyboard_handle = input_keyboard.build();
 
         let mut output_keyboard = service_builder.add_characteristic(
             HID_REPORT,
-            Attribute::new([0u8; 8]),
+            Attribute::new([0u8; 8]).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().read().write().write_without_response()),
         )?;
-        let output_keyboard_desc = output_keyboard
-            .add_descriptor(Uuid::new_16(0x2908), Attribute::new([KEYBOARD_ID, 2u8]))?; // First is ID (e.g. 1 for keyboard 2 for media keys)
+        let output_keyboard_desc = output_keyboard.add_descriptor(
+            Uuid::new_16(0x2908),
+            Attribute::new([KEYBOARD_ID, 2u8]).security(SecurityMode::JustWorks),
+        )?; // First is ID (e.g. 1 for keyboard 2 for media keys)
         let output_keyboard_handle = output_keyboard.build();
 
         let mut input_media_keys = service_builder.add_characteristic(
             HID_REPORT,
-            Attribute::new([0u8; 16]),
+            Attribute::new([0u8; 16]).security(SecurityMode::JustWorks),
             Metadata::new(Properties::new().read().notify()),
         )?;
-        let input_media_keys_desc = input_media_keys
-            .add_descriptor(Uuid::new_16(0x2908), Attribute::new([MEDIA_KEYS_ID, 1u8]))?;
+        let input_media_keys_desc = input_media_keys.add_descriptor(
+            Uuid::new_16(0x2908),
+            Attribute::new([MEDIA_KEYS_ID, 1u8]).security(SecurityMode::JustWorks),
+        )?;
         let input_media_keys_handle = input_media_keys.build();
 
         let _service_handle = service_builder.build();

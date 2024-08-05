@@ -9,7 +9,7 @@ use nrf_softdevice::{
             ServiceList, ServiceUuid16,
         },
         gatt_server, peripheral,
-        security::SecurityHandler,
+        security::{IoCapabilities, SecurityHandler},
     },
     raw::{self},
     Softdevice,
@@ -66,6 +66,10 @@ impl NrfBleDriver {
 
         let sd: &'static mut Softdevice = Softdevice::enable(&config);
 
+        unsafe {
+            raw::sd_ble_gap_appearance_set(raw::BLE_APPEARANCE_HID_KEYBOARD as u16);
+        }
+
         let server = server::Server::new(sd, "12345678").unwrap();
         spawner.spawn(softdevice_task(sd)).unwrap();
         spawner.spawn(server_task(sd, server, name)).unwrap();
@@ -93,26 +97,25 @@ async fn softdevice_task(sd: &'static Softdevice) -> ! {
 }
 
 struct HidSecurityHandler {}
-impl SecurityHandler for HidSecurityHandler {}
+impl SecurityHandler for HidSecurityHandler {
+    fn can_bond(&self, _conn: &nrf_softdevice::ble::Connection) -> bool {
+        true
+    }
+    fn on_bonded(
+        &self,
+        _conn: &nrf_softdevice::ble::Connection,
+        _master_id: nrf_softdevice::ble::MasterId,
+        _key: nrf_softdevice::ble::EncryptionInfo,
+        _peer_id: nrf_softdevice::ble::IdentityKey,
+    ) {
+    }
+}
 static SEC: HidSecurityHandler = HidSecurityHandler {};
 
 #[embassy_executor::task]
 async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str) -> ! {
     let adv_data: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
         .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])
-        .services_16(
-            ServiceList::Incomplete,
-            &[
-                // ServiceUuid16::BATTERY,
-                ServiceUuid16::HUMAN_INTERFACE_DEVICE,
-            ],
-        )
-        .full_name(name)
-        // Change the appearance (icon of the bluetooth device) to a keyboard
-        .raw(AdvertisementDataType::APPEARANCE, &[0xC1, 0x03])
-        .build();
-
-    static SCAN_DATA: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
         .services_16(
             ServiceList::Complete,
             &[
@@ -121,6 +124,21 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
                 ServiceUuid16::HUMAN_INTERFACE_DEVICE,
             ],
         )
+        .full_name("testname")
+        // Change the appearance (icon of the bluetooth device) to a keyboard
+        .raw(AdvertisementDataType::APPEARANCE, &[0xC1, 0x03])
+        .raw(AdvertisementDataType::TXPOWER_LEVEL, &[0x02])
+        .build();
+
+    static SCAN_DATA: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
+        // .services_16(
+        //     ServiceList::Complete,
+        //     &[
+        //         ServiceUuid16::DEVICE_INFORMATION,
+        //         // ServiceUuid16::BATTERY,
+        //         ServiceUuid16::HUMAN_INTERFACE_DEVICE,
+        //     ],
+        // )
         .build();
 
     let config = peripheral::Config::default();
@@ -152,7 +170,8 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
 
         select(
             async {
-                let _e = gatt_server::run(&conn, &server, |_| {}).await;
+                let e = gatt_server::run(&conn, &server, |_| {}).await;
+                rktk::print!("{:?}", e);
             },
             async {
                 loop {
