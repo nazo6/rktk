@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(impl_trait_in_assoc_type)]
 
-use core::{ops::DerefMut as _, panic::PanicInfo};
+use core::panic::PanicInfo;
 
 use defmt_rtt as _;
 
@@ -14,21 +14,15 @@ use embassy_nrf::{
     interrupt::{self, InterruptExt, Priority},
     peripherals::SPI2,
     ppi::Group,
-    usb::vbus_detect::SoftwareVbusDetect,
 };
-use once_cell::sync::OnceCell;
 use rktk::{
     interface::{ble::DummyBleDriver, double_tap::DummyDoubleTapResetDriver, usb::DummyUsbDriver},
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
-    backlight::ws2812_pwm::Ws2812Pwm,
-    ble::NrfBleDriver,
-    display::ssd1306::create_ssd1306,
-    keyscan::duplex_matrix::create_duplex_matrix,
-    mouse::pmw3360::create_pmw3360,
+    backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
+    keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360,
     split::uart_half_duplex::UartHalfDuplexSplitDriver,
-    usb::{new_usb, UsbConfig, UsbUserOpts},
 };
 
 mod keymap;
@@ -42,7 +36,7 @@ bind_interrupts!(pub struct Irqs {
     UARTE0_UART0 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE0>;
 });
 
-static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
+// static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -73,7 +67,7 @@ async fn main(_spawner: Spawner) {
     interrupt::SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0.set_priority(Priority::P2);
     interrupt::UARTE1.set_priority(Priority::P2);
 
-    let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09).await;
+    let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09);
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
@@ -115,7 +109,7 @@ async fn main(_spawner: Spawner) {
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
-        mouse: Some(ball),
+        mouse_builder: Some(ball),
         usb: {
             #[cfg(feature = "usb")]
             let usb = {
@@ -142,7 +136,7 @@ async fn main(_spawner: Spawner) {
 
             usb
         },
-        display: Some(display),
+        display_builder: Some(display),
         split: Some(split),
         backlight: Some(backlight),
         ble: {
@@ -169,9 +163,8 @@ fn panic(info: &PanicInfo) -> ! {
     use core::fmt::Write;
     use embassy_nrf::peripherals::{P0_17, P0_20, TWISPI0};
     use rktk::interface::display::DisplayDriver as _;
-    use ssd1306::mode::DisplayConfig as _;
 
-    let mut display = unsafe {
+    let display = unsafe {
         create_ssd1306(
             TWISPI0::steal(),
             Irqs,
@@ -180,7 +173,7 @@ fn panic(info: &PanicInfo) -> ! {
             ssd1306::size::DisplaySize128x32,
         )
     };
-    let _ = display.deref_mut().init();
+    let mut display = display.build_sync().unwrap();
 
     let mut str = heapless::String::<512>::new();
 

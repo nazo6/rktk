@@ -3,7 +3,7 @@ use core::fmt::Write as _;
 use embassy_futures::select::{select, Either};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 
-use crate::interface::{display::DisplayDriver, keyscan::Hand};
+use crate::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder};
 
 pub enum DisplayMessage {
     Clear,
@@ -36,8 +36,11 @@ async fn print_message<D: DisplayDriver>(display: &mut D, msg: &str) {
     let _ = display.flush_async().await;
 }
 
-pub(super) async fn start<D: DisplayDriver>(mut display: D) {
-    let _ = display.init().await;
+pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<Output = D>) {
+    let Ok(mut display) = display_builder.build().await else {
+        panic!("Failed to build display");
+    };
+
     let _ = display
         .update_text("Hello world", D::calculate_point(1, 3))
         .await;
@@ -50,7 +53,7 @@ pub(super) async fn start<D: DisplayDriver>(mut display: D) {
         {
             Either::First(mes) => match mes {
                 DisplayMessage::Clear => {
-                    display.clear().await.unwrap();
+                    display.clear_flush().await.unwrap();
                 }
                 DisplayMessage::Message(msg) => {
                     let _ = print_message(&mut display, msg).await;

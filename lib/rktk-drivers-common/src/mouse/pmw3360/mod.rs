@@ -10,7 +10,7 @@ use embedded_hal::digital::OutputPin;
 use embedded_hal_async::spi::SpiBus;
 use error::Pmw3360Error;
 use registers as reg;
-use rktk::interface::mouse::MouseDriver;
+use rktk::interface::{mouse::MouseDriver, DriverBuilder};
 
 #[derive(Default)]
 pub struct BurstData {
@@ -25,6 +25,41 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
+pub struct Pmw3360Builder<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
+    spi: S,
+    cs_pin: OP,
+    _marker: core::marker::PhantomData<&'d ()>,
+}
+
+impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360Builder<'d, S, OP> {
+    pub fn new(spi: S, cs_pin: OP) -> Self {
+        Self {
+            spi,
+            cs_pin,
+            _marker: core::marker::PhantomData,
+        }
+    }
+}
+
+impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Pmw3360Builder<'d, S, OP> {
+    type Output = Pmw3360<'d, S, OP>;
+
+    type Error = Pmw3360Error<S, OP>;
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        let mut driver = Pmw3360 {
+            _marker: core::marker::PhantomData,
+            spi: self.spi,
+            cs_pin: self.cs_pin,
+            rw_flag: false,
+        };
+
+        driver.power_up().await?;
+
+        Ok(driver)
+    }
+}
+
 pub struct Pmw3360<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
     _marker: core::marker::PhantomData<&'d ()>,
     spi: S,
@@ -34,16 +69,27 @@ pub struct Pmw3360<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
     rw_flag: bool,
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
-    pub fn new(spi: S, cs_pin: OP) -> Self {
-        Self {
-            _marker: core::marker::PhantomData,
-            spi,
-            cs_pin,
-            rw_flag: false,
-        }
+impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> {
+    async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
+        self.burst_read()
+            .await
+            .map(|data| (data.dx as i8, data.dy as i8))
+            .map_err(|_| rktk::interface::error::RktkError::GeneralError("Failed to read PMW3360"))
     }
 
+    async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::interface::error::RktkError> {
+        self.set_cpi(cpi).await.map_err(|_| {
+            rktk::interface::error::RktkError::GeneralError("Failed to set cpi to PMW3360")
+        })?;
+        Ok(())
+    }
+
+    async fn get_cpi(&mut self) -> Result<u16, rktk::interface::error::RktkError> {
+        Err(rktk::interface::error::RktkError::NotSupported)
+    }
+}
+
+impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S, OP>> {
         // TODO: propagate errors
 
@@ -282,33 +328,5 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
         Timer::after_micros(200).await;
         Ok(())
-    }
-}
-
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> {
-    async fn init(&mut self) -> Result<(), rktk::interface::error::RktkError> {
-        self.power_up().await.map_err(|_| {
-            rktk::interface::error::RktkError::GeneralError("Failed to power up PMW3360")
-        })?;
-
-        Ok(())
-    }
-
-    async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
-        self.burst_read()
-            .await
-            .map(|data| (data.dx as i8, data.dy as i8))
-            .map_err(|_| rktk::interface::error::RktkError::GeneralError("Failed to read PMW3360"))
-    }
-
-    async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::interface::error::RktkError> {
-        self.set_cpi(cpi).await.map_err(|_| {
-            rktk::interface::error::RktkError::GeneralError("Failed to set cpi to PMW3360")
-        })?;
-        Ok(())
-    }
-
-    async fn get_cpi(&mut self) -> Result<u16, rktk::interface::error::RktkError> {
-        Err(rktk::interface::error::RktkError::NotSupported)
     }
 }

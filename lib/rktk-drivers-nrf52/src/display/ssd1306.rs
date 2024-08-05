@@ -5,6 +5,7 @@ use embassy_nrf::{
     Peripheral,
 };
 pub use rktk_drivers_common::display::ssd1306::Ssd1306Display;
+use rktk_drivers_common::display::ssd1306::Ssd1306DisplayBuilder;
 use ssd1306::size::DisplaySize;
 
 pub fn create_ssd1306<'d, T: Instance, SIZE: DisplaySize>(
@@ -13,11 +14,11 @@ pub fn create_ssd1306<'d, T: Instance, SIZE: DisplaySize>(
     sda: impl Peripheral<P = impl Pin> + 'd,
     scl: impl Peripheral<P = impl Pin> + 'd,
     size: SIZE,
-) -> Ssd1306Display<Twim<'d, T>, SIZE> {
+) -> Ssd1306DisplayBuilder<Twim<'d, T>, SIZE> {
     let mut i2c_config = Config::default();
     i2c_config.frequency = Frequency::K400;
 
     let i2c = Twim::new(twim, _irq, sda, scl, i2c_config);
 
-    Ssd1306Display::new(i2c, size)
+    Ssd1306DisplayBuilder::new(i2c, size)
 }

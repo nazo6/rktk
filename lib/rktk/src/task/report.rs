@@ -12,8 +12,8 @@ pub type ReportReceiver<'a> = Receiver<'a, CriticalSectionRawMutex, HidReport, 1
 pub type ReportSender<'a> = Sender<'a, CriticalSectionRawMutex, HidReport, 16>;
 pub type ReportChannel = Channel<CriticalSectionRawMutex, HidReport, 16>;
 
-pub async fn start_report_task<'a, USB: UsbDriver, BT: BleDriver>(
-    report_receiver: ReportReceiver<'a>,
+pub async fn start_report_task<USB: UsbDriver, BT: BleDriver>(
+    report_receiver: ReportReceiver<'_>,
     usb: Option<USB>,
     bt: Option<BT>,
 ) {

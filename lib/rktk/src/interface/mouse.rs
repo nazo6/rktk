@@ -1,9 +1,6 @@
 use super::error::RktkError;
 
 pub trait MouseDriver {
-    async fn init(&mut self) -> Result<(), RktkError> {
-        Ok(())
-    }
     async fn read(&mut self) -> Result<(i8, i8), RktkError>;
     async fn set_cpi(&mut self, _cpi: u16) -> Result<(), RktkError> {
         Err(RktkError::NotSupported)
