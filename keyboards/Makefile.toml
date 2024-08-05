@@ -1,0 +1,30 @@
+[tasks.rp-run]
+script = 'cd ./keyball61-rp2040 && cargo run --release'
+
+[tasks.nrf-build-usb]
+script = 'cd ./keyball61-nrf52840 && cargo build --release --features usb'
+
+[tasks.nrf-build-ble]
+script = 'cd ./keyball61-nrf52840 && cargo build --release --features ble-master'
+
+[tasks.nrf-build-uf2]
+script = '''
+cd keyball61-nrf52840\target\thumbv7em-none-eabihf\release
+..\..\..\utils\arm-none-eabi-objcopy.exe -Oihex keyball61-nrf52840 keyball61-nrf52840.hex
+python3 ..\..\..\utils\uf2conv.py keyball61-nrf52840.hex -c -b 0x26000 -f 0xADA52840
+'''
+
+[tasks.nrf-deploy]
+script = 'cd keyball61-nrf52840\target\thumbv7em-none-eabihf\release && copy flash.uf2 E:\'
+
+[tasks.nrf-run-usb]
+run_task = { name = ["nrf-build-usb", "nrf-build-uf2", "nrf-deploy"] }
+
+[tasks.nrf-run-ble]
+run_task = { name = ["nrf-build-ble", "nrf-build-uf2", "nrf-deploy"] }
+
+[tasks.nrf-check]
+script = 'cd keyball61-nrf52840 && cargo check'
+
+[tasks.rp-check]
+script = 'cd keyball61-rp2040 && cargo check'

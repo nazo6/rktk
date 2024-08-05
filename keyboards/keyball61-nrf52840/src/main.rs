@@ -18,7 +18,7 @@ use embassy_nrf::{
 };
 use once_cell::sync::OnceCell;
 use rktk::{
-    interface::{double_tap::DummyDoubleTapResetDriver, usb::DummyUsbDriver},
+    interface::{ble::DummyBleDriver, double_tap::DummyDoubleTapResetDriver, usb::DummyUsbDriver},
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
@@ -92,25 +92,6 @@ async fn main(_spawner: Spawner) {
         (2, 6),
     );
 
-    let usb = {
-        let mut config = UsbConfig::new(0xc0de, 0xcafe);
-        config.manufacturer = Some("Yowkees/nazo6");
-        config.product = Some("keyball");
-        config.serial_number = Some("12345678");
-        config.max_power = 100;
-        config.max_packet_size_0 = 64;
-        config.supports_remote_wakeup = true;
-        let usb_opts = UsbUserOpts {
-            config,
-            mouse_poll_interval: 5,
-            kb_poll_interval: 5,
-        };
-
-        let vbus = SOFTWARE_VBUS.get_or_init(|| SoftwareVbusDetect::new(true, true));
-        let driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
-        new_usb(usb_opts, driver).await
-    };
-
     let display = create_ssd1306(
         p.TWISPI0,
         Irqs,
@@ -131,17 +112,48 @@ async fn main(_spawner: Spawner) {
 
     let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
 
-    let ble = NrfBleDriver::new_and_init("keyball61").await;
-
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse: Some(ball),
-        usb: Option::<DummyUsbDriver>::None,
+        usb: {
+            #[cfg(feature = "usb")]
+            let usb = {
+                let mut config = UsbConfig::new(0xc0de, 0xcafe);
+                config.manufacturer = Some("Yowkees/nazo6");
+                config.product = Some("keyball");
+                config.serial_number = Some("12345678");
+                config.max_power = 100;
+                config.max_packet_size_0 = 64;
+                config.supports_remote_wakeup = true;
+                let usb_opts = UsbUserOpts {
+                    config,
+                    mouse_poll_interval: 5,
+                    kb_poll_interval: 5,
+                };
+
+                let vbus = SOFTWARE_VBUS.get_or_init(|| SoftwareVbusDetect::new(true, true));
+                let driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
+                Some(new_usb(usb_opts, driver).await)
+            };
+
+            #[cfg(not(feature = "usb"))]
+            let usb = Option::<DummyUsbDriver>::None;
+
+            usb
+        },
         display: Some(display),
         split: Some(split),
         backlight: Some(backlight),
-        ble: Some(ble),
+        ble: {
+            #[cfg(feature = "ble-master")]
+            let ble = Some(NrfBleDriver::new_and_init("keyball61").await);
+
+            #[cfg(not(feature = "ble-master"))]
+            let ble = Option::<DummyBleDriver>::None;
+
+            ble
+        },
     };
 
     rktk::task::start(drivers, keymap::KEYMAP).await;

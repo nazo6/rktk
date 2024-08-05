@@ -47,3 +47,8 @@ embedded-graphics = "0.8.1"
 ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
 display-interface = "0.5.0"
 heapless = "0.8.0"
+
+[features]
+usb = []
+# Enables ble driver. If this feature is enabled, this side is always master.
+ble-master = []
