@@ -47,3 +47,5 @@ embedded-graphics = "0.8.1"
 ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
 
 smart-leds = "0.4.0"
+
+defmt = "0.3.8"

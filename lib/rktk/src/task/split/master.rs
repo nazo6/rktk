@@ -8,11 +8,11 @@ use crate::{
         keyscan::{KeyChangeEventOneHand, KeyscanDriver},
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
-        usb::{HidReport, UsbDriver},
+        usb::HidReport,
     },
     keycode::Layer,
     state::{State, StateReport},
-    task::backlight::BACKLIGHT_CTRL,
+    task::{backlight::BACKLIGHT_CTRL, report::ReportSender},
 };
 
 use super::{M2sTx, S2mRx};
@@ -75,13 +75,13 @@ fn handle_led(
     *latest_led = Some(led);
 }
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
     m2s_tx: M2sTx<'_>,
     s2m_rx: S2mRx<'_>,
-    keymap: [Layer; CONFIG.layer_count],
+    report_sender: ReportSender<'_>,
     mut key_scanner: KS,
     mut mouse: Option<M>,
-    mut usb: USB,
+    keymap: [Layer; CONFIG.layer_count],
     hand: crate::interface::keyscan::Hand,
 ) {
     let mut state = State::new(keymap, Some(hand));
@@ -114,19 +114,20 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, USB: UsbDriver>(
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
         if let Some(report) = state_report.keyboard_report {
-            let _ = usb.send_report(HidReport::Keyboard(report)).await;
+            let _ = report_sender.try_send(HidReport::Keyboard(report));
         }
         if let Some(report) = state_report.mouse_report {
             crate::utils::display_state!(MouseMove, (report.x, report.y));
-            let _ = usb.send_report(HidReport::Mouse(report)).await;
+            let _ = report_sender.try_send(HidReport::Mouse(report));
         }
         if let Some(report) = state_report.media_keyboard_report {
-            let _ = usb.send_report(HidReport::MediaKeyboard(report)).await;
+            let _ = report_sender.try_send(HidReport::MediaKeyboard(report));
         }
 
         handle_led(&state_report, m2s_tx, &mut latest_led);
 
         let took = start.elapsed();
+
         if took < SCAN_INTERVAL_KEYBOARD {
             Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
         }

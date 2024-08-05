@@ -1,13 +1,18 @@
 //! Program entrypoint.
 
-use embassy_futures::join::join;
-use embassy_time::Duration;
+use embassy_futures::{
+    join::join,
+    select::{select, Either},
+};
+use embassy_time::{Duration, Timer};
+use report::ReportChannel;
 
 use crate::{
     config::static_config::CONFIG,
     interface::{
-        backlight::BacklightDriver, display::DisplayDriver, double_tap::DoubleTapResetDriver,
-        keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, usb::UsbDriver,
+        backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
+        double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
+        split::SplitDriver, usb::UsbDriver,
     },
     keycode::Layer,
 };
@@ -15,6 +20,7 @@ use crate::{
 mod backlight;
 pub mod display;
 mod no_split;
+mod report;
 mod split;
 
 /// All drivers required to run the keyboard.
@@ -31,14 +37,20 @@ pub struct Drivers<
     D: DisplayDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
+    BT: BleDriver,
 > {
-    pub key_scanner: KS,
     pub double_tap_reset: Option<DTR>,
+
+    pub key_scanner: KS,
     pub mouse: Option<M>,
-    pub usb: USB,
+
     pub display: Option<D>,
+
     pub split: Option<SP>,
     pub backlight: Option<BL>,
+
+    pub usb: Option<USB>,
+    pub ble: Option<BT>,
 }
 
 /// Receives the [`Drivers`] and executes the main process of the keyboard.
@@ -57,8 +69,9 @@ pub async fn start<
     D: DisplayDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
+    BT: BleDriver,
 >(
-    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL>,
+    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL, BT>,
     keymap: [Layer; CONFIG.layer_count],
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {
@@ -86,26 +99,58 @@ pub async fn start<
 
             crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
-            if let Some(split) = drivers.split {
-                split::start(
-                    keymap,
-                    drivers.key_scanner,
-                    mouse,
-                    split,
-                    drivers.usb,
-                    drivers.backlight,
-                )
-                .await;
-            } else {
-                no_split::start(
-                    keymap,
-                    drivers.key_scanner,
-                    mouse,
-                    drivers.usb,
-                    drivers.backlight,
-                )
-                .await;
-            }
+            let host_connected = match (&mut drivers.ble, &mut drivers.usb) {
+                (Some(ble), _) => {
+                    let _ = ble.wait_ready().await;
+                    true
+                }
+                (_, Some(usb)) => {
+                    match select(
+                        usb.wait_ready(),
+                        Timer::after_millis(CONFIG.split_usb_timeout),
+                    )
+                    .await
+                    {
+                        Either::First(_) => true,
+                        Either::Second(_) => false,
+                    }
+                }
+                _ => false,
+            };
+
+            let report_chan = ReportChannel::new();
+            let report_sender = report_chan.sender();
+            let report_receiver = report_chan.receiver();
+
+            join(
+                async {
+                    if let Some(split) = drivers.split {
+                        split::start(
+                            report_sender,
+                            drivers.key_scanner,
+                            mouse,
+                            split,
+                            drivers.backlight,
+                            keymap,
+                            host_connected,
+                        )
+                        .await;
+                    } else {
+                        no_split::start(
+                            report_sender,
+                            keymap,
+                            drivers.key_scanner,
+                            mouse,
+                            drivers.backlight,
+                        )
+                        .await;
+                    }
+                },
+                async {
+                    report::start_report_task(report_receiver, drivers.usb, drivers.ble).await;
+                },
+            )
+            .await;
         },
     )
     .await;

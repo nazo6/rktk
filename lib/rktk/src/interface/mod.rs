@@ -1,6 +1,7 @@
 //! This module contains the interface for the drivers.
 
 pub mod backlight;
+pub mod ble;
 pub mod display;
 pub mod double_tap;
 pub mod error;

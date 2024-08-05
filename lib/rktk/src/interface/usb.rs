@@ -1,6 +1,7 @@
 use super::error::RktkError;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
+#[derive(Debug)]
 pub enum HidReport {
     Keyboard(KeyboardReport),
     MediaKeyboard(MediaKeyboardReport),
@@ -14,4 +15,15 @@ pub trait UsbDriver {
     async fn wait_ready(&mut self);
     async fn send_report(&mut self, report: HidReport) -> Result<(), RktkError>;
     async fn wakeup(&mut self) -> Result<(), RktkError>;
+}
+
+pub enum DummyUsbDriver {}
+impl UsbDriver for DummyUsbDriver {
+    async fn wait_ready(&mut self) {}
+    async fn send_report(&mut self, _report: HidReport) -> Result<(), RktkError> {
+        Ok(())
+    }
+    async fn wakeup(&mut self) -> Result<(), RktkError> {
+        Ok(())
+    }
 }
