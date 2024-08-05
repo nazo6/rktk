@@ -120,11 +120,11 @@ async fn server_task(sd: &'static Softdevice, server: Server, name: &'static str
             ServiceList::Complete,
             &[
                 ServiceUuid16::DEVICE_INFORMATION,
-                // ServiceUuid16::BATTERY,
+                ServiceUuid16::BATTERY,
                 ServiceUuid16::HUMAN_INTERFACE_DEVICE,
             ],
         )
-        .full_name("testname")
+        .full_name(name)
         // Change the appearance (icon of the bluetooth device) to a keyboard
         .raw(AdvertisementDataType::APPEARANCE, &[0xC1, 0x03])
         .raw(AdvertisementDataType::TXPOWER_LEVEL, &[0x02])
