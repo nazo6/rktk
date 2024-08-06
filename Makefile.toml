@@ -1,0 +1,14 @@
+[tasks.kb]
+script_runner = "@shell"
+script = 'cd keyboards && cargo make ${1}'
+
+[tasks.check-all]
+script_runner = "@shell"
+script = '''
+cd ./keyboards/keyball61-rp2040 && cargo clippy
+cd ../keyball61-nrf52840 && cargo clippy
+cd ../../lib/rktk && cargo clippy
+cd ../rktk-drivers-common && cargo clippy
+cd ../rktk-drivers-nrf52 && cargo clippy
+cd ../rktk-drivers-rp2040 && cargo clippy
+'''
