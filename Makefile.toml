@@ -2,6 +2,12 @@
 script_runner = "@shell"
 script = 'cd keyboards && cargo make ${1}'
 
+[tasks.run-usb]
+script = 'cd keyboards && cargo make nrf-run-usb'
+
+[tasks.run-ble]
+script = 'cd keyboards && cargo make nrf-run-ble'
+
 [tasks.check-all]
 script_runner = "@shell"
 script = '''

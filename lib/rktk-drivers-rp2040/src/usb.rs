@@ -1,13 +1,9 @@
-use core::sync::atomic::AtomicBool;
-
 use embassy_futures::select::{select, Either};
 use embassy_rp::{peripherals::USB, usb::Driver};
 pub use embassy_usb::Config as UsbConfig;
 use embassy_usb::UsbDevice;
 pub use rktk_drivers_common::usb::interface::*;
 use rktk_drivers_common::usb::{driver::CommonUsbDriver, RemoteWakeupSignal};
-
-pub static SUSPENDED: AtomicBool = AtomicBool::new(false);
 
 pub async fn new_usb(
     user_opts: UsbUserOpts<'static>,

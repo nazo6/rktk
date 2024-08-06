@@ -11,7 +11,7 @@ use usbd_hid::descriptor::{
 use crate::usb::handler::{UsbDeviceHandler, UsbRequestHandler};
 
 use super::interface::{UsbOpts, UsbResource, UsbUserOpts};
-use super::RemoteWakeupSignal;
+use super::{RemoteWakeupSignal, SUSPENDED};
 
 macro_rules! singleton {
     ($val:expr, $type:ty) => {{
@@ -124,6 +124,10 @@ impl<D: Driver<'static>> UsbDriver for CommonUsbDriver<D> {
     ) -> Result<(), rktk::interface::error::RktkError> {
         match report {
             rktk::interface::usb::HidReport::Keyboard(report) => {
+                if SUSPENDED.load(core::sync::atomic::Ordering::SeqCst) {
+                    self.wakeup_signal.signal(());
+                    return Ok(());
+                }
                 let _ = self.hid.keyboard.write_serialize(&report).await;
                 Ok(())
             }
