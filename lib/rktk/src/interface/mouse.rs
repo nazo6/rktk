@@ -1,4 +1,4 @@
-use super::error::RktkError;
+use super::{error::RktkError, DriverBuilder};
 
 pub trait MouseDriver {
     async fn read(&mut self) -> Result<(i8, i8), RktkError>;
@@ -15,5 +15,16 @@ pub enum DummyMouseDriver {}
 impl MouseDriver for DummyMouseDriver {
     async fn read(&mut self) -> Result<(i8, i8), RktkError> {
         Err(RktkError::NotSupported)
+    }
+}
+
+pub enum DummyMouseDriverBuilder {}
+impl DriverBuilder for DummyMouseDriverBuilder {
+    type Output = DummyMouseDriver;
+
+    type Error = ();
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        unimplemented!()
     }
 }

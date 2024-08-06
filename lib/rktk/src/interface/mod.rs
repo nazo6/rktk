@@ -9,6 +9,7 @@ pub mod keyscan;
 pub mod mouse;
 pub mod rand;
 pub mod split;
+pub mod storage;
 pub mod usb;
 
 pub trait DriverBuilder {

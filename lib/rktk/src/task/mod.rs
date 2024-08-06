@@ -12,9 +12,15 @@ use report::ReportChannel;
 use crate::{
     config::static_config::CONFIG,
     interface::{
-        backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
-        double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
-        rand::RandomDriver, split::SplitDriver, usb::UsbDriver, DriverBuilder,
+        backlight::BacklightDriver,
+        ble::BleDriver,
+        display::{DisplayDriver, DummyDisplayDriver},
+        double_tap::DoubleTapResetDriver,
+        keyscan::KeyscanDriver,
+        mouse::MouseDriver,
+        split::SplitDriver,
+        usb::UsbDriver,
+        DriverBuilder,
     },
     keycode::Layer,
 };
@@ -29,28 +35,30 @@ mod split;
 ///
 /// Only the `key_scanner` and `usb` drivers are required.
 /// For other drivers, if the value is None, it will be handled appropriately.
-///
-/// TODO: Add bluetooth driver and make usb optional.
 pub struct Drivers<
-    DTR: DoubleTapResetDriver,
-    KS: KeyscanDriver,
-    M: MouseDriver,
-    USB: UsbDriver,
-    D: DisplayDriver,
-    SP: SplitDriver,
-    BL: BacklightDriver,
-    BT: BleDriver,
-    FLASH: Flash + 'static,
-    MouseBuilder: DriverBuilder<Output = M>,
-    DisplayBuilder: DriverBuilder<Output = D>,
+    // required drivers
+    KeyScan: KeyscanDriver,
+    // builder drivers
+    MouseBuilder: DriverBuilder<Output = Mouse>,
+    DisplayBuilder: DriverBuilder<Output = Display>,
+    // optional drivers
+    Backlight: BacklightDriver,
+    Usb: UsbDriver,
+    Split: SplitDriver,
+    Ble: BleDriver,
+    DoubleTapReset: DoubleTapResetDriver,
+    EkvFlash: Flash + 'static,
+    // optional drivers of builder
+    Mouse: MouseDriver,
+    Display: DisplayDriver,
 > {
-    pub double_tap_reset: Option<DTR>,
-    pub key_scanner: KS,
-    pub backlight: Option<BL>,
-    pub usb: Option<USB>,
-    pub ble: Option<BT>,
-    pub split: Option<SP>,
-    pub storage: &'static ekv::Database<FLASH, CriticalSectionRawMutex>,
+    pub double_tap_reset: Option<DoubleTapReset>,
+    pub key_scanner: KeyScan,
+    pub backlight: Option<Backlight>,
+    pub usb: Option<Usb>,
+    pub ble: Option<Ble>,
+    pub split: Option<Split>,
+    pub storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
 
     pub mouse_builder: Option<MouseBuilder>,
     pub display_builder: Option<DisplayBuilder>,
@@ -65,19 +73,35 @@ pub struct Drivers<
 ///
 /// TODO: To avoid using both `new` and `init` methods, receive builder instead of driver.
 pub async fn start<
-    DTR: DoubleTapResetDriver,
-    KS: KeyscanDriver,
-    M: MouseDriver,
-    USB: UsbDriver,
-    D: DisplayDriver,
-    SP: SplitDriver,
-    BL: BacklightDriver,
-    BT: BleDriver,
-    STORAGE: Flash,
-    MouseBuilder: DriverBuilder<Output = M>,
-    DisplayBuilder: DriverBuilder<Output = D>,
+    // required drivers
+    KeyScan: KeyscanDriver,
+    // builder drivers
+    MouseBuilder: DriverBuilder<Output = Mouse>,
+    DisplayBuilder: DriverBuilder<Output = Display>,
+    // optional drivers
+    Backlight: BacklightDriver,
+    Usb: UsbDriver,
+    Split: SplitDriver,
+    Ble: BleDriver,
+    DoubleTapReset: DoubleTapResetDriver,
+    EkvFlash: Flash + 'static,
+    // optional drivers of builder
+    Mouse: MouseDriver,
+    Display: DisplayDriver,
 >(
-    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL, BT, STORAGE, MouseBuilder, DisplayBuilder>,
+    mut drivers: Drivers<
+        KeyScan,
+        MouseBuilder,
+        DisplayBuilder,
+        Backlight,
+        Usb,
+        Split,
+        Ble,
+        DoubleTapReset,
+        EkvFlash,
+        Mouse,
+        Display,
+    >,
     keymap: [Layer; CONFIG.layer_count],
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {
@@ -160,4 +184,15 @@ pub async fn start<
         },
     )
     .await;
+}
+
+pub enum DummyDisplayDriverBuilder {}
+impl DriverBuilder for DummyDisplayDriverBuilder {
+    type Output = DummyDisplayDriver;
+
+    type Error = ();
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        unimplemented!()
+    }
 }

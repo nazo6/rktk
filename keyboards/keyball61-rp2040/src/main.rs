@@ -7,7 +7,10 @@ use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::{gpio::Flex, peripherals::PIO1, pio::Pio};
 use keymap::KEYMAP;
-use rktk::{interface::ble::DummyBleDriver, task::Drivers};
+use rktk::{
+    interface::{ble::DummyBleDriver, storage::DummyStorage},
+    task::Drivers,
+};
 use rktk_drivers_rp2040::{
     backlight::ws2812_pio::Ws2812Pio,
     display::ssd1306::create_ssd1306,
@@ -100,6 +103,7 @@ async fn main(_spawner: Spawner) {
         split: Some(split),
         backlight: Some(backlight),
         ble: Option::<DummyBleDriver>::None,
+        storage: Option::<&DummyStorage>::None,
     };
 
     rktk::task::start(drivers, KEYMAP).await;

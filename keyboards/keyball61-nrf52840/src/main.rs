@@ -171,7 +171,7 @@ async fn main(_spawner: Spawner) {
         display_builder: Some(display),
         split: Some(split),
         backlight: Some(backlight),
-        storage,
+        storage: Some(storage),
         ble,
     };
 

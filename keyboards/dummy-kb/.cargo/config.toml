@@ -1,0 +1,16 @@
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "elf2uf2-rs -d"
+
+[build]
+target = "thumbv6m-none-eabi"
+
+[env]
+DEFMT_LOG = "info"
+RKTK_CONFIG_PATH = { value = "../rktk.keyball.toml", relative = true }
+
+[unstable]
+build-std = ["core"]
+build-std-features = ["panic_immediate_abort"]
+
+[profile.release]
+panic = 'abort'
