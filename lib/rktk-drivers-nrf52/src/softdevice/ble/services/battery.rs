@@ -12,7 +12,7 @@ use nrf_softdevice::{
     raw, Softdevice,
 };
 
-use crate::ble::constant::{BATTERY_LEVEL, BATTERY_SERVICE};
+use super::super::constant::{BATTERY_LEVEL, BATTERY_SERVICE};
 
 pub struct BatteryService {
     value_handle: u16,

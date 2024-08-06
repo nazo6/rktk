@@ -15,7 +15,7 @@ use rktk::interface::usb::HidReport;
 use ssmarshal::serialize;
 use usbd_hid::descriptor::SerializedDescriptor as _;
 
-use crate::ble::constant::*;
+use super::super::constant::*;
 
 mod descriptor;
 

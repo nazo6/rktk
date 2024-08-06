@@ -128,6 +128,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
 
         let took = start.elapsed();
 
+        crate::print!("Master took {:?}", took);
         if took < SCAN_INTERVAL_KEYBOARD {
             Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
         }

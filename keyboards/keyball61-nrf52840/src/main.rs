@@ -4,11 +4,7 @@
 
 use core::panic::PanicInfo;
 
-use defmt_rtt as _;
-
 use embassy_executor::Spawner;
-use nrf_softdevice as _;
-
 use embassy_nrf::{
     gpio::{Flex, Pin},
     interrupt::{self, InterruptExt, Priority},
@@ -17,19 +13,26 @@ use embassy_nrf::{
     usb::vbus_detect::SoftwareVbusDetect,
 };
 use once_cell::sync::OnceCell;
-use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
+
+use rktk::{
+    interface::{double_tap::DummyDoubleTapResetDriver, rand::RandomDriver as _},
+    task::Drivers,
+};
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360,
-    split::uart_half_duplex::UartHalfDuplexSplitDriver,
+    softdevice::ble::init_ble_server, split::uart_half_duplex::UartHalfDuplexSplitDriver,
 };
+
+use defmt_rtt as _;
+use nrf_softdevice as _;
 
 #[cfg(not(feature = "ble-master"))]
 use rktk::interface::ble::DummyBleDriver;
 #[cfg(not(feature = "usb"))]
 use rktk::interface::usb::DummyUsbDriver;
 #[cfg(feature = "ble-master")]
-use rktk_drivers_nrf52::ble::NrfBleDriver;
+use rktk_drivers_nrf52::softdevice::ble::NrfBleDriver;
 #[cfg(feature = "usb")]
 use rktk_drivers_nrf52::usb::{new_usb, UsbConfig, UsbUserOpts};
 
@@ -114,6 +117,27 @@ async fn main(_spawner: Spawner) {
 
     let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
 
+    let sd = rktk_drivers_nrf52::softdevice::init_sd("keyball61");
+    let (server, sd) = init_ble_server(sd).await;
+    rktk_drivers_nrf52::softdevice::start_softdevice(sd).await;
+
+    embassy_time::Timer::after_millis(50).await;
+
+    let rand = rktk_drivers_nrf52::softdevice::rand::SdRand::new(sd);
+
+    let storage =
+        rktk_drivers_nrf52::softdevice::flash::init_database(sd, rand.get_random().unwrap());
+
+    let ble = {
+        #[cfg(feature = "ble-master")]
+        let ble = Some(NrfBleDriver::new(sd, server, "keyball61", storage).await);
+
+        #[cfg(not(feature = "ble-master"))]
+        let ble = Option::<DummyBleDriver>::None;
+
+        ble
+    };
+
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
@@ -147,15 +171,8 @@ async fn main(_spawner: Spawner) {
         display_builder: Some(display),
         split: Some(split),
         backlight: Some(backlight),
-        ble: {
-            #[cfg(feature = "ble-master")]
-            let ble = Some(NrfBleDriver::new_and_init("keyball61").await);
-
-            #[cfg(not(feature = "ble-master"))]
-            let ble = Option::<DummyBleDriver>::None;
-
-            ble
-        },
+        storage,
+        ble,
     };
 
     rktk::task::start(drivers, keymap::KEYMAP).await;

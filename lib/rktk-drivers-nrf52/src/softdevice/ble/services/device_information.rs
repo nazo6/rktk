@@ -10,7 +10,7 @@ use nrf_softdevice::{
     Softdevice,
 };
 
-use crate::ble::constant::{
+use super::super::constant::{
     DEVICE_INFORMATION, FIRMWARE_REVISION, HARDWARE_REVISION, MANUFACTURER_NAME, MODEL_NUMBER,
     PNP_ID, SERIAL_NUMBER, SOFTWARE_REVISION,
 };

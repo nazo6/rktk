@@ -1,9 +1,11 @@
 //! Program entrypoint.
 
+use ekv::flash::Flash;
 use embassy_futures::{
     join::join,
     select::{select, Either},
 };
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_time::{Duration, Timer};
 use report::ReportChannel;
 
@@ -12,7 +14,7 @@ use crate::{
     interface::{
         backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
         double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
-        split::SplitDriver, usb::UsbDriver, DriverBuilder,
+        rand::RandomDriver, split::SplitDriver, usb::UsbDriver, DriverBuilder,
     },
     keycode::Layer,
 };
@@ -38,19 +40,17 @@ pub struct Drivers<
     SP: SplitDriver,
     BL: BacklightDriver,
     BT: BleDriver,
+    FLASH: Flash + 'static,
     MouseBuilder: DriverBuilder<Output = M>,
     DisplayBuilder: DriverBuilder<Output = D>,
 > {
     pub double_tap_reset: Option<DTR>,
-
     pub key_scanner: KS,
-
     pub backlight: Option<BL>,
-
     pub usb: Option<USB>,
     pub ble: Option<BT>,
-
     pub split: Option<SP>,
+    pub storage: &'static ekv::Database<FLASH, CriticalSectionRawMutex>,
 
     pub mouse_builder: Option<MouseBuilder>,
     pub display_builder: Option<DisplayBuilder>,
@@ -73,10 +73,11 @@ pub async fn start<
     SP: SplitDriver,
     BL: BacklightDriver,
     BT: BleDriver,
+    STORAGE: Flash,
     MouseBuilder: DriverBuilder<Output = M>,
     DisplayBuilder: DriverBuilder<Output = D>,
 >(
-    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL, BT, MouseBuilder, DisplayBuilder>,
+    mut drivers: Drivers<DTR, KS, M, USB, D, SP, BL, BT, STORAGE, MouseBuilder, DisplayBuilder>,
     keymap: [Layer; CONFIG.layer_count],
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {

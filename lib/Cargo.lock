@@ -414,6 +414,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "60b1af1c220855b6ceac025d3f6ecdd2b7c4894bfe9cd9bda4fbb4bc7c0d4cf0"
 
 [[package]]
+name = "ekv"
+version = "0.1.0"
+source = "git+https://github.com/embassy-rs/ekv#571a9c8863e9644682ebd41343eaf0444ea4bf87"
+dependencies = [
+ "embassy-sync 0.5.0",
+ "heapless 0.8.0",
+]
+
+[[package]]
 name = "embassy-embedded-hal"
 version = "0.1.0"
 source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7300b4fdc673c"
@@ -1622,8 +1631,9 @@ version = "0.0.1"
 dependencies = [
  "bitflags 2.6.0",
  "display-interface",
+ "ekv",
  "embassy-futures 0.1.1 (git+https://github.com/embassy-rs/embassy)",
- "embassy-sync 0.6.0",
+ "embassy-sync 0.5.0",
  "embassy-time",
  "embedded-graphics",
  "heapless 0.8.0",
@@ -1645,7 +1655,7 @@ version = "0.0.1"
 dependencies = [
  "display-interface",
  "embassy-executor",
- "embassy-sync 0.6.0",
+ "embassy-sync 0.5.0",
  "embassy-time",
  "embassy-usb",
  "embedded-graphics",
@@ -1665,13 +1675,15 @@ dependencies = [
  "bitvec",
  "defmt",
  "display-interface",
+ "ekv",
  "embassy-executor",
  "embassy-futures 0.1.1 (git+https://github.com/embassy-rs/embassy)",
  "embassy-nrf",
- "embassy-sync 0.6.0",
+ "embassy-sync 0.5.0",
  "embassy-time",
  "embassy-usb",
  "embedded-io-async",
+ "embedded-storage-async",
  "heapless 0.8.0",
  "nrf-softdevice",
  "rktk",
@@ -1691,7 +1703,7 @@ dependencies = [
  "embassy-executor",
  "embassy-futures 0.1.1 (git+https://github.com/embassy-rs/embassy)",
  "embassy-rp",
- "embassy-sync 0.6.0",
+ "embassy-sync 0.5.0",
  "embassy-time",
  "embassy-usb",
  "fixed",
