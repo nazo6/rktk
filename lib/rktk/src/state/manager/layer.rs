@@ -2,7 +2,7 @@ use crate::{
     keycode::{layer::LayerOp, KeyCode},
     state::{
         common::{CommonLocalState, CommonState},
-        pressed::{KeyStatusChangeType, KeyStatusUpdateEvent},
+        pressed::{KeyStatus, KeyStatusEvent},
     },
 };
 
@@ -26,11 +26,11 @@ impl LocalStateManager for LayerLocalState {
         _common_local_state: &mut CommonLocalState,
         _global_state: &mut Self::GlobalState,
         kc: &KeyCode,
-        event: &KeyStatusUpdateEvent,
+        event: &KeyStatusEvent,
     ) {
         match kc {
             KeyCode::Layer(layer_op) => match event.change_type {
-                KeyStatusChangeType::Released(_) => match layer_op {
+                KeyStatus::Released(_) => match layer_op {
                     LayerOp::Move(l) => {
                         common_state.layer_active[*l as usize] = false;
                     }

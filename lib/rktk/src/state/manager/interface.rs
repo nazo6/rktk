@@ -3,7 +3,7 @@ use crate::{
     state::common::{CommonLocalState, CommonState},
 };
 
-use super::super::pressed::KeyStatusUpdateEvent;
+use super::super::pressed::KeyStatusEvent;
 
 pub(crate) trait LocalStateManager {
     type GlobalState;
@@ -16,7 +16,7 @@ pub(crate) trait LocalStateManager {
         common_local_state: &mut CommonLocalState,
         global_state: &mut Self::GlobalState,
         kc: &KeyCode,
-        event: &KeyStatusUpdateEvent,
+        event: &KeyStatusEvent,
     );
 
     /// Called once for every loop

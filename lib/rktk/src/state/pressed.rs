@@ -6,14 +6,14 @@ pub struct AllPressed {
     state: [[Option<Instant>; CONFIG.cols * 2]; CONFIG.rows],
 }
 
-pub struct KeyStatusUpdateEvent {
+pub struct KeyStatusEvent {
     pub row: u8,
     pub col: u8,
-    pub change_type: KeyStatusChangeType,
+    pub change_type: KeyStatus,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum KeyStatusChangeType {
+pub enum KeyStatus {
     // Just pressed
     Pressed,
     // Still pressing
@@ -31,7 +31,7 @@ impl AllPressed {
         &mut self,
         events: impl Iterator<Item = &'a KeyChangeEventOneHand>,
         update_time: Instant,
-    ) -> heapless::Vec<KeyStatusUpdateEvent, 32> {
+    ) -> heapless::Vec<KeyStatusEvent, 32> {
         let mut composed = heapless::Vec::new();
         for event in events {
             if event.row as usize >= CONFIG.rows || event.col as usize >= (CONFIG.cols * 2) {
@@ -42,19 +42,19 @@ impl AllPressed {
                 (true, None) => {
                     *key_state = Some(update_time);
                     composed
-                        .push(KeyStatusUpdateEvent {
+                        .push(KeyStatusEvent {
                             row: event.row,
                             col: event.col,
-                            change_type: KeyStatusChangeType::Pressed,
+                            change_type: KeyStatus::Pressed,
                         })
                         .ok();
                 }
                 (false, Some(pressed_time)) => {
                     composed
-                        .push(KeyStatusUpdateEvent {
+                        .push(KeyStatusEvent {
                             row: event.row,
                             col: event.col,
-                            change_type: KeyStatusChangeType::Released(update_time - *pressed_time),
+                            change_type: KeyStatus::Released(update_time - *pressed_time),
                         })
                         .ok();
                     *key_state = None;
@@ -66,10 +66,10 @@ impl AllPressed {
         for (row, col, press_start) in self.iter() {
             if !composed.iter().any(|e| e.row == row && e.col == col) {
                 composed
-                    .push(KeyStatusUpdateEvent {
+                    .push(KeyStatusEvent {
                         row,
                         col,
-                        change_type: KeyStatusChangeType::Pressing(update_time - *press_start),
+                        change_type: KeyStatus::Pressing(update_time - *press_start),
                     })
                     .ok();
             }

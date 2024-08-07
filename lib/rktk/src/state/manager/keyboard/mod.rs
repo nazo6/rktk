@@ -4,7 +4,7 @@ use crate::{
     keycode::KeyCode,
     state::{
         common::{CommonLocalState, CommonState},
-        pressed::{KeyStatusChangeType, KeyStatusUpdateEvent},
+        pressed::{KeyStatus, KeyStatusEvent},
     },
 };
 
@@ -49,11 +49,11 @@ impl LocalStateManager for KeyboardLocalState {
         common_local_state: &mut CommonLocalState,
         _global_state: &mut Self::GlobalState,
         kc: &KeyCode,
-        event: &KeyStatusUpdateEvent,
+        event: &KeyStatusEvent,
     ) {
         match kc {
             KeyCode::Key(key) => {
-                if let KeyStatusChangeType::Pressed = event.change_type {
+                if let KeyStatus::Pressed = event.change_type {
                     common_local_state.normal_key_pressed = true;
                 }
                 common_local_state.keycodes.push(*key as u8).ok();
@@ -63,11 +63,6 @@ impl LocalStateManager for KeyboardLocalState {
             }
             KeyCode::Modifier(mod_key) => {
                 self.modifier |= mod_key.bits();
-            }
-            KeyCode::WithModifier(mod_key, key) => {
-                if common_local_state.keycodes.push(*key as u8).is_ok() {
-                    self.modifier |= mod_key.bits();
-                }
             }
             _ => {}
         };

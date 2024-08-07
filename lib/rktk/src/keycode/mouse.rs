@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 
-use super::macros::bit_normal;
+use super::macros::normal;
 use super::{KeyAction, KeyCode, KeyDef};
 
 bitflags! {
@@ -14,8 +14,8 @@ bitflags! {
     }
 }
 
-bit_normal!(M_L, Mouse, Left);
-bit_normal!(M_R, Mouse, Right);
-bit_normal!(M_MID, Mouse, Middle);
-bit_normal!(M_BCK, Mouse, Back);
-bit_normal!(M_FWD, Mouse, Forward);
+normal!(M_L, Mouse, Left);
+normal!(M_R, Mouse, Right);
+normal!(M_MID, Mouse, Middle);
+normal!(M_BCK, Mouse, Back);
+normal!(M_FWD, Mouse, Forward);

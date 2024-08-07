@@ -1,7 +1,7 @@
 use super::{KeyAction, KeyCode, KeyDef};
 use bitflags::bitflags;
 
-use super::macros::bit_normal;
+use super::macros::normal;
 
 bitflags! {
     #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -17,11 +17,11 @@ bitflags! {
     }
 }
 
-bit_normal!(L_CTRL, Modifier, LCtrl);
-bit_normal!(L_SHFT, Modifier, LShft);
-bit_normal!(L_ALT, Modifier, LAlt);
-bit_normal!(L_GUI, Modifier, LGui);
-bit_normal!(R_CTRL, Modifier, RCtrl);
-bit_normal!(R_SHFT, Modifier, RShft);
-bit_normal!(R_ALT, Modifier, RAlt);
-bit_normal!(R_GUI, Modifier, RGui);
+normal!(L_CTRL, Modifier, LCtrl);
+normal!(L_SHFT, Modifier, LShft);
+normal!(L_ALT, Modifier, LAlt);
+normal!(L_GUI, Modifier, LGui);
+normal!(R_CTRL, Modifier, RCtrl);
+normal!(R_SHFT, Modifier, RShft);
+normal!(R_ALT, Modifier, RAlt);
+normal!(R_GUI, Modifier, RGui);

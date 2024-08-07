@@ -15,10 +15,10 @@ pub enum LayerOp {
 
 pub const fn MV(n: u8) -> KeyDef {
     // assert!(n < LAYER_NUM);
-    KeyDef::Key(KeyAction::Tap(KeyCode::Layer(LayerOp::Move(n))))
+    KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Move(n))))
 }
 
 pub const fn TG(n: u8) -> KeyDef {
     // assert!(n < LAYER_NUM);
-    KeyDef::Key(KeyAction::Tap(KeyCode::Layer(LayerOp::Toggle(n))))
+    KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Toggle(n))))
 }

@@ -12,7 +12,7 @@ macro_rules! with_consts {
         use super::{KeyAction, KeyDef, KeyCode};
 
         paste::paste!{
-            $(pub const [<$variant:snake:upper>] :KeyDef = KeyDef::Key(KeyAction::Tap(KeyCode::$key_type($name::$variant)));)*
+            $(pub const [<$variant:snake:upper>] :KeyDef = KeyDef::Key(KeyAction::Normal(KeyCode::$key_type($name::$variant)));)*
         }
     }
 }
@@ -31,24 +31,17 @@ macro_rules! with_consts_no_val {
         use super::{KeyAction, KeyDef, KeyCode};
 
         paste::paste!{
-            $(pub const [<$variant:snake:upper>] :KeyDef = KeyDef::Key(KeyAction::Tap(KeyCode::$key_type($name::$variant)));)*
+            $(pub const [<$variant:snake:upper>] :KeyDef = KeyDef::Key(KeyAction::Normal(KeyCode::$key_type($name::$variant)));)*
         }
     }
 }
 
 macro_rules! normal {
     ($name:ident, $type:ident, $variant:ident) => {
-        pub const $name: KeyDef = KeyDef::Key(KeyAction::Tap(KeyCode::$type($type::$variant)));
+        pub const $name: KeyDef = KeyDef::Key(KeyAction::Normal(KeyCode::$type($type::$variant)));
     };
 }
 
-macro_rules! bit_normal {
-    ($name:ident, $type:ident, $variant:ident) => {
-        pub const $name: KeyDef = KeyDef::Key(KeyAction::Tap(KeyCode::$type($type::$variant)));
-    };
-}
-
-pub(super) use bit_normal;
 pub(super) use normal;
 pub(super) use with_consts;
 pub(super) use with_consts_no_val;

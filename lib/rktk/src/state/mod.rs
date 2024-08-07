@@ -14,7 +14,7 @@ use crate::{
 
 use self::{
     common::CommonState,
-    pressed::{AllPressed, KeyStatusChangeType, KeyStatusUpdateEvent},
+    pressed::{AllPressed, KeyStatus, KeyStatusEvent},
 };
 
 mod common;
@@ -108,20 +108,21 @@ impl State {
         };
 
         for event in events.iter() {
-            let Some(kc) = self.resolve_key(event, prev_highest_layer) else {
+            let Some(kci) = self.resolve_key(event, prev_highest_layer) else {
                 continue;
             };
-
-            process_event!(
-                &mut self.common_state,
-                &mut cls,
-                &kc,
-                event,
-                (mls, &mut self.mouse),
-                (kls, &mut self.keyboard),
-                (mkls, &mut self.media_keyboard),
-                (lls, &mut ())
-            );
+            for kc in kci {
+                process_event!(
+                    &mut self.common_state,
+                    &mut cls,
+                    &kc,
+                    event,
+                    (mls, &mut self.mouse),
+                    (kls, &mut self.keyboard),
+                    (mkls, &mut self.media_keyboard),
+                    (lls, &mut ())
+                );
+            }
         }
 
         loop_end!(
@@ -141,36 +142,62 @@ impl State {
         }
     }
 
-    fn resolve_key(&mut self, event: &KeyStatusUpdateEvent, layer: usize) -> Option<KeyCode> {
+    fn resolve_key<'a>(
+        &mut self,
+        event: &'a KeyStatusEvent,
+        layer: usize,
+    ) -> Option<KeyCodeIter<'a>> {
+        self.common_state
+            .get_keyaction(event.row, event.col, layer)
+            .map(|action| KeyCodeIter {
+                event,
+                action,
+                idx: 0,
+            })
+    }
+}
+
+struct KeyCodeIter<'a> {
+    event: &'a KeyStatusEvent,
+    action: KeyAction,
+    idx: usize,
+}
+impl<'a> core::iter::Iterator for KeyCodeIter<'a> {
+    type Item = KeyCode;
+
+    fn next(&mut self) -> Option<Self::Item> {
         const DEFAULT_TAP_THRESHOLD: Duration = Duration::from_millis(CONFIG.default_tap_threshold);
-
-        let key_action = self.common_state.get_keycode(event.row, event.col, layer)?;
-
-        match event.change_type {
-            KeyStatusChangeType::Pressed => match key_action {
-                KeyAction::Tap(kc) => Some(kc),
-                _ => None,
-            },
-            KeyStatusChangeType::Pressing(duration) => match key_action {
-                KeyAction::Tap(kc) => Some(kc),
-                KeyAction::TapHold(_tkc, hkc) => {
-                    if duration > DEFAULT_TAP_THRESHOLD {
+        let kc = if self.idx == 0 {
+            match (self.event.change_type, self.action) {
+                (KeyStatus::Pressed, KeyAction::Normal(kc)) => Some(kc),
+                (KeyStatus::Pressed, _) => None,
+                (_, KeyAction::Normal(kc)) => Some(kc),
+                (_, KeyAction::Normal2(kc1, _kc2)) => Some(kc1),
+                (KeyStatus::Pressing(dur), KeyAction::TapHold(_, hkc)) => {
+                    if dur > DEFAULT_TAP_THRESHOLD {
                         Some(hkc)
                     } else {
                         None
                     }
                 }
-            },
-            KeyStatusChangeType::Released(duration) => match key_action {
-                KeyAction::Tap(kc) => Some(kc),
-                KeyAction::TapHold(tkc, hkc) => {
-                    if duration > DEFAULT_TAP_THRESHOLD {
+                (KeyStatus::Released(dur), KeyAction::TapHold(tkc, hkc)) => {
+                    if dur > DEFAULT_TAP_THRESHOLD {
                         Some(hkc)
                     } else {
                         Some(tkc)
                     }
                 }
-            },
-        }
+            }
+        } else if self.idx == 1 {
+            if let KeyAction::Normal2(_kc1, kc2) = self.action {
+                Some(kc2)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        self.idx += 1;
+        kc
     }
 }

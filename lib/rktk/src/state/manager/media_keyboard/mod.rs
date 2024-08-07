@@ -4,7 +4,7 @@ use crate::{
     keycode::KeyCode,
     state::{
         common::{CommonLocalState, CommonState},
-        pressed::KeyStatusUpdateEvent,
+        pressed::KeyStatusEvent,
     },
 };
 
@@ -45,7 +45,7 @@ impl LocalStateManager for MediaKeyboardLocalState {
         _common_local_state: &mut CommonLocalState,
         _global_state: &mut Self::GlobalState,
         kc: &KeyCode,
-        _event: &KeyStatusUpdateEvent,
+        _event: &KeyStatusEvent,
     ) {
         match kc {
             KeyCode::Media(key) => {

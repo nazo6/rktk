@@ -28,12 +28,16 @@ pub enum KeyDef {
 
 /// Defined how key is handled.
 ///
-/// - `Tap`: Normal key press.
+/// - `Normal`: Normal key press.
+/// - `Normal2`: Press key with another key.
 /// - `TapHold`: If tapped term is too short, treat as `Tap` (first key is used). If tapped term is longer than `TAP_THRESHOLD`, treat as `Hold` (second key is used).
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyAction {
-    Tap(KeyCode),
+    Normal(KeyCode),
+    Normal2(KeyCode, KeyCode),
     TapHold(KeyCode, KeyCode),
+    // In future add more actions like:
+    // TapDance(TapDanceId),
 }
 
 /// Represents each key.
@@ -42,7 +46,6 @@ pub enum KeyCode {
     Key(key::Key),
     Mouse(mouse::Mouse),
     Modifier(modifier::Modifier),
-    WithModifier(modifier::Modifier, key::Key),
     Layer(layer::LayerOp),
     Special(special::Special),
     Media(media::Media),

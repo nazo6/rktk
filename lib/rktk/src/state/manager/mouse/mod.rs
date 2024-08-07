@@ -5,7 +5,7 @@ use crate::{
     keycode::{key::Key, special::Special, KeyCode},
     state::{
         common::{CommonLocalState, CommonState},
-        pressed::{KeyStatusChangeType, KeyStatusUpdateEvent},
+        pressed::{KeyStatus, KeyStatusEvent},
     },
 };
 
@@ -60,12 +60,12 @@ impl LocalStateManager for MouseLocalState {
         _common_local_state: &mut CommonLocalState,
         global_mouse_state: &mut MouseState,
         kc: &KeyCode,
-        event: &KeyStatusUpdateEvent,
+        event: &KeyStatusEvent,
     ) {
         match kc {
             KeyCode::Mouse(btn) => self.mouse_button |= btn.bits(),
             KeyCode::Special(special_op) => match event.change_type {
-                KeyStatusChangeType::Released(_) => match special_op {
+                KeyStatus::Released(_) => match special_op {
                     Special::MoScrl => {
                         global_mouse_state.scroll_mode = false;
                     }

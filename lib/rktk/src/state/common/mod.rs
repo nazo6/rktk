@@ -30,7 +30,7 @@ impl CommonState {
         self.layer_active.iter().rposition(|&x| x).unwrap_or(0)
     }
 
-    pub fn get_keycode(&self, row: u8, col: u8, layer: usize) -> Option<KeyAction> {
+    pub fn get_keyaction(&self, row: u8, col: u8, layer: usize) -> Option<KeyAction> {
         if row >= (CONFIG.rows) as u8 || col >= (CONFIG.cols * 2) as u8 {
             return None;
         }
