@@ -29,6 +29,8 @@ pub async fn start<
     let mut recv_buf = [0u8; MAX_DATA_SIZE];
     let mut send_buf = [0u8; MAX_DATA_SIZE];
 
+    let mut recv_cnt = 0;
+    let mut recv_err = 0;
     loop {
         match select(
             split.wait_recv(&mut recv_buf, is_master),
@@ -37,17 +39,15 @@ pub async fn start<
         .await
         {
             Either::First(res) => {
+                recv_cnt += 1;
                 if let Err(e) = res {
-                    crate::print!("RER: {:?} {}", e, embassy_time::Instant::now());
+                    recv_err += 1;
                 } else if let Ok(data) = from_bytes_cobs(&mut recv_buf) {
                     // crate::print!("R: {:?} {}", data, embassy_time::Instant::now());
                     let _ = received_sender.send(data).await;
                 } else {
-                    crate::print!(
-                        "REP:{} {}",
-                        fmt_array(&recv_buf),
-                        embassy_time::Instant::now()
-                    );
+                    crate::print!("err rate: {}", recv_err as f32 / recv_cnt as f32 * 100.0);
+                    recv_err += 1;
                 }
             }
             Either::Second(send_data) => {

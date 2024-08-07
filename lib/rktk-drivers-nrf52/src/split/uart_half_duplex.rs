@@ -1,6 +1,12 @@
+//! Uart half duplex split driver
+//!
+//! This module includes a half-duplex communication driver for split keyboard-to-keyboard communication using UART.
+//! Since this driver is a half-duplex communication where the transmitter and receiver share pins, a TRRS cable is not required for connection; a TRS cable is sufficient.
+//! However, due to its nature, it is relatively prone to transmission and reception errors. I checked on the receiving side and confirmed that reception failed at a rate of about 0.3%. This is a relatively high figure for a keyboard.
+
 use embassy_nrf::{
     buffered_uarte::{BufferedUarteRx, BufferedUarteTx, InterruptHandler},
-    gpio::{AnyPin, Input, Output},
+    gpio::{AnyPin, Flex, Input, Output},
     interrupt,
     ppi::AnyGroup,
     uarte::{Baudrate, Instance, Parity},
@@ -125,9 +131,10 @@ impl<
         _is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
         {
-            let _pin = Output::new(
-                &mut self.pin,
-                embassy_nrf::gpio::Level::High,
+            let mut pin = Flex::new(&mut self.pin);
+            pin.set_high();
+            pin.set_as_input_output(
+                embassy_nrf::gpio::Pull::Up,
                 embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
             );
         }
@@ -153,7 +160,6 @@ impl<
             embassy_nrf::gpio::Level::High,
             embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
         );
-        embassy_time::Timer::after_ticks(5).await;
         Ok(())
     }
 }
