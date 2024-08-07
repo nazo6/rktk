@@ -45,8 +45,6 @@ impl KeyResolver {
     ) -> heapless::Vec<(EventType, KeyCode), 64> {
         use EventType::*;
 
-        let highest_layer = cs.highest_layer();
-
         let mut resolved_keys = heapless::Vec::new();
 
         // If new key is pressed, all taphold keys in pressing state will be marked as force hold.
