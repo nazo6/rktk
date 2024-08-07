@@ -41,3 +41,7 @@ jobs:
         cd ../rktk-drivers-nrf52 && cargo clippy
         cd ../rktk-drivers-rp2040 && cargo clippy
         cd ../rktk-drivers-common && cargo clippy
+
+    - name: Run test
+      run: |
+        cd ./lib/rktk && cargo test
