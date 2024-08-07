@@ -1,5 +1,4 @@
-pub mod interface;
-pub mod keyboard;
-pub mod layer;
-pub mod media_keyboard;
-pub mod mouse;
+pub(super) mod keyboard;
+pub(super) mod layer;
+pub(super) mod media_keyboard;
+pub(super) mod mouse;

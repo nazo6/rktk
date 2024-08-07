@@ -5,13 +5,11 @@ use crate::{
     keycode::{key::Key, special::Special, KeyCode},
     state::{
         common::{CommonLocalState, CommonState},
-        pressed::{KeyStatus, KeyStatusEvent},
+        key_resolver::EventType,
     },
 };
 
 use self::aml::Aml;
-
-use super::interface::LocalStateManager;
 
 mod aml;
 mod reporter;
@@ -48,24 +46,17 @@ impl MouseLocalState {
             mouse_button: 0,
         }
     }
-}
 
-impl LocalStateManager for MouseLocalState {
-    type GlobalState = MouseState;
-    type Report = MouseReport;
-
-    fn process_event(
+    pub fn process_event(
         &mut self,
-        _common_state: &mut CommonState,
-        _common_local_state: &mut CommonLocalState,
         global_mouse_state: &mut MouseState,
         kc: &KeyCode,
-        event: &KeyStatusEvent,
+        event: EventType,
     ) {
         match kc {
             KeyCode::Mouse(btn) => self.mouse_button |= btn.bits(),
-            KeyCode::Special(special_op) => match event.change_type {
-                KeyStatus::Released(_) => match special_op {
+            KeyCode::Special(special_op) => match event {
+                EventType::Released => match special_op {
                     Special::MoScrl => {
                         global_mouse_state.scroll_mode = false;
                     }
@@ -80,7 +71,7 @@ impl LocalStateManager for MouseLocalState {
         }
     }
 
-    fn loop_end(
+    pub fn loop_end(
         &mut self,
         common_state: &mut CommonState,
         common_local_state: &mut CommonLocalState,
@@ -119,12 +110,7 @@ impl LocalStateManager for MouseLocalState {
         }
     }
 
-    fn report(
-        self,
-        _common_state: &CommonState,
-        _common_local_state: &CommonLocalState,
-        global_state: &mut Self::GlobalState,
-    ) -> Option<Self::Report> {
+    pub fn report(self, global_state: &mut MouseState) -> Option<MouseReport> {
         global_state.reporter.gen(
             self.mouse_event,
             self.mouse_button,

@@ -23,7 +23,7 @@ pub fn display_panic_message<D: crate::interface::display::DisplayDriver>(
         let _ = write!(str, "\nPANIC: {}", location.line());
     }
 
-    let _ = display.update_text_sync(&str, D::calculate_point(0, 0));
+    let _ = display.update_text_sync(&str, D::calculate_point(1, 2));
 
     let mut str = heapless::String::<512>::new();
 
@@ -43,6 +43,6 @@ pub fn display_panic_message<D: crate::interface::display::DisplayDriver>(
             wait(200);
         }
     } else {
-        let _ = display.update_text_sync(&str, D::calculate_point(0, 1));
+        let _ = display.update_text_sync(&str, D::calculate_point(1, 1));
     }
 }

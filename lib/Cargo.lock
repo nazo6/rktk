@@ -439,7 +439,6 @@ version = "0.5.0"
 source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7300b4fdc673c"
 dependencies = [
  "critical-section",
- "defmt",
  "document-features",
  "embassy-executor-macros",
 ]
@@ -614,7 +613,6 @@ source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7
 dependencies = [
  "cfg-if",
  "critical-section",
- "defmt",
  "document-features",
  "embassy-time-driver",
  "embassy-time-queue-driver",
@@ -643,7 +641,6 @@ name = "embassy-usb"
 version = "0.2.0"
 source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7300b4fdc673c"
 dependencies = [
- "defmt",
  "embassy-futures 0.1.1 (git+https://github.com/embassy-rs/embassy)",
  "embassy-net-driver-channel",
  "embassy-sync 0.6.0 (git+https://github.com/embassy-rs/embassy)",

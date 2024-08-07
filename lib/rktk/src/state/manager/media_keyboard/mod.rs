@@ -1,14 +1,6 @@
 use usbd_hid::descriptor::MediaKeyboardReport;
 
-use crate::{
-    keycode::KeyCode,
-    state::{
-        common::{CommonLocalState, CommonState},
-        pressed::KeyStatusEvent,
-    },
-};
-
-use super::interface::LocalStateManager;
+use crate::keycode::KeyCode;
 
 mod reporter;
 
@@ -32,21 +24,8 @@ impl MediaKeyboardLocalState {
     pub fn new() -> Self {
         Self { media_key: None }
     }
-}
 
-impl LocalStateManager for MediaKeyboardLocalState {
-    type GlobalState = MediaKeyboardState;
-
-    type Report = MediaKeyboardReport;
-
-    fn process_event(
-        &mut self,
-        _common_state: &mut CommonState,
-        _common_local_state: &mut CommonLocalState,
-        _global_state: &mut Self::GlobalState,
-        kc: &KeyCode,
-        _event: &KeyStatusEvent,
-    ) {
+    pub fn process_event(&mut self, kc: &KeyCode) {
         match kc {
             KeyCode::Media(key) => {
                 self.media_key = Some(*key as u16);
@@ -55,12 +34,7 @@ impl LocalStateManager for MediaKeyboardLocalState {
         };
     }
 
-    fn report(
-        self,
-        _common_state: &CommonState,
-        _common_local_state: &CommonLocalState,
-        global_state: &mut Self::GlobalState,
-    ) -> Option<Self::Report> {
+    pub fn report(self, global_state: &mut MediaKeyboardState) -> Option<MediaKeyboardReport> {
         global_state.reporter.gen(self.media_key)
     }
 }

@@ -362,7 +362,6 @@ source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7
 dependencies = [
  "cortex-m",
  "critical-section",
- "defmt",
  "document-features",
  "embassy-executor-macros",
  "embassy-time-driver",
@@ -490,7 +489,6 @@ source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7
 dependencies = [
  "cfg-if",
  "critical-section",
- "defmt",
  "document-features",
  "embassy-time-driver",
  "embassy-time-queue-driver",
@@ -519,7 +517,6 @@ name = "embassy-usb"
 version = "0.2.0"
 source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7300b4fdc673c"
 dependencies = [
- "defmt",
  "embassy-futures 0.1.1 (git+https://github.com/embassy-rs/embassy)",
  "embassy-net-driver-channel",
  "embassy-sync 0.6.0",
@@ -827,7 +824,6 @@ dependencies = [
  "heapless 0.8.0",
  "nrf-softdevice",
  "once_cell",
- "panic-probe",
  "rktk",
  "rktk-drivers-nrf52",
  "ssd1306",
@@ -1096,16 +1092,6 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 dependencies = [
  "critical-section",
  "portable-atomic",
-]
-
-[[package]]
-name = "panic-probe"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4047d9235d1423d66cc97da7d07eddb54d4f154d6c13805c6d0793956f4f25b0"
-dependencies = [
- "cortex-m",
- "defmt",
 ]
 
 [[package]]

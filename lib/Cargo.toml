@@ -20,20 +20,11 @@ embedded-hal-async = "1.0.0"
 embedded-io-async = "0.6.1"
 embedded-storage-async = "0.4.1"
 
+embassy-embedded-hal = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
 embassy-sync = { version = "0.5.0" }
-embassy-embedded-hal = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
-  "defmt",
-] }
-embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy", features = [
-  "defmt",
-] }
-embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy", features = [
-  "defmt",
-  "defmt-timestamp-uptime",
-] }
-embassy-usb = { version = "0.2.0", git = "https://github.com/embassy-rs/embassy", features = [
-  "defmt",
-] }
+embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy" }
+embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy" }
+embassy-usb = { version = "0.2.0", git = "https://github.com/embassy-rs/embassy" }
 embassy-futures = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
 ekv = { git = "https://github.com/embassy-rs/ekv", version = "0.1.0" }
 
