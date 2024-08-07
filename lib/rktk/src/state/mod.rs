@@ -2,6 +2,7 @@
 
 #![allow(clippy::single_match)]
 
+use embassy_time::Instant;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{
@@ -16,6 +17,7 @@ mod key_resolver;
 mod manager;
 mod pressed;
 
+#[derive(Debug, PartialEq)]
 pub struct StateReport {
     pub keyboard_report: Option<KeyboardReport>,
     pub mouse_report: Option<MouseReport>,
@@ -54,16 +56,14 @@ impl State {
 
     /// Updates state with the given events.
     /// If the keyboard is not split, slave_events should be empty.
-    #[inline(always)]
     pub fn update(
         &mut self,
         master_events: &mut [KeyChangeEventOneHand],
         slave_events: &mut [KeyChangeEventOneHand],
         mouse_event: (i8, i8),
+        now: Instant,
     ) -> StateReport {
-        let prev_highest_layer = self.cs.highest_layer();
-
-        let mut cls = CommonLocalState::new(prev_highest_layer);
+        let mut cls = CommonLocalState::new(now);
 
         let mut mls = manager::mouse::MouseLocalState::new(mouse_event);
         let mut kls = manager::keyboard::KeyboardLocalState::new();
@@ -83,13 +83,17 @@ impl State {
             lls.process_event(&mut self.cs, &kc, event);
         }
 
-        mls.loop_end(&mut self.cs, &mut cls, &mut self.mouse);
+        let highest_layer = self.cs.highest_layer();
+        mls.loop_end(&mut self.cs, &mut cls, &mut self.mouse, highest_layer);
 
         StateReport {
             keyboard_report: kls.report(&cls, &mut self.keyboard),
             mouse_report: mls.report(&mut self.mouse),
             media_keyboard_report: mkls.report(&mut self.media_keyboard),
-            highest_layer: prev_highest_layer as u8,
+            highest_layer: highest_layer as u8,
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

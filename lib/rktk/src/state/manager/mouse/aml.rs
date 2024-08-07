@@ -20,11 +20,18 @@ impl Aml {
         }
     }
 
-    pub fn enabled(&mut self, now: Instant, mouse_event: (i8, i8), continue_aml: bool) -> bool {
+    pub fn enabled_changed(
+        &mut self,
+        now: Instant,
+        mouse_event: (i8, i8),
+        continue_aml: bool,
+    ) -> (bool, bool) {
+        let mut changed = false;
         if let Some(start) = self.start {
             if mouse_event != (0, 0) || continue_aml {
                 self.start = Some(now);
             } else if now.duration_since(start) > DEFAULT_AUTO_MOUSE_DURATION {
+                changed = true;
                 self.start = None;
                 self.move_acc = 0;
             }
@@ -36,11 +43,12 @@ impl Aml {
             }
 
             if self.move_acc > CONFIG.default_auto_mouse_threshold {
+                changed = true;
                 self.start = Some(now);
                 self.move_acc = 0;
             }
         }
 
-        self.start.is_some()
+        (self.start.is_some(), changed)
     }
 }

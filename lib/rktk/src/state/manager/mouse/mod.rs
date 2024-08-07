@@ -76,8 +76,9 @@ impl MouseLocalState {
         common_state: &mut CommonState,
         common_local_state: &mut CommonLocalState,
         global_mouse_state: &mut MouseState,
+        highest_layer: usize,
     ) {
-        if common_state.layers[common_local_state.prev_highest_layer].arrowball {
+        if common_state.layers[highest_layer].arrowball {
             global_mouse_state.arrowball_move.0 += self.mouse_event.0;
             global_mouse_state.arrowball_move.1 += self.mouse_event.1;
 
@@ -101,12 +102,14 @@ impl MouseLocalState {
             self.mouse_event = (0, 0);
         } else {
             global_mouse_state.arrowball_move = (0, 0);
-            common_state.layer_active[CONFIG.default_auto_mouse_layer] =
-                global_mouse_state.aml.enabled(
-                    common_local_state.now,
-                    self.mouse_event,
-                    self.mouse_button != 0 || global_mouse_state.scroll_mode,
-                );
+            let (enabled, changed) = global_mouse_state.aml.enabled_changed(
+                common_local_state.now,
+                self.mouse_event,
+                self.mouse_button != 0 || global_mouse_state.scroll_mode,
+            );
+            if changed {
+                common_state.layer_active[CONFIG.default_auto_mouse_layer] = enabled;
+            }
         }
     }
 

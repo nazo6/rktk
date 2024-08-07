@@ -2,7 +2,7 @@
 //!
 //! To archieve flexible key mapping, key definition is bit complex.
 //! For example, normal `A` key is defined following:
-//! ```rust
+//! ```ignore
 //! KeyDef::Key(KeyAction::Tap(KeyCode::Key(Key::A)));
 //! ```
 //! This is too complex for normal usage, so these normal keys as provided as constants.

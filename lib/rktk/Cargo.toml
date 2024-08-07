@@ -28,6 +28,11 @@ ekv = { workspace = true }
 paste = "1.0.15"
 bitflags = "2.6.0"
 
+[dev-dependencies]
+embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
+critical-section = { version = "1.1.2", features = ["std"] }
+pretty_assertions = "1.4.0"
+
 [build-dependencies]
 schemars = "0.8.21"
 toml = "0.8.19"

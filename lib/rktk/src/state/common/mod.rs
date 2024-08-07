@@ -41,19 +41,17 @@ impl CommonState {
 }
 
 pub(super) struct CommonLocalState {
-    pub prev_highest_layer: usize,
     pub normal_key_pressed: bool,
     pub keycodes: heapless::Vec<u8, 6>,
     pub now: Instant,
 }
 
 impl CommonLocalState {
-    pub fn new(prev_highest_layer: usize) -> Self {
+    pub fn new(now: Instant) -> Self {
         Self {
-            prev_highest_layer,
             normal_key_pressed: false,
             keycodes: heapless::Vec::new(),
-            now: Instant::now(),
+            now,
         }
     }
 }

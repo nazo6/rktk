@@ -17,22 +17,18 @@ impl LayerLocalState {
         event: EventType,
     ) {
         match kc {
-            KeyCode::Layer(layer_op) => match event {
-                EventType::Released => match layer_op {
-                    LayerOp::Move(l) => {
-                        common_state.layer_active[*l as usize] = false;
-                    }
-                    LayerOp::Toggle(l) => {
-                        common_state.layer_active[*l as usize] =
-                            !common_state.layer_active[*l as usize];
-                    }
-                },
-                _ => match layer_op {
-                    LayerOp::Move(l) => {
-                        common_state.layer_active[*l as usize] = true;
-                    }
-                    _ => {}
-                },
+            KeyCode::Layer(layer_op) => match (event, layer_op) {
+                (EventType::Pressed, LayerOp::Toggle(l)) => {
+                    common_state.layer_active[*l as usize] =
+                        !common_state.layer_active[*l as usize];
+                }
+                (EventType::Pressed, LayerOp::Momentary(l)) => {
+                    common_state.layer_active[*l as usize] = true;
+                }
+                (EventType::Released, LayerOp::Momentary(l)) => {
+                    common_state.layer_active[*l as usize] = false;
+                }
+                _ => {}
             },
             _ => {}
         };

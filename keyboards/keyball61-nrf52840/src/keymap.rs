@@ -4,22 +4,22 @@ use rktk::keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::
 
 const L2ENTER: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Move(2)),
+    KeyCode::Layer(LayerOp::Momentary(2)),
 ));
 
 const L2SPC: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Move(2)),
+    KeyCode::Layer(LayerOp::Momentary(2)),
 ));
 
 const L3SPC: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Move(3)),
+    KeyCode::Layer(LayerOp::Momentary(3)),
 ));
 
 const L4GRV: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Grave),
-    KeyCode::Layer(LayerOp::Move(4)),
+    KeyCode::Layer(LayerOp::Momentary(4)),
 ));
 
 #[rustfmt::skip]

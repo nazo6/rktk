@@ -9,13 +9,13 @@ use super::{KeyAction, KeyCode};
 /// - `Toggle`: Move layer only while key is pressed.
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum LayerOp {
-    Move(u8),
+    Momentary(u8),
     Toggle(u8),
 }
 
-pub const fn MV(n: u8) -> KeyDef {
+pub const fn MO(n: u8) -> KeyDef {
     // assert!(n < LAYER_NUM);
-    KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Move(n))))
+    KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(n))))
 }
 
 pub const fn TG(n: u8) -> KeyDef {

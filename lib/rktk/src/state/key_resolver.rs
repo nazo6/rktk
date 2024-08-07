@@ -105,16 +105,16 @@ impl KeyResolver {
         }
 
         for (_ev, kc) in &resolved_keys {
-            if let KeyCode::Layer(LayerOp::Move(l)) = kc {
+            if let KeyCode::Layer(LayerOp::Momentary(l)) = kc {
                 cs.layer_active[*l as usize] = true;
             }
         }
 
         let highest_layer = cs.highest_layer();
         for event in &events.pressed {
-            let action = cs
-                .get_keyaction(event.row, event.col, highest_layer)
-                .unwrap();
+            let Some(action) = cs.get_keyaction(event.row, event.col, highest_layer) else {
+                continue;
+            };
 
             match action {
                 KeyAction::Normal(kc) => {
