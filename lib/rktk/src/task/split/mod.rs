@@ -6,7 +6,7 @@ use crate::{
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
     },
-    keycode::Layer,
+    Layer,
 };
 use embassy_futures::join::join;
 use embassy_sync::{

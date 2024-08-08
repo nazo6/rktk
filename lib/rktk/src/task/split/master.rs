@@ -1,47 +1,53 @@
 use embassy_futures::join::join;
-use embassy_time::Timer;
+use embassy_time::{Duration, Timer};
+use rktk_keymanager::state::{KeyChangeEvent, State, StateConfig, StateReport};
 
 use crate::{
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
     interface::{
         backlight::{BacklightCtrl, BacklightMode},
-        keyscan::{KeyChangeEventOneHand, KeyscanDriver},
+        keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
         usb::HidReport,
     },
-    keycode::Layer,
-    state::{State, StateReport},
     task::{backlight::BACKLIGHT_CTRL, report::ReportSender},
+    Layer,
 };
 
 use super::{M2sTx, S2mRx};
 
-fn receive_from_slave(
-    slave_events: &mut heapless::Vec<KeyChangeEventOneHand, 16>,
+fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
+    if hand == Hand::Right {
+        ev.col = CONFIG.cols as u8 - 1 - ev.col;
+    }
+}
+
+fn receive_from_slave<const N: usize>(
+    slave_events: &mut heapless::Vec<KeyChangeEvent, N>,
     mouse_move: &mut (i8, i8),
+    hand: Hand,
     s2m_rx: S2mRx<'_>,
 ) {
-    slave_events.clear();
     while let Ok(cmd_from_slave) = s2m_rx.try_receive() {
         match cmd_from_slave {
             SlaveToMaster::Pressed(row, col) => {
-                slave_events
-                    .push(KeyChangeEventOneHand {
-                        col,
-                        row,
-                        pressed: true,
-                    })
-                    .ok();
+                let mut ev = KeyChangeEvent {
+                    col,
+                    row,
+                    pressed: true,
+                };
+                split_to_entire(&mut ev, hand);
+                slave_events.push(ev).ok();
             }
             SlaveToMaster::Released(row, col) => {
-                slave_events
-                    .push(KeyChangeEventOneHand {
-                        col,
-                        row,
-                        pressed: false,
-                    })
-                    .ok();
+                let mut ev = KeyChangeEvent {
+                    col,
+                    row,
+                    pressed: false,
+                };
+                split_to_entire(&mut ev, hand);
+                slave_events.push(ev).ok();
             }
             SlaveToMaster::Mouse { x, y } => {
                 mouse_move.0 += x;
@@ -84,22 +90,28 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
     keymap: [Layer; CONFIG.layer_count],
     hand: crate::interface::keyscan::Hand,
 ) {
-    let mut state = State::new(keymap, Some(hand));
+    let mut state = State::new(
+        keymap,
+        StateConfig {
+            tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
+            auto_mouse_layer: CONFIG.default_auto_mouse_layer,
+            auto_mouse_duration: Duration::from_millis(CONFIG.default_auto_mouse_duration),
+            auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
+            scroll_divider_x: CONFIG.default_scroll_divider_x,
+            scroll_divider_y: CONFIG.default_scroll_divider_y,
+        },
+    );
 
     crate::print!("Master start");
 
     let mut latest_led: Option<BacklightCtrl> = None;
-
-    let mut slave_events = heapless::Vec::<_, 16>::new();
 
     loop {
         let start = embassy_time::Instant::now();
 
         let mut mouse_move: (i8, i8) = (0, 0);
 
-        receive_from_slave(&mut slave_events, &mut mouse_move, s2m_rx);
-
-        let (mut master_events, _) = join(key_scanner.scan(), async {
+        let (mut events, _) = join(key_scanner.scan(), async {
             if let Some(mouse) = &mut mouse {
                 if let Ok((x, y)) = mouse.read().await {
                     mouse_move.0 += x;
@@ -109,7 +121,15 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
         })
         .await;
 
-        let state_report = state.update(&mut master_events, &mut slave_events, mouse_move, start);
+        events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
+
+        receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
+
+        if events.len() > 0 {
+            crate::print!("{:?}", events);
+        }
+
+        let state_report = state.update(&mut events, mouse_move, start);
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 

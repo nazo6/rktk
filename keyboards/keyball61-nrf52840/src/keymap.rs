@@ -1,6 +1,9 @@
 use rktk::config::static_config::CONFIG;
-use rktk::keycode::*;
-use rktk::keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*};
+use rktk::keymanager::keycode::*;
+use rktk::keymanager::keycode::{
+    key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
+};
+use rktk::{Layer, LayerMap};
 
 const L2ENTER: KeyDef = KeyDef::Key(KeyAction::TapHold(
     KeyCode::Key(Key::Enter),

@@ -28,6 +28,8 @@ ekv = { workspace = true }
 paste = "1.0.15"
 bitflags = "2.6.0"
 
+rktk-keymanager = { path = "../rktk-keymanager" }
+
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
 critical-section = { version = "1.1.2", features = ["std"] }

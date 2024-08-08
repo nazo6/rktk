@@ -22,7 +22,7 @@ use crate::{
         usb::UsbDriver,
         DriverBuilder,
     },
-    keycode::Layer,
+    Layer,
 };
 
 mod backlight;

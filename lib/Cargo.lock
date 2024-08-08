@@ -1628,6 +1628,7 @@ dependencies = [
  "paste",
  "postcard",
  "pretty_assertions",
+ "rktk-keymanager",
  "schemars",
  "serde",
  "serde_json",
