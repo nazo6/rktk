@@ -1,7 +1,6 @@
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
-    config::static_config::CONFIG,
     keycode::{key::Key, special::Special, KeyCode},
     state::{
         common::{CommonLocalState, CommonState},
@@ -20,15 +19,23 @@ pub struct MouseState {
     reporter: reporter::MouseReportGenerator,
     aml: Aml,
     arrowball_move: (i8, i8),
+    auto_mouse_layer: usize,
 }
 
 impl MouseState {
-    pub fn new() -> Self {
+    pub fn new(
+        auto_mouse_layer: usize,
+        auto_mouse_duration: embassy_time::Duration,
+        auto_mouse_threshold: u8,
+        scroll_divider_x: i8,
+        scroll_divider_y: i8,
+    ) -> Self {
         Self {
-            aml: Aml::new(),
+            aml: Aml::new(auto_mouse_duration, auto_mouse_threshold),
             scroll_mode: false,
-            reporter: reporter::MouseReportGenerator::new(),
+            reporter: reporter::MouseReportGenerator::new(scroll_divider_x, scroll_divider_y),
             arrowball_move: (0, 0),
+            auto_mouse_layer,
         }
     }
 }
@@ -71,9 +78,9 @@ impl MouseLocalState {
         }
     }
 
-    pub fn loop_end(
+    pub fn loop_end<const LAYER: usize, const ROW: usize, const COL: usize>(
         &mut self,
-        common_state: &mut CommonState,
+        common_state: &mut CommonState<LAYER, ROW, COL>,
         common_local_state: &mut CommonLocalState,
         global_mouse_state: &mut MouseState,
         highest_layer: usize,
@@ -108,7 +115,7 @@ impl MouseLocalState {
                 self.mouse_button != 0 || global_mouse_state.scroll_mode,
             );
             if changed {
-                common_state.layer_active[CONFIG.default_auto_mouse_layer] = enabled;
+                common_state.layer_active[global_mouse_state.auto_mouse_layer] = enabled;
             }
         }
     }

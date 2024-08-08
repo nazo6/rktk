@@ -34,14 +34,15 @@ impl KeyboardLocalState {
         kc: &KeyCode,
         event: EventType,
     ) {
-        match kc {
-            KeyCode::Key(key) => {
+        match (event, kc) {
+            (EventType::Released, _) => {}
+            (_, KeyCode::Key(key)) => {
                 if let EventType::Pressed = event {
                     common_local_state.normal_key_pressed = true;
                 }
                 common_local_state.keycodes.push(*key as u8).ok();
             }
-            KeyCode::Modifier(mod_key) => {
+            (_, KeyCode::Modifier(mod_key)) => {
                 self.modifier |= mod_key.bits();
             }
             _ => {}

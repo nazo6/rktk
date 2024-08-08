@@ -1,5 +1,8 @@
 use super::pressed::Pressed;
-use rktk::interface::keyscan::{Hand, KeyChangeEventOneHand, KeyscanDriver};
+use rktk::{
+    interface::keyscan::{Hand, KeyscanDriver},
+    keymanager::state::KeyChangeEvent,
+};
 
 pub enum Pull {
     Up,
@@ -79,7 +82,7 @@ impl<
         }
     }
 
-    async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEventOneHand)) {
+    async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         // col -> row scan
         {
             for row in self.rows.iter_mut() {
@@ -100,7 +103,7 @@ impl<
                 for (i, row) in self.rows.iter_mut().enumerate() {
                     if let Some(change) = self.pressed.set_pressed(row.is_high(), i as u8, j as u8)
                     {
-                        cb(KeyChangeEventOneHand {
+                        cb(KeyChangeEvent {
                             row: i as u8,
                             col: j as u8,
                             pressed: change,
@@ -135,7 +138,7 @@ impl<
                         self.pressed
                             .set_pressed(col.is_high(), i as u8, (j + 3) as u8)
                     {
-                        cb(KeyChangeEventOneHand {
+                        cb(KeyChangeEvent {
                             row: i as u8,
                             col: (j + 3) as u8,
                             pressed: change,
@@ -160,7 +163,7 @@ impl<
         const ROWS: usize,
     > KeyscanDriver for DuplexMatrixScanner<'a, F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
-    async fn scan(&mut self) -> heapless::Vec<KeyChangeEventOneHand, 16> {
+    async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32> {
         let mut events = heapless::Vec::new();
         self.scan_with_cb(|e| {
             events.push(e).ok();

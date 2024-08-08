@@ -1,13 +1,13 @@
 use embassy_futures::join::join;
-use embassy_time::Timer;
+use embassy_time::{Duration, Timer};
+use rktk_keymanager::state::{State, StateConfig};
 
 use crate::{
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
     interface::{
         backlight::BacklightDriver, keyscan::KeyscanDriver, mouse::MouseDriver, usb::HidReport,
     },
-    keycode::Layer,
-    state::State,
+    Layer,
 };
 
 use super::report::ReportSender;
@@ -27,7 +27,17 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, BL: BacklightDriver>(
             }
         },
         async move {
-            let mut state = State::new(keymap, None);
+            let mut state = State::new(
+                keymap,
+                StateConfig {
+                    tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
+                    auto_mouse_layer: CONFIG.default_auto_mouse_layer,
+                    auto_mouse_duration: Duration::from_millis(CONFIG.default_auto_mouse_duration),
+                    auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
+                    scroll_divider_x: CONFIG.default_scroll_divider_x,
+                    scroll_divider_y: CONFIG.default_scroll_divider_y,
+                },
+            );
 
             crate::print!("Start",);
 
@@ -50,7 +60,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, BL: BacklightDriver>(
                 })
                 .await;
 
-                let state_report = state.update(&mut master_events, &mut [], mouse_move, start);
+                let state_report = state.update(&mut master_events, mouse_move, start);
 
                 crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 

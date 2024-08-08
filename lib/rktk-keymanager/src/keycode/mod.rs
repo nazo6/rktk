@@ -7,8 +7,6 @@
 //! ```
 //! This is too complex for normal usage, so these normal keys as provided as constants.
 
-use crate::config::static_config::CONFIG;
-
 pub mod key;
 pub mod layer;
 pub mod macros;
@@ -36,6 +34,7 @@ pub enum KeyAction {
     Normal(KeyCode),
     Normal2(KeyCode, KeyCode),
     TapHold(KeyCode, KeyCode),
+    OneShot(KeyCode),
     // In future add more actions like:
     // TapDance(TapDanceId),
 }
@@ -55,10 +54,3 @@ pub enum KeyCode {
 pub const _____: KeyDef = KeyDef::Inherit;
 /// No key definition.
 pub const XXXXX: KeyDef = KeyDef::None;
-
-pub struct Layer {
-    pub map: [[KeyDef; CONFIG.cols * 2]; CONFIG.rows],
-    pub arrowball: bool,
-}
-
-pub type LayerMap = [[KeyDef; CONFIG.cols * 2]; CONFIG.rows];

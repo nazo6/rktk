@@ -1,6 +1,6 @@
 "$schema" = "../lib/rktk/schema.json"
 
-cols = 7
+cols = 14
 rows = 5
 
 right_led_count = 34

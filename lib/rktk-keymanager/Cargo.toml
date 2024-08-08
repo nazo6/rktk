@@ -1,0 +1,20 @@
+[package]
+name = "rktk-keymanager"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+embassy-time = { workspace = true }
+bitflags = "2.6.0"
+heapless = { workspace = true }
+usbd-hid = { workspace = true }
+
+paste = "1.0.15"
+
+[dev-dependencies]
+embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
+critical-section = { version = "1.1.2", features = ["std"] }
+pretty_assertions = "1.4.0"

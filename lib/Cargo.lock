@@ -1628,6 +1628,7 @@ dependencies = [
  "paste",
  "postcard",
  "pretty_assertions",
+ "rktk-keymanager",
  "schemars",
  "serde",
  "serde_json",
@@ -1702,6 +1703,19 @@ dependencies = [
  "smart-leds",
  "ssd1306",
  "static_cell",
+]
+
+[[package]]
+name = "rktk-keymanager"
+version = "0.0.1"
+dependencies = [
+ "bitflags 2.6.0",
+ "critical-section",
+ "embassy-time",
+ "heapless 0.8.0",
+ "paste",
+ "pretty_assertions",
+ "usbd-hid",
 ]
 
 [[package]]

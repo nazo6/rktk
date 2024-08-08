@@ -2,15 +2,10 @@
 
 #![allow(clippy::single_match)]
 
-use embassy_time::Instant;
+use embassy_time::{Duration, Instant};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use crate::{
-    config::static_config::CONFIG,
-    interface::keyscan::{Hand, KeyChangeEventOneHand},
-    keycode::Layer,
-    state::common::CommonLocalState,
-};
+use crate::{state::common::CommonLocalState, Layer};
 
 mod common;
 mod key_resolver;
@@ -25,30 +20,46 @@ pub struct StateReport {
     pub highest_layer: u8,
 }
 
-pub struct State {
-    /// Specifies which hand is the master when the keyboard is split.
-    /// If None, the keyboard is not split.
-    master_hand: Option<Hand>,
+#[derive(Debug)]
+pub struct KeyChangeEvent {
+    pub col: u8,
+    pub row: u8,
+    pub pressed: bool,
+}
 
-    pressed: pressed::Pressed,
-    key_resolver: key_resolver::KeyResolver,
+pub struct StateConfig {
+    pub tap_threshold: Duration,
+    pub auto_mouse_layer: usize,
+    pub auto_mouse_duration: embassy_time::Duration,
+    pub auto_mouse_threshold: u8,
+    pub scroll_divider_x: i8,
+    pub scroll_divider_y: i8,
+}
 
-    cs: common::CommonState,
+pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
+    key_resolver: key_resolver::KeyResolver<ROW, COL>,
+    pressed: pressed::Pressed<COL, ROW>,
+
+    cs: common::CommonState<LAYER, ROW, COL>,
     mouse: manager::mouse::MouseState,
     keyboard: manager::keyboard::KeyboardState,
     media_keyboard: manager::media_keyboard::MediaKeyboardState,
 }
 
-impl State {
-    pub fn new(layers: [Layer; CONFIG.layer_count], master_hand: Option<Hand>) -> Self {
+impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, COL> {
+    pub fn new(layers: [Layer<ROW, COL>; LAYER], config: StateConfig) -> Self {
         Self {
-            master_hand,
-
+            key_resolver: key_resolver::KeyResolver::new(config.tap_threshold),
             pressed: pressed::Pressed::new(),
-            key_resolver: key_resolver::KeyResolver::new(),
 
             cs: common::CommonState::new(layers),
-            mouse: manager::mouse::MouseState::new(),
+            mouse: manager::mouse::MouseState::new(
+                config.auto_mouse_layer,
+                config.auto_mouse_duration,
+                config.auto_mouse_threshold,
+                config.scroll_divider_x,
+                config.scroll_divider_y,
+            ),
             keyboard: manager::keyboard::KeyboardState::new(),
             media_keyboard: manager::media_keyboard::MediaKeyboardState::new(),
         }
@@ -58,8 +69,7 @@ impl State {
     /// If the keyboard is not split, slave_events should be empty.
     pub fn update(
         &mut self,
-        master_events: &mut [KeyChangeEventOneHand],
-        slave_events: &mut [KeyChangeEventOneHand],
+        key_events: &mut [KeyChangeEvent],
         mouse_event: (i8, i8),
         now: Instant,
     ) -> StateReport {
@@ -68,19 +78,15 @@ impl State {
         let mut mls = manager::mouse::MouseLocalState::new(mouse_event);
         let mut kls = manager::keyboard::KeyboardLocalState::new();
         let mut mkls = manager::media_keyboard::MediaKeyboardLocalState::new();
-        let mut lls = manager::layer::LayerLocalState::new();
 
-        let events = self.pressed.compose_events_and_update_pressed(
-            self.master_hand,
-            master_events,
-            slave_events,
-        );
-
-        for (event, kc) in self.key_resolver.resolve_key(&mut self.cs, &cls, &events) {
+        let events_with_pressing = self.pressed.update_pressed(key_events);
+        for (event, kc) in self
+            .key_resolver
+            .resolve_key(&mut self.cs, &cls, &events_with_pressing)
+        {
             mls.process_event(&mut self.mouse, &kc, event);
             kls.process_event(&mut cls, &kc, event);
             mkls.process_event(&kc);
-            lls.process_event(&mut self.cs, &kc, event);
         }
 
         let highest_layer = self.cs.highest_layer();

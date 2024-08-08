@@ -1,20 +1,20 @@
 use embassy_time::Instant;
 
 use crate::{
-    config::static_config::CONFIG,
-    keycode::{KeyAction, KeyDef, Layer},
+    keycode::{KeyAction, KeyDef},
+    Layer,
 };
 
-pub(super) struct CommonState {
-    pub layers: [Layer; CONFIG.layer_count],
-    pub layer_active: [bool; CONFIG.layer_count],
+pub(super) struct CommonState<const LAYER: usize, const ROW: usize, const COL: usize> {
+    pub layers: [Layer<ROW, COL>; LAYER],
+    pub layer_active: [bool; LAYER],
 }
 
-impl CommonState {
-    pub fn new(layers: [Layer; CONFIG.layer_count]) -> Self {
+impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, ROW, COL> {
+    pub fn new(layers: [Layer<ROW, COL>; LAYER]) -> Self {
         Self {
             layers,
-            layer_active: [false; CONFIG.layer_count],
+            layer_active: [false; LAYER],
         }
     }
 
@@ -23,7 +23,7 @@ impl CommonState {
     }
 
     pub fn get_keyaction(&self, row: u8, col: u8, layer: usize) -> Option<KeyAction> {
-        if row >= (CONFIG.rows) as u8 || col >= (CONFIG.cols * 2) as u8 {
+        if row >= ROW as u8 || col >= COL as u8 {
             return None;
         }
 
