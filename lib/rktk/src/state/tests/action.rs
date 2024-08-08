@@ -6,22 +6,12 @@ fn normal_action() {
     let mut keymap = EMPTY_KEYMAP;
     keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Key(Key::A)));
 
-    let now = embassy_time::Instant::from_secs(0);
-    let mut state = super::super::State::new(keymap, Some(Hand::Left));
-    let report = state.update(
-        &mut [KeyChangeEventOneHand {
-            col: 0,
-            row: 0,
-            pressed: true,
-        }],
-        &mut [],
-        (0, 0),
-        now,
-    );
+    let mut state = State::new(keymap, Some(Hand::Left));
+    let _ = update!(state, time(0));
 
-    let mut expected = EMPTY_REPORT;
+    let report = update!(state, time(0), (0, 0, true));
+    let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0, 0, 0, 0, 0];
-
     assert_eq!(report, expected, "Normal action key 'a' is pressed");
 }
 
@@ -33,22 +23,12 @@ fn normal2_action() {
         KeyCode::Key(Key::B),
     ));
 
-    let now = embassy_time::Instant::from_secs(0);
-    let mut state = super::super::State::new(keymap, Some(Hand::Left));
-    let report = state.update(
-        &mut [KeyChangeEventOneHand {
-            col: 0,
-            row: 0,
-            pressed: true,
-        }],
-        &mut [],
-        (0, 0),
-        now,
-    );
+    let mut state = State::new(keymap, Some(Hand::Left));
+    let _ = update!(state, time(0));
 
-    let mut expected = EMPTY_REPORT;
+    let report = update!(state, time(0), (0, 0, true));
+    let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0x05, 0, 0, 0, 0];
-
     assert_eq!(
         report, expected,
         "Normal2 action key 'a' and 'b' are pressed"
@@ -62,33 +42,20 @@ fn taphold_action_hold() {
         KeyCode::Key(Key::A),
         KeyCode::Key(Key::B),
     ));
-    let now = embassy_time::Instant::from_secs(0);
 
-    let mut state = super::super::State::new(keymap, Some(Hand::Left));
+    let mut state = State::new(keymap, Some(Hand::Left));
+    let _ = update!(state, time(0));
 
-    let report = state.update(
-        &mut [KeyChangeEventOneHand {
-            col: 0,
-            row: 0,
-            pressed: true,
-        }],
-        &mut [],
-        (0, 0),
-        now,
-    );
+    let report = update!(state, time(0), (0, 0, true));
+    assert_eq!(report, NONE_REPORT, "TapHold action key, Just tapped");
 
-    assert_eq!(report, EMPTY_REPORT, "TapHold action key, Just tapped");
-
-    let now = embassy_time::Instant::from_millis(50);
-    let report = state.update(&mut [], &mut [], (0, 0), now);
+    let report = update!(state, time(50));
     assert_eq!(
         report, NONE_REPORT,
         "TapHold action key, Sill in tapping term"
     );
 
-    let now = embassy_time::Instant::from_millis(1000);
-    let report = state.update(&mut [], &mut [], (0, 0), now);
-
+    let report = update!(state, time(1000), (0, 0, true));
     let mut expected = NONE_REPORT;
     expected.keyboard_report = Some(KeyboardReport {
         keycodes: [0x05, 0, 0, 0, 0, 0],
@@ -109,33 +76,14 @@ fn taphold_action_tap() {
         KeyCode::Key(Key::A),
         KeyCode::Key(Key::B),
     ));
-    let now = embassy_time::Instant::from_secs(0);
 
-    let mut state = super::super::State::new(keymap, Some(Hand::Left));
+    let mut state = State::new(keymap, Some(Hand::Left));
+    let _ = update!(state, time(0));
 
-    let report = state.update(
-        &mut [KeyChangeEventOneHand {
-            col: 0,
-            row: 0,
-            pressed: true,
-        }],
-        &mut [],
-        (0, 0),
-        now,
-    );
-    assert_eq!(report, EMPTY_REPORT, "TapHold action key, Just tapped");
+    let report = update!(state, time(0), (0, 0, true));
+    assert_eq!(report, NONE_REPORT, "TapHold action key, Just tapped");
 
-    let now = embassy_time::Instant::from_millis(200);
-    let report = state.update(
-        &mut [KeyChangeEventOneHand {
-            col: 0,
-            row: 0,
-            pressed: false,
-        }],
-        &mut [],
-        (0, 0),
-        now,
-    );
+    let report = update!(state, time(200), (0, 0, false));
     let mut expected = NONE_REPORT;
     expected.keyboard_report = Some(KeyboardReport {
         keycodes: [0x04, 0, 0, 0, 0, 0],
