@@ -44,4 +44,4 @@ jobs:
 
     - name: Run test
       run: |
-        cd ./lib/rktk && cargo test
+        cd ./lib/rktk-keymanager && cargo test
