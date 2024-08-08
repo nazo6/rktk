@@ -1705,6 +1705,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "rktk-keymanager"
+version = "0.0.1"
+dependencies = [
+ "bitflags 2.6.0",
+ "critical-section",
+ "embassy-time",
+ "heapless 0.8.0",
+ "paste",
+ "pretty_assertions",
+ "usbd-hid",
+]
+
+[[package]]
 name = "rp-pac"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -4,6 +4,7 @@ members = [
   "rktk-drivers-common",
   "rktk-drivers-nrf52",
   "rktk-drivers-rp2040",
+  "rktk-keymanager",
 ]
 resolver = "2"
 
