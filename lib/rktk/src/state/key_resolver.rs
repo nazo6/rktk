@@ -7,7 +7,7 @@ use crate::{
 
 use super::{
     common::{CommonLocalState, CommonState},
-    pressed::KeyStatusEvents,
+    pressed::{KeyLocation, KeyStatusEvents},
 };
 
 struct KeyPressedState {
@@ -16,11 +16,19 @@ struct KeyPressedState {
     pub hold: bool,
 }
 
+struct OneShotState {
+    pub key: KeyCode,
+    // When active, this is some and contains the location of the key that activated this oneshot
+    // key.
+    pub active: Option<KeyLocation>,
+}
+
 const DEFAULT_TAP_THRESHOLD: Duration = Duration::from_millis(CONFIG.default_tap_threshold);
 
 /// Handles layer related events and resolve physical key position to keycode.
 pub struct KeyResolver {
     key_state: [[Option<KeyPressedState>; CONFIG.cols * 2]; CONFIG.rows],
+    oneshot: heapless::Vec<OneShotState, 4>,
 }
 
 #[derive(Clone, Copy)]
@@ -52,6 +60,7 @@ impl KeyResolver {
     pub fn new() -> Self {
         Self {
             key_state: core::array::from_fn(|_| core::array::from_fn(|_| None)),
+            oneshot: heapless::Vec::new(),
         }
     }
 
@@ -64,6 +73,26 @@ impl KeyResolver {
         use EventType::*;
 
         let mut resolved_keys = heapless::Vec::new();
+
+        if let Some(loc) = events.pressed.first() {
+            for osc in &mut self.oneshot {
+                if osc.active.is_none() {
+                    osc.active = Some(*loc);
+                    let _ = resolved_keys.push((Pressed, osc.key));
+                }
+            }
+        }
+        self.oneshot.retain(|osc| {
+            if let Some(loc) = osc.active {
+                if events.released.contains(&loc) {
+                    let _ = resolved_keys.push((Released, osc.key));
+                    return false;
+                } else {
+                    let _ = resolved_keys.push((Pressing, osc.key));
+                }
+            }
+            true
+        });
 
         // If new key is pressed, all taphold keys in pressing state will be marked as force hold.
         // Same as QMK's HOLD_ON_OTHER_KEY_PRESS
@@ -92,6 +121,7 @@ impl KeyResolver {
                             let _ = resolved_keys.push((Pressed, hkc));
                         }
                     }
+                    KeyAction::OneShot(_) => {}
                 }
             }
         }
@@ -111,9 +141,10 @@ impl KeyResolver {
                         {
                             let _ = resolved_keys.push((Released, hkc));
                         } else {
-                            let _ = resolved_keys.push((Released, tkc));
+                            let _ = resolved_keys.push((Pressed, tkc));
                         }
                     }
+                    KeyAction::OneShot(_) => {}
                 }
             }
             self.key_state[event.row as usize][event.col as usize] = None;
@@ -140,6 +171,12 @@ impl KeyResolver {
                     let _ = resolved_keys.push((Pressed, kc2));
                 }
                 KeyAction::TapHold(_, _) => {}
+                KeyAction::OneShot(kc) => {
+                    let _ = self.oneshot.push(OneShotState {
+                        key: kc,
+                        active: None,
+                    });
+                }
             };
 
             self.key_state[event.row as usize][event.col as usize] = Some(KeyPressedState {

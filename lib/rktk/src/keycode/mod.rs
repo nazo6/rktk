@@ -36,6 +36,7 @@ pub enum KeyAction {
     Normal(KeyCode),
     Normal2(KeyCode, KeyCode),
     TapHold(KeyCode, KeyCode),
+    OneShot(KeyCode),
     // In future add more actions like:
     // TapDance(TapDanceId),
 }

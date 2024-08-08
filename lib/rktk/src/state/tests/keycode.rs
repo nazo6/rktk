@@ -20,7 +20,6 @@ fn mouse_left_click_key() {
 fn layer_momentary_key() {
     let mut keymap = EMPTY_KEYMAP;
     keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(1))));
-    keymap[0].map[0][1] = KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(2))));
 
     let mut state = State::new(keymap, Some(Hand::Left));
     let _ = update!(state, time(0));

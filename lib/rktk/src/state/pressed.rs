@@ -13,6 +13,7 @@ pub struct KeyStatusEvents {
     pub released: Vec<KeyLocation, 16>,
 }
 
+#[derive(Clone, Copy, PartialEq)]
 pub struct KeyLocation {
     pub row: u8,
     pub col: u8,
