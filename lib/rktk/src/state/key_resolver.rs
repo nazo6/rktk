@@ -13,7 +13,7 @@ use super::{
 struct KeyPressedState {
     pub press_start: Instant,
     pub action: KeyAction,
-    pub force_hold: bool,
+    pub hold: bool,
 }
 
 const DEFAULT_TAP_THRESHOLD: Duration = Duration::from_millis(CONFIG.default_tap_threshold);
@@ -28,6 +28,24 @@ pub enum EventType {
     Pressed,
     Pressing,
     Released,
+}
+
+pub fn handle_layer_kc(common_state: &mut CommonState, kc: &KeyCode, event: EventType) {
+    match kc {
+        KeyCode::Layer(layer_op) => match (event, layer_op) {
+            (EventType::Pressed, LayerOp::Toggle(l)) => {
+                common_state.layer_active[*l as usize] = !common_state.layer_active[*l as usize];
+            }
+            (EventType::Pressed, LayerOp::Momentary(l)) => {
+                common_state.layer_active[*l as usize] = true;
+            }
+            (EventType::Released, LayerOp::Momentary(l)) => {
+                common_state.layer_active[*l as usize] = false;
+            }
+            _ => {}
+        },
+        _ => {}
+    };
 }
 
 impl KeyResolver {
@@ -49,10 +67,8 @@ impl KeyResolver {
 
         // If new key is pressed, all taphold keys in pressing state will be marked as force hold.
         // Same as QMK's HOLD_ON_OTHER_KEY_PRESS
-        let force_hold = !events.pressed.is_empty();
+        let make_hold = !events.pressed.is_empty();
 
-        // pressing events are processed first to make sure that changed layer is used for prssed
-        // events.
         for event in &events.pressing {
             if let Some(key_state) = &self.key_state[event.row as usize][event.col as usize] {
                 match key_state.action {
@@ -64,16 +80,16 @@ impl KeyResolver {
                         let _ = resolved_keys.push((Pressing, kc2));
                     }
                     KeyAction::TapHold(_tkc, hkc) => {
-                        if key_state.force_hold
-                            || cls.now - key_state.press_start > DEFAULT_TAP_THRESHOLD
-                        {
+                        if key_state.hold {
                             let _ = resolved_keys.push((Pressing, hkc));
-                        } else if force_hold {
+                        } else if cls.now - key_state.press_start > DEFAULT_TAP_THRESHOLD
+                            || make_hold
+                        {
                             self.key_state[event.row as usize][event.col as usize]
                                 .as_mut()
                                 .unwrap()
-                                .force_hold = true;
-                            let _ = resolved_keys.push((Pressing, hkc));
+                                .hold = true;
+                            let _ = resolved_keys.push((Pressed, hkc));
                         }
                     }
                 }
@@ -91,8 +107,7 @@ impl KeyResolver {
                         let _ = resolved_keys.push((Released, kc2));
                     }
                     KeyAction::TapHold(tkc, hkc) => {
-                        if key_state.force_hold
-                            || cls.now - key_state.press_start > DEFAULT_TAP_THRESHOLD
+                        if key_state.hold || cls.now - key_state.press_start > DEFAULT_TAP_THRESHOLD
                         {
                             let _ = resolved_keys.push((Released, hkc));
                         } else {
@@ -104,10 +119,10 @@ impl KeyResolver {
             self.key_state[event.row as usize][event.col as usize] = None;
         }
 
-        for (_ev, kc) in &resolved_keys {
-            if let KeyCode::Layer(LayerOp::Momentary(l)) = kc {
-                cs.layer_active[*l as usize] = true;
-            }
+        // To determine layer for `pressed` keys, we have to apply the layer changed in above loop.
+        // This is important to implement HOLD_ON_OTHER_KEY_PRESS and one shot layer.
+        for (event, kc) in &resolved_keys {
+            handle_layer_kc(cs, kc, *event);
         }
 
         let highest_layer = cs.highest_layer();
@@ -130,8 +145,12 @@ impl KeyResolver {
             self.key_state[event.row as usize][event.col as usize] = Some(KeyPressedState {
                 press_start: Instant::now(),
                 action,
-                force_hold: false,
+                hold: false,
             });
+        }
+
+        for (event, kc) in &resolved_keys {
+            handle_layer_kc(cs, kc, *event);
         }
 
         resolved_keys

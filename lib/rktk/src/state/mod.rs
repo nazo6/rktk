@@ -68,7 +68,6 @@ impl State {
         let mut mls = manager::mouse::MouseLocalState::new(mouse_event);
         let mut kls = manager::keyboard::KeyboardLocalState::new();
         let mut mkls = manager::media_keyboard::MediaKeyboardLocalState::new();
-        let mut lls = manager::layer::LayerLocalState::new();
 
         let events = self.pressed.compose_events_and_update_pressed(
             self.master_hand,
@@ -80,7 +79,6 @@ impl State {
             mls.process_event(&mut self.mouse, &kc, event);
             kls.process_event(&mut cls, &kc, event);
             mkls.process_event(&kc);
-            lls.process_event(&mut self.cs, &kc, event);
         }
 
         let highest_layer = self.cs.highest_layer();
