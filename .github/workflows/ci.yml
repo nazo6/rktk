@@ -23,14 +23,7 @@ jobs:
     - uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: "nightly-2024-08-01"
-
-    - uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ./target
-        key: ${{ steps.rust-toolchain.outputs.cachekey }}-${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+        components: "clippy"
 
     - name: Install cargo-make
       uses: taiki-e/install-action@v2
