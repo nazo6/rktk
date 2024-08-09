@@ -100,7 +100,7 @@ async fn main(_spawner: Spawner) {
         mouse_builder: Some(ball),
         usb: Some(usb),
         display_builder: Some(display),
-        split: Some(split),
+        split,
         backlight: Some(backlight),
         ble: Option::<DummyBleDriver>::None,
         storage: Option::<&DummyStorage>::None,

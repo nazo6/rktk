@@ -6,9 +6,7 @@ use embassy_sync::{
 use postcard::{from_bytes_cobs, to_slice_cobs};
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::config::static_config::CONFIG;
-
-use super::super::split::*;
+use crate::{config::static_config::CONFIG, interface::split::SplitDriver};
 
 pub const MAX_DATA_SIZE: usize = 16;
 

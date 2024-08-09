@@ -27,9 +27,8 @@ use crate::{
 
 mod backlight;
 pub mod display;
-mod no_split;
+mod main_loop;
 mod report;
-mod split;
 
 /// All drivers required to run the keyboard.
 ///
@@ -38,13 +37,13 @@ mod split;
 pub struct Drivers<
     // required drivers
     KeyScan: KeyscanDriver,
+    Split: SplitDriver,
     // builder drivers
     MouseBuilder: DriverBuilder<Output = Mouse>,
     DisplayBuilder: DriverBuilder<Output = Display>,
     // optional drivers
     Backlight: BacklightDriver,
     Usb: UsbDriver,
-    Split: SplitDriver,
     Ble: BleDriver,
     DoubleTapReset: DoubleTapResetDriver,
     EkvFlash: Flash + 'static,
@@ -54,10 +53,10 @@ pub struct Drivers<
 > {
     pub double_tap_reset: Option<DoubleTapReset>,
     pub key_scanner: KeyScan,
+    pub split: Split,
     pub backlight: Option<Backlight>,
     pub usb: Option<Usb>,
     pub ble: Option<Ble>,
-    pub split: Option<Split>,
     pub storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
 
     pub mouse_builder: Option<MouseBuilder>,
@@ -91,11 +90,11 @@ pub async fn start<
 >(
     mut drivers: Drivers<
         KeyScan,
+        Split,
         MouseBuilder,
         DisplayBuilder,
         Backlight,
         Usb,
-        Split,
         Ble,
         DoubleTapReset,
         EkvFlash,
@@ -154,27 +153,16 @@ pub async fn start<
 
             join(
                 async {
-                    if let Some(split) = drivers.split {
-                        split::start(
-                            report_sender,
-                            drivers.key_scanner,
-                            mouse,
-                            split,
-                            drivers.backlight,
-                            keymap,
-                            host_connected,
-                        )
-                        .await;
-                    } else {
-                        no_split::start(
-                            report_sender,
-                            keymap,
-                            drivers.key_scanner,
-                            mouse,
-                            drivers.backlight,
-                        )
-                        .await;
-                    }
+                    main_loop::start(
+                        report_sender,
+                        drivers.key_scanner,
+                        mouse,
+                        drivers.split,
+                        drivers.backlight,
+                        keymap,
+                        host_connected,
+                    )
+                    .await;
                 },
                 async {
                     report::start_report_task(report_receiver, drivers.usb, drivers.ble).await;

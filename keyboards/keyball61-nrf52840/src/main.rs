@@ -169,7 +169,7 @@ async fn main(_spawner: Spawner) {
             usb
         },
         display_builder: Some(display),
-        split: Some(split),
+        split,
         backlight: Some(backlight),
         storage: Some(storage),
         ble,
