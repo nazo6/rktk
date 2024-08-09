@@ -10,27 +10,27 @@ forced-target = "thumbv7em-none-eabihf"
 rktk-drivers-nrf52 = { path = "../../lib/rktk-drivers-nrf52" }
 rktk = { path = "../../lib/rktk" }
 
-embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy", features = [
+embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
   "executor-thread",
   "executor-interrupt",
   "integrated-timers",
   "nightly",
 ] }
-embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy", features = [
-] }
-embassy-sync = { version = "0.6.0", git = "https://github.com/embassy-rs/embassy" }
-embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+embassy-time = { workspace = true }
+embassy-sync = { workspace = true }
+embassy-nrf = { workspace = true, features = [
   "gpiote",
   "time-driver-rtc1",
   "nrf52840",
   "nfc-pins-as-gpio",
 ] }
-cortex-m = "0.7.7"
-cortex-m-rt = "0.7.3"
-defmt = "0.3.5"
+
+cortex-m = { workspace = true, features = ["inline-asm"] }
+cortex-m-rt = { workspace = true }
+
 defmt-rtt = "0.4.0"
-nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice", features = [
+nrf-softdevice = { workspace = true, features = [
   "ble-peripheral",
   "ble-central",
   "critical-section-impl",

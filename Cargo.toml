@@ -26,15 +26,20 @@ embedded-hal-async = "1.0.0"
 embedded-io-async = "0.6.1"
 embedded-storage-async = "0.4.1"
 
-embassy-embedded-hal = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
-embassy-sync = { version = "0.5.0" }
-embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy" }
-embassy-time = { version = "0.3.0", git = "https://github.com/embassy-rs/embassy" }
-embassy-usb = { version = "0.2.0", git = "https://github.com/embassy-rs/embassy" }
-embassy-futures = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
+embassy-embedded-hal = { version = "0.2.0" }
+embassy-sync = { version = "0.6.0" }
+embassy-executor = { version = "0.6.0" }
+embassy-time = { version = "0.3.2" }
+embassy-usb = { version = "0.3.0" }
+embassy-futures = { version = "0.1.1" }
 ekv = { git = "https://github.com/embassy-rs/ekv", version = "0.1.0" }
 
-embassy-rp = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy" }
+embassy-rp = { version = "0.2.0" }
+embassy-nrf = { version = "0.2.0" }
+nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice" }
+
+cortex-m = "0.7.6"
+cortex-m-rt = "0.7.0"
 
 usbd-hid = "0.8.2"
 

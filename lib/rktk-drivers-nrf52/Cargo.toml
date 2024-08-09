@@ -18,14 +18,14 @@ embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-embassy-nrf = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+embassy-nrf = { workspace = true, features = [
   "defmt",
   "gpiote",
   "time-driver-rtc1",
   "nrf52840",
   "nfc-pins-as-gpio",
 ] }
-nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice", features = [
+nrf-softdevice = { workspace = true, features = [
   "ble-peripheral",
   "ble-gatt-server",
   "ble-sec",
