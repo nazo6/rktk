@@ -1,9 +1,0 @@
-{
-  "lspconfig": {
-    "rust_analyzer": {
-      "rust-analyzer.check.workspace": false,
-      "rust-analyzer.check.allTargets": false,
-      "rust-analyzer.check.command": "custom-ra-check"
-    }
-  }
-}

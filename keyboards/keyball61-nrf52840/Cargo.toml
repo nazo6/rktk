@@ -18,18 +18,12 @@ embassy-executor = { workspace = true, features = [
   "nightly",
 ] }
 embassy-time = { workspace = true }
-embassy-sync = { workspace = true }
 embassy-nrf = { workspace = true, features = [
   "gpiote",
   "time-driver-rtc1",
   "nrf52840",
   "nfc-pins-as-gpio",
 ] }
-
-cortex-m = { workspace = true, features = ["inline-asm"] }
-cortex-m-rt = { workspace = true }
-
-defmt-rtt = "0.4.0"
 nrf-softdevice = { workspace = true, features = [
   "ble-peripheral",
   "ble-central",
@@ -38,13 +32,15 @@ nrf-softdevice = { workspace = true, features = [
   "nrf52840",
 ] }
 
+cortex-m = { workspace = true, features = ["inline-asm"] }
+cortex-m-rt = { workspace = true }
+
+defmt-rtt = { workspace = true }
+
 once_cell = { version = "1.19.0", default-features = false, features = [
   "atomic-polyfill",
 ] }
-embedded-graphics = "0.8.1"
-ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
-display-interface = "0.5.0"
-heapless = "0.8.0"
+ssd1306 = { workspace = true }
 
 [features]
 usb = []

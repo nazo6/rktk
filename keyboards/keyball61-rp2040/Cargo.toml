@@ -9,9 +9,7 @@ forced-target = "thumbv6m-none-eabi"
 [dependencies]
 rktk-drivers-rp2040 = { path = "../../lib/rktk-drivers-rp2040" }
 rktk = { path = "../../lib/rktk" }
-cortex-m = { workspace = true, features = ["inline-asm"] }
-cortex-m-rt = { workspace = true }
-defmt-rtt = { workspace = true }
+
 embassy-rp = { workspace = true, features = [
   "defmt",
   "unstable-pac",
@@ -26,7 +24,13 @@ embassy-executor = { workspace = true, features = [
   "defmt",
   "integrated-timers",
 ] }
+
+cortex-m = { workspace = true, features = ["inline-asm"] }
+cortex-m-rt = { workspace = true }
 portable-atomic = { version = "1.6.0", features = [
   "unsafe-assume-single-core",
 ] }
-ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
+
+defmt-rtt = { workspace = true }
+
+ssd1306 = { workspace = true }
