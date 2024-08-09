@@ -20,8 +20,7 @@ jobs:
     - name: Set rust version
       run: rustup override set nightly-2024-08-01
 
-    - id: rust-toolchain
-      uses: dtolnay/rust-toolchain@master
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: "nightly-2024-08-01"
 
