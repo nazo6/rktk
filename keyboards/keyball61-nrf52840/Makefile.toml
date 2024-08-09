@@ -10,5 +10,15 @@ script = '''
 alias ef exec --fail-on-error
 ef utils/arm-none-eabi-objcopy.exe -Oihex ${1} ${1}.hex
 ef python3 utils/uf2conv.py ${1}.hex -o ${1}.uf2 -c -b 0x26000 -f 0xADA52840
-exec cmd /c "copy ${1}.uf2 E:\\"
+success = set false
+r = range 1 10
+for i in ${r}
+  if not ${success}
+    code = exec --get-exit-code cmd /c "copy ${1}.uf2 E:\\"
+    success = eq ${code} 0
+  end
+  if not ${success}
+    sleep 750
+  end
+end
 '''
