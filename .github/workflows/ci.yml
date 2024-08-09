@@ -24,6 +24,7 @@ jobs:
       with:
         toolchain: "nightly-2024-08-01"
         components: "clippy,rust-src"
+        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
     - name: Install cargo-make
       uses: taiki-e/install-action@v2
