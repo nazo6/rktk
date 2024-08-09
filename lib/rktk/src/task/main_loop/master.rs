@@ -125,10 +125,6 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
 
         receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
 
-        if events.len() > 0 {
-            crate::print!("{:?}", events);
-        }
-
         let state_report = state.update(&mut events, mouse_move, start);
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);

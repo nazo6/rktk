@@ -48,7 +48,7 @@ async fn main(_spawner: Spawner) {
         mouse_builder: Option::<DummyMouseDriverBuilder>::None,
         usb: Option::<DummyUsbDriver>::None,
         display_builder: Option::<DummyDisplayDriverBuilder>::None,
-        split: Option::<DummySplitDriver>::None,
+        split: DummySplitDriver,
         backlight: Option::<DummyBacklightDriver>::None,
         ble: Option::<DummyBleDriver>::None,
         storage: Option::<&DummyStorage>::None,

@@ -20,28 +20,19 @@ jobs:
     - name: Set rust version
       run: rustup override set nightly-2024-08-01
 
-    - id: rust-toolchain
-      uses: dtolnay/rust-toolchain@master
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: "nightly-2024-08-01"
-        components: "clippy"
-        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf,x86_64-unknown-linux-gnu"
+        components: "clippy,rust-src"
+        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
-    - uses: actions/cache@v4
+    - name: Install cargo-make
+      uses: taiki-e/install-action@v2
       with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ./lib/target
-        key: ${{ steps.rust-toolchain.outputs.cachekey }}-${{ runner.os }}-cargo-${{ hashFiles('lib/Cargo.lock') }}
+        tool: cargo-make
 
     - name: Run check
-      run: |
-        cd ./lib/rktk && cargo clippy
-        cd ../rktk-drivers-nrf52 && cargo clippy
-        cd ../rktk-drivers-rp2040 && cargo clippy
-        cd ../rktk-drivers-common && cargo clippy
+      run: cargo make check-all
 
     - name: Run test
-      run: |
-        cd ./lib/rktk-keymanager && cargo test
+      run: cargo make test-all

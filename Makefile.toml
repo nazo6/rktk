@@ -1,20 +1,52 @@
-[tasks.kb]
-script_runner = "@shell"
-script = 'cd keyboards && cargo make ${1}'
+[config]
+default_to_workspace = false
+skip_core_tasks = true
+skip_git_env_info = true
+skip_rust_env_info = true
+skip_crate_env_info = true
 
 [tasks.run-usb]
-script = 'cd keyboards && cargo make nrf-run-usb'
+script = 'cd keyboards/keyball61-nrf52840 && cargo run --release --no-default-features --features usb'
 
 [tasks.run-ble]
-script = 'cd keyboards && cargo make nrf-run-ble'
+script = 'cd keyboards/keyball61-nrf52840 && cargo run --release --no-default-features --features ble-master'
 
 [tasks.check-all]
-script_runner = "@shell"
 script = '''
-cd ./keyboards/keyball61-rp2040 && cargo clippy
-cd ../keyball61-nrf52840 && cargo clippy
-cd ../../lib/rktk && cargo clippy
-cd ../rktk-drivers-common && cargo clippy
-cd ../rktk-drivers-nrf52 && cargo clippy
-cd ../rktk-drivers-rp2040 && cargo clippy
+#!@duckscript
+packages = glob_array ./**/Cargo.toml
+pwd = pwd
+for path in ${packages}
+  if not eq ${path} Cargo.toml
+    dir = dirname ${path}
+    cd ${dir}
+    exec --fail-on-error cargo clippy
+    cd ${pwd}
+  end
+end
+'''
+
+[tasks.test-all]
+script = '''
+#!@duckscript
+fn test
+  pwd = pwd
+  cd ${1}
+  exec --fail-on-error cargo test
+  cd ${pwd}
+end
+
+test ./lib/rktk-keymanager
+'''
+
+[tasks.ra-check]
+script = '''
+#!@duckscript
+if starts_with ${2} rktk
+  cd lib/${2}
+  exec cargo clippy --message-format=json
+else
+  cd keyboards/${2}
+  exec cargo clippy --message-format=json
+end
 '''

@@ -6,9 +6,7 @@ use embassy_sync::{
 use postcard::{from_bytes_cobs, to_slice_cobs};
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::config::static_config::CONFIG;
-
-use super::super::split::*;
+use crate::{config::static_config::CONFIG, interface::split::SplitDriver};
 
 pub const MAX_DATA_SIZE: usize = 16;
 
@@ -40,7 +38,7 @@ pub async fn start<
         {
             Either::First(res) => {
                 recv_cnt += 1;
-                if let Err(e) = res {
+                if let Err(_e) = res {
                     recv_err += 1;
                 } else if let Ok(data) = from_bytes_cobs(&mut recv_buf) {
                     // crate::print!("R: {:?} {}", data, embassy_time::Instant::now());
@@ -61,13 +59,13 @@ pub async fn start<
     }
 }
 
-fn fmt_array(arr: &[u8]) -> heapless::String<64> {
-    use core::fmt::Write as _;
-
-    let mut str = heapless::String::<64>::new();
-
-    for b in arr {
-        let _ = write!(str, "{:02X}", b);
-    }
-    str
-}
+// fn fmt_array(arr: &[u8]) -> heapless::String<64> {
+//     use core::fmt::Write as _;
+//
+//     let mut str = heapless::String::<64>::new();
+//
+//     for b in arr {
+//         let _ = write!(str, "{:02X}", b);
+//     }
+//     str
+// }

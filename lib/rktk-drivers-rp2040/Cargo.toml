@@ -13,10 +13,10 @@ rktk-drivers-common = { path = "../rktk-drivers-common" }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
-embassy-sync = { version = "0.6.0" }
+embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 static_cell = { workspace = true }
-embassy-rp = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+embassy-rp = { workspace = true, features = [
   "defmt",
   "unstable-pac",
   "time-driver",
