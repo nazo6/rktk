@@ -18,19 +18,29 @@ script = 'cd keyboards && cargo make nrf-run-ble'
 [tasks.check-all]
 script = '''
 #!@duckscript
-fn clippy
+packages = glob_array ./**/Cargo.toml
+pwd = pwd
+for path in ${packages}
+  if not eq ${path} Cargo.toml
+    dir = dirname ${path}
+    cd ${dir}
+    exec --fail-on-error cargo clippy
+    cd ${pwd}
+  end
+end
+'''
+
+[tasks.test-all]
+script = '''
+#!@duckscript
+fn test
   pwd = pwd
   cd ${1}
-  exec --fail-on-error cargo clippy
+  exec --fail-on-error cargo test
   cd ${pwd}
 end
 
-clippy ./keyboards/keyball61-rp2040
-clippy ./keyboards/keyball61-nrf52840
-clippy ./lib/rktk
-clippy ./lib/rktk-drivers-common
-clippy ./lib/rktk-drivers-nrf52
-clippy ./lib/rktk-drivers-rp2040
+test ./lib/rktk-keymanager
 '''
 
 [tasks.ra-check]
