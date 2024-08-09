@@ -1,8 +1,14 @@
+[config]
+skip_core_tasks = true
+skip_git_env_info = true
+skip_rust_env_info = true
+skip_crate_env_info = true
+
 [tasks.deploy]
 script = '''
 #!@duckscript
 alias ef exec --fail-on-error
 ef utils/arm-none-eabi-objcopy.exe -Oihex ${1} ${1}.hex
 ef python3 utils/uf2conv.py ${1}.hex -o ${1}.uf2 -c -b 0x26000 -f 0xADA52840
-cp {1}.uf2 D:/
+exec cmd /c "copy ${1}.uf2 E:\\"
 '''

@@ -5,15 +5,11 @@ skip_git_env_info = true
 skip_rust_env_info = true
 skip_crate_env_info = true
 
-[tasks.kb]
-script_runner = "@shell"
-script = 'cd keyboards && cargo make ${1}'
-
 [tasks.run-usb]
-script = 'cd keyboards && cargo make nrf-run-usb'
+script = 'cd keyboards/keyball61-nrf52840 && cargo run --release --no-default-features --features usb'
 
 [tasks.run-ble]
-script = 'cd keyboards && cargo make nrf-run-ble'
+script = 'cd keyboards/keyball61-nrf52840 && cargo run --release --no-default-features --features ble-master'
 
 [tasks.check-all]
 script = '''
