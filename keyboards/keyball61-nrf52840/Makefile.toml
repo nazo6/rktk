@@ -1,0 +1,8 @@
+[tasks.deploy]
+script = '''
+#!@duckscript
+alias ef exec --fail-on-error
+ef utils/arm-none-eabi-objcopy.exe -Oihex ${1} ${1}.hex
+ef python3 utils/uf2conv.py ${1}.hex -o ${1}.uf2 -c -b 0x26000 -f 0xADA52840
+cp {1}.uf2 D:/
+'''

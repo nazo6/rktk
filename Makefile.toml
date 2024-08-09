@@ -1,3 +1,10 @@
+[config]
+default_to_workspace = false
+skip_core_tasks = true
+skip_git_env_info = true
+skip_rust_env_info = true
+skip_crate_env_info = true
+
 [tasks.kb]
 script_runner = "@shell"
 script = 'cd keyboards && cargo make ${1}'
@@ -9,12 +16,31 @@ script = 'cd keyboards && cargo make nrf-run-usb'
 script = 'cd keyboards && cargo make nrf-run-ble'
 
 [tasks.check-all]
-script_runner = "@shell"
 script = '''
-cd ./keyboards/keyball61-rp2040 && cargo clippy
-cd ../keyball61-nrf52840 && cargo clippy
-cd ../../lib/rktk && cargo clippy
-cd ../rktk-drivers-common && cargo clippy
-cd ../rktk-drivers-nrf52 && cargo clippy
-cd ../rktk-drivers-rp2040 && cargo clippy
+#!@duckscript
+fn clippy
+  pwd = pwd
+  cd ${1}
+  exec --fail-on-error cargo clippy
+  cd ${pwd}
+end
+
+clippy ./keyboards/keyball61-rp2040
+clippy ./keyboards/keyball61-nrf52840
+clippy ./lib/rktk
+clippy ./lib/rktk-drivers-common
+clippy ./lib/rktk-drivers-nrf52
+clippy ./lib/rktk-drivers-rp2040
+'''
+
+[tasks.ra-check]
+script = '''
+#!@duckscript
+if starts_with ${2} rktk
+  cd lib/${2}
+  exec cargo clippy --message-format=json
+else
+  cd keyboards/${2}
+  exec cargo clippy --message-format=json
+end
 '''

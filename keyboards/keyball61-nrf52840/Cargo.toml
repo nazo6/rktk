@@ -1,7 +1,10 @@
+cargo-features = ["per-package-target"]
+
 [package]
 name = "keyball61-nrf52840"
 version = "0.1.0"
 edition = "2021"
+forced-target = "thumbv7em-none-eabihf"
 
 [dependencies]
 rktk-drivers-nrf52 = { path = "../../lib/rktk-drivers-nrf52" }

@@ -1,0 +1,12 @@
+[profile.release]
+lto = true
+
+[profile.size-opt]
+inherits = "release"
+opt-level = "z"
+lto = true
+panic = "abort"
+rustflags = ["-Zlocation-detail=none"]
+
+[alias]
+custom-ra-check = "make ra-check"

@@ -1,5 +1,5 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-runner = "elf2uf2-rs -d"
+runner = "cargo make deploy"
 
 [build]
 target = "thumbv7em-none-eabihf"
@@ -7,9 +7,3 @@ target = "thumbv7em-none-eabihf"
 [env]
 DEFMT_LOG = "info"
 RKTK_CONFIG_PATH = { value = "../rktk.keyball.toml", relative = true }
-
-[unstable]
-build-std = ["core"]
-
-[profile.release]
-strip = false

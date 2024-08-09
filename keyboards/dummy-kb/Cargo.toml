@@ -1,5 +1,5 @@
 [package]
-name = "keyball61-rp2040"
+name = "dummy-kb"
 version = "0.1.0"
 edition = "2021"
 

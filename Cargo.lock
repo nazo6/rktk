@@ -331,6 +331,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "defmt-rtt"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bab697b3dbbc1750b7c8b821aa6f6e7f2480b47a99bc057a2ed7b170ebef0c51"
+dependencies = [
+ "critical-section",
+ "defmt",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -396,6 +406,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dummy-kb"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt-rtt",
+ "embassy-executor",
+ "embassy-rp",
+ "portable-atomic",
+ "rktk",
+ "rktk-drivers-rp2040",
+]
+
+[[package]]
 name = "dyn-clone"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -438,9 +462,13 @@ name = "embassy-executor"
 version = "0.5.0"
 source = "git+https://github.com/embassy-rs/embassy#2b031756c6d705f58de972de48f7300b4fdc673c"
 dependencies = [
+ "cortex-m",
  "critical-section",
+ "defmt",
  "document-features",
  "embassy-executor-macros",
+ "embassy-time-driver",
+ "embassy-time-queue-driver",
 ]
 
 [[package]]
@@ -1029,6 +1057,43 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
+name = "keyball61-nrf52840"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-rtt",
+ "display-interface",
+ "embassy-executor",
+ "embassy-nrf",
+ "embassy-sync 0.6.0 (git+https://github.com/embassy-rs/embassy)",
+ "embassy-time",
+ "embedded-graphics",
+ "heapless 0.8.0",
+ "nrf-softdevice",
+ "once_cell",
+ "rktk",
+ "rktk-drivers-nrf52",
+ "ssd1306",
+]
+
+[[package]]
+name = "keyball61-rp2040"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt-rtt",
+ "embassy-executor",
+ "embassy-rp",
+ "portable-atomic",
+ "rktk",
+ "rktk-drivers-rp2040",
+ "ssd1306",
+]
+
+[[package]]
 name = "lalrpop"
 version = "0.19.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1143,6 +1208,7 @@ source = "git+https://github.com/embassy-rs/nrf-softdevice#d5f023ba0f30d9d677993
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
+ "critical-section",
  "embassy-futures 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "embassy-sync 0.5.0",
  "embedded-storage",
@@ -1360,6 +1426,10 @@ name = "once_cell"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
+dependencies = [
+ "critical-section",
+ "portable-atomic",
+]
 
 [[package]]
 name = "parking_lot"

@@ -1,3 +1,2 @@
 [env]
-DEFMT_LOG = "info"
 RKTK_CONFIG_PATH = { value = "rktk.example.toml", relative = true }

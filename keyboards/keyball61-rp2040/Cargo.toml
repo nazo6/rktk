@@ -1,21 +1,24 @@
+cargo-features = ["per-package-target"]
+
 [package]
 name = "keyball61-rp2040"
 version = "0.1.0"
 edition = "2021"
+forced-target = "thumbv6m-none-eabi"
 
 [dependencies]
 rktk-drivers-rp2040 = { path = "../../lib/rktk-drivers-rp2040" }
 rktk = { path = "../../lib/rktk" }
 cortex-m = { version = "0.7.6", features = ["inline-asm"] }
 cortex-m-rt = "0.7.0"
-defmt-rtt = "0.4.1"
-embassy-rp = { version = "0.1.0", git = "https://github.com/embassy-rs/embassy", features = [
+defmt-rtt = { workspace = true }
+embassy-rp = { workspace = true, features = [
   "defmt",
   "unstable-pac",
   "time-driver",
   "critical-section-impl",
 ] }
-embassy-executor = { version = "0.5.0", git = "https://github.com/embassy-rs/embassy", features = [
+embassy-executor = { workspace = true, features = [
   "task-arena-size-32768",
   "arch-cortex-m",
   "executor-thread",
