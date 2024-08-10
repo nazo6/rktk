@@ -24,12 +24,9 @@ pub async fn start<
     to_send_receiver: Receiver<'a, CriticalSectionRawMutex, S, { CONFIG.split_channel_size }>,
     is_master: bool,
 ) {
-    let mut recv_buf = [0u8; MAX_DATA_SIZE];
-    let mut send_buf = [0u8; MAX_DATA_SIZE];
-
-    let mut recv_cnt = 0;
-    let mut recv_err = 0;
     loop {
+        let mut recv_buf = [0u8; MAX_DATA_SIZE];
+
         match select(
             split.wait_recv(&mut recv_buf, is_master),
             to_send_receiver.receive(),
@@ -37,18 +34,23 @@ pub async fn start<
         .await
         {
             Either::First(res) => {
-                recv_cnt += 1;
-                if let Err(_e) = res {
-                    recv_err += 1;
-                } else if let Ok(data) = from_bytes_cobs(&mut recv_buf) {
-                    // crate::print!("R: {:?} {}", data, embassy_time::Instant::now());
-                    let _ = received_sender.send(data).await;
-                } else {
-                    crate::print!("err rate: {}", recv_err as f32 / recv_cnt as f32 * 100.0);
-                    recv_err += 1;
+                // Reducing the processing time here is very important for drivers for half-duplex communication.
+                // Since half-duplex communication shares one pin between Rx and Tx, this means that in most cases the communication peripheral must be initialized for each receive or transmit.
+                // This process takes some time, and the longer this block takes, the higher the error rate will be at higher communication speeds.
+                //
+                // I measured the time in this block using embassy-time, and while it was on the order of microseconds, I do not believe this is an accurate figure.
+                // In fact, removing rktk::print from this block improved the error rate.
+                if res.is_ok() {
+                    match from_bytes_cobs(&mut recv_buf.clone()) {
+                        Ok(data) => {
+                            let _ = received_sender.try_send(data);
+                        }
+                        Err(_e) => {}
+                    }
                 }
             }
             Either::Second(send_data) => {
+                let mut send_buf = [0u8; MAX_DATA_SIZE];
                 if let Ok(bytes) = to_slice_cobs(&send_data, &mut send_buf) {
                     if let Err(e) = split.send(bytes, is_master).await {
                         crate::print!("SE: {:?} {}", e, embassy_time::Instant::now())

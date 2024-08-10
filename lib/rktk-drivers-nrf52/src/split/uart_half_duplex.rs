@@ -6,13 +6,13 @@
 
 use embassy_nrf::{
     buffered_uarte::{BufferedUarteRx, BufferedUarteTx, InterruptHandler},
-    gpio::{AnyPin, Flex, Input, Output},
+    gpio::{AnyPin, Flex},
     interrupt,
     ppi::AnyGroup,
     uarte::{Baudrate, Instance, Parity},
     Peripheral,
 };
-use embedded_io_async::Read as _;
+use embedded_io_async::{Read as _, Write};
 use rktk::interface::split::SplitDriver;
 
 pub struct UartHalfDuplexSplitDriver<
@@ -50,7 +50,7 @@ impl<
     > UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
 {
     pub fn new(
-        pin: AnyPin,
+        mut pin: AnyPin,
         uarte: UARTEP,
         irq: IRQ,
         timer: TIMERP,
@@ -58,6 +58,13 @@ impl<
         ppi_ch2: CH2P,
         ppi_group: AnyGroup,
     ) -> Self {
+        {
+            let mut pin = Flex::new(&mut pin);
+            pin.set_as_input_output(
+                embassy_nrf::gpio::Pull::Up,
+                embassy_nrf::gpio::OutputDrive::HighDrive0Disconnect1,
+            );
+        }
         Self {
             pin,
             uarte,
@@ -90,11 +97,8 @@ impl<
         buf: &mut [u8],
         _is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
-        {
-            let _pin = Input::new(&mut self.pin, embassy_nrf::gpio::Pull::Up);
-        }
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD230400;
+        config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
         let mut rx = BufferedUarteRx::new(
             &mut self.uarte,
@@ -121,6 +125,7 @@ impl<
                 i += 1;
             }
         }
+        drop(rx);
 
         Ok(())
     }
@@ -130,16 +135,8 @@ impl<
         buf: &[u8],
         _is_master: bool,
     ) -> Result<(), rktk::interface::error::RktkError> {
-        {
-            let mut pin = Flex::new(&mut self.pin);
-            pin.set_high();
-            pin.set_as_input_output(
-                embassy_nrf::gpio::Pull::Up,
-                embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
-            );
-        }
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD230400;
+        config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
         let mut tx = BufferedUarteTx::new(
             &mut self.uarte,
@@ -148,18 +145,14 @@ impl<
             config,
             &mut self.write_buffer,
         );
-        tx.write(buf)
+
+        tx.write_all(buf)
             .await
             .map_err(|_| rktk::interface::error::RktkError::GeneralError("write error"))?;
         tx.flush()
             .await
             .map_err(|_| rktk::interface::error::RktkError::GeneralError("flush error"))?;
         drop(tx);
-        let _pin = Output::new(
-            &mut self.pin,
-            embassy_nrf::gpio::Level::High,
-            embassy_nrf::gpio::OutputDrive::Standard0Disconnect1,
-        );
         Ok(())
     }
 }
