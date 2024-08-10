@@ -17,22 +17,22 @@ const EMPTY_LAYER: LayerMap<ROWS, COLS> = [
 pub const EMPTY_KEYMAP: [Layer<ROWS, COLS>; LAYER_COUNT] = [
     Layer {
         map: EMPTY_LAYER,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: EMPTY_LAYER,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: EMPTY_LAYER,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: EMPTY_LAYER,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: EMPTY_LAYER,
-        arrowball: true,
+        arrowmouse: true,
     },
 ];

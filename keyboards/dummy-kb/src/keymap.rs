@@ -75,22 +75,22 @@ const L4: LayerMap = [
 pub const KEYMAP: [Layer; CONFIG.layer_count] = [
     Layer {
         map: L0,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: L1,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: L2,
-        arrowball: false,
+        arrowmouse: false,
     },
     Layer {
         map: L3,
-        arrowball: true,
+        arrowmouse: true,
     },
     Layer {
         map: L4,
-        arrowball: true,
+        arrowmouse: true,
     },
 ];
