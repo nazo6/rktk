@@ -49,10 +49,3 @@ impl<D: Driver<'static>> UsbDriver for CommonUsbDriver<D> {
         Ok(())
     }
 }
-
-#[embassy_executor::task]
-async fn start_usb(
-    mut device: UsbDevice<'static, impl Driver<'static> + 'static>,
-    signal: &'static RemoteWakeupSignal,
-) {
-}
