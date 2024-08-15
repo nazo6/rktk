@@ -10,12 +10,13 @@ repository.workspace = true
 [dependencies]
 rktk = { path = "../rktk" }
 
+embassy-executor = { workspace = true }
 embedded-hal-async = { workspace = true }
 embedded-hal = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
 embassy-sync = { workspace = true }
-embassy-executor = { workspace = true }
+embassy-futures = { workspace = true }
 
 usbd-hid = { workspace = true }
 

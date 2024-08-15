@@ -4,6 +4,12 @@ skip_git_env_info = true
 skip_rust_env_info = true
 skip_crate_env_info = true
 
+[tasks.run-usb]
+script = 'cargo run --release --no-default-features --features usb'
+
+[tasks.run-ble]
+script = 'cargo run --release --no-default-features --features ble-master'
+
 [tasks.deploy]
 script = '''
 #!@duckscript

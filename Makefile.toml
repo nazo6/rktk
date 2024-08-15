@@ -6,10 +6,10 @@ skip_rust_env_info = true
 skip_crate_env_info = true
 
 [tasks.run-usb]
-script = 'cd keyboards/keyball61-nrf52840 && cargo run --release --no-default-features --features usb'
+script = 'cd keyboards/keyball61-nrf52840 && cargo make run-usb'
 
 [tasks.run-ble]
-script = 'cd keyboards/keyball61-nrf52840 && cargo run --release --no-default-features --features ble-master'
+script = 'cd keyboards/keyball61-nrf52840 && cargo make run-ble'
 
 [tasks.check-all]
 script = '''

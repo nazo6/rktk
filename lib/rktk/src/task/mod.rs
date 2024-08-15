@@ -41,24 +41,25 @@ pub struct Drivers<
     // builder drivers
     MouseBuilder: DriverBuilder<Output = Mouse>,
     DisplayBuilder: DriverBuilder<Output = Display>,
+    UsbBuilder: DriverBuilder<Output = Usb>,
     // optional drivers
     Backlight: BacklightDriver,
-    Usb: UsbDriver,
     Ble: BleDriver,
     DoubleTapReset: DoubleTapResetDriver,
     EkvFlash: Flash + 'static,
     // optional drivers of builder
     Mouse: MouseDriver,
     Display: DisplayDriver,
+    Usb: UsbDriver,
 > {
     pub double_tap_reset: Option<DoubleTapReset>,
     pub key_scanner: KeyScan,
     pub split: Split,
     pub backlight: Option<Backlight>,
-    pub usb: Option<Usb>,
     pub ble: Option<Ble>,
     pub storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
 
+    pub usb_builder: Option<UsbBuilder>,
     pub mouse_builder: Option<MouseBuilder>,
     pub display_builder: Option<DisplayBuilder>,
 }
@@ -72,34 +73,32 @@ pub struct Drivers<
 ///
 /// TODO: To avoid using both `new` and `init` methods, receive builder instead of driver.
 pub async fn start<
-    // required drivers
     KeyScan: KeyscanDriver,
-    // builder drivers
+    Split: SplitDriver,
     MouseBuilder: DriverBuilder<Output = Mouse>,
     DisplayBuilder: DriverBuilder<Output = Display>,
-    // optional drivers
+    UsbBuilder: DriverBuilder<Output = Usb>,
     Backlight: BacklightDriver,
-    Usb: UsbDriver,
-    Split: SplitDriver,
     Ble: BleDriver,
     DoubleTapReset: DoubleTapResetDriver,
     EkvFlash: Flash + 'static,
-    // optional drivers of builder
     Mouse: MouseDriver,
     Display: DisplayDriver,
+    Usb: UsbDriver,
 >(
     mut drivers: Drivers<
         KeyScan,
         Split,
         MouseBuilder,
         DisplayBuilder,
+        UsbBuilder,
         Backlight,
-        Usb,
         Ble,
         DoubleTapReset,
         EkvFlash,
         Mouse,
         Display,
+        Usb,
     >,
     keymap: [Layer; CONFIG.layer_count],
 ) {
@@ -126,9 +125,19 @@ pub async fn start<
                 None
             };
 
+            let mut usb = if let Some(usb_builder) = drivers.usb_builder {
+                if let Ok(usb) = usb_builder.build().await {
+                    Some(usb)
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
             crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
-            let host_connected = match (&mut drivers.ble, &mut drivers.usb) {
+            let host_connected = match (&mut drivers.ble, &mut usb) {
                 (Some(ble), _) => {
                     let _ = ble.wait_ready().await;
                     true
@@ -165,7 +174,7 @@ pub async fn start<
                     .await;
                 },
                 async {
-                    report::start_report_task(report_receiver, drivers.usb, drivers.ble).await;
+                    report::start_report_task(report_receiver, usb, drivers.ble).await;
                 },
             )
             .await;

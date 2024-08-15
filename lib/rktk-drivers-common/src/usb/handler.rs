@@ -1,10 +1,11 @@
 use core::sync::atomic::{AtomicBool, Ordering};
-
-use embassy_usb::Handler;
+use embassy_usb::{
+    class::hid::{ReportId, RequestHandler},
+    control::OutResponse,
+    Handler,
+};
 
 use super::SUSPENDED;
-
-// use crate::utils::print_sync;
 
 pub struct UsbDeviceHandler {
     configured: AtomicBool,
@@ -43,11 +44,6 @@ impl Handler for UsbDeviceHandler {
         SUSPENDED.store(suspended, Ordering::Release);
     }
 }
-
-use embassy_usb::class::hid::{ReportId, RequestHandler};
-use embassy_usb::control::OutResponse;
-
-// use crate::utils::print_sync;
 
 pub struct UsbRequestHandler {}
 

@@ -1,4 +1,4 @@
-use super::error::RktkError;
+use super::{error::RktkError, DriverBuilder};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 #[derive(Debug)]
@@ -25,5 +25,16 @@ impl UsbDriver for DummyUsbDriver {
     }
     async fn wakeup(&mut self) -> Result<(), RktkError> {
         Ok(())
+    }
+}
+
+pub enum DummyUsbDriverBuilder {}
+impl DriverBuilder for DummyUsbDriverBuilder {
+    type Output = DummyUsbDriver;
+
+    type Error = ();
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        unimplemented!()
     }
 }
