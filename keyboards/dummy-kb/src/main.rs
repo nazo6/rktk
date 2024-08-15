@@ -11,11 +11,11 @@ use embassy_rp::gpio::Flex;
 use keymap::KEYMAP;
 use rktk::{
     interface::{
-        backlight::DummyBacklightDriver, ble::DummyBleDriver,
+        backlight::DummyBacklightDriver, ble::DummyBleDriver, display::DummyDisplayDriverBuilder,
         double_tap::DummyDoubleTapResetDriver, mouse::DummyMouseDriverBuilder,
         split::DummySplitDriver, storage::DummyStorage, usb::DummyUsbDriverBuilder,
     },
-    task::{Drivers, DummyDisplayDriverBuilder},
+    task::Drivers,
 };
 use rktk_drivers_rp2040::keyscan::duplex_matrix::create_duplex_matrix;
 

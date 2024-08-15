@@ -1,16 +1,25 @@
 use embassy_usb::class::hid::{HidReaderWriter, State};
-use embassy_usb::driver::Driver;
+use embassy_usb::driver::{Driver, EndpointError};
 
 use embassy_usb::{Builder, UsbDevice};
 use rktk::interface::DriverBuilder;
 use usbd_hid::descriptor::{
-    KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
+    AsInputReport, KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
 
 use crate::usb::handler::{UsbDeviceHandler, UsbRequestHandler};
 
-use super::driver::{CommonUsbDriver, HidReaderWriters};
-use super::{RemoteWakeupSignal, UsbOpts};
+use super::driver::CommonUsbDriver;
+use super::{
+    RemoteWakeupSignal, UsbOpts, HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL,
+    HID_MOUSE_CHANNEL,
+};
+
+pub struct HidReaderWriters<'a, D: Driver<'a>> {
+    pub keyboard: HidReaderWriter<'a, D, 1, 8>,
+    pub mouse: HidReaderWriter<'a, D, 1, 8>,
+    pub media_key: HidReaderWriter<'a, D, 1, 8>,
+}
 
 macro_rules! singleton {
     ($val:expr, $type:ty) => {{
@@ -81,19 +90,24 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
 }
 
 impl<D: Driver<'static> + 'static> DriverBuilder for CommonUsbDriverBuilder<D> {
-    type Output = CommonUsbDriver<D>;
+    type Output = CommonUsbDriver;
 
-    type Error = ();
+    type Error = embassy_executor::SpawnError;
 
-    async fn build(self) -> Result<Self::Output, Self::Error> {
+    // should be called with timeout
+    async fn build(mut self) -> Result<Self::Output, Self::Error> {
         let usb = self.builder.build();
 
-        let _ = embassy_executor::Spawner::for_current_executor()
-            .await
-            .spawn(start_usb(usb, self.wakeup_signal));
+        let ex = embassy_executor::Spawner::for_current_executor().await;
+        ex.spawn(start_usb(usb, self.wakeup_signal))?;
+
+        self.hid.keyboard.ready().await;
+
+        ex.spawn(hid_kb(self.hid.keyboard))?;
+        ex.spawn(hid_mkb(self.hid.media_key))?;
+        ex.spawn(hid_mouse(self.hid.mouse))?;
 
         Ok(Self::Output {
-            hid: self.hid,
             wakeup_signal: self.wakeup_signal,
         })
     }
@@ -130,5 +144,38 @@ async fn start_usb(mut device: impl UsbDeviceTrait + 'static, signal: &'static R
                 }
             }
         }
+    }
+}
+
+trait HidWriterTrait {
+    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError>;
+}
+impl<'d, D: Driver<'d>, const M: usize, const N: usize> HidWriterTrait
+    for HidReaderWriter<'d, D, M, N>
+{
+    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError> {
+        self.write_serialize(r).await
+    }
+}
+
+#[embassy_executor::task]
+async fn hid_kb(mut device: impl HidWriterTrait + 'static) {
+    loop {
+        let report = HID_KEYBOARD_CHANNEL.receive().await;
+        let _ = device.write_serialize(&report).await;
+    }
+}
+#[embassy_executor::task]
+async fn hid_mkb(mut device: impl HidWriterTrait + 'static) {
+    loop {
+        let report = HID_MEDIA_KEYBOARD_CHANNEL.receive().await;
+        let _ = device.write_serialize(&report).await;
+    }
+}
+#[embassy_executor::task]
+async fn hid_mouse(mut device: impl HidWriterTrait + 'static) {
+    loop {
+        let report = HID_MOUSE_CHANNEL.receive().await;
+        let _ = device.write_serialize(&report).await;
     }
 }

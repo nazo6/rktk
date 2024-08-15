@@ -8,10 +8,10 @@ use crate::{
         backlight::{BacklightCtrl, BacklightMode},
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
+        reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster},
-        usb::HidReport,
     },
-    task::{backlight::BACKLIGHT_CTRL, report::ReportSender},
+    task::backlight::BACKLIGHT_CTRL,
     Layer,
 };
 
@@ -81,10 +81,10 @@ fn handle_led(
     *latest_led = Some(led);
 }
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     m2s_tx: M2sTx<'_>,
     s2m_rx: S2mRx<'_>,
-    report_sender: ReportSender<'_>,
+    reporter: &R,
     mut key_scanner: KS,
     mut mouse: Option<M>,
     keymap: [Layer; CONFIG.layer_count],
@@ -130,14 +130,14 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
         if let Some(report) = state_report.keyboard_report {
-            let _ = report_sender.try_send(HidReport::Keyboard(report));
+            let _ = reporter.send_keyboard_report(report);
         }
         if let Some(report) = state_report.mouse_report {
             crate::utils::display_state!(MouseMove, (report.x, report.y));
-            let _ = report_sender.try_send(HidReport::Mouse(report));
+            let _ = reporter.send_mouse_report(report);
         }
         if let Some(report) = state_report.media_keyboard_report {
-            let _ = report_sender.try_send(HidReport::MediaKeyboard(report));
+            let _ = reporter.send_media_keyboard_report(report);
         }
 
         handle_led(&state_report, m2s_tx, &mut latest_led);
