@@ -10,7 +10,7 @@ use usbd_hid::descriptor::{
 
 use crate::usb::handler::{UsbDeviceHandler, UsbRequestHandler};
 
-use super::interface::{UsbOpts, UsbResource, UsbUserOpts};
+use super::interface::UsbUserOpts;
 use super::{RemoteWakeupSignal, SUSPENDED};
 
 macro_rules! singleton {
@@ -39,63 +39,54 @@ impl<D: Driver<'static>> CommonUsbDriver<D> {
         start_usb: impl FnOnce(UsbDevice<'static, D>, &'static RemoteWakeupSignal) -> SpawnToken<S>,
     ) -> Self {
         let wakeup_signal = singleton!(RemoteWakeupSignal::new(), RemoteWakeupSignal);
-        let opts = UsbOpts {
-            kb_request_handler: singleton!(UsbRequestHandler {}, UsbRequestHandler),
-            mouse_request_handler: singleton!(UsbRequestHandler {}, UsbRequestHandler),
-            mkb_request_handler: singleton!(UsbRequestHandler {}, UsbRequestHandler),
-            device_handler: singleton!(UsbDeviceHandler::new(), UsbDeviceHandler),
-            resource: UsbResource {
-                driver,
-                config_descriptor: singleton!([0; 256], [u8; 256]),
-                bos_descriptor: singleton!([0; 256], [u8; 256]),
-                msos_descriptor: singleton!([0; 256], [u8; 256]),
-                control_buf: singleton!([0; 64], [u8; 64]),
-                state_kb: singleton!(State::new(), State),
-                state_mouse: singleton!(State::new(), State),
-                state_media_key: singleton!(State::new(), State),
-            },
-        };
 
         let mut builder = Builder::new(
-            opts.resource.driver,
+            driver,
             user_opts.config,
-            opts.resource.config_descriptor,
-            opts.resource.bos_descriptor,
-            opts.resource.msos_descriptor,
-            opts.resource.control_buf,
+            singleton!([0; 256], [u8; 256]),
+            singleton!([0; 256], [u8; 256]),
+            singleton!([0; 256], [u8; 256]),
+            singleton!([0; 64], [u8; 64]),
         );
 
-        builder.handler(opts.device_handler);
+        builder.handler(singleton!(UsbDeviceHandler::new(), UsbDeviceHandler));
 
         let keyboard_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: KeyboardReport::desc(),
-                request_handler: Some(opts.kb_request_handler),
+                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
                 poll_ms: user_opts.kb_poll_interval,
                 max_packet_size: 64,
             };
-            HidReaderWriter::<_, 1, 8>::new(&mut builder, opts.resource.state_kb, config)
+            HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
         let mouse_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: MouseReport::desc(),
-                request_handler: Some(opts.mouse_request_handler),
+                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
                 poll_ms: user_opts.mouse_poll_interval,
                 max_packet_size: 64,
             };
-            HidReaderWriter::<_, 1, 8>::new(&mut builder, opts.resource.state_mouse, config)
+            HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
         let media_key_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: MediaKeyboardReport::desc(),
-                request_handler: Some(opts.mkb_request_handler),
+                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
                 poll_ms: user_opts.kb_poll_interval,
                 max_packet_size: 64,
             };
-            HidReaderWriter::<_, 1, 8>::new(&mut builder, opts.resource.state_media_key, config)
+            HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
+        let rrp_serial = embassy_usb::class::cdc_acm::CdcAcmClass::new(
+            &mut builder,
+            singleton!(
+                embassy_usb::class::cdc_acm::State::new(),
+                embassy_usb::class::cdc_acm::State
+            ),
+            64,
+        );
 
-        // Build the builder.
         let usb = builder.build();
 
         let _ = embassy_executor::Spawner::for_current_executor()
@@ -146,4 +137,11 @@ impl<D: Driver<'static>> UsbDriver for CommonUsbDriver<D> {
         self.wakeup_signal.signal(());
         Ok(())
     }
+}
+
+#[embassy_executor::task]
+async fn start_usb(
+    mut device: UsbDevice<'static, impl Driver<'static> + 'static>,
+    signal: &'static RemoteWakeupSignal,
+) {
 }
