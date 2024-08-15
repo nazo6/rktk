@@ -102,7 +102,7 @@ pub async fn start<
         async {
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 if let Ok(mut mouse) = mouse_builder.build().await {
-                    let _ = mouse.set_cpi(600).await;
+                    let _ = mouse.set_cpi(CONFIG.default_cpi).await;
                     Some(mouse)
                 } else {
                     None

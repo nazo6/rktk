@@ -56,37 +56,25 @@ impl NrfBleDriver {
 }
 
 impl ReporterDriver for NrfBleDriver {
-    fn send_keyboard_report(&self, report: KeyboardReport) -> Result<(), RktkError> {
+    fn try_send_keyboard_report(&self, report: KeyboardReport) -> Result<(), RktkError> {
         REPORT_CHAN
             .try_send(HidReport::Keyboard(report))
             .map_err(|_| RktkError::GeneralError("report_chan not empty"))?;
         Ok(())
     }
 
-    fn send_media_keyboard_report(&self, report: MediaKeyboardReport) -> Result<(), RktkError> {
+    fn try_send_media_keyboard_report(&self, report: MediaKeyboardReport) -> Result<(), RktkError> {
         REPORT_CHAN
             .try_send(HidReport::MediaKeyboard(report))
             .map_err(|_| RktkError::GeneralError("report_chan not empty"))?;
         Ok(())
     }
 
-    fn send_mouse_report(&self, report: MouseReport) -> Result<(), RktkError> {
+    fn try_send_mouse_report(&self, report: MouseReport) -> Result<(), RktkError> {
         REPORT_CHAN
             .try_send(HidReport::Mouse(report))
             .map_err(|_| RktkError::GeneralError("report_chan not empty"))?;
         Ok(())
-    }
-
-    fn send_rrp_data(&self, _data: &[u8]) -> Result<(), RktkError> {
-        Err(RktkError::NotSupported)
-    }
-
-    async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<(), RktkError> {
-        Err(RktkError::NotSupported)
-    }
-
-    fn wakeup(&mut self) -> Result<(), RktkError> {
-        Err(RktkError::NotSupported)
     }
 }
 impl BleDriver for NrfBleDriver {}

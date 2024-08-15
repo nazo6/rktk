@@ -15,6 +15,16 @@ macro_rules! print {
 }
 
 #[macro_export]
+macro_rules! format {
+    ($($arg:tt)*) => {{
+        use core::fmt::Write as _;
+        let mut str = heapless::String::<256>::new();
+        write!(str, $($arg)*).unwrap();
+        str
+    }};
+}
+
+#[macro_export]
 macro_rules! print_str {
     ($str:tt) => {{
         use $crate::task::display::*;

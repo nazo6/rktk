@@ -1,25 +1,18 @@
+use embassy_usb::class::cdc_acm::CdcAcmClass;
 use embassy_usb::class::hid::{HidReaderWriter, State};
-use embassy_usb::driver::{Driver, EndpointError};
+use embassy_usb::driver::Driver;
 
-use embassy_usb::{Builder, UsbDevice};
+use embassy_usb::Builder;
 use rktk::interface::DriverBuilder;
 use usbd_hid::descriptor::{
-    AsInputReport, KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
+    KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
 
 use crate::usb::handler::{UsbDeviceHandler, UsbRequestHandler};
 
 use super::driver::CommonUsbDriver;
-use super::{
-    RemoteWakeupSignal, UsbOpts, HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL,
-    HID_MOUSE_CHANNEL,
-};
-
-pub struct HidReaderWriters<'a, D: Driver<'a>> {
-    pub keyboard: HidReaderWriter<'a, D, 1, 8>,
-    pub mouse: HidReaderWriter<'a, D, 1, 8>,
-    pub media_key: HidReaderWriter<'a, D, 1, 8>,
-}
+use super::task::*;
+use super::{RemoteWakeupSignal, UsbOpts};
 
 macro_rules! singleton {
     ($val:expr, $type:ty) => {{
@@ -30,13 +23,23 @@ macro_rules! singleton {
 
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,
-    hid: HidReaderWriters<'static, D>,
+    keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
+    mouse_hid: HidReaderWriter<'static, D, 1, 8>,
+    media_key_hid: HidReaderWriter<'static, D, 1, 8>,
     wakeup_signal: &'static RemoteWakeupSignal,
+    rrp_serial: CdcAcmClass<'static, D>,
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
-    pub fn new(opts: UsbOpts<D>) -> Self {
+    pub fn new(mut opts: UsbOpts<D>) -> Self {
         let wakeup_signal = singleton!(RemoteWakeupSignal::new(), RemoteWakeupSignal);
+
+        // Required for windows compatibility.
+        // https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/kconfig/CONFIG_CDC_ACM_IAD.html#help
+        opts.config.device_class = 0xEF;
+        opts.config.device_sub_class = 0x02;
+        opts.config.device_protocol = 0x01;
+        opts.config.composite_with_iads = true;
 
         let mut builder = Builder::new(
             opts.driver,
@@ -77,13 +80,21 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
 
+        let rrp_serial = CdcAcmClass::new(
+            &mut builder,
+            singleton!(
+                embassy_usb::class::cdc_acm::State::new(),
+                embassy_usb::class::cdc_acm::State
+            ),
+            64,
+        );
+
         Self {
             builder,
-            hid: HidReaderWriters {
-                keyboard: keyboard_hid,
-                mouse: mouse_hid,
-                media_key: media_key_hid,
-            },
+            keyboard_hid,
+            mouse_hid,
+            media_key_hid,
+            rrp_serial,
             wakeup_signal,
         }
     }
@@ -101,81 +112,16 @@ impl<D: Driver<'static> + 'static> DriverBuilder for CommonUsbDriverBuilder<D> {
         let ex = embassy_executor::Spawner::for_current_executor().await;
         ex.spawn(start_usb(usb, self.wakeup_signal))?;
 
-        self.hid.keyboard.ready().await;
+        self.keyboard_hid.ready().await;
 
-        ex.spawn(hid_kb(self.hid.keyboard))?;
-        ex.spawn(hid_mkb(self.hid.media_key))?;
-        ex.spawn(hid_mouse(self.hid.mouse))?;
+        ex.spawn(hid_kb(self.keyboard_hid))?;
+        ex.spawn(hid_mkb(self.media_key_hid))?;
+        ex.spawn(hid_mouse(self.mouse_hid))?;
+        let (r, w) = self.rrp_serial.split();
+        ex.spawn(rrp(r, w))?;
 
         Ok(Self::Output {
             wakeup_signal: self.wakeup_signal,
         })
-    }
-}
-
-// this is a workaround for embassy task that cannot spawn generic task
-trait UsbDeviceTrait {
-    async fn run_until_suspend(&mut self);
-    async fn wait_resume(&mut self);
-    async fn remote_wakeup(&mut self) -> Result<(), embassy_usb::RemoteWakeupError>;
-}
-
-impl<'d, D: Driver<'d>> UsbDeviceTrait for UsbDevice<'d, D> {
-    async fn run_until_suspend(&mut self) {
-        self.run_until_suspend().await;
-    }
-    async fn wait_resume(&mut self) {
-        self.wait_resume().await;
-    }
-    async fn remote_wakeup(&mut self) -> Result<(), embassy_usb::RemoteWakeupError> {
-        self.remote_wakeup().await
-    }
-}
-
-#[embassy_executor::task]
-async fn start_usb(mut device: impl UsbDeviceTrait + 'static, signal: &'static RemoteWakeupSignal) {
-    loop {
-        device.run_until_suspend().await;
-        match embassy_futures::select::select(device.wait_resume(), signal.wait()).await {
-            embassy_futures::select::Either::First(_) => {}
-            embassy_futures::select::Either::Second(_) => {
-                if let Err(e) = device.remote_wakeup().await {
-                    rktk::print!("Failed to send remote wakeup: {:?}", e);
-                }
-            }
-        }
-    }
-}
-
-trait HidWriterTrait {
-    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError>;
-}
-impl<'d, D: Driver<'d>, const M: usize, const N: usize> HidWriterTrait
-    for HidReaderWriter<'d, D, M, N>
-{
-    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError> {
-        self.write_serialize(r).await
-    }
-}
-
-#[embassy_executor::task]
-async fn hid_kb(mut device: impl HidWriterTrait + 'static) {
-    loop {
-        let report = HID_KEYBOARD_CHANNEL.receive().await;
-        let _ = device.write_serialize(&report).await;
-    }
-}
-#[embassy_executor::task]
-async fn hid_mkb(mut device: impl HidWriterTrait + 'static) {
-    loop {
-        let report = HID_MEDIA_KEYBOARD_CHANNEL.receive().await;
-        let _ = device.write_serialize(&report).await;
-    }
-}
-#[embassy_executor::task]
-async fn hid_mouse(mut device: impl HidWriterTrait + 'static) {
-    loop {
-        let report = HID_MOUSE_CHANNEL.receive().await;
-        let _ = device.write_serialize(&report).await;
     }
 }

@@ -36,7 +36,7 @@
     },
     "default_cpi": {
       "description": "Default CPI value for mouse",
-      "default": 400,
+      "default": 600,
       "type": "integer",
       "format": "uint16",
       "minimum": 0.0

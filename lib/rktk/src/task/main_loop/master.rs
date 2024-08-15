@@ -106,6 +106,8 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
 
     let mut latest_led: Option<BacklightCtrl> = None;
 
+    let mut cnt = 0;
+
     loop {
         let start = embassy_time::Instant::now();
 
@@ -130,22 +132,29 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
         if let Some(report) = state_report.keyboard_report {
-            let _ = reporter.send_keyboard_report(report);
+            let _ = reporter.try_send_keyboard_report(report);
         }
         if let Some(report) = state_report.mouse_report {
             crate::utils::display_state!(MouseMove, (report.x, report.y));
-            let _ = reporter.send_mouse_report(report);
+            let _ = reporter.try_send_mouse_report(report);
         }
         if let Some(report) = state_report.media_keyboard_report {
-            let _ = reporter.send_media_keyboard_report(report);
+            let _ = reporter.try_send_media_keyboard_report(report);
         }
 
         handle_led(&state_report, m2s_tx, &mut latest_led);
 
         let took = start.elapsed();
 
+        if cnt % 10 == 0 {
+            reporter.try_send_rrp_data(
+                crate::format!("Master loop took: {}us\n", took.as_micros()).as_bytes(),
+            );
+        }
+
         if took < SCAN_INTERVAL_KEYBOARD {
             Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
         }
+        cnt += 1;
     }
 }

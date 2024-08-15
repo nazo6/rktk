@@ -62,7 +62,7 @@ pub struct StaticConfig {
     pub split_channel_size: usize,
 
     /// Default CPI value for mouse
-    #[cfg_attr(not(no_build), serde(default = "u16_default::<400>"))]
+    #[cfg_attr(not(no_build), serde(default = "u16_default::<600>"))]
     pub default_cpi: u16,
 
     /// Default duration of auto mouse mode (ms)
