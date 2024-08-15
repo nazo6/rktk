@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(impl_trait_in_assoc_type)]
+// #![feature(impl_trait_in_assoc_type)]
 
 use core::panic::PanicInfo;
 
@@ -22,6 +22,7 @@ use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360,
     softdevice::ble::init_ble_server, split::uart_half_duplex::UartHalfDuplexSplitDriver,
+    usb::UsbOpts,
 };
 
 use defmt_rtt as _;
@@ -34,7 +35,7 @@ use rktk::interface::usb::DummyUsbDriver;
 #[cfg(feature = "ble-master")]
 use rktk_drivers_nrf52::softdevice::ble::NrfBleDriver;
 #[cfg(feature = "usb")]
-use rktk_drivers_nrf52::usb::{new_usb, UsbConfig, UsbUserOpts};
+use rktk_drivers_nrf52::usb::new_usb;
 
 mod keymap;
 
@@ -142,25 +143,26 @@ async fn main(_spawner: Spawner) {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse_builder: Some(ball),
-        usb: {
+        usb_builder: {
             #[cfg(feature = "usb")]
             let usb = {
-                let mut config = UsbConfig::new(0xc0de, 0xcafe);
+                let mut config = rktk_drivers_nrf52::usb::Config::new(0xc0de, 0xcafe);
                 config.manufacturer = Some("Yowkees/nazo6");
                 config.product = Some("keyball");
                 config.serial_number = Some("12345678");
                 config.max_power = 100;
                 config.max_packet_size_0 = 64;
                 config.supports_remote_wakeup = true;
-                let usb_opts = UsbUserOpts {
-                    config,
-                    mouse_poll_interval: 5,
-                    kb_poll_interval: 5,
-                };
 
                 let vbus = SOFTWARE_VBUS.get_or_init(|| SoftwareVbusDetect::new(true, true));
                 let driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
-                Some(new_usb(usb_opts, driver).await)
+                let opts = UsbOpts {
+                    config,
+                    mouse_poll_interval: 5,
+                    kb_poll_interval: 5,
+                    driver,
+                };
+                Some(new_usb(opts))
             };
 
             #[cfg(not(feature = "usb"))]

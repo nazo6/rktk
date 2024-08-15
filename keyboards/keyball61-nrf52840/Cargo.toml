@@ -15,7 +15,8 @@ embassy-executor = { workspace = true, features = [
   "executor-thread",
   "executor-interrupt",
   "integrated-timers",
-  "nightly",
+  "task-arena-size-65536",
+  # "nightly",
 ] }
 embassy-time = { workspace = true }
 embassy-nrf = { workspace = true, features = [

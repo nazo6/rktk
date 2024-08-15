@@ -13,7 +13,7 @@ use rktk::{
     interface::{
         backlight::DummyBacklightDriver, ble::DummyBleDriver,
         double_tap::DummyDoubleTapResetDriver, mouse::DummyMouseDriverBuilder,
-        split::DummySplitDriver, storage::DummyStorage, usb::DummyUsbDriver,
+        split::DummySplitDriver, storage::DummyStorage, usb::DummyUsbDriverBuilder,
     },
     task::{Drivers, DummyDisplayDriverBuilder},
 };
@@ -46,7 +46,7 @@ async fn main(_spawner: Spawner) {
         key_scanner,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse_builder: Option::<DummyMouseDriverBuilder>::None,
-        usb: Option::<DummyUsbDriver>::None,
+        usb_builder: Option::<DummyUsbDriverBuilder>::None,
         display_builder: Option::<DummyDisplayDriverBuilder>::None,
         split: DummySplitDriver,
         backlight: Option::<DummyBacklightDriver>::None,

@@ -18,7 +18,7 @@ use rktk_drivers_rp2040::{
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
     split::pio_half_duplex::PioHalfDuplexSplitDriver,
-    usb::{new_usb, UsbConfig, UsbUserOpts},
+    usb::{new_usb, UsbOpts},
 };
 
 mod keymap;
@@ -71,21 +71,22 @@ async fn main(_spawner: Spawner) {
     );
 
     let usb = {
-        let mut config = UsbConfig::new(0xc0de, 0xcafe);
+        let mut config = rktk_drivers_rp2040::usb::Config::new(0xc0de, 0xcafe);
         config.manufacturer = Some("Yowkees/nazo6");
         config.product = Some("keyball");
         config.serial_number = Some("12345678");
         config.max_power = 100;
         config.max_packet_size_0 = 64;
         config.supports_remote_wakeup = true;
-        let usb_opts = UsbUserOpts {
+        let driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
+        let usb_opts = UsbOpts {
             config,
             mouse_poll_interval: 5,
             kb_poll_interval: 5,
+            driver,
         };
-        let driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
 
-        new_usb(usb_opts, driver).await
+        new_usb(usb_opts)
     };
 
     let pio = Pio::new(p.PIO0, Irqs);
@@ -98,7 +99,7 @@ async fn main(_spawner: Spawner) {
         key_scanner,
         double_tap_reset: Some(dtr),
         mouse_builder: Some(ball),
-        usb: Some(usb),
+        usb_builder: Some(usb),
         display_builder: Some(display),
         split,
         backlight: Some(backlight),
