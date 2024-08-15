@@ -170,6 +170,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "const_format"
+version = "0.2.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3a214c7af3d04997541b18d432afaff4c455e79e2029079647e72fc2bd27673"
+dependencies = [
+ "const_format_proc_macros",
+]
+
+[[package]]
+name = "const_format_proc_macros"
+version = "0.2.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7f6ff08fd20f4f299298a28e2dfa8a8ba1036e6cd2460ac1de7b425d76f2500"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-xid",
+]
+
+[[package]]
 name = "cortex-m"
 version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1535,7 +1555,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a55c51ee6c0db07e68448e336cf8ea4131a620edefebf9893e759b2d793420f8"
 dependencies = [
  "cobs",
+ "const_format",
  "heapless 0.7.17",
+ "postcard-derive",
+ "serde",
+]
+
+[[package]]
+name = "postcard-derive"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc4b01218787dd4420daf63875163a787a78294ad48a24e9f6fa8c6507759a79"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "postcard-rpc"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "111c525e45975cedb56617adc399b84c216d743c16b7ea00a0285deb1c21a46e"
+dependencies = [
+ "heapless 0.8.0",
+ "postcard",
  "serde",
 ]
 
@@ -1685,9 +1729,10 @@ dependencies = [
  "embassy-sync 0.6.0",
  "embassy-time",
  "embedded-graphics",
- "heapless 0.8.0",
+ "heapless 0.7.17",
  "paste",
  "postcard",
+ "postcard-rpc",
  "pretty_assertions",
  "rktk-keymanager",
  "schemars",
@@ -1710,7 +1755,7 @@ dependencies = [
  "embedded-graphics",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
- "heapless 0.8.0",
+ "heapless 0.7.17",
  "rktk",
  "ssd1306",
  "static_cell",
@@ -1733,7 +1778,7 @@ dependencies = [
  "embassy-usb",
  "embedded-io-async",
  "embedded-storage-async",
- "heapless 0.8.0",
+ "heapless 0.7.17",
  "nrf-softdevice",
  "rktk",
  "rktk-drivers-common",
@@ -1773,9 +1818,11 @@ dependencies = [
  "bitflags 2.6.0",
  "critical-section",
  "embassy-time",
- "heapless 0.8.0",
+ "heapless 0.7.17",
  "paste",
+ "postcard",
  "pretty_assertions",
+ "serde",
  "usbd-hid",
 ]
 
@@ -1881,18 +1928,18 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "serde"
-version = "1.0.205"
+version = "1.0.207"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e33aedb1a7135da52b7c21791455563facbbcc43d0f0f66165b42c21b3dfb150"
+checksum = "5665e14a49a4ea1b91029ba7d3bca9f299e1f7cfa194388ccc20f14743e784f2"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.205"
+version = "1.0.207"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692d6f5ac90220161d6774db30c662202721e64aed9058d2c394f451261420c1"
+checksum = "6aea2634c86b0e8ef2cfdc0c340baede54ec27b1e46febd7f80dffb2aa44a00e"
 dependencies = [
  "proc-macro2",
  "quote",

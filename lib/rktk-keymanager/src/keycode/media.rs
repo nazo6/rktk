@@ -3,6 +3,8 @@ use super::macros::{normal, with_consts};
 with_consts!(
     Media,
     /// Media key definitions.
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "postcard", derive(postcard::experimental::schema::Schema))]
     #[derive(PartialEq, Eq, Clone, Copy, Debug)]
     pub enum Media {
         Zero = 0x00,

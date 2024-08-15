@@ -3,6 +3,8 @@ use super::macros::{normal, with_consts};
 with_consts!(
     Key,
     /// Keycode definitions for the HID Usage Tables (HUT) 1.12
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "postcard", derive(postcard::experimental::schema::Schema))]
     #[derive(PartialEq, Eq, Clone, Copy, Debug)]
     pub enum Key {
         A = 0x04,

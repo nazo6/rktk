@@ -3,9 +3,13 @@ use bitflags::bitflags;
 
 use super::macros::normal;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "postcard", derive(postcard::experimental::schema::Schema))]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub struct Modifier(u8);
+
 bitflags! {
-    #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-    pub struct Modifier: u8 {
+    impl Modifier: u8 {
         const LCtrl = 0x01;
         const LShft = 0x02;
         const LAlt = 0x04;

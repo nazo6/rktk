@@ -8,13 +8,23 @@ repository.workspace = true
 
 [dependencies]
 embassy-time = { workspace = true }
-bitflags = "2.6.0"
+bitflags = { version = "2.6.0" }
 heapless = { workspace = true }
 usbd-hid = { workspace = true }
 
 paste = "1.0.15"
 
+serde = { workspace = true, optional = true, features = ["derive"] }
+postcard = { workspace = true, optional = true, features = [
+  "experimental-derive",
+] }
+
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
 critical-section = { version = "1.1.2", features = ["std"] }
 pretty_assertions = "1.4.0"
+
+[features]
+serde = ["dep:serde"]
+postcard = ["dep:postcard", "serde"]
+default = ["serde", "postcard"]
