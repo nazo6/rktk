@@ -18,7 +18,10 @@ pub trait ReporterDriver {
     fn try_send_rrp_data(&self, _data: &[u8]) -> Result<(), RktkError> {
         Err(RktkError::NotSupported)
     }
-    async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<(), RktkError> {
+    async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), RktkError> {
+        Err(RktkError::NotSupported)
+    }
+    async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<usize, RktkError> {
         Err(RktkError::NotSupported)
     }
 

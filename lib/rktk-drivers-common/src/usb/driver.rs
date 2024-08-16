@@ -51,10 +51,17 @@ impl ReporterDriver for CommonUsbDriver {
         }
         Ok(())
     }
-
-    async fn read_rrp_data(&self, buf: &mut [u8]) -> Result<(), rktk::interface::error::RktkError> {
-        RRP_RECV_PIPE.read(buf).await;
+    async fn send_rrp_data(&self, data: &[u8]) -> Result<(), rktk::interface::error::RktkError> {
+        RRP_SEND_PIPE.write_all(data).await;
         Ok(())
+    }
+
+    async fn read_rrp_data(
+        &self,
+        buf: &mut [u8],
+    ) -> Result<usize, rktk::interface::error::RktkError> {
+        let read = RRP_RECV_PIPE.read(buf).await;
+        Ok(read)
     }
 
     fn wakeup(&mut self) -> Result<(), rktk::interface::error::RktkError> {

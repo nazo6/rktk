@@ -1,5 +1,3 @@
-cargo-features = ["profile-rustflags"]
-
 [workspace]
 members = [
   "lib/rktk",
@@ -9,7 +7,7 @@ members = [
   "lib/rktk-keymanager",
   "keyboards/dummy-kb",
   "keyboards/keyball61-rp2040",
-  "keyboards/keyball61-nrf52840",
+  "keyboards/keyball61-nrf52840", "lib/rktk-rrp",
 ]
 resolver = "2"
 

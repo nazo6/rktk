@@ -1,4 +1,4 @@
-use embassy_futures::join::join;
+use embassy_futures::{join::join, select::select};
 use embassy_time::{Duration, Timer};
 use rktk_keymanager::state::{KeyChangeEvent, State, StateConfig, StateReport};
 
@@ -12,10 +12,36 @@ use crate::{
         split::{MasterToSlave, SlaveToMaster},
     },
     task::backlight::BACKLIGHT_CTRL,
-    Layer,
+    Keymap,
 };
 
 use super::{M2sTx, S2mRx};
+
+#[macro_export]
+macro_rules! get_req {
+    ($ep_name:ident, $reporter:expr) => {{
+        use rktk_rrp::endpoints::$ep_name::*;
+        let mut buf = [0u8; Request::POSTCARD_MAX_SIZE + Request::POSTCARD_MAX_SIZE / 254 + 2];
+        read_until_zero($reporter, &mut buf).await;
+        let Ok(req) = postcard::from_bytes_cobs::<Request>(&mut buf) else {
+            continue;
+        };
+        req
+    }};
+}
+
+#[macro_export]
+macro_rules! send_res {
+    ($ep_name:ident, $reporter:expr, $val:expr) => {{
+        use rktk_rrp::endpoints::$ep_name::*;
+        let mut buf = [0u8; Response::POSTCARD_MAX_SIZE + Response::POSTCARD_MAX_SIZE / 254 + 2];
+        let val: &Response = $val;
+        let Ok(res) = postcard::to_slice_cobs(val, &mut buf) else {
+            continue;
+        };
+        let _ = $reporter.send_rrp_data(res).await;
+    }};
+}
 
 fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
@@ -87,11 +113,11 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     reporter: &R,
     mut key_scanner: KS,
     mut mouse: Option<M>,
-    keymap: [Layer; CONFIG.layer_count],
+    keymap: Keymap,
     hand: crate::interface::keyscan::Hand,
 ) {
     let mut state = State::new(
-        keymap,
+        keymap.clone(),
         StateConfig {
             tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
             auto_mouse_layer: CONFIG.default_auto_mouse_layer,
@@ -107,45 +133,109 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     let mut latest_led: Option<BacklightCtrl> = None;
 
     loop {
-        let start = embassy_time::Instant::now();
+        select(
+            async {
+                loop {
+                    let start = embassy_time::Instant::now();
 
-        let mut mouse_move: (i8, i8) = (0, 0);
+                    let mut mouse_move: (i8, i8) = (0, 0);
 
-        let (mut events, _) = join(key_scanner.scan(), async {
-            if let Some(mouse) = &mut mouse {
-                if let Ok((x, y)) = mouse.read().await {
-                    mouse_move.0 += x;
-                    mouse_move.1 += y;
+                    let (mut events, _) = join(key_scanner.scan(), async {
+                        if let Some(mouse) = &mut mouse {
+                            if let Ok((x, y)) = mouse.read().await {
+                                mouse_move.0 += x;
+                                mouse_move.1 += y;
+                            }
+                        }
+                    })
+                    .await;
+
+                    events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
+
+                    receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
+
+                    let state_report = state.update(&mut events, mouse_move, start);
+
+                    crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+
+                    if let Some(report) = state_report.keyboard_report {
+                        let _ = reporter.try_send_keyboard_report(report);
+                    }
+                    if let Some(report) = state_report.mouse_report {
+                        crate::utils::display_state!(MouseMove, (report.x, report.y));
+                        let _ = reporter.try_send_mouse_report(report);
+                    }
+                    if let Some(report) = state_report.media_keyboard_report {
+                        let _ = reporter.try_send_media_keyboard_report(report);
+                    }
+
+                    handle_led(&state_report, m2s_tx, &mut latest_led);
+
+                    let took = start.elapsed();
+
+                    if took < SCAN_INTERVAL_KEYBOARD {
+                        Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
+                    }
                 }
-            }
-        })
+            },
+            async {
+                use postcard::experimental::max_size::MaxSize;
+                loop {
+                    let mut buf = [0u8; 64];
+                    read_until_zero(reporter, &mut buf).await;
+                    let Ok(ep_name) = postcard::from_bytes_cobs::<heapless::String<64>>(&mut buf)
+                    else {
+                        continue;
+                    };
+                    match ep_name.as_str() {
+                        "get_info" => {
+                            get_req!(get_info, reporter);
+                            crate::print!("Received get_info");
+
+                            let val = heapless::String::<1024>::from("rktk");
+
+                            send_res!(get_info, reporter, &val);
+                        }
+                        "get_keymap" => {
+                            get_req!(get_keymap, reporter);
+                            let mut keys = heapless::Vec::new();
+                            for (l, layer) in keymap.iter().enumerate() {
+                                for (r, row) in layer.map.iter().enumerate() {
+                                    for (c, key) in row.iter().enumerate() {
+                                        keys.push((l, r, c, *key)).ok();
+                                    }
+                                }
+                            }
+                            send_res!(get_keymap, reporter, &keys);
+                        }
+                        _ => {}
+                    }
+                }
+            },
+        )
         .await;
+    }
+}
 
-        events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
-
-        receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
-
-        let state_report = state.update(&mut events, mouse_move, start);
-
-        crate::utils::display_state!(HighestLayer, state_report.highest_layer);
-
-        if let Some(report) = state_report.keyboard_report {
-            let _ = reporter.try_send_keyboard_report(report);
-        }
-        if let Some(report) = state_report.mouse_report {
-            crate::utils::display_state!(MouseMove, (report.x, report.y));
-            let _ = reporter.try_send_mouse_report(report);
-        }
-        if let Some(report) = state_report.media_keyboard_report {
-            let _ = reporter.try_send_media_keyboard_report(report);
+async fn read_until_zero<R: ReporterDriver>(reporter: &R, buf: &mut [u8]) -> usize {
+    let mut reader = [0];
+    let mut read = 0;
+    loop {
+        let Ok(crr_read) = reporter.read_rrp_data(&mut reader).await else {
+            continue;
+        };
+        if crr_read == 0 {
+            continue;
         }
 
-        handle_led(&state_report, m2s_tx, &mut latest_led);
+        buf[read] = reader[0];
 
-        let took = start.elapsed();
+        read += crr_read;
 
-        if took < SCAN_INTERVAL_KEYBOARD {
-            Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
+        if reader[0] == 0 {
+            break;
         }
     }
+
+    read
 }

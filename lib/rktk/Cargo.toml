@@ -27,8 +27,8 @@ ekv = { workspace = true }
 paste = "1.0.15"
 bitflags = "2.6.0"
 
-rktk-keymanager = { path = "../rktk-keymanager", features = ["postcard"] }
-postcard-rpc = "0.6.0"
+rktk-keymanager = { path = "../rktk-keymanager", features = ["state"] }
+rktk-rrp = { path = "../rktk-rrp" }
 postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",

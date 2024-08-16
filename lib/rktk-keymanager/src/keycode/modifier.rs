@@ -4,7 +4,10 @@ use bitflags::bitflags;
 use super::macros::normal;
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "postcard", derive(postcard::experimental::schema::Schema))]
+#[cfg_attr(
+    feature = "postcard",
+    derive(postcard::experimental::max_size::MaxSize)
+)]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Modifier(u8);
 

@@ -85,7 +85,7 @@ impl MouseLocalState {
         global_mouse_state: &mut MouseState,
         highest_layer: usize,
     ) {
-        if common_state.layers[highest_layer].arrowmouse {
+        if common_state.keymap[highest_layer].arrowmouse {
             global_mouse_state.arrowball_move.0 += self.mouse_event.0;
             global_mouse_state.arrowball_move.1 += self.mouse_event.1;
 

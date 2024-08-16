@@ -4,7 +4,10 @@ with_consts!(
     Key,
     /// Keycode definitions for the HID Usage Tables (HUT) 1.12
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-    #[cfg_attr(feature = "postcard", derive(postcard::experimental::schema::Schema))]
+    #[cfg_attr(
+        feature = "postcard",
+        derive(postcard::experimental::max_size::MaxSize)
+    )]
     #[derive(PartialEq, Eq, Clone, Copy, Debug)]
     pub enum Key {
         A = 0x04,
