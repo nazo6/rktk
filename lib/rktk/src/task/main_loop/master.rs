@@ -160,6 +160,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
 
                     if let Some(report) = state_report.keyboard_report {
                         let _ = reporter.try_send_keyboard_report(report);
+                        let _ = reporter.wakeup();
                     }
                     if let Some(report) = state_report.mouse_report {
                         crate::utils::display_state!(MouseMove, (report.x, report.y));

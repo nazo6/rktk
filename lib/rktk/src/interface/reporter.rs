@@ -25,7 +25,7 @@ pub trait ReporterDriver {
         Err(RktkError::NotSupported)
     }
 
-    fn wakeup(&mut self) -> Result<(), RktkError> {
+    fn wakeup(&self) -> Result<(), RktkError> {
         Err(RktkError::NotSupported)
     }
 }

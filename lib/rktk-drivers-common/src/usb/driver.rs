@@ -64,8 +64,11 @@ impl ReporterDriver for CommonUsbDriver {
         Ok(read)
     }
 
-    fn wakeup(&mut self) -> Result<(), rktk::interface::error::RktkError> {
-        self.wakeup_signal.signal(());
+    fn wakeup(&self) -> Result<(), rktk::interface::error::RktkError> {
+        if super::SUSPENDED.load(core::sync::atomic::Ordering::SeqCst) {
+            self.wakeup_signal.signal(());
+            return Ok(());
+        }
         Ok(())
     }
 }
