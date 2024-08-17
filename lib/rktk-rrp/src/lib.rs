@@ -4,6 +4,8 @@ use postcard::experimental::max_size::MaxSize;
 use rktk_keymanager::keycode::KeyDef;
 
 pub mod endpoints;
+pub use futures;
+pub mod server;
 
 #[derive(MaxSize)]
 pub struct UpdateKey {

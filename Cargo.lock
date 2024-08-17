@@ -1073,6 +1073,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1121,7 +1130,7 @@ dependencies = [
  "diff",
  "ena",
  "is-terminal",
- "itertools",
+ "itertools 0.10.5",
  "lalrpop-util",
  "petgraph",
  "regex",
@@ -1726,6 +1735,7 @@ dependencies = [
  "embassy-time",
  "embedded-graphics",
  "heapless 0.7.17",
+ "itertools 0.13.0",
  "paste",
  "postcard",
  "pretty_assertions",
@@ -1827,6 +1837,7 @@ dependencies = [
 name = "rktk-rrp"
 version = "0.0.1"
 dependencies = [
+ "futures",
  "heapless 0.7.17",
  "postcard",
  "rktk-keymanager",

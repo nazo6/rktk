@@ -17,6 +17,8 @@ use crate::{
 
 use super::{M2sTx, S2mRx};
 
+mod rrp_server;
+
 #[macro_export]
 macro_rules! get_req {
     ($ep_name:ident, $reporter:expr) => {{
@@ -180,63 +182,13 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
                 }
             },
             async {
-                use postcard::experimental::max_size::MaxSize;
-                loop {
-                    let mut buf = [0u8; 64];
-                    read_until_zero(reporter, &mut buf).await;
-                    let Ok(ep_name) = postcard::from_bytes_cobs::<heapless::String<64>>(&mut buf)
-                    else {
-                        continue;
-                    };
-                    match ep_name.as_str() {
-                        "get_info" => {
-                            get_req!(get_info, reporter);
-                            crate::print!("Received get_info");
-
-                            let val = heapless::String::<1024>::from("rktk");
-
-                            send_res!(get_info, reporter, &val);
-                        }
-                        "get_keymap" => {
-                            get_req!(get_keymap, reporter);
-                            let mut keys = heapless::Vec::new();
-                            for (l, layer) in keymap.iter().enumerate() {
-                                for (r, row) in layer.map.iter().enumerate() {
-                                    for (c, key) in row.iter().enumerate() {
-                                        keys.push((l, r, c, *key)).ok();
-                                    }
-                                }
-                            }
-                            send_res!(get_keymap, reporter, &keys);
-                        }
-                        _ => {}
-                    }
-                }
+                let mut server = rrp_server::Server {
+                    keymap: keymap.clone(),
+                };
+                let et = rrp_server::EndpointTransportImpl(reporter);
+                server.handle(&et).await;
             },
         )
         .await;
     }
-}
-
-async fn read_until_zero<R: ReporterDriver>(reporter: &R, buf: &mut [u8]) -> usize {
-    let mut reader = [0];
-    let mut read = 0;
-    loop {
-        let Ok(crr_read) = reporter.read_rrp_data(&mut reader).await else {
-            continue;
-        };
-        if crr_read == 0 {
-            continue;
-        }
-
-        buf[read] = reader[0];
-
-        read += crr_read;
-
-        if reader[0] == 0 {
-            break;
-        }
-    }
-
-    read
 }

@@ -33,6 +33,7 @@ postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
+itertools = { version = "0.13.0", default-features = false }
 
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
