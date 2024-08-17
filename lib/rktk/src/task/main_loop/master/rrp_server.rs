@@ -47,6 +47,7 @@ pub struct Server {
 impl Server {
     endpoint_server!(
         get_keyboard_info normal normal => get_info
+        get_layout_json normal stream => get_layout_json
         get_keymaps normal stream => get_keymaps
         set_keymaps stream normal => set_keymaps
     );
@@ -72,6 +73,19 @@ impl Server {
                 },
             ),
         )
+    }
+
+    async fn get_layout_json(
+        &mut self,
+        _req: get_layout_json::Request,
+    ) -> impl Stream<Item = get_layout_json::StreamResponse> + '_ {
+        rktk_rrp::__reexports::futures::stream::iter(CONFIG.layout_json.as_bytes().chunks(64).map(
+            |chunk| {
+                let mut vec = heapless::Vec::new();
+                vec.extend_from_slice(chunk).unwrap();
+                vec
+            },
+        ))
     }
 
     async fn set_keymaps(

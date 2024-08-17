@@ -11,6 +11,9 @@ script = 'cd keyboards/keyball61-nrf52840 && cargo make run-usb'
 [tasks.run-ble]
 script = 'cd keyboards/keyball61-nrf52840 && cargo make run-ble'
 
+[tasks.run-rrp]
+script = 'cd rrp-desktop && pnpm tauri dev'
+
 [tasks.check-all]
 script = '''
 #!@duckscript
@@ -42,7 +45,10 @@ test ./lib/rktk-keymanager
 [tasks.ra-check]
 script = '''
 #!@duckscript
-if starts_with ${2} rktk
+if starts_with ${2} rrp-desktop
+  cd rrp-desktop/src-tauri
+  exec cargo clippy --message-format=json
+elseif starts_with ${2} rktk
   cd lib/${2}
   exec cargo clippy --message-format=json
 else

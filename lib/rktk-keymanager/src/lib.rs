@@ -1,4 +1,4 @@
-#![cfg_attr(not(test), no_std)]
+#![cfg_attr(all(not(test), not(feature = "specta")), no_std)]
 
 //! # rktk-keymanager
 //! A library for managing key state and keymaps for self-made keyboards.

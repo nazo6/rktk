@@ -134,9 +134,9 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_str(self, v: &str) -> Result<()> {
-        self.output += "\"";
+        self.output += "r###\"";
         self.output += v;
-        self.output += "\"";
+        self.output += "\"###";
         Ok(())
     }
 

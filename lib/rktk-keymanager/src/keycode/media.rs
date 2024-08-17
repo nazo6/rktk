@@ -8,6 +8,7 @@ with_consts!(
         feature = "postcard",
         derive(postcard::experimental::max_size::MaxSize)
     )]
+    #[cfg_attr(feature = "specta", derive(specta::Type))]
     #[derive(PartialEq, Eq, Clone, Copy, Debug)]
     pub enum Media {
         Zero = 0x00,

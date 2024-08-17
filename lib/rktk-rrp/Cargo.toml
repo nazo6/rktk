@@ -12,6 +12,8 @@ postcard = { workspace = true, features = ["experimental-derive"] }
 heapless = { workspace = true }
 futures = { version = "0.3.30", default-features = false }
 serde = { workspace = true, features = ["derive"] }
+specta = { workspace = true, optional = true, features = ["derive"] }
 
 [features]
-std = ["postcard/use-std"]
+std-client = ["postcard/use-std"]
+specta = ["std-client", "dep:specta", "rktk-keymanager/specta"]

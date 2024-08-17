@@ -6,10 +6,10 @@ members = [
   "lib/rktk-drivers-rp2040",
   "lib/rktk-keymanager",
   "lib/rktk-rrp",
-  "lib/rktk-rrp-desktop",
   "keyboards/dummy-kb",
   "keyboards/keyball61-rp2040",
   "keyboards/keyball61-nrf52840",
+  "rrp-desktop/src-tauri",
 ]
 resolver = "2"
 
@@ -59,3 +59,5 @@ postcard = "1.0.8"
 
 defmt = "0.3.8"
 defmt-rtt = "0.4.1"
+
+specta = { version = "2.0.0-rc.20" }

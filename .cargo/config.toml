@@ -12,4 +12,4 @@ rustflags = ["-Zlocation-detail=none"]
 custom-ra-check = "make ra-check"
 
 [env]
-RKTK_CONFIG_PATH = { value = "lib/rktk.example.toml", relative = true }
+RKTK_CONFIG_PATH = { value = "keyboards/rktk.keyball.toml", relative = true }

@@ -22,6 +22,7 @@ pub mod utils;
     feature = "postcard",
     derive(postcard::experimental::max_size::MaxSize)
 )]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyDef {
     None,
@@ -39,6 +40,7 @@ pub enum KeyDef {
     feature = "postcard",
     derive(postcard::experimental::max_size::MaxSize)
 )]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyAction {
     Normal(KeyCode),
@@ -55,6 +57,7 @@ pub enum KeyAction {
     feature = "postcard",
     derive(postcard::experimental::max_size::MaxSize)
 )]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyCode {
     Key(key::Key),

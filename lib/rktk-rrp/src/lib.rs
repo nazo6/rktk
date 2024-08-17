@@ -1,5 +1,6 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std-client"), no_std)]
 
+#[cfg(feature = "std-client")]
 pub mod client;
 pub mod endpoints;
 pub mod server;

@@ -8,6 +8,7 @@ use super::{KeyAction, KeyCode, KeyDef};
     feature = "postcard",
     derive(postcard::experimental::max_size::MaxSize)
 )]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Mouse(u8);
 

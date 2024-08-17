@@ -12,6 +12,7 @@ use super::{KeyAction, KeyCode};
     feature = "postcard",
     derive(postcard::experimental::max_size::MaxSize)
 )]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum LayerOp {
     Momentary(u8),

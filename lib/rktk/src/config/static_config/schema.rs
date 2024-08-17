@@ -29,6 +29,12 @@ pub struct StaticConfig {
     #[cfg(no_build)]
     pub name: &'static str,
 
+    /// The layout of the keyboard.
+    #[cfg(not(no_build))]
+    pub layout_json: String,
+    #[cfg(no_build)]
+    pub layout_json: &'static str,
+
     /// Timeout for detecting split USB connection (ms).
     #[cfg_attr(not(no_build), serde(default = "u64_default::<200>"))]
     pub split_usb_timeout: u64,

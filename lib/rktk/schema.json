@@ -4,6 +4,7 @@
   "type": "object",
   "required": [
     "cols",
+    "layout_json",
     "name",
     "rows"
   ],
@@ -74,6 +75,10 @@
       "type": "integer",
       "format": "uint",
       "minimum": 0.0
+    },
+    "layout_json": {
+      "description": "The layout of the keyboard.",
+      "type": "string"
     },
     "left_led_count": {
       "description": "Backlight led count for left side. This is also used for non-split keyboard.",

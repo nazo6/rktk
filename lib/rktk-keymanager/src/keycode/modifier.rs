@@ -8,6 +8,7 @@ use super::macros::normal;
     feature = "postcard",
     derive(postcard::experimental::max_size::MaxSize)
 )]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Modifier(u8);
 

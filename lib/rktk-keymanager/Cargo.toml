@@ -19,6 +19,8 @@ postcard = { workspace = true, optional = true, features = [
   "experimental-derive",
 ] }
 
+specta = { workspace = true, optional = true, features = ["derive"] }
+
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
 critical-section = { version = "1.1.2", features = ["std"] }
@@ -30,3 +32,4 @@ postcard = ["dep:postcard", "serde"]
 default = ["serde", "postcard"]
 # Enables state management.
 state = ["dep:embassy-time", "dep:usbd-hid"]
+specta = ["dep:specta"]
