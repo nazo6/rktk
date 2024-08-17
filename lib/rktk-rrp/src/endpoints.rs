@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[cfg_attr(
-    not(feature = "std-client"),
+    not(feature = "std"),
     derive(postcard::experimental::max_size::MaxSize)
 )]
 pub struct KeyDefLoc {
@@ -19,13 +19,13 @@ pub mod get_keyboard_info {
     #[derive(Serialize, Deserialize, Debug)]
     #[cfg_attr(feature = "specta", derive(specta::Type))]
     #[cfg_attr(
-        not(feature = "std-client"),
+        not(feature = "std"),
         derive(postcard::experimental::max_size::MaxSize)
     )]
     pub struct KeyboardInfo {
-        #[cfg(not(feature = "std-client"))]
+        #[cfg(not(feature = "std"))]
         pub name: heapless::String<64>,
-        #[cfg(feature = "std-client")]
+        #[cfg(feature = "std")]
         pub name: String,
         pub rows: u8,
         pub cols: u8,
@@ -38,9 +38,9 @@ pub mod get_keyboard_info {
 pub mod get_layout_json {
     pub type Request = ();
     /// 64 bytes stream of JSON layout data
-    #[cfg(not(feature = "std-client"))]
+    #[cfg(not(feature = "std"))]
     pub type StreamResponse = heapless::Vec<u8, 64>;
-    #[cfg(feature = "std-client")]
+    #[cfg(feature = "std")]
     pub type StreamResponse = Vec<u8>;
 }
 

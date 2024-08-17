@@ -17,14 +17,16 @@ script = 'cd rrp-desktop && pnpm tauri dev'
 [tasks.check-all]
 script = '''
 #!@duckscript
-packages = glob_array ./**/Cargo.toml
 pwd = pwd
-for path in ${packages}
-  if not eq ${path} Cargo.toml
-    dir = dirname ${path}
-    cd ${dir}
-    exec --fail-on-error cargo clippy
-    cd ${pwd}
+handle = gitignore_path_array ./
+for path in ${handle}
+  if ends_with ${path} Cargo.toml
+    if not eq ${path} ./Cargo.toml
+      dir = dirname ${path}
+      cd ${dir}
+      exec --fail-on-error cargo clippy
+      cd ${pwd}
+    end
   end
 end
 '''

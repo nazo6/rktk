@@ -27,9 +27,14 @@ critical-section = { version = "1.1.2", features = ["std"] }
 pretty_assertions = "1.4.0"
 
 [features]
-serde = ["dep:serde"]
-postcard = ["dep:postcard", "serde"]
-default = ["serde", "postcard"]
+default = ["serde"]
 # Enables state management.
 state = ["dep:embassy-time", "dep:usbd-hid"]
-specta = ["dep:specta"]
+# Enables serialization.
+serde = ["dep:serde"]
+# Enables serialization with postcard.
+postcard = ["dep:postcard", "serde"]
+
+std = []
+# Enables type export by specta.
+specta = ["std", "dep:specta", "postcard"]

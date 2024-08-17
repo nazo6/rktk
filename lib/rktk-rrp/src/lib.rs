@@ -1,8 +1,9 @@
-#![cfg_attr(not(feature = "std-client"), no_std)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(feature = "std-client")]
+#[cfg(feature = "client")]
 pub mod client;
 pub mod endpoints;
+#[cfg(feature = "server")]
 pub mod server;
 
 pub mod __reexports {

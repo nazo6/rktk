@@ -28,5 +28,5 @@ tokio-serial = "5.4.4"
 tokio = { version = "1.39.2", features = ["full"] }
 anyhow = "1.0.86"
 
-rktk-rrp = { path = "../../lib/rktk-rrp", features = ["std-client", "specta"] }
+rktk-rrp = { path = "../../lib/rktk-rrp", features = ["specta"] }
 rktk-keymanager = { path = "../../lib/rktk-keymanager", default-features = false }
