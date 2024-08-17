@@ -53,16 +53,22 @@ impl Server {
     async fn get_keymaps(
         &mut self,
         _req: get_keymaps::Request,
-    ) -> impl Stream<Item = get_keymaps::Response> + '_ {
+    ) -> impl Stream<Item = get_keymaps::StreamResponse> + '_ {
         rktk_rrp::futures::stream::iter(
-            itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols)
-                .map(|(layer, row, col)| (layer, row, col, self.keymap[layer].map[row][col])),
+            itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols).map(
+                |(layer, row, col)| KeyDefLoc {
+                    layer: layer as u8,
+                    row: row as u8,
+                    col: col as u8,
+                    key: self.keymap[layer].map[row][col],
+                },
+            ),
         )
     }
 
     async fn set_keymaps(
         &mut self,
-        _req: impl Stream<Item = set_keymaps::Request>,
+        _req: impl Stream<Item = set_keymaps::StreamRequest>,
     ) -> set_keymaps::Response {
     }
 }

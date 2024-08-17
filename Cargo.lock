@@ -1841,6 +1841,7 @@ dependencies = [
  "heapless 0.7.17",
  "postcard",
  "rktk-keymanager",
+ "serde",
 ]
 
 [[package]]

@@ -1,7 +1,10 @@
 #[allow(async_fn_in_trait)]
 pub trait EndpointTransport {
     type Error;
+    /// Wait and read serial data until a zero byte is received
+    /// Implementations should not consume bytes after the zero byte
     async fn read_until_zero(&self, buf: &mut [u8]) -> Result<usize, Self::Error>;
+    /// Send all bytes in the buffer.
     async fn send_all(&self, buf: &[u8]) -> Result<(), Self::Error>;
 }
 
@@ -43,10 +46,10 @@ macro_rules! endpoint_server {
     }};
     (@get stream $et:expr, $ep:ident) => {{
         use $crate::futures::stream;
-        let mut buf = [0u8; Request::POSTCARD_MAX_SIZE + Request::POSTCARD_MAX_SIZE / 254 + 2];
+        let mut buf = [0u8; StreamRequest::POSTCARD_MAX_SIZE + StreamRequest::POSTCARD_MAX_SIZE / 254 + 2];
 
         stream::unfold((), |state| async {
-            let mut buf = [0u8; Request::POSTCARD_MAX_SIZE + Request::POSTCARD_MAX_SIZE / 254 + 2];
+            let mut buf = [0u8; StreamRequest::POSTCARD_MAX_SIZE + StreamRequest::POSTCARD_MAX_SIZE / 254 + 2];
             loop {
                 let Ok(size) = $et.read_until_zero(&mut buf).await else {
                     continue;
@@ -54,7 +57,7 @@ macro_rules! endpoint_server {
                 if size == 1 {
                     return None;
                 }
-                let Ok(req) = postcard::from_bytes_cobs::<Request>(&mut buf) else {
+                let Ok(req) = postcard::from_bytes_cobs::<StreamRequest>(&mut buf) else {
                     continue;
                 };
                 return Some((req, ()));
@@ -74,8 +77,8 @@ macro_rules! endpoint_server {
     (@send stream $et:expr, $ep:ident, $data:expr) => {{
         use $crate::futures::stream::StreamExt;
         while let Some(res) = $data.next().await {
-            let res: Response = res;
-            let mut buf = [0u8; Response::POSTCARD_MAX_SIZE + Response::POSTCARD_MAX_SIZE / 254 + 2];
+            let res: StreamResponse = res;
+            let mut buf = [0u8; StreamResponse::POSTCARD_MAX_SIZE + StreamResponse::POSTCARD_MAX_SIZE / 254 + 2];
             let Ok(res) = postcard::to_slice_cobs(&res, &mut buf) else {
                 continue;
             };
