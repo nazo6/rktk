@@ -1065,7 +1065,6 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5794414bc20e0d750f145bc0e82366b19dd078e9e075e8331fb8dd069a1cb6a2"
 dependencies = [
- "defmt",
  "embassy-futures",
  "embassy-sync 0.6.0",
  "embassy-time",
@@ -1150,7 +1149,6 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "critical-section",
- "defmt",
  "document-features",
  "embassy-embedded-hal",
  "embassy-hal-internal",
@@ -1238,7 +1236,6 @@ checksum = "b3e0c49ff02ebe324faf3a8653ba91582e2d0a7fdef5bc88f449d5aa1bfcc05c"
 dependencies = [
  "cfg-if",
  "critical-section",
- "defmt",
  "embedded-io-async",
  "futures-util",
  "heapless 0.8.0",
@@ -4075,6 +4072,7 @@ name = "rrp-desktop"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "futures",
  "rktk-keymanager",
  "rktk-rrp",
  "serde",

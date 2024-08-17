@@ -10,7 +10,7 @@ repository.workspace = true
 rktk-keymanager = { path = "../rktk-keymanager", features = ["postcard"] }
 postcard = { workspace = true, features = ["experimental-derive"] }
 heapless = { workspace = true }
-futures = { version = "0.3.30", default-features = false }
+futures = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 specta = { workspace = true, optional = true, features = ["derive"] }
 

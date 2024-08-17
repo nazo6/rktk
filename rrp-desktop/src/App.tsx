@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
-import { commands } from "./bindings";
+import { events } from "./bindings";
+import { Home } from "./page/Home";
+import { Connect } from "./page/Connect";
 
-function App() {
-  const [data, setData] = useState("");
+export default function App() {
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const info = await commands.keyboardInfo();
-      setData(JSON.stringify(info));
-    })();
+    const h = events.connectionEvent.listen((e) => {
+      setConnected(e.payload);
+    });
   });
 
   return (
-    <div className="container">
-      <p>{data}</p>
-    </div>
+    connected ? <Home /> : <Connect />
   );
 }
-
-export default App;

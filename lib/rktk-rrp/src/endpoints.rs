@@ -2,6 +2,7 @@ use rktk_keymanager::keycode::KeyDef;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[cfg_attr(
     not(feature = "std"),
     derive(postcard::experimental::max_size::MaxSize)

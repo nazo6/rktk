@@ -7,7 +7,7 @@ macro_rules! endpoint_client {
     };
 
     (@def $ep:ident normal normal) => {
-        pub async fn $ep(&self, req: $crate::endpoints::$ep::Request) -> Result<$crate::endpoints::$ep::Response, anyhow::Error> {
+        pub async fn $ep(&mut self, req: $crate::endpoints::$ep::Request) -> Result<$crate::endpoints::$ep::Response, anyhow::Error> {
             use $crate::endpoints::$ep::{Request, Response};
             endpoint_client!(@send_ep_name self, $ep);
             endpoint_client!(@send_req normal self, $ep, req);
@@ -15,7 +15,7 @@ macro_rules! endpoint_client {
         }
     };
     (@def $ep:ident stream normal) => {
-        pub async fn $ep(&self, req: impl $crate::__reexports::futures::stream::Stream<Item = $crate::endpoints::$ep::StreamRequest>) ->
+        pub async fn $ep(&mut self, req: impl $crate::__reexports::futures::stream::Stream<Item = $crate::endpoints::$ep::StreamRequest>) ->
             Result<$crate::endpoints::$ep::Response, anyhow::Error>
         {
             use $crate::endpoints::$ep::{StreamRequest, Response};
@@ -25,7 +25,7 @@ macro_rules! endpoint_client {
         }
     };
     (@def $ep:ident normal stream) => {
-        pub async fn $ep(&self, req: $crate::endpoints::$ep::Request)
+        pub async fn $ep(&mut self, req: $crate::endpoints::$ep::Request)
             -> Result<impl $crate::__reexports::futures::stream::Stream<Item = $crate::endpoints::$ep::StreamResponse> + '_, anyhow::Error>
         {
             endpoint_client!(@send_ep_name self, $ep);
@@ -36,7 +36,7 @@ macro_rules! endpoint_client {
         }
     };
     (@def $ep:ident stream stream) => {
-        pub async fn $ep(&self, req: impl $crate::__reexports::futures::stream::Stream<Item = $crate::endpoints::$ep::StreamRequest>)
+        pub async fn $ep(&mut self, req: impl $crate::__reexports::futures::stream::Stream<Item = $crate::endpoints::$ep::StreamRequest>)
             -> Result<impl $crate::__reexports::futures::stream::Stream<Item = $crate::endpoints::$ep::StreamResponse>, anyhow::Error>
         {
             use $crate::endpoints::$ep::{StreamRequest, StreamResponse};

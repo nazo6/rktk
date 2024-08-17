@@ -19,7 +19,6 @@ embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-nrf = { workspace = true, features = [
-  "defmt",
   "gpiote",
   "time-driver-rtc1",
   "nrf52840",

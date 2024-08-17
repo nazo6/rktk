@@ -10,13 +10,11 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new() -> Self {
-        let stream = tokio_serial::new("COM8", 115200)
-            .open_native_async()
-            .unwrap();
-        Client {
+    pub fn new(name: &str, baud: u32) -> anyhow::Result<Self> {
+        let stream = tokio_serial::new(name, baud).open_native_async()?;
+        Ok(Client {
             stream: Mutex::new(stream),
-        }
+        })
     }
 }
 
@@ -43,5 +41,6 @@ impl Client {
     endpoint_client!(
        get_keyboard_info normal normal
        get_keymaps normal stream
+       get_layout_json normal stream
     );
 }

@@ -25,7 +25,13 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
                 continue;
             }
 
-            buf[read] = reader[0];
+            if let Some(byte) = buf.get_mut(read) {
+                *byte = reader[0];
+            } else {
+                crate::print!("Invalid byte received");
+
+                return Err(RktkError::GeneralError("Invalid byte received"));
+            }
 
             read += crr_read;
 

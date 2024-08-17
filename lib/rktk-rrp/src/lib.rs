@@ -6,6 +6,7 @@ pub mod endpoints;
 #[cfg(feature = "server")]
 pub mod server;
 
+#[doc(hidden)]
 pub mod __reexports {
     pub use futures;
     pub use heapless;
