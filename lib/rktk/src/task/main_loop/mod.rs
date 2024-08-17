@@ -4,6 +4,7 @@ use crate::{
         backlight::BacklightDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
+        reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
     },
     Layer,
@@ -13,8 +14,6 @@ use embassy_sync::{
     blocking_mutex::raw::CriticalSectionRawMutex,
     channel::{Channel, Receiver, Sender},
 };
-
-use super::report::ReportSender;
 
 mod master;
 mod slave;
@@ -30,14 +29,19 @@ type M2sRx<'a> =
     Receiver<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver, SP: SplitDriver, BL: BacklightDriver>(
-    report_sender: ReportSender<'_>,
+pub async fn start<
+    KS: KeyscanDriver,
+    M: MouseDriver,
+    SP: SplitDriver,
+    BL: BacklightDriver,
+    R: ReporterDriver,
+>(
+    reporter: Option<&R>,
     mut key_scanner: KS,
     mouse: Option<M>,
     mut split: SP,
     backlight: Option<BL>,
     keymap: [Layer; CONFIG.layer_count],
-    host_connected: bool,
 ) {
     let hand = key_scanner.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
@@ -58,7 +62,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, SP: SplitDriver, BL: Backl
         async move {
             let _ = split.init().await;
 
-            let is_master = host_connected;
+            let is_master = reporter.is_some();
 
             crate::utils::display_state!(Master, Some(is_master));
 
@@ -70,18 +74,10 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, SP: SplitDriver, BL: Backl
             let m2s_tx = m2s_chan.sender();
             let m2s_rx = m2s_chan.receiver();
 
-            if is_master {
+            if let Some(reporter) = reporter {
                 join(
                     split_handler::start(split, s2m_tx, m2s_rx, is_master),
-                    master::start(
-                        m2s_tx,
-                        s2m_rx,
-                        report_sender,
-                        key_scanner,
-                        mouse,
-                        keymap,
-                        hand,
-                    ),
+                    master::start(m2s_tx, s2m_rx, reporter, key_scanner, mouse, keymap, hand),
                 )
                 .await;
             } else {

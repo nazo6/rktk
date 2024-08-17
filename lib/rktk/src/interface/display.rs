@@ -7,6 +7,8 @@ use embedded_graphics::{
     text::{Baseline, Text},
 };
 
+use super::DriverBuilder;
+
 /// Interface for display drivers.
 ///
 /// TODO: Allow sync-only drivers?
@@ -84,15 +86,26 @@ impl DisplayDriver for DummyDisplayDriver {
     const MAX_TEXT_WIDTH: usize = 10;
 
     fn flush(&mut self) -> Result<(), DisplayError> {
-        unimplemented!()
+        unreachable!()
     }
     fn clear_buffer(&mut self) {
-        unimplemented!()
+        unreachable!()
     }
     async fn flush_async(&mut self) -> Result<(), DisplayError> {
-        unimplemented!()
+        unreachable!()
     }
     fn calculate_point(_col: i32, _row: i32) -> Point {
-        unimplemented!()
+        unreachable!()
+    }
+}
+
+pub enum DummyDisplayDriverBuilder {}
+impl DriverBuilder for DummyDisplayDriverBuilder {
+    type Output = DummyDisplayDriver;
+
+    type Error = ();
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        unreachable!()
     }
 }

@@ -15,4 +15,5 @@ use config::static_config::CONFIG;
 pub use rktk_keymanager as keymanager;
 
 pub type Layer = keymanager::Layer<{ CONFIG.rows }, { CONFIG.cols }>;
+pub type Keymap = keymanager::Keymap<{ CONFIG.layer_count }, { CONFIG.rows }, { CONFIG.cols }>;
 pub type LayerMap = keymanager::LayerMap<{ CONFIG.rows }, { CONFIG.cols }>;

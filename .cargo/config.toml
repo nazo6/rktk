@@ -10,3 +10,6 @@ rustflags = ["-Zlocation-detail=none"]
 
 [alias]
 custom-ra-check = "make ra-check"
+
+[env]
+RKTK_CONFIG_PATH = { value = "lib/rktk.example.toml", relative = true }

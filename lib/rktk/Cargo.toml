@@ -21,14 +21,19 @@ display-interface = { workspace = true }
 smart-leds = { workspace = true }
 
 heapless = { workspace = true }
-postcard = "1.0.8"
 serde = { version = "1.0.203", default-features = false, features = ["derive"] }
 ekv = { workspace = true }
 
 paste = "1.0.15"
 bitflags = "2.6.0"
 
-rktk-keymanager = { path = "../rktk-keymanager" }
+rktk-keymanager = { path = "../rktk-keymanager", features = ["state"] }
+rktk-rrp = { path = "../rktk-rrp" }
+postcard = { workspace = true, features = [
+  "experimental-derive",
+  "heapless-cas",
+] }
+itertools = { version = "0.13.0", default-features = false }
 
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }

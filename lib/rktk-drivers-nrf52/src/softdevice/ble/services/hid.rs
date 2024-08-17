@@ -11,9 +11,10 @@ use nrf_softdevice::{
     },
     Softdevice,
 };
-use rktk::interface::usb::HidReport;
 use ssmarshal::serialize;
 use usbd_hid::descriptor::SerializedDescriptor as _;
+
+use crate::softdevice::ble::HidReport;
 
 use super::super::constant::*;
 

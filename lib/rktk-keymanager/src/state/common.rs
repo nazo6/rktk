@@ -2,18 +2,18 @@ use embassy_time::Instant;
 
 use crate::{
     keycode::{KeyAction, KeyDef},
-    Layer,
+    Keymap,
 };
 
 pub(super) struct CommonState<const LAYER: usize, const ROW: usize, const COL: usize> {
-    pub layers: [Layer<ROW, COL>; LAYER],
+    pub keymap: Keymap<LAYER, ROW, COL>,
     pub layer_active: [bool; LAYER],
 }
 
 impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, ROW, COL> {
-    pub fn new(layers: [Layer<ROW, COL>; LAYER]) -> Self {
+    pub fn new(layers: Keymap<LAYER, ROW, COL>) -> Self {
         Self {
-            layers,
+            keymap: layers,
             layer_active: [false; LAYER],
         }
     }
@@ -28,7 +28,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, 
         }
 
         for layer in (0..=layer).rev() {
-            let key = &self.layers[layer].map[row as usize][col as usize];
+            let key = &self.keymap[layer].map[row as usize][col as usize];
             match key {
                 KeyDef::None => return None,
                 KeyDef::Inherit => continue,

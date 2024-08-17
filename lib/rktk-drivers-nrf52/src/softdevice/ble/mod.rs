@@ -12,8 +12,9 @@ use nrf_softdevice::{
     Softdevice,
 };
 
-use rktk::interface::{ble::BleDriver, usb::HidReport};
+use rktk::interface::{ble::BleDriver, error::RktkError, reporter::ReporterDriver};
 use server::Server;
+use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::flash::NrfDb;
 
@@ -21,6 +22,13 @@ mod bonder;
 mod constant;
 mod server;
 mod services;
+
+#[derive(Debug)]
+pub enum HidReport {
+    Keyboard(KeyboardReport),
+    MediaKeyboard(MediaKeyboardReport),
+    Mouse(MouseReport),
+}
 
 static REPORT_CHAN: Channel<CriticalSectionRawMutex, HidReport, 8> = Channel::new();
 
@@ -47,18 +55,29 @@ impl NrfBleDriver {
     }
 }
 
-impl BleDriver for NrfBleDriver {
-    async fn wait_ready(&mut self) {}
+impl ReporterDriver for NrfBleDriver {
+    fn try_send_keyboard_report(&self, report: KeyboardReport) -> Result<(), RktkError> {
+        REPORT_CHAN
+            .try_send(HidReport::Keyboard(report))
+            .map_err(|_| RktkError::GeneralError("report_chan not empty"))?;
+        Ok(())
+    }
 
-    async fn send_report(
-        &mut self,
-        report: rktk::interface::usb::HidReport,
-    ) -> Result<(), rktk::interface::error::RktkError> {
-        let _ = REPORT_CHAN.send(report).await;
+    fn try_send_media_keyboard_report(&self, report: MediaKeyboardReport) -> Result<(), RktkError> {
+        REPORT_CHAN
+            .try_send(HidReport::MediaKeyboard(report))
+            .map_err(|_| RktkError::GeneralError("report_chan not empty"))?;
+        Ok(())
+    }
 
+    fn try_send_mouse_report(&self, report: MouseReport) -> Result<(), RktkError> {
+        REPORT_CHAN
+            .try_send(HidReport::Mouse(report))
+            .map_err(|_| RktkError::GeneralError("report_chan not empty"))?;
         Ok(())
     }
 }
+impl BleDriver for NrfBleDriver {}
 
 #[embassy_executor::task]
 async fn softdevice_task(sd: &'static Softdevice) -> ! {

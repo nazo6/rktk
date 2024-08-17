@@ -7,6 +7,7 @@ use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 mod builder;
 mod driver;
 mod handler;
+mod task;
 
 type RemoteWakeupSignal = embassy_sync::signal::Signal<CriticalSectionRawMutex, ()>;
 static SUSPENDED: AtomicBool = AtomicBool::new(false);

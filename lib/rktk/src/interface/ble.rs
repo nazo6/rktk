@@ -1,14 +1,7 @@
-use super::{error::RktkError, usb::HidReport};
+use super::reporter::ReporterDriver;
 
-pub trait BleDriver {
-    async fn wait_ready(&mut self);
-    async fn send_report(&mut self, report: HidReport) -> Result<(), RktkError>;
-}
+pub trait BleDriver: ReporterDriver {}
 
 pub enum DummyBleDriver {}
-impl BleDriver for DummyBleDriver {
-    async fn wait_ready(&mut self) {}
-    async fn send_report(&mut self, _report: HidReport) -> Result<(), RktkError> {
-        Ok(())
-    }
-}
+impl ReporterDriver for DummyBleDriver {}
+impl BleDriver for DummyBleDriver {}

@@ -17,6 +17,11 @@ pub mod special;
 pub mod utils;
 
 /// Top-level key definition.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "postcard",
+    derive(postcard::experimental::max_size::MaxSize)
+)]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyDef {
     None,
@@ -29,6 +34,11 @@ pub enum KeyDef {
 /// - `Normal`: Normal key press.
 /// - `Normal2`: Press key with another key.
 /// - `TapHold`: If tapped term is too short, treat as `Tap` (first key is used). If tapped term is longer than `TAP_THRESHOLD`, treat as `Hold` (second key is used).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "postcard",
+    derive(postcard::experimental::max_size::MaxSize)
+)]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyAction {
     Normal(KeyCode),
@@ -40,6 +50,11 @@ pub enum KeyAction {
 }
 
 /// Represents each key.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "postcard",
+    derive(postcard::experimental::max_size::MaxSize)
+)]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyCode {
     Key(key::Key),

@@ -7,20 +7,13 @@ use embassy_futures::{
 };
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_time::{Duration, Timer};
-use report::ReportChannel;
 
 use crate::{
     config::static_config::CONFIG,
     interface::{
-        backlight::BacklightDriver,
-        ble::BleDriver,
-        display::{DisplayDriver, DummyDisplayDriver},
-        double_tap::DoubleTapResetDriver,
-        keyscan::KeyscanDriver,
-        mouse::MouseDriver,
-        split::SplitDriver,
-        usb::UsbDriver,
-        DriverBuilder,
+        backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
+        double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
+        reporter::DummyReporterDriver, split::SplitDriver, usb::UsbDriver, DriverBuilder,
     },
     Layer,
 };
@@ -28,7 +21,6 @@ use crate::{
 mod backlight;
 pub mod display;
 mod main_loop;
-mod report;
 
 /// All drivers required to run the keyboard.
 ///
@@ -65,13 +57,7 @@ pub struct Drivers<
 }
 
 /// Receives the [`Drivers`] and executes the main process of the keyboard.
-/// This function should not be called more than once.
-///
-/// NOTE: For optimal boot time and proper operation of the Double Tap driver, do not do any heavy processing before executing this function.
-/// Driver authors should use the init method defined in each driver's trait to perform initialization
-/// instead of the associated functions such as new that are performed on the keyboard crate side.
-///
-/// TODO: To avoid using both `new` and `init` methods, receive builder instead of driver.
+/// This function must not be called more than once.
 pub async fn start<
     KeyScan: KeyscanDriver,
     Split: SplitDriver,
@@ -116,18 +102,8 @@ pub async fn start<
         async {
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 if let Ok(mut mouse) = mouse_builder.build().await {
-                    let _ = mouse.set_cpi(600).await;
+                    let _ = mouse.set_cpi(CONFIG.default_cpi).await;
                     Some(mouse)
-                } else {
-                    None
-                }
-            } else {
-                None
-            };
-
-            let mut usb = if let Some(usb_builder) = drivers.usb_builder {
-                if let Ok(usb) = usb_builder.build().await {
-                    Some(usb)
                 } else {
                     None
                 }
@@ -137,59 +113,58 @@ pub async fn start<
 
             crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
-            let host_connected = match (&mut drivers.ble, &mut usb) {
+            match (drivers.ble, drivers.usb_builder) {
                 (Some(ble), _) => {
-                    let _ = ble.wait_ready().await;
-                    true
-                }
-                (_, Some(usb)) => {
-                    match select(
-                        usb.wait_ready(),
-                        Timer::after_millis(CONFIG.split_usb_timeout),
-                    )
-                    .await
-                    {
-                        Either::First(_) => true,
-                        Either::Second(_) => false,
-                    }
-                }
-                _ => false,
-            };
-
-            let report_chan = ReportChannel::new();
-            let report_sender = report_chan.sender();
-            let report_receiver = report_chan.receiver();
-
-            join(
-                async {
                     main_loop::start(
-                        report_sender,
+                        Some(&ble),
                         drivers.key_scanner,
                         mouse,
                         drivers.split,
                         drivers.backlight,
                         keymap,
-                        host_connected,
                     )
                     .await;
-                },
-                async {
-                    report::start_report_task(report_receiver, usb, drivers.ble).await;
-                },
-            )
-            .await;
+                }
+                (_, Some(usb_builder)) => {
+                    match select(
+                        usb_builder.build(),
+                        Timer::after(Duration::from_millis(CONFIG.split_usb_timeout)),
+                    )
+                    .await
+                    {
+                        Either::First(usb) => {
+                            let Ok(usb) = usb else {
+                                panic!("Failed to build USB");
+                            };
+
+                            main_loop::start(
+                                Some(&usb),
+                                drivers.key_scanner,
+                                mouse,
+                                drivers.split,
+                                drivers.backlight,
+                                keymap,
+                            )
+                            .await;
+                        }
+                        Either::Second(_) => {
+                            main_loop::start(
+                                Option::<DummyReporterDriver>::None.as_ref(),
+                                drivers.key_scanner,
+                                mouse,
+                                drivers.split,
+                                drivers.backlight,
+                                keymap,
+                            )
+                            .await;
+                        }
+                    }
+                }
+                (None, None) => {
+                    panic!("No USB or BLE driver is provided");
+                }
+            }
         },
     )
     .await;
-}
-
-pub enum DummyDisplayDriverBuilder {}
-impl DriverBuilder for DummyDisplayDriverBuilder {
-    type Output = DummyDisplayDriver;
-
-    type Error = ();
-
-    async fn build(self) -> Result<Self::Output, Self::Error> {
-        unimplemented!()
-    }
 }

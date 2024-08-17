@@ -8,6 +8,7 @@ pub mod error;
 pub mod keyscan;
 pub mod mouse;
 pub mod rand;
+pub mod reporter;
 pub mod split;
 pub mod storage;
 pub mod usb;

@@ -1,4 +1,4 @@
-use embassy_futures::join::join;
+use embassy_futures::{join::join, select::select};
 use embassy_time::{Duration, Timer};
 use rktk_keymanager::state::{KeyChangeEvent, State, StateConfig, StateReport};
 
@@ -8,14 +8,42 @@ use crate::{
         backlight::{BacklightCtrl, BacklightMode},
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
+        reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster},
-        usb::HidReport,
     },
-    task::{backlight::BACKLIGHT_CTRL, report::ReportSender},
-    Layer,
+    task::backlight::BACKLIGHT_CTRL,
+    Keymap,
 };
 
 use super::{M2sTx, S2mRx};
+
+mod rrp_server;
+
+#[macro_export]
+macro_rules! get_req {
+    ($ep_name:ident, $reporter:expr) => {{
+        use rktk_rrp::endpoints::$ep_name::*;
+        let mut buf = [0u8; Request::POSTCARD_MAX_SIZE + Request::POSTCARD_MAX_SIZE / 254 + 2];
+        read_until_zero($reporter, &mut buf).await;
+        let Ok(req) = postcard::from_bytes_cobs::<Request>(&mut buf) else {
+            continue;
+        };
+        req
+    }};
+}
+
+#[macro_export]
+macro_rules! send_res {
+    ($ep_name:ident, $reporter:expr, $val:expr) => {{
+        use rktk_rrp::endpoints::$ep_name::*;
+        let mut buf = [0u8; Response::POSTCARD_MAX_SIZE + Response::POSTCARD_MAX_SIZE / 254 + 2];
+        let val: &Response = $val;
+        let Ok(res) = postcard::to_slice_cobs(val, &mut buf) else {
+            continue;
+        };
+        let _ = $reporter.send_rrp_data(res).await;
+    }};
+}
 
 fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
@@ -81,17 +109,17 @@ fn handle_led(
     *latest_led = Some(led);
 }
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     m2s_tx: M2sTx<'_>,
     s2m_rx: S2mRx<'_>,
-    report_sender: ReportSender<'_>,
+    reporter: &R,
     mut key_scanner: KS,
     mut mouse: Option<M>,
-    keymap: [Layer; CONFIG.layer_count],
+    keymap: Keymap,
     hand: crate::interface::keyscan::Hand,
 ) {
     let mut state = State::new(
-        keymap,
+        keymap.clone(),
         StateConfig {
             tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
             auto_mouse_layer: CONFIG.default_auto_mouse_layer,
@@ -107,45 +135,60 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
     let mut latest_led: Option<BacklightCtrl> = None;
 
     loop {
-        let start = embassy_time::Instant::now();
+        select(
+            async {
+                loop {
+                    let start = embassy_time::Instant::now();
 
-        let mut mouse_move: (i8, i8) = (0, 0);
+                    let mut mouse_move: (i8, i8) = (0, 0);
 
-        let (mut events, _) = join(key_scanner.scan(), async {
-            if let Some(mouse) = &mut mouse {
-                if let Ok((x, y)) = mouse.read().await {
-                    mouse_move.0 += x;
-                    mouse_move.1 += y;
+                    let (mut events, _) = join(key_scanner.scan(), async {
+                        if let Some(mouse) = &mut mouse {
+                            if let Ok((x, y)) = mouse.read().await {
+                                mouse_move.0 += x;
+                                mouse_move.1 += y;
+                            }
+                        }
+                    })
+                    .await;
+
+                    events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
+
+                    receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
+
+                    let state_report = state.update(&mut events, mouse_move, start);
+
+                    crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+
+                    if let Some(report) = state_report.keyboard_report {
+                        let _ = reporter.try_send_keyboard_report(report);
+                        let _ = reporter.wakeup();
+                    }
+                    if let Some(report) = state_report.mouse_report {
+                        crate::utils::display_state!(MouseMove, (report.x, report.y));
+                        let _ = reporter.try_send_mouse_report(report);
+                    }
+                    if let Some(report) = state_report.media_keyboard_report {
+                        let _ = reporter.try_send_media_keyboard_report(report);
+                    }
+
+                    handle_led(&state_report, m2s_tx, &mut latest_led);
+
+                    let took = start.elapsed();
+
+                    if took < SCAN_INTERVAL_KEYBOARD {
+                        Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
+                    }
                 }
-            }
-        })
+            },
+            async {
+                let mut server = rrp_server::Server {
+                    keymap: keymap.clone(),
+                };
+                let et = rrp_server::EndpointTransportImpl(reporter);
+                server.handle(&et).await;
+            },
+        )
         .await;
-
-        events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
-
-        receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
-
-        let state_report = state.update(&mut events, mouse_move, start);
-
-        crate::utils::display_state!(HighestLayer, state_report.highest_layer);
-
-        if let Some(report) = state_report.keyboard_report {
-            let _ = report_sender.try_send(HidReport::Keyboard(report));
-        }
-        if let Some(report) = state_report.mouse_report {
-            crate::utils::display_state!(MouseMove, (report.x, report.y));
-            let _ = report_sender.try_send(HidReport::Mouse(report));
-        }
-        if let Some(report) = state_report.media_keyboard_report {
-            let _ = report_sender.try_send(HidReport::MediaKeyboard(report));
-        }
-
-        handle_led(&state_report, m2s_tx, &mut latest_led);
-
-        let took = start.elapsed();
-
-        if took < SCAN_INTERVAL_KEYBOARD {
-            Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
-        }
     }
 }

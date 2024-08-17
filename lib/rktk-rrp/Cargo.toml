@@ -1,0 +1,17 @@
+[package]
+name = "rktk-rrp"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+rktk-keymanager = { path = "../rktk-keymanager" }
+postcard = { workspace = true, features = ["experimental-derive"] }
+heapless = { workspace = true }
+futures = { version = "0.3.30", default-features = false }
+serde = { workspace = true, features = ["derive"] }
+
+[features]
+std = ["postcard/use-std"]

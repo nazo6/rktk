@@ -23,6 +23,12 @@ def!(u8_default, u8);
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
 pub struct StaticConfig {
+    /// The name of the keyboard.
+    #[cfg(not(no_build))]
+    pub name: String,
+    #[cfg(no_build)]
+    pub name: &'static str,
+
     /// Timeout for detecting split USB connection (ms).
     #[cfg_attr(not(no_build), serde(default = "u64_default::<200>"))]
     pub split_usb_timeout: u64,
@@ -62,7 +68,7 @@ pub struct StaticConfig {
     pub split_channel_size: usize,
 
     /// Default CPI value for mouse
-    #[cfg_attr(not(no_build), serde(default = "u16_default::<400>"))]
+    #[cfg_attr(not(no_build), serde(default = "u16_default::<600>"))]
     pub default_cpi: u16,
 
     /// Default duration of auto mouse mode (ms)

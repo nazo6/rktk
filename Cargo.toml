@@ -1,5 +1,3 @@
-cargo-features = ["profile-rustflags"]
-
 [workspace]
 members = [
   "lib/rktk",
@@ -7,6 +5,8 @@ members = [
   "lib/rktk-drivers-nrf52",
   "lib/rktk-drivers-rp2040",
   "lib/rktk-keymanager",
+  "lib/rktk-rrp",
+  "lib/rktk-rrp-desktop",
   "keyboards/dummy-kb",
   "keyboards/keyball61-rp2040",
   "keyboards/keyball61-nrf52840",
@@ -43,7 +43,7 @@ cortex-m-rt = "0.7.0"
 
 usbd-hid = "0.8.2"
 
-heapless = "0.8.0"
+heapless = "0.7.0"
 static_cell = "2.1.0"
 fixed = "1.27.0"
 fixed-macro = "1.2.0"
@@ -53,6 +53,9 @@ embedded-graphics = "0.8.1"
 ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
 
 smart-leds = "0.4.0"
+
+serde = { version = "1.0.207", default-features = false }
+postcard = "1.0.8"
 
 defmt = "0.3.8"
 defmt-rtt = "0.4.1"
