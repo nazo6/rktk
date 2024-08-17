@@ -1,4 +1,7 @@
-use rktk_rrp::{endpoint_server, endpoints::*, futures::Stream, server::EndpointTransport};
+use rktk_rrp::{
+    __reexports::futures::Stream, __reexports::futures::StreamExt as _, endpoint_server,
+    endpoints::*, server::EndpointTransport,
+};
 
 use crate::{
     config::static_config::CONFIG,
@@ -54,7 +57,7 @@ impl Server {
         &mut self,
         _req: get_keymaps::Request,
     ) -> impl Stream<Item = get_keymaps::StreamResponse> + '_ {
-        rktk_rrp::futures::stream::iter(
+        rktk_rrp::__reexports::futures::stream::iter(
             itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols).map(
                 |(layer, row, col)| KeyDefLoc {
                     layer: layer as u8,
@@ -68,7 +71,12 @@ impl Server {
 
     async fn set_keymaps(
         &mut self,
-        _req: impl Stream<Item = set_keymaps::StreamRequest>,
+        req: impl Stream<Item = set_keymaps::StreamRequest>,
     ) -> set_keymaps::Response {
+        let mut req = core::pin::pin!(req);
+
+        while let Some(key) = req.next().await {
+            self.keymap[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
+        }
     }
 }

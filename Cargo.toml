@@ -5,9 +5,11 @@ members = [
   "lib/rktk-drivers-nrf52",
   "lib/rktk-drivers-rp2040",
   "lib/rktk-keymanager",
+  "lib/rktk-rrp",
+  "lib/rktk-rrp-desktop",
   "keyboards/dummy-kb",
   "keyboards/keyball61-rp2040",
-  "keyboards/keyball61-nrf52840", "lib/rktk-rrp",
+  "keyboards/keyball61-nrf52840",
 ]
 resolver = "2"
 

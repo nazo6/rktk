@@ -45,7 +45,7 @@ macro_rules! endpoint_server {
         req
     }};
     (@get stream $et:expr, $ep:ident) => {{
-        use $crate::futures::stream;
+        use $crate::__reexports::futures::stream;
         let mut buf = [0u8; StreamRequest::POSTCARD_MAX_SIZE + StreamRequest::POSTCARD_MAX_SIZE / 254 + 2];
 
         stream::unfold((), |state| async {
@@ -75,7 +75,7 @@ macro_rules! endpoint_server {
     }};
 
     (@send stream $et:expr, $ep:ident, $data:expr) => {{
-        use $crate::futures::stream::StreamExt;
+        use $crate::__reexports::futures::stream::StreamExt;
         while let Some(res) = $data.next().await {
             let res: StreamResponse = res;
             let mut buf = [0u8; StreamResponse::POSTCARD_MAX_SIZE + StreamResponse::POSTCARD_MAX_SIZE / 254 + 2];

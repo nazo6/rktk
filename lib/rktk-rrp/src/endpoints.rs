@@ -2,7 +2,7 @@ use postcard::experimental::max_size::MaxSize;
 use rktk_keymanager::keycode::KeyDef;
 use serde::{Deserialize, Serialize};
 
-#[derive(MaxSize, Serialize, Deserialize)]
+#[derive(MaxSize, Serialize, Deserialize, Debug)]
 pub struct KeyDefLoc {
     pub layer: u8,
     pub row: u8,
@@ -12,10 +12,7 @@ pub struct KeyDefLoc {
 
 pub mod get_info {
     pub type Request = ();
-    #[cfg(not(feature = "std"))]
     pub type Response = heapless::String<1024>;
-    #[cfg(feature = "std")]
-    pub type Response = String;
 }
 
 pub mod get_keymaps {
