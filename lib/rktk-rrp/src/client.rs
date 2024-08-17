@@ -31,7 +31,8 @@ macro_rules! endpoint_client {
             endpoint_client!(@send_ep_name self, $ep);
             use $crate::endpoints::$ep::{Request, StreamResponse};
             endpoint_client!(@send_req normal self, $ep, req);
-            Ok(endpoint_client!(@get_res stream self, $ep))
+            let res = endpoint_client!(@get_res stream self, $ep);
+            Ok(res)
         }
     };
     (@def $ep:ident stream stream) => {

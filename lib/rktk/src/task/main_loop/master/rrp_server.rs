@@ -1,3 +1,4 @@
+use get_keyboard_info::KeyboardInfo;
 use rktk_rrp::{
     __reexports::futures::Stream, __reexports::futures::StreamExt as _, endpoint_server,
     endpoints::*, server::EndpointTransport,
@@ -45,13 +46,17 @@ pub struct Server {
 }
 impl Server {
     endpoint_server!(
-        get_info normal normal => get_info
+        get_keyboard_info normal normal => get_info
         get_keymaps normal stream => get_keymaps
         set_keymaps stream normal => set_keymaps
     );
 
-    async fn get_info(&mut self, _req: get_info::Request) -> get_info::Response {
-        heapless::String::<1024>::from("rktk")
+    async fn get_info(&mut self, _req: get_keyboard_info::Request) -> get_keyboard_info::Response {
+        KeyboardInfo {
+            name: heapless::String::from(CONFIG.name),
+            cols: CONFIG.cols as u8,
+            rows: CONFIG.rows as u8,
+        }
     }
     async fn get_keymaps(
         &mut self,

@@ -10,9 +10,24 @@ pub struct KeyDefLoc {
     pub key: KeyDef,
 }
 
-pub mod get_info {
+pub mod get_keyboard_info {
+    use postcard::experimental::max_size::MaxSize;
+    use serde::{Deserialize, Serialize};
+
+    #[derive(MaxSize, Serialize, Deserialize, Debug)]
+    pub struct KeyboardInfo {
+        pub name: heapless::String<64>,
+        pub rows: u8,
+        pub cols: u8,
+    }
+
     pub type Request = ();
-    pub type Response = heapless::String<1024>;
+    pub type Response = KeyboardInfo;
+}
+
+pub mod get_layout_json {
+    pub type Request = ();
+    pub type StreamResponse = heapless::String<64>;
 }
 
 pub mod get_keymaps {

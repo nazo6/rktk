@@ -23,6 +23,12 @@ def!(u8_default, u8);
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
 pub struct StaticConfig {
+    /// The name of the keyboard.
+    #[cfg(not(no_build))]
+    pub name: String,
+    #[cfg(no_build)]
+    pub name: &'static str,
+
     /// Timeout for detecting split USB connection (ms).
     #[cfg_attr(not(no_build), serde(default = "u64_default::<200>"))]
     pub split_usb_timeout: u64,

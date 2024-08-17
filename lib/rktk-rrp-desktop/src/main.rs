@@ -15,12 +15,8 @@ async fn main() {
     };
     let start = std::time::Instant::now();
 
-    let mut stream = client.get_keymaps(()).await.unwrap();
-    let mut stream = core::pin::pin!(stream);
-
-    let keys = stream.collect::<Vec<_>>().await;
-    dbg!(start.elapsed());
-    // dbg!(keys);
+    let info = client.get_keyboard_info(()).await.unwrap();
+    dbg!(info);
 }
 
 struct Client {
@@ -48,7 +44,7 @@ impl Client {
     }
 
     endpoint_client!(
-       get_info normal normal
+       get_keyboard_info normal normal
        get_keymaps normal stream
     );
 }
