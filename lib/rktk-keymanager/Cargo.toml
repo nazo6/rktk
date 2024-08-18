@@ -25,6 +25,7 @@ specta = { workspace = true, optional = true, features = ["derive"] }
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
 critical-section = { version = "1.1.2", features = ["std"] }
 pretty_assertions = "1.4.0"
+usbd-hid = { workspace = true }
 
 [features]
 default = ["serde"]

@@ -18,10 +18,7 @@ fn normal_action() {
 #[test]
 fn normal2_action() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal2(
-        KeyCode::Key(Key::A),
-        KeyCode::Key(Key::B),
-    ));
+    keymap[0].map[0][0] = KeyAction::Normal2(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -38,10 +35,7 @@ fn normal2_action() {
 #[test]
 fn taphold_action_hold() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::TapHold(
-        KeyCode::Key(Key::A),
-        KeyCode::Key(Key::B),
-    ));
+    keymap[0].map[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -72,10 +66,7 @@ fn taphold_action_hold() {
 #[test]
 fn taphold_action_tap() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::TapHold(
-        KeyCode::Key(Key::A),
-        KeyCode::Key(Key::B),
-    ));
+    keymap[0].map[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));

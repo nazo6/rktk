@@ -6,7 +6,7 @@
 use keycode::KeyAction;
 
 pub mod keycode;
-#[cfg(feature = "state")]
+#[cfg(any(test, feature = "state"))]
 pub mod state;
 
 #[derive(Clone, Debug)]
