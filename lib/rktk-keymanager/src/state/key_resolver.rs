@@ -123,6 +123,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                         }
                     }
                     KeyAction::OneShot(_) => {}
+                    KeyAction::Inherit => unreachable!(),
                 }
             }
         }
@@ -145,6 +146,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                         }
                     }
                     KeyAction::OneShot(_) => {}
+                    KeyAction::Inherit => unreachable!(),
                 }
             }
             self.key_state[event.row as usize][event.col as usize] = None;
@@ -158,7 +160,8 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
 
         let highest_layer = cs.highest_layer();
         for event in &events.pressed {
-            let Some(action) = cs.get_keyaction(event.row, event.col, highest_layer) else {
+            let Some(action) = cs.get_inherited_keyaction(event.row, event.col, highest_layer)
+            else {
                 continue;
             };
 
@@ -177,6 +180,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                         active: None,
                     });
                 }
+                KeyAction::Inherit => unreachable!(),
             };
 
             self.key_state[event.row as usize][event.col as usize] = Some(KeyPressedState {

@@ -16,20 +16,6 @@ pub mod mouse;
 pub mod special;
 pub mod utils;
 
-/// Top-level key definition.
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Clone, Debug, PartialEq, Eq, Copy)]
-pub enum KeyDef {
-    None,
-    Inherit,
-    Key(KeyAction),
-}
-
 /// Defined how key is handled.
 ///
 /// - `Normal`: Normal key press.
@@ -43,6 +29,7 @@ pub enum KeyDef {
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyAction {
+    Inherit,
     Normal(KeyCode),
     Normal2(KeyCode, KeyCode),
     TapHold(KeyCode, KeyCode),
@@ -60,6 +47,7 @@ pub enum KeyAction {
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum KeyCode {
+    None,
     Key(key::Key),
     Mouse(mouse::Mouse),
     Modifier(modifier::Modifier),
@@ -69,6 +57,6 @@ pub enum KeyCode {
 }
 
 /// Inherit key definition from parent layer.
-pub const _____: KeyDef = KeyDef::Inherit;
+pub const _____: KeyAction = KeyAction::Inherit;
 /// No key definition.
-pub const XXXXX: KeyDef = KeyDef::None;
+pub const XXXXX: KeyAction = KeyAction::Normal(KeyCode::None);

@@ -74,7 +74,7 @@ impl<'a> Server<'a> {
         let keymap = self.state.lock().await.get_keymap_mut().clone();
         futures::stream::iter(
             itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols).map(
-                move |(layer, row, col)| KeyDefLoc {
+                move |(layer, row, col)| KeyActionLoc {
                     layer: layer as u8,
                     row: row as u8,
                     col: col as u8,

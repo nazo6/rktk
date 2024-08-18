@@ -1,7 +1,5 @@
 #![allow(non_snake_case)]
 
-use super::super::keycode::KeyDef;
-
 use super::{KeyAction, KeyCode};
 
 /// Keycode for layer operations.
@@ -19,12 +17,12 @@ pub enum LayerOp {
     Toggle(u8),
 }
 
-pub const fn MO(n: u8) -> KeyDef {
+pub const fn MO(n: u8) -> KeyAction {
     // assert!(n < LAYER_NUM);
-    KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(n))))
+    KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(n)))
 }
 
-pub const fn TG(n: u8) -> KeyDef {
+pub const fn TG(n: u8) -> KeyAction {
     // assert!(n < LAYER_NUM);
-    KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Toggle(n))))
+    KeyAction::Normal(KeyCode::Layer(LayerOp::Toggle(n)))
 }

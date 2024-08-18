@@ -37,7 +37,7 @@ async getKeyboardInfo() : Promise<Result<KeyboardInfo, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getKeymaps() : Promise<Result<KeyDefLoc[], string>> {
+async getKeymaps() : Promise<Result<KeyActionLoc[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_keymaps") };
 } catch (e) {
@@ -53,7 +53,7 @@ async getLayoutJson() : Promise<Result<string, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async setKeymaps(keymaps: KeyDefLoc[]) : Promise<Result<null, string>> {
+async setKeymaps(keymaps: KeyActionLoc[]) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("set_keymaps", { keymaps }) };
 } catch (e) {
@@ -90,16 +90,12 @@ export type Key = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K
  * - `Normal2`: Press key with another key.
  * - `TapHold`: If tapped term is too short, treat as `Tap` (first key is used). If tapped term is longer than `TAP_THRESHOLD`, treat as `Hold` (second key is used).
  */
-export type KeyAction = { Normal: KeyCode } | { Normal2: [KeyCode, KeyCode] } | { TapHold: [KeyCode, KeyCode] } | { OneShot: KeyCode }
+export type KeyAction = "Inherit" | { Normal: KeyCode } | { Normal2: [KeyCode, KeyCode] } | { TapHold: [KeyCode, KeyCode] } | { OneShot: KeyCode }
+export type KeyActionLoc = { layer: number; row: number; col: number; key: KeyAction }
 /**
  * Represents each key.
  */
-export type KeyCode = { Key: Key } | { Mouse: Mouse } | { Modifier: Modifier } | { Layer: LayerOp } | { Special: Special } | { Media: Media }
-/**
- * Top-level key definition.
- */
-export type KeyDef = "None" | "Inherit" | { Key: KeyAction }
-export type KeyDefLoc = { layer: number; row: number; col: number; key: KeyDef }
+export type KeyCode = "None" | { Key: Key } | { Mouse: Mouse } | { Modifier: Modifier } | { Layer: LayerOp } | { Special: Special } | { Media: Media }
 export type KeyboardInfo = { name: string; rows: number; cols: number }
 /**
  * Keycode for layer operations.

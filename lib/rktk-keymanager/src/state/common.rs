@@ -1,9 +1,6 @@
 use embassy_time::Instant;
 
-use crate::{
-    keycode::{KeyAction, KeyDef},
-    Keymap,
-};
+use crate::{keycode::KeyAction, Keymap};
 
 pub(super) struct CommonState<const LAYER: usize, const ROW: usize, const COL: usize> {
     pub keymap: Keymap<LAYER, ROW, COL>,
@@ -22,17 +19,18 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, 
         self.layer_active.iter().rposition(|&x| x).unwrap_or(0)
     }
 
-    pub fn get_keyaction(&self, row: u8, col: u8, layer: usize) -> Option<KeyAction> {
+    /// Get the key action for the given key position and if it is inherited, resolve the inherited key action
+    pub fn get_inherited_keyaction(&self, row: u8, col: u8, layer: usize) -> Option<KeyAction> {
         if row >= ROW as u8 || col >= COL as u8 {
             return None;
         }
 
         for layer in (0..=layer).rev() {
-            let key = &self.keymap[layer].map[row as usize][col as usize];
-            match key {
-                KeyDef::None => return None,
-                KeyDef::Inherit => continue,
-                KeyDef::Key(action) => return Some(*action),
+            let ka = &self.keymap[layer].map[row as usize][col as usize];
+            if let KeyAction::Inherit = ka {
+                continue;
+            } else {
+                return Some(*ka);
             }
         }
 

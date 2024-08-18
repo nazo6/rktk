@@ -21,7 +21,7 @@ pub fn first_empty_second_none() {
 #[test]
 pub fn key_press_release() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Key(Key::A)));
+    keymap[0].map[0][0] = KeyAction::Normal(KeyCode::Key(Key::A));
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
 

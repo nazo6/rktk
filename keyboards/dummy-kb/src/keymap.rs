@@ -5,33 +5,13 @@ use rktk::keymanager::keycode::{
 };
 use rktk::{Layer, LayerMap};
 
-const L2ENTER: KeyDef = KeyDef::Key(KeyAction::TapHold(
-    KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Momentary(2)),
-));
-
-const L2SPC: KeyDef = KeyDef::Key(KeyAction::TapHold(
-    KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Momentary(2)),
-));
-
-const L3SPC: KeyDef = KeyDef::Key(KeyAction::TapHold(
-    KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Momentary(3)),
-));
-
-const L4GRV: KeyDef = KeyDef::Key(KeyAction::TapHold(
-    KeyCode::Key(Key::Grave),
-    KeyCode::Layer(LayerOp::Momentary(4)),
-));
-
 #[rustfmt::skip]
 const L0: LayerMap = [
-    [ L4GRV , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
+    [ _____ , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
     [  TAB  , Q     , W     , E     , R     , T     , _____ , /**/ _____ , Y     , U     , I     , O     , P    , MINUS],
     [  ESC  , A     , S     , D     , F     , G     , _____ , /**/ _____ , H     , J     , K     , L     , SCLN , QUOTE],
     [ L_SHFT, Z     , X     , C     , V     , B     , LBRC  , /**/ RBRC  , N     , M     , COMM  , DOT   , SLASH, BSLSH],
-    [ L_CTRL, L_GUI , TG(2) , L_ALT , L3SPC , L2SPC , SPACE , /**/ BS    ,L2ENTER, _____ , _____ , _____ ,R_SHFT,R_CTRL],
+    [ L_CTRL, L_GUI , TG(2) , L_ALT , _____ , _____ , SPACE , /**/ BS    , _____ , _____ , _____ , _____ ,R_SHFT,R_CTRL],
 ];
 
 #[rustfmt::skip]

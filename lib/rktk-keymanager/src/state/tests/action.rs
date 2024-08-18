@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn normal_action() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Key(Key::A)));
+    keymap[0].map[0][0] = KeyAction::Normal(KeyCode::Key(Key::A));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -100,9 +100,9 @@ fn taphold_action_tap() {
 #[test]
 fn oneshot_action_mod() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::OneShot(KeyCode::Modifier(Modifier::LCtrl)));
-    keymap[0].map[0][1] = KeyDef::Key(KeyAction::Normal(KeyCode::Key(Key::A)));
-    keymap[0].map[0][2] = KeyDef::Key(KeyAction::Normal(KeyCode::Key(Key::B)));
+    keymap[0].map[0][0] = KeyAction::OneShot(KeyCode::Modifier(Modifier::LCtrl));
+    keymap[0].map[0][1] = KeyAction::Normal(KeyCode::Key(Key::A));
+    keymap[0].map[0][2] = KeyAction::Normal(KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));

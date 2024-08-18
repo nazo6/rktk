@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 
 use super::macros::normal;
-use super::{KeyAction, KeyCode, KeyDef};
+use super::{KeyAction, KeyCode};
 
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(

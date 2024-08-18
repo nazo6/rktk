@@ -1,4 +1,4 @@
-use rktk_keymanager::keycode::KeyDef;
+use rktk_keymanager::keycode::KeyAction;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
     not(feature = "std"),
     derive(postcard::experimental::max_size::MaxSize)
 )]
-pub struct KeyDefLoc {
+pub struct KeyActionLoc {
     pub layer: u8,
     pub row: u8,
     pub col: u8,
-    pub key: KeyDef,
+    pub key: KeyAction,
 }
 
 pub mod get_keyboard_info {
@@ -47,9 +47,9 @@ pub mod get_layout_json {
 
 pub mod get_keymaps {
     pub type Request = ();
-    pub type StreamResponse = super::KeyDefLoc;
+    pub type StreamResponse = super::KeyActionLoc;
 }
 pub mod set_keymaps {
-    pub type StreamRequest = super::KeyDefLoc;
+    pub type StreamRequest = super::KeyActionLoc;
     pub type Response = ();
 }

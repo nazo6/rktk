@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn mouse_left_click_key() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Mouse(Mouse::Left)));
+    keymap[0].map[0][0] = KeyAction::Normal(KeyCode::Mouse(Mouse::Left));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -19,7 +19,7 @@ fn mouse_left_click_key() {
 #[test]
 fn layer_momentary_key() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(1))));
+    keymap[0].map[0][0] = KeyAction::Normal(KeyCode::Layer(LayerOp::Momentary(1)));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -43,7 +43,7 @@ fn layer_momentary_key() {
 #[test]
 fn layer_toggle_key() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap[0].map[0][0] = KeyDef::Key(KeyAction::Normal(KeyCode::Layer(LayerOp::Toggle(1))));
+    keymap[0].map[0][0] = KeyAction::Normal(KeyCode::Layer(LayerOp::Toggle(1)));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));

@@ -9,10 +9,10 @@ macro_rules! with_consts {
         $(#[$($attr)*])*
         $vis enum $name { $($variant = $val,)* }
 
-        use super::{KeyAction, KeyDef, KeyCode};
+        use super::{KeyAction, KeyCode};
 
         paste::paste!{
-            $(pub const [<$variant:snake:upper>] :KeyDef = KeyDef::Key(KeyAction::Normal(KeyCode::$key_type($name::$variant)));)*
+            $(pub const [<$variant:snake:upper>] :KeyAction = KeyAction::Normal(KeyCode::$key_type($name::$variant));)*
         }
     }
 }
@@ -28,17 +28,17 @@ macro_rules! with_consts_no_val {
         $(#[$($attr)*])*
         $vis enum $name { $($variant,)* }
 
-        use super::{KeyAction, KeyDef, KeyCode};
+        use super::{KeyAction, KeyCode};
 
         paste::paste!{
-            $(pub const [<$variant:snake:upper>] :KeyDef = KeyDef::Key(KeyAction::Normal(KeyCode::$key_type($name::$variant)));)*
+            $(pub const [<$variant:snake:upper>] :KeyAction = KeyAction::Normal(KeyCode::$key_type($name::$variant));)*
         }
     }
 }
 
 macro_rules! normal {
     ($name:ident, $type:ident, $variant:ident) => {
-        pub const $name: KeyDef = KeyDef::Key(KeyAction::Normal(KeyCode::$type($type::$variant)));
+        pub const $name: KeyAction = KeyAction::Normal(KeyCode::$type($type::$variant));
     };
 }
 

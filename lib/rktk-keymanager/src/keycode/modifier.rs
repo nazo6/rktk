@@ -1,4 +1,4 @@
-use super::{KeyAction, KeyCode, KeyDef};
+use super::{KeyAction, KeyCode};
 use bitflags::bitflags;
 
 use super::macros::normal;

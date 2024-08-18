@@ -2,9 +2,8 @@ import { notifications } from "@mantine/notifications";
 import {
   commands,
   KeyAction,
+  KeyActionLoc,
   KeyboardInfo,
-  KeyDef,
-  KeyDefLoc,
   Result,
 } from "../../bindings";
 import { useEffect, useState } from "react";
@@ -48,7 +47,7 @@ export function Home() {
 }
 
 function HomeInner(props: { keyboardInfo: KeyboardInfo }) {
-  const [keymaps, setKeymaps] = useState<KeyDefLoc[] | null>(null);
+  const [keymaps, setKeymaps] = useState<KeyActionLoc[] | null>(null);
   const [layout, setLayout] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,7 +95,7 @@ function HomeInner(props: { keyboardInfo: KeyboardInfo }) {
 
 import * as kle from "@ijprest/kle-serial";
 
-function Keyboard(props: { keymaps: KeyDefLoc[]; keyboardJson: string }) {
+function Keyboard(props: { keymaps: KeyActionLoc[]; keyboardJson: string }) {
   console.log(props.keyboardJson);
 
   const val = JSON.parse(props.keyboardJson);
@@ -163,60 +162,15 @@ function Keyboard(props: { keymaps: KeyDefLoc[]; keyboardJson: string }) {
   );
 }
 
-function displayKey(key?: KeyDef): string {
+function displayKey(key?: KeyAction): string {
   if (!key) {
     return "";
   }
-  if (typeof key !== "string" && "Key" in key) {
-    if ("Normal" in key.Key) {
-      if ("Key" in key.Key.Normal) {
-        return key.Key.Normal.Key;
-      }
+  if (typeof key != "string" && "Normal" in key) {
+    if (typeof key.Normal != "string" && "Key" in key.Normal) {
+      return key.Normal.Key;
     }
   }
 
   return "";
-}
-
-function KeyChanger(props: { keydef: KeyDef }) {
-  const [keydef, setKeydef] = useState<KeyDef>(props.keydef);
-
-  let childMenu = null;
-  let active = null;
-
-  switch (keydef) {
-    case "None":
-      active = "None";
-      break;
-    case "Inherit":
-      active = "Inherit";
-      break;
-    default:
-      active = "Custom";
-      childMenu = (
-        <KeyActionMenu
-          keyAction={keydef.Key}
-          setKeyAction={(ka) => setKeydef({ Key: ka })}
-        />
-      );
-  }
-
-  return (
-    <div>
-      <NavLink>
-        <NavLink active={active == "None"}>None</NavLink>
-        <NavLink active={active == "Inherit"}>None</NavLink>
-        <NavLink active={active == "Custom"}></NavLink>
-      </NavLink>
-    </div>
-  );
-}
-
-function KeyActionMenu(
-  props: { keyAction: KeyAction; setKeyAction: (keyAction: KeyAction) => void },
-) {
-  return (
-    <div>
-    </div>
-  );
 }
