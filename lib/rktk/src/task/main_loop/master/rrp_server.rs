@@ -1,4 +1,3 @@
-use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, mutex::Mutex};
 use futures::{Stream, StreamExt as _};
 use get_keyboard_info::KeyboardInfo;
 use rktk_keymanager::state::State;
@@ -7,6 +6,7 @@ use rktk_rrp::{endpoint_server, endpoints::*, server::EndpointTransport};
 use crate::{
     config::static_config::CONFIG,
     interface::{error::RktkError, reporter::ReporterDriver},
+    utils::ThreadModeMutex,
 };
 
 pub struct EndpointTransportImpl<'a, R: ReporterDriver>(pub &'a R);
@@ -47,10 +47,7 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
 }
 
 pub struct Server<'a> {
-    pub state: &'a Mutex<
-        ThreadModeRawMutex,
-        State<{ CONFIG.layer_count }, { CONFIG.rows }, { CONFIG.cols }>,
-    >,
+    pub state: &'a ThreadModeMutex<State<{ CONFIG.layer_count }, { CONFIG.rows }, { CONFIG.cols }>>,
 }
 impl<'a> Server<'a> {
     endpoint_server!(

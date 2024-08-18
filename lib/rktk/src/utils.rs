@@ -39,3 +39,11 @@ macro_rules! display_state {
     }};
 }
 pub(crate) use display_state;
+use embassy_sync::mutex::Mutex;
+
+#[cfg(target_arch = "arm")]
+pub(crate) type ThreadModeMutex<T> =
+    Mutex<embassy_sync::blocking_mutex::raw::ThreadModeRawMutex, T>;
+#[cfg(not(target_arch = "arm"))]
+pub(crate) type ThreadModeMutex<T> =
+    Mutex<embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex, T>;

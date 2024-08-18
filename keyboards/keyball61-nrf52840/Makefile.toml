@@ -10,6 +10,9 @@ script = 'cargo run --release --no-default-features --features usb'
 [tasks.run-ble]
 script = 'cargo run --release --no-default-features --features ble-master'
 
+[tasks.run-usb-size-optimized]
+script = 'cargo run --profile size-opt -Z build-std=core,panic_abort -Z build-std-features=panic_immediate_abort --no-default-features --features usb'
+
 [tasks.deploy]
 script = '''
 #!@duckscript

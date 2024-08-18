@@ -1,5 +1,4 @@
 use embassy_futures::{join::join, select::select};
-use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, mutex::Mutex};
 use embassy_time::{Duration, Timer};
 use rktk_keymanager::state::{KeyChangeEvent, State, StateConfig, StateReport};
 
@@ -13,6 +12,7 @@ use crate::{
         split::{MasterToSlave, SlaveToMaster},
     },
     task::backlight::BACKLIGHT_CTRL,
+    utils::ThreadModeMutex,
     Keymap,
 };
 
@@ -119,7 +119,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     keymap: Keymap,
     hand: crate::interface::keyscan::Hand,
 ) {
-    let state = Mutex::<ThreadModeRawMutex, _>::new(State::new(
+    let state = ThreadModeMutex::new(State::new(
         keymap.clone(),
         StateConfig {
             tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
