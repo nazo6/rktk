@@ -26,6 +26,9 @@ ekv = { workspace = true }
 
 paste = "1.0.15"
 bitflags = "2.6.0"
+itertools = { version = "0.13.0", default-features = false }
+futures = { workspace = true }
+
 
 rktk-keymanager = { path = "../rktk-keymanager", features = ["state"] }
 rktk-rrp = { path = "../rktk-rrp", features = ["server"] }
@@ -33,7 +36,6 @@ postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
-itertools = { version = "0.13.0", default-features = false }
 
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }

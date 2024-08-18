@@ -11,9 +11,9 @@ pub(super) struct CommonState<const LAYER: usize, const ROW: usize, const COL: u
 }
 
 impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, ROW, COL> {
-    pub fn new(layers: Keymap<LAYER, ROW, COL>) -> Self {
+    pub fn new(keymap: Keymap<LAYER, ROW, COL>) -> Self {
         Self {
-            keymap: layers,
+            keymap,
             layer_active: [false; LAYER],
         }
     }

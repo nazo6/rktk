@@ -1,13 +1,12 @@
+use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, mutex::Mutex};
+use futures::{Stream, StreamExt as _};
 use get_keyboard_info::KeyboardInfo;
-use rktk_rrp::{
-    __reexports::futures::Stream, __reexports::futures::StreamExt as _, endpoint_server,
-    endpoints::*, server::EndpointTransport,
-};
+use rktk_keymanager::state::State;
+use rktk_rrp::{endpoint_server, endpoints::*, server::EndpointTransport};
 
 use crate::{
     config::static_config::CONFIG,
     interface::{error::RktkError, reporter::ReporterDriver},
-    Keymap,
 };
 
 pub struct EndpointTransportImpl<'a, R: ReporterDriver>(pub &'a R);
@@ -47,10 +46,13 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
     }
 }
 
-pub struct Server {
-    pub keymap: Keymap,
+pub struct Server<'a> {
+    pub state: &'a Mutex<
+        ThreadModeRawMutex,
+        State<{ CONFIG.layer_count }, { CONFIG.rows }, { CONFIG.cols }>,
+    >,
 }
-impl Server {
+impl<'a> Server<'a> {
     endpoint_server!(
         get_keyboard_info normal normal => get_info
         get_layout_json normal stream => get_layout_json
@@ -69,13 +71,14 @@ impl Server {
         &mut self,
         _req: get_keymaps::Request,
     ) -> impl Stream<Item = get_keymaps::StreamResponse> + '_ {
-        rktk_rrp::__reexports::futures::stream::iter(
+        let keymap = self.state.lock().await.get_keymap_mut().clone();
+        futures::stream::iter(
             itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols).map(
-                |(layer, row, col)| KeyDefLoc {
+                move |(layer, row, col)| KeyDefLoc {
                     layer: layer as u8,
                     row: row as u8,
                     col: col as u8,
-                    key: self.keymap[layer].map[row][col],
+                    key: keymap[layer].map[row][col],
                 },
             ),
         )
@@ -85,13 +88,11 @@ impl Server {
         &mut self,
         _req: get_layout_json::Request,
     ) -> impl Stream<Item = get_layout_json::StreamResponse> + '_ {
-        rktk_rrp::__reexports::futures::stream::iter(CONFIG.layout_json.as_bytes().chunks(64).map(
-            |chunk| {
-                let mut vec = heapless::Vec::new();
-                vec.extend_from_slice(chunk).unwrap();
-                vec
-            },
-        ))
+        futures::stream::iter(CONFIG.layout_json.as_bytes().chunks(64).map(|chunk| {
+            let mut vec = heapless::Vec::new();
+            vec.extend_from_slice(chunk).unwrap();
+            vec
+        }))
     }
 
     async fn set_keymaps(
@@ -100,8 +101,10 @@ impl Server {
     ) -> set_keymaps::Response {
         let mut req = core::pin::pin!(req);
 
+        let mut state = self.state.lock().await;
+        let keymap = state.get_keymap_mut();
         while let Some(key) = req.next().await {
-            self.keymap[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
+            keymap[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
         }
     }
 }

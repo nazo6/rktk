@@ -1,13 +1,14 @@
 import { notifications } from "@mantine/notifications";
 import {
   commands,
+  KeyAction,
   KeyboardInfo,
   KeyDef,
   KeyDefLoc,
   Result,
 } from "../../bindings";
 import { useEffect, useState } from "react";
-import { Button } from "@mantine/core";
+import { Button, NavLink } from "@mantine/core";
 
 export function Home() {
   const [data, setData] = useState<KeyboardInfo | null>(null);
@@ -175,4 +176,47 @@ function displayKey(key?: KeyDef): string {
   }
 
   return "";
+}
+
+function KeyChanger(props: { keydef: KeyDef }) {
+  const [keydef, setKeydef] = useState<KeyDef>(props.keydef);
+
+  let childMenu = null;
+  let active = null;
+
+  switch (keydef) {
+    case "None":
+      active = "None";
+      break;
+    case "Inherit":
+      active = "Inherit";
+      break;
+    default:
+      active = "Custom";
+      childMenu = (
+        <KeyActionMenu
+          keyAction={keydef.Key}
+          setKeyAction={(ka) => setKeydef({ Key: ka })}
+        />
+      );
+  }
+
+  return (
+    <div>
+      <NavLink>
+        <NavLink active={active == "None"}>None</NavLink>
+        <NavLink active={active == "Inherit"}>None</NavLink>
+        <NavLink active={active == "Custom"}></NavLink>
+      </NavLink>
+    </div>
+  );
+}
+
+function KeyActionMenu(
+  props: { keyAction: KeyAction; setKeyAction: (keyAction: KeyAction) => void },
+) {
+  return (
+    <div>
+    </div>
+  );
 }

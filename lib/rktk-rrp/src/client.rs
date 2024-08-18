@@ -89,8 +89,9 @@ macro_rules! endpoint_client {
     }};
 
     (@send_req stream $et:expr, $ep:ident, $data:expr) => {{
-        use $crate::futures::stream::StreamExt;
-        while let Some(res) = $data.next().await {
+        use $crate::__reexports::futures::stream::StreamExt;
+        let mut data = core::pin::pin!($data);
+        while let Some(res) = data.next().await {
             let res: StreamRequest = res;
             let Ok(res) = to_stdvec_cobs(&res) else {
                 continue;

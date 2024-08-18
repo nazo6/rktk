@@ -39,8 +39,9 @@ impl Client {
     }
 
     endpoint_client!(
-       get_keyboard_info normal normal
-       get_keymaps normal stream
-       get_layout_json normal stream
+        get_keyboard_info normal normal
+        get_keymaps normal stream
+        get_layout_json normal stream
+        set_keymaps stream normal
     );
 }

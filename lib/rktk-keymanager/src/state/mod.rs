@@ -99,6 +99,10 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             highest_layer: highest_layer as u8,
         }
     }
+
+    pub fn get_keymap_mut(&mut self) -> &mut [Layer<ROW, COL>; LAYER] {
+        &mut self.cs.keymap
+    }
 }
 
 #[cfg(test)]

@@ -1,4 +1,5 @@
 use embassy_futures::{join::join, select::select};
+use embassy_sync::{blocking_mutex::raw::ThreadModeRawMutex, mutex::Mutex};
 use embassy_time::{Duration, Timer};
 use rktk_keymanager::state::{KeyChangeEvent, State, StateConfig, StateReport};
 
@@ -118,7 +119,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     keymap: Keymap,
     hand: crate::interface::keyscan::Hand,
 ) {
-    let mut state = State::new(
+    let state = Mutex::<ThreadModeRawMutex, _>::new(State::new(
         keymap.clone(),
         StateConfig {
             tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
@@ -128,7 +129,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
             scroll_divider_x: CONFIG.default_scroll_divider_x,
             scroll_divider_y: CONFIG.default_scroll_divider_y,
         },
-    );
+    ));
 
     crate::print!("Master start");
 
@@ -156,7 +157,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
 
                     receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
 
-                    let state_report = state.update(&mut events, mouse_move, start);
+                    let state_report = state.lock().await.update(&mut events, mouse_move, start);
 
                     crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
@@ -182,9 +183,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
                 }
             },
             async {
-                let mut server = rrp_server::Server {
-                    keymap: keymap.clone(),
-                };
+                let mut server = rrp_server::Server { state: &state };
                 let et = rrp_server::EndpointTransportImpl(reporter);
                 server.handle(&et).await;
             },

@@ -109,6 +109,23 @@ async fn get_keymaps(
     Ok(res)
 }
 
+#[tauri::command]
+#[specta::specta]
+async fn set_keymaps(
+    state: tauri::State<'_, State>,
+    keymaps: Vec<set_keymaps::StreamRequest>,
+) -> Result<(), String> {
+    let ConnectedState::Connected { client } = &mut *state.0.write().await else {
+        return Err("Not connected".to_string());
+    };
+
+    client
+        .set_keymaps(futures::stream::iter(keymaps.into_iter()))
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Type, Event)]
 pub struct ConnectionEvent(bool);
 
@@ -123,6 +140,7 @@ pub fn tauri_specta_builder() -> TauriSpectaBuilder {
             get_keyboard_info,
             get_keymaps,
             get_layout_json,
+            set_keymaps,
         ]);
 
     #[cfg(debug_assertions)]
