@@ -7,7 +7,7 @@ import {
   Result,
 } from "../../bindings";
 import { useEffect, useState } from "react";
-import { Button, NavLink } from "@mantine/core";
+import { Button } from "@mantine/core";
 
 export function Home() {
   const [data, setData] = useState<KeyboardInfo | null>(null);
@@ -94,70 +94,82 @@ function HomeInner(props: { keyboardInfo: KeyboardInfo }) {
 }
 
 import * as kle from "@ijprest/kle-serial";
+import { KeyActionSelector } from "./KeySelector";
+
+type KeyWithAction = {
+  key: kle.Key;
+  action?: KeyActionLoc;
+};
 
 function Keyboard(props: { keymaps: KeyActionLoc[]; keyboardJson: string }) {
-  console.log(props.keyboardJson);
-
   const val = JSON.parse(props.keyboardJson);
   const kb = kle.Serial.parse(JSON.stringify(val.keymap));
+  const keys = kb.keys.map((key) => {
+    return {
+      key,
+      action: props.keymaps.find((v) =>
+        v.col == parseInt(key.labels[0].split(",")[1]) &&
+        v.row == parseInt(key.labels[0].split(",")[0]) &&
+        v.layer == 0
+      ),
+    };
+  });
 
-  console.log(kb);
-
-  const [selectedKey, setSelectedKey] = useState<
-    { row: number; col: number; layer: number } | null
-  >(null);
-  const selectedKeymap = selectedKey
-    ? props.keymaps.find((v) =>
-      v.col == selectedKey.col && v.row == selectedKey.row &&
-      v.layer == selectedKey.layer
-    )
-    : null;
+  const [selectedKey, setSelectedKey] = useState<KeyWithAction | null>(null);
 
   return (
     <div className="flex flex-col">
       <div className="relative h-72">
-        {kb.keys.map((key) => (
-          <div
-            className="absolute border-2 border-black"
-            style={{
-              width: key.width * 50 + "px",
-              height: key.height * 50 + "px",
-              top: key.y * 50 + "px",
-              left: key.x * 50 + "px",
-              transform: `rotate(${key.rotation_angle}deg)`,
-            }}
+        {keys.map((k) => (
+          <Key
+            k={k}
             onClick={() => {
-              const loc = key.labels[0];
-              const [row, col] = loc.split(",").map((x) => parseInt(x));
-              setSelectedKey({ row, col, layer: 0 });
+              setSelectedKey(k);
             }}
-          >
-            {displayKey(
-              props.keymaps.find((v) =>
-                v.col == parseInt(key.labels[0].split(",")[1]) &&
-                v.row == parseInt(key.labels[0].split(",")[0]) &&
-                v.layer == 0
-              )?.key,
-            )}
-          </div>
+          />
         ))}
       </div>
       <div>
         {selectedKey
           ? (
-            <div>
-              <h2>Selected key</h2>
-              <p>Row: {selectedKey.row}</p>
-              <p>Col: {selectedKey.col}</p>
-              <p>Layer: {selectedKey.layer}</p>
-              <p>
-                Keymap:{" "}
-                {selectedKeymap ? JSON.stringify(selectedKeymap.key) : "None"}
-              </p>
+            <div className="flex gap-2">
+              <p>Row: {selectedKey.action?.row}</p>
+              <p>Col: {selectedKey.action?.col}</p>
+              <p>Layer: {selectedKey.action?.layer}</p>
             </div>
           )
           : <div>No key selected</div>}
       </div>
+      {selectedKey?.action &&
+        (
+          <KeyActionSelector
+            keyAction={selectedKey.action.key}
+            setKeyAction={(key) => {}}
+          />
+        )}
+    </div>
+  );
+}
+
+function Key(
+  { k, onClick }: {
+    k: KeyWithAction;
+    onClick?: () => void;
+  },
+) {
+  return (
+    <div
+      className="absolute border-2 border-black"
+      style={{
+        width: k.key.width * 50 + "px",
+        height: k.key.height * 50 + "px",
+        top: k.key.y * 50 + "px",
+        left: k.key.x * 50 + "px",
+        transform: `rotate(${k.key.rotation_angle}deg)`,
+      }}
+      onClick={onClick}
+    >
+      {displayKey(k.action?.key)}
     </div>
   );
 }
