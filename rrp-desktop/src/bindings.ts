@@ -90,7 +90,7 @@ export type Key = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K
  * - `Normal2`: Press key with another key.
  * - `TapHold`: If tapped term is too short, treat as `Tap` (first key is used). If tapped term is longer than `TAP_THRESHOLD`, treat as `Hold` (second key is used).
  */
-export type KeyAction = "Inherit" | { Normal: KeyCode } | { Normal2: [KeyCode, KeyCode] } | { TapHold: [KeyCode, KeyCode] } | { OneShot: KeyCode }
+export type KeyAction = "Inherit" | { Normal: KeyCode } | { Normal2: [KeyCode, KeyCode] } | { TapHold: [KeyCode, KeyCode] } | { OneShot: KeyCode } | { TapDance: number }
 export type KeyActionLoc = { layer: number; row: number; col: number; key: KeyAction }
 /**
  * Represents each key.

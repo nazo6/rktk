@@ -24,6 +24,11 @@ pub async fn start<
     to_send_receiver: Receiver<'a, CriticalSectionRawMutex, S, { CONFIG.split_channel_size }>,
     is_master: bool,
 ) {
+    let mut send_id: usize = 0;
+    let mut recv_id: usize = 0;
+    let mut recv_cnt: usize = 0;
+    let mut recv_err: usize = 0;
+
     loop {
         let mut recv_buf = [0u8; MAX_DATA_SIZE];
 
@@ -41,9 +46,21 @@ pub async fn start<
                 // I measured the time in this block using embassy-time, and while it was on the order of microseconds, I do not believe this is an accurate figure.
                 // In fact, removing rktk::print from this block improved the error rate.
                 if res.is_ok() {
-                    match from_bytes_cobs(&mut recv_buf.clone()) {
-                        Ok(data) => {
+                    match from_bytes_cobs::<(usize, R)>(&mut recv_buf.clone()) {
+                        Ok((id, data)) => {
                             let _ = received_sender.try_send(data);
+                            if id - recv_id > 1 {
+                                recv_err += 1;
+                                crate::print!(
+                                    "RE:{} {}\n{}/{}",
+                                    id,
+                                    embassy_time::Instant::now().as_millis(),
+                                    recv_err,
+                                    recv_cnt
+                                );
+                            }
+                            recv_id = id;
+                            recv_cnt += 1;
                         }
                         Err(_e) => {}
                     }
@@ -51,10 +68,11 @@ pub async fn start<
             }
             Either::Second(send_data) => {
                 let mut send_buf = [0u8; MAX_DATA_SIZE];
-                if let Ok(bytes) = to_slice_cobs(&send_data, &mut send_buf) {
+                if let Ok(bytes) = to_slice_cobs(&(send_id, send_data), &mut send_buf) {
                     if let Err(e) = split.send(bytes, is_master).await {
                         crate::print!("SE: {:?} {}", e, embassy_time::Instant::now())
                     }
+                    send_id += 1;
                 }
             }
         }
