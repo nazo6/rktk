@@ -8,7 +8,7 @@ use core::panic::PanicInfo;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::Flex;
-use keymap::KEYMAP;
+use keymap::{KEYMAP, KEY_CONFIG};
 use rktk::{
     interface::{
         backlight::DummyBacklightDriver, ble::DummyBleDriver, display::DummyDisplayDriverBuilder,
@@ -54,7 +54,7 @@ async fn main(_spawner: Spawner) {
         storage: Option::<&DummyStorage>::None,
     };
 
-    rktk::task::start(drivers, KEYMAP).await;
+    rktk::task::start(drivers, KEY_CONFIG).await;
 }
 
 #[panic_handler]

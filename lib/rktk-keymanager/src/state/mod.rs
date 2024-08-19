@@ -2,12 +2,14 @@
 
 #![allow(clippy::single_match)]
 
-use embassy_time::{Duration, Instant};
+use config::StateConfig;
+use embassy_time::Instant;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{state::common::CommonLocalState, Layer};
 
 mod common;
+pub mod config;
 mod key_resolver;
 mod manager;
 mod pressed;
@@ -27,15 +29,6 @@ pub struct KeyChangeEvent {
     pub pressed: bool,
 }
 
-pub struct StateConfig {
-    pub tap_threshold: Duration,
-    pub auto_mouse_layer: usize,
-    pub auto_mouse_duration: embassy_time::Duration,
-    pub auto_mouse_threshold: u8,
-    pub scroll_divider_x: i8,
-    pub scroll_divider_y: i8,
-}
-
 pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
     key_resolver: key_resolver::KeyResolver<ROW, COL>,
     pressed: pressed::Pressed<COL, ROW>,
@@ -49,17 +42,11 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
 impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, COL> {
     pub fn new(layers: [Layer<ROW, COL>; LAYER], config: StateConfig) -> Self {
         Self {
-            key_resolver: key_resolver::KeyResolver::new(config.tap_threshold),
+            key_resolver: key_resolver::KeyResolver::new(config.key_resolver),
             pressed: pressed::Pressed::new(),
 
             cs: common::CommonState::new(layers),
-            mouse: manager::mouse::MouseState::new(
-                config.auto_mouse_layer,
-                config.auto_mouse_duration,
-                config.auto_mouse_threshold,
-                config.scroll_divider_x,
-                config.scroll_divider_y,
-            ),
+            mouse: manager::mouse::MouseState::new(config.mouse),
             keyboard: manager::keyboard::KeyboardState::new(),
             media_keyboard: manager::media_keyboard::MediaKeyboardState::new(),
         }

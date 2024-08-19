@@ -3,15 +3,36 @@ use rktk::keymanager::keycode::*;
 use rktk::keymanager::keycode::{
     key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
 };
-use rktk::{Layer, LayerMap};
+use rktk::keymanager::state::config::TapDanceConfig;
+use rktk::{KeyConfig, Layer, LayerMap};
+
+const L2ENTER: KeyAction = KeyAction::TapHold(
+    KeyCode::Key(Key::Enter),
+    KeyCode::Layer(LayerOp::Momentary(2)),
+);
+
+const L2SPC: KeyAction = KeyAction::TapHold(
+    KeyCode::Key(Key::Enter),
+    KeyCode::Layer(LayerOp::Momentary(2)),
+);
+
+const L3SPC: KeyAction = KeyAction::TapHold(
+    KeyCode::Key(Key::Enter),
+    KeyCode::Layer(LayerOp::Momentary(3)),
+);
+
+const L4GRV: KeyAction = KeyAction::TapHold(
+    KeyCode::Key(Key::Grave),
+    KeyCode::Layer(LayerOp::Momentary(4)),
+);
 
 #[rustfmt::skip]
 const L0: LayerMap = [
-    [ _____ , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
+    [ L4GRV , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
     [  TAB  , Q     , W     , E     , R     , T     , _____ , /**/ _____ , Y     , U     , I     , O     , P    , MINUS],
     [  ESC  , A     , S     , D     , F     , G     , _____ , /**/ _____ , H     , J     , K     , L     , SCLN , QUOTE],
     [ L_SHFT, Z     , X     , C     , V     , B     , LBRC  , /**/ RBRC  , N     , M     , COMM  , DOT   , SLASH, BSLSH],
-    [ L_CTRL, L_GUI , TG(2) , L_ALT , _____ , _____ , SPACE , /**/ BS    , _____ , _____ , _____ , _____ ,R_SHFT,R_CTRL],
+    [ L_CTRL, L_GUI , TG(2) , L_ALT , L3SPC , L2SPC , SPACE , /**/ BS    , TD(0) , _____ , _____ , _____ ,R_SHFT,R_CTRL],
 ];
 
 #[rustfmt::skip]
@@ -74,3 +95,30 @@ pub const KEYMAP: [Layer; CONFIG.layer_count] = [
         arrowmouse: true,
     },
 ];
+
+pub const KEY_CONFIG: KeyConfig = KeyConfig {
+    keymap: KEYMAP,
+    tap_dance: [
+        Some(TapDanceConfig {
+            tap: [
+                Some(KeyCode::Key(Key::Enter)),
+                Some(KeyCode::Layer(LayerOp::Toggle(2))),
+                None,
+                None,
+            ],
+            hold: [
+                Some(KeyCode::Layer(LayerOp::Momentary(2))),
+                None,
+                None,
+                None,
+            ],
+        }),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    ],
+};

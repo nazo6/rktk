@@ -31,7 +31,7 @@ bluetooth.
 | Backlight LED      | 🟡     |
 | USB                | ✅     |
 | Bluetooth          | 🟡     |
-| VIA/Vial support   | ❌     |
+| Remapper support   | ❌     |
 | Double-tap reset   | ✅     |
 
 ### Drivers

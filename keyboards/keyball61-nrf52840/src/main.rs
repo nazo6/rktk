@@ -177,7 +177,7 @@ async fn main(_spawner: Spawner) {
         ble,
     };
 
-    rktk::task::start(drivers, keymap::KEYMAP).await;
+    rktk::task::start(drivers, keymap::KEY_CONFIG).await;
 }
 
 #[panic_handler]

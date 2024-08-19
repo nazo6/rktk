@@ -47,14 +47,16 @@ test ./lib/rktk-keymanager
 [tasks.ra-check]
 script = '''
 #!@duckscript
-if starts_with ${2} rrp-desktop
-  cd rrp-desktop/src-tauri
-  exec cargo clippy --message-format=json
-elseif starts_with ${2} rktk
-  cd lib/${2}
-  exec cargo clippy --message-format=json
-else
-  cd keyboards/${2}
-  exec cargo clippy --message-format=json
+pwd = pwd
+handle = gitignore_path_array ./
+for path in ${handle}
+  if ends_with ${path} Cargo.toml
+    if not eq ${path} ./Cargo.toml
+      dir = dirname ${path}
+      cd ${dir}
+      exec cargo clippy --message-format=json --tests
+      cd ${pwd}
+    end
+  end
 end
 '''

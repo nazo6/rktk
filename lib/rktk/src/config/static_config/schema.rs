@@ -100,4 +100,8 @@ pub struct StaticConfig {
     /// Threshold for tap (ms)
     #[cfg_attr(not(no_build), serde(default = "u64_default::<200>"))]
     pub default_tap_threshold: u64,
+
+    /// Threshold for tap dance (ms)
+    #[cfg_attr(not(no_build), serde(default = "u64_default::<100>"))]
+    pub default_tap_dance_threshold: u64,
 }

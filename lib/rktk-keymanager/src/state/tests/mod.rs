@@ -11,6 +11,9 @@ mod prelude {
 
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
+    use crate::state::config::{
+        KeyResolverConfig, MouseConfig, TapDanceConfig, MAX_TAP_DANCE_COUNT,
+    };
     pub(super) use crate::{
         keycode::*,
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*},
@@ -103,15 +106,37 @@ mod prelude {
     pub fn new_state(
         keymap: [crate::Layer<ROWS, COLS>; LAYER_COUNT],
     ) -> State<LAYER_COUNT, ROWS, COLS> {
+        let mut tap_dance = [const { None }; MAX_TAP_DANCE_COUNT];
+        tap_dance[0] = Some(TapDanceConfig {
+            tap: [
+                Some(KeyCode::Key(Key::A)),
+                Some(KeyCode::Key(Key::B)),
+                Some(KeyCode::Layer(LayerOp::Toggle(2))),
+                None,
+            ],
+            hold: [
+                Some(KeyCode::Modifier(Modifier::LCtrl)),
+                Some(KeyCode::Layer(LayerOp::Momentary(1))),
+                None,
+                None,
+            ],
+        });
+
         State::new(
             keymap,
             crate::state::StateConfig {
-                tap_threshold: Duration::from_millis(500),
-                auto_mouse_layer: 1,
-                auto_mouse_duration: Duration::from_millis(500),
-                auto_mouse_threshold: 5,
-                scroll_divider_x: 20,
-                scroll_divider_y: -12,
+                mouse: MouseConfig {
+                    auto_mouse_layer: 1,
+                    auto_mouse_duration: Duration::from_millis(500),
+                    auto_mouse_threshold: 5,
+                    scroll_divider_x: 20,
+                    scroll_divider_y: -12,
+                },
+                key_resolver: KeyResolverConfig {
+                    tap_threshold: Duration::from_millis(500),
+                    tap_dash_threshold: Duration::from_millis(100),
+                    tap_dance,
+                },
             },
         )
     }

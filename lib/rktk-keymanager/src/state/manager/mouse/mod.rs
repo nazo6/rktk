@@ -4,6 +4,7 @@ use crate::{
     keycode::{key::Key, special::Special, KeyCode},
     state::{
         common::{CommonLocalState, CommonState},
+        config::MouseConfig,
         key_resolver::EventType,
     },
 };
@@ -23,19 +24,16 @@ pub struct MouseState {
 }
 
 impl MouseState {
-    pub fn new(
-        auto_mouse_layer: usize,
-        auto_mouse_duration: embassy_time::Duration,
-        auto_mouse_threshold: u8,
-        scroll_divider_x: i8,
-        scroll_divider_y: i8,
-    ) -> Self {
+    pub fn new(config: MouseConfig) -> Self {
         Self {
-            aml: Aml::new(auto_mouse_duration, auto_mouse_threshold),
+            aml: Aml::new(config.auto_mouse_duration, config.auto_mouse_threshold),
             scroll_mode: false,
-            reporter: reporter::MouseReportGenerator::new(scroll_divider_x, scroll_divider_y),
+            reporter: reporter::MouseReportGenerator::new(
+                config.scroll_divider_x,
+                config.scroll_divider_y,
+            ),
             arrowball_move: (0, 0),
-            auto_mouse_layer,
+            auto_mouse_layer: config.auto_mouse_layer,
         }
     }
 }

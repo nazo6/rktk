@@ -55,6 +55,13 @@
       "type": "integer",
       "format": "int8"
     },
+    "default_tap_dance_threshold": {
+      "description": "Threshold for tap dance (ms)",
+      "default": 100,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
     "default_tap_threshold": {
       "description": "Threshold for tap (ms)",
       "default": 200,

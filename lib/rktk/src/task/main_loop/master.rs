@@ -1,6 +1,9 @@
 use embassy_futures::{join::join, select::select};
 use embassy_time::{Duration, Timer};
-use rktk_keymanager::state::{KeyChangeEvent, State, StateConfig, StateReport};
+use rktk_keymanager::state::{
+    config::{KeyResolverConfig, MouseConfig, StateConfig},
+    KeyChangeEvent, State, StateReport,
+};
 
 use crate::{
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
@@ -13,7 +16,7 @@ use crate::{
     },
     task::backlight::BACKLIGHT_CTRL,
     utils::ThreadModeMutex,
-    Keymap,
+    KeyConfig,
 };
 
 use super::{M2sTx, S2mRx};
@@ -116,18 +119,24 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     reporter: &R,
     mut key_scanner: KS,
     mut mouse: Option<M>,
-    keymap: Keymap,
+    key_config: KeyConfig,
     hand: crate::interface::keyscan::Hand,
 ) {
     let state = ThreadModeMutex::new(State::new(
-        keymap.clone(),
+        key_config.keymap.clone(),
         StateConfig {
-            tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
-            auto_mouse_layer: CONFIG.default_auto_mouse_layer,
-            auto_mouse_duration: Duration::from_millis(CONFIG.default_auto_mouse_duration),
-            auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
-            scroll_divider_x: CONFIG.default_scroll_divider_x,
-            scroll_divider_y: CONFIG.default_scroll_divider_y,
+            mouse: MouseConfig {
+                auto_mouse_layer: CONFIG.default_auto_mouse_layer,
+                auto_mouse_duration: Duration::from_millis(CONFIG.default_auto_mouse_duration),
+                auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
+                scroll_divider_x: CONFIG.default_scroll_divider_x,
+                scroll_divider_y: CONFIG.default_scroll_divider_y,
+            },
+            key_resolver: KeyResolverConfig {
+                tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
+                tap_dash_threshold: Duration::from_millis(CONFIG.default_tap_dance_threshold),
+                tap_dance: key_config.tap_dance.clone(),
+            },
         },
     ));
 

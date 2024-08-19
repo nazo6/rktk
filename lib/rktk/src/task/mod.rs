@@ -15,7 +15,7 @@ use crate::{
         double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
         reporter::DummyReporterDriver, split::SplitDriver, usb::UsbDriver, DriverBuilder,
     },
-    Layer,
+    KeyConfig, Layer,
 };
 
 mod backlight;
@@ -86,7 +86,7 @@ pub async fn start<
         Display,
         Usb,
     >,
-    keymap: [Layer; CONFIG.layer_count],
+    key_config: KeyConfig,
 ) {
     if let Some(dtr) = &mut drivers.double_tap_reset {
         dtr.execute(Duration::from_millis(CONFIG.double_tap_threshold))
@@ -121,7 +121,7 @@ pub async fn start<
                         mouse,
                         drivers.split,
                         drivers.backlight,
-                        keymap,
+                        key_config,
                     )
                     .await;
                 }
@@ -143,7 +143,7 @@ pub async fn start<
                                 mouse,
                                 drivers.split,
                                 drivers.backlight,
-                                keymap,
+                                key_config,
                             )
                             .await;
                         }
@@ -154,7 +154,7 @@ pub async fn start<
                                 mouse,
                                 drivers.split,
                                 drivers.backlight,
-                                keymap,
+                                key_config,
                             )
                             .await;
                         }

@@ -6,7 +6,6 @@ use core::panic::PanicInfo;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::{gpio::Flex, peripherals::PIO1, pio::Pio};
-use keymap::KEYMAP;
 use rktk::{
     interface::{ble::DummyBleDriver, storage::DummyStorage},
     task::Drivers,
@@ -107,7 +106,7 @@ async fn main(_spawner: Spawner) {
         storage: Option::<&DummyStorage>::None,
     };
 
-    rktk::task::start(drivers, KEYMAP).await;
+    rktk::task::start(drivers, keymap::KEY_CONFIG).await;
 }
 
 #[panic_handler]

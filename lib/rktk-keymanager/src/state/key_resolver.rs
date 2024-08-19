@@ -1,18 +1,24 @@
 use embassy_time::{Duration, Instant};
 
+use super::config::{
+    TapDanceConfig, MAX_ONESHOT_COUNT, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_COUNT,
+};
 use crate::keycode::{layer::LayerOp, KeyAction, KeyCode};
 
 use super::{
     common::{CommonLocalState, CommonState},
+    config::KeyResolverConfig,
     pressed::{KeyLocation, KeyStatusEvents},
 };
 
+#[derive(Debug)]
 struct KeyPressedState {
     pub press_start: Instant,
     pub action: KeyAction,
     pub hold: bool,
 }
 
+#[derive(Debug)]
 struct OneShotState {
     pub key: KeyCode,
     // When active, this is some and contains the location of the key that activated this oneshot
@@ -20,14 +26,29 @@ struct OneShotState {
     pub active: Option<KeyLocation>,
 }
 
+#[derive(Debug)]
+struct TapDance {
+    pub state: Option<TapDanceActiveState>,
+    pub config: Option<TapDanceConfig>,
+}
+
+#[derive(Debug)]
+struct TapDanceActiveState {
+    pub waiting: bool,
+    pub tap_count: u8,
+    pub last_release: Instant,
+}
+
 /// Handles layer related events and resolve physical key position to keycode.
 pub struct KeyResolver<const ROW: usize, const COL: usize> {
     key_state: [[Option<KeyPressedState>; COL]; ROW],
-    oneshot: heapless::Vec<OneShotState, 4>,
+    tap_dance: [TapDance; MAX_TAP_DANCE_COUNT],
+    oneshot: heapless::Vec<OneShotState, MAX_ONESHOT_COUNT>,
     tap_threshold: Duration,
+    tap_dance_threshold: Duration,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum EventType {
     Pressed,
     Pressing,
@@ -35,35 +56,45 @@ pub enum EventType {
 }
 
 impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
-    pub fn new(tap_threshold: Duration) -> Self {
+    pub fn new(mut config: KeyResolverConfig) -> Self {
         Self {
             key_state: core::array::from_fn(|_| core::array::from_fn(|_| None)),
             oneshot: heapless::Vec::new(),
-            tap_threshold,
+            tap_dance: core::array::from_fn(|i| TapDance {
+                state: None,
+                config: config.tap_dance[i].take(),
+            }),
+            tap_threshold: config.tap_threshold,
+            tap_dance_threshold: config.tap_dash_threshold,
         }
     }
 
+    /// Give keycode and handle it if it is layer related key.
+    /// returns true if it is layer related key.
     pub fn handle_layer_kc<const LAYER: usize>(
         common_state: &mut CommonState<LAYER, ROW, COL>,
         kc: &KeyCode,
         event: EventType,
-    ) {
+    ) -> bool {
         match kc {
-            KeyCode::Layer(layer_op) => match (event, layer_op) {
-                (EventType::Pressed, LayerOp::Toggle(l)) => {
-                    common_state.layer_active[*l as usize] =
-                        !common_state.layer_active[*l as usize];
+            KeyCode::Layer(layer_op) => {
+                match (event, layer_op) {
+                    (EventType::Pressed, LayerOp::Toggle(l)) => {
+                        common_state.layer_active[*l as usize] =
+                            !common_state.layer_active[*l as usize];
+                    }
+                    (EventType::Pressed, LayerOp::Momentary(l)) => {
+                        common_state.layer_active[*l as usize] = true;
+                    }
+                    (EventType::Released, LayerOp::Momentary(l)) => {
+                        common_state.layer_active[*l as usize] = false;
+                    }
+                    _ => {}
                 }
-                (EventType::Pressed, LayerOp::Momentary(l)) => {
-                    common_state.layer_active[*l as usize] = true;
-                }
-                (EventType::Released, LayerOp::Momentary(l)) => {
-                    common_state.layer_active[*l as usize] = false;
-                }
-                _ => {}
-            },
-            _ => {}
-        };
+                true
+            }
+            _ => false,
+        }
     }
 
     pub fn resolve_key<const LAYER: usize>(
@@ -71,7 +102,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         cs: &mut CommonState<LAYER, ROW, COL>,
         cls: &CommonLocalState,
         events: &KeyStatusEvents,
-    ) -> heapless::Vec<(EventType, KeyCode), 64> {
+    ) -> heapless::Vec<(EventType, KeyCode), MAX_RESOLVED_KEY_COUNT> {
         use EventType::*;
 
         let mut resolved_keys = heapless::Vec::new();
@@ -95,6 +126,26 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
             }
             true
         });
+
+        #[cfg(test)]
+        dbg!(&self.tap_dance[0]);
+
+        for td in self.tap_dance.iter_mut() {
+            if let Some(tds) = &mut td.state {
+                if tds.waiting && cls.now - tds.last_release > self.tap_dance_threshold {
+                    if let Some(Some(Some(tkc))) = td
+                        .config
+                        .as_ref()
+                        .map(|tdc| tdc.tap.get(tds.tap_count as usize - 1))
+                    {
+                        let _ = resolved_keys.push((Pressed, *tkc));
+                        let _ = resolved_keys.push((Released, *tkc));
+                    }
+
+                    td.state = None;
+                }
+            }
+        }
 
         // If new key is pressed, all taphold keys in pressing state will be marked as force hold.
         // Same as QMK's HOLD_ON_OTHER_KEY_PRESS
@@ -123,6 +174,27 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                         }
                     }
                     KeyAction::OneShot(_) => {}
+                    KeyAction::TapDance(id) => {
+                        if let Some(td) = self.tap_dance.get_mut(id as usize) {
+                            if let (Some(config), Some(tap_count)) =
+                                (&mut td.config, td.state.as_ref().map(|tds| tds.tap_count))
+                            {
+                                if let Some(Some(hkc)) = config.hold.get(tap_count as usize - 1) {
+                                    if key_state.hold {
+                                        let _ = resolved_keys.push((Pressing, *hkc));
+                                    } else if cls.now - key_state.press_start > self.tap_threshold
+                                        || make_hold
+                                    {
+                                        self.key_state[event.row as usize][event.col as usize]
+                                            .as_mut()
+                                            .unwrap()
+                                            .hold = true;
+                                        let _ = resolved_keys.push((Pressed, *hkc));
+                                    }
+                                }
+                            }
+                        }
+                    }
                     KeyAction::Inherit => unreachable!(),
                 }
             }
@@ -143,9 +215,29 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                             let _ = resolved_keys.push((Released, hkc));
                         } else {
                             let _ = resolved_keys.push((Pressed, tkc));
+                            let _ = resolved_keys.push((Released, tkc));
                         }
                     }
                     KeyAction::OneShot(_) => {}
+                    KeyAction::TapDance(id) => {
+                        if let Some(td) = self.tap_dance.get_mut(id as usize) {
+                            if let (Some(config), Some(tds)) = (&td.config, td.state.as_mut()) {
+                                if key_state.hold
+                                    || cls.now - key_state.press_start > self.tap_threshold
+                                {
+                                    if let Some(Some(hkc)) =
+                                        config.hold.get(tds.tap_count as usize - 1)
+                                    {
+                                        let _ = resolved_keys.push((Released, *hkc));
+                                        td.state = None;
+                                    }
+                                } else {
+                                    tds.last_release = cls.now;
+                                    tds.waiting = true;
+                                }
+                            }
+                        }
+                    }
                     KeyAction::Inherit => unreachable!(),
                 }
             }
@@ -154,9 +246,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
 
         // To determine layer for `pressed` keys, we have to apply the layer changed in above loop.
         // This is important to implement HOLD_ON_OTHER_KEY_PRESS and one shot layer.
-        for (event, kc) in &resolved_keys {
-            Self::handle_layer_kc(cs, kc, *event);
-        }
+        resolved_keys.retain(|(ev, kc)| !Self::handle_layer_kc(cs, kc, *ev));
 
         let highest_layer = cs.highest_layer();
         for event in &events.pressed {
@@ -180,19 +270,43 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                         active: None,
                     });
                 }
+                KeyAction::TapDance(id) => {
+                    if let Some(tap_dance_state) =
+                        self.tap_dance.get_mut(id as usize).map(|td| &mut td.state)
+                    {
+                        match tap_dance_state {
+                            Some(tds) => {
+                                if cls.now - tds.last_release > self.tap_dance_threshold {
+                                    tds.tap_count = 1;
+                                } else {
+                                    tds.tap_count += 1;
+                                }
+                                tds.waiting = false;
+                            }
+                            None => {
+                                *tap_dance_state = Some(TapDanceActiveState {
+                                    tap_count: 1,
+                                    last_release: cls.now,
+                                    waiting: false,
+                                });
+                            }
+                        }
+                    }
+                }
                 KeyAction::Inherit => unreachable!(),
             };
 
             self.key_state[event.row as usize][event.col as usize] = Some(KeyPressedState {
-                press_start: Instant::now(),
+                press_start: cls.now,
                 action,
                 hold: false,
             });
         }
 
-        for (event, kc) in &resolved_keys {
-            Self::handle_layer_kc(cs, kc, *event);
-        }
+        resolved_keys.retain(|(ev, kc)| !Self::handle_layer_kc(cs, kc, *ev));
+
+        #[cfg(test)]
+        dbg!(&resolved_keys);
 
         resolved_keys
     }

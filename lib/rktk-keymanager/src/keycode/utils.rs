@@ -9,3 +9,9 @@ pub const fn SF(k: KeyAction) -> KeyAction {
         panic!("Unsupported key type")
     }
 }
+
+/// Tap dance
+#[allow(non_snake_case)]
+pub const fn TD(id: u8) -> KeyAction {
+    KeyAction::TapDance(id)
+}

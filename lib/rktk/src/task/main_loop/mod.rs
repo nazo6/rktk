@@ -7,7 +7,7 @@ use crate::{
         reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
     },
-    Layer,
+    KeyConfig,
 };
 use embassy_futures::join::join;
 use embassy_sync::{
@@ -41,7 +41,7 @@ pub async fn start<
     mouse: Option<M>,
     mut split: SP,
     backlight: Option<BL>,
-    keymap: [Layer; CONFIG.layer_count],
+    key_config: KeyConfig,
 ) {
     let hand = key_scanner.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
@@ -77,7 +77,15 @@ pub async fn start<
             if let Some(reporter) = reporter {
                 join(
                     split_handler::start(split, s2m_tx, m2s_rx, is_master),
-                    master::start(m2s_tx, s2m_rx, reporter, key_scanner, mouse, keymap, hand),
+                    master::start(
+                        m2s_tx,
+                        s2m_rx,
+                        reporter,
+                        key_scanner,
+                        mouse,
+                        key_config,
+                        hand,
+                    ),
                 )
                 .await;
             } else {

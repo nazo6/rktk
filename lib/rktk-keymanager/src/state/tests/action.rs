@@ -1,6 +1,8 @@
 use super::prelude::*;
 use pretty_assertions::assert_eq;
 
+mod tap_dance;
+
 #[test]
 fn normal_action() {
     let mut keymap = EMPTY_KEYMAP;
