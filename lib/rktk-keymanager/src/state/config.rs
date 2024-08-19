@@ -20,7 +20,7 @@ pub struct MouseConfig {
 #[derive(Debug, Clone)]
 pub struct KeyResolverConfig {
     pub tap_threshold: Duration,
-    pub tap_dash_threshold: Duration,
+    pub tap_dance_threshold: Duration,
     pub tap_dance: [Option<TapDanceConfig>; MAX_TAP_DANCE_COUNT],
 }
 

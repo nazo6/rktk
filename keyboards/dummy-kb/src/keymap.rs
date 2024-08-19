@@ -31,8 +31,8 @@ const L0: LayerMap = [
     [ L4GRV , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
     [  TAB  , Q     , W     , E     , R     , T     , _____ , /**/ _____ , Y     , U     , I     , O     , P    , MINUS],
     [  ESC  , A     , S     , D     , F     , G     , _____ , /**/ _____ , H     , J     , K     , L     , SCLN , QUOTE],
-    [ L_SHFT, Z     , X     , C     , V     , B     , LBRC  , /**/ RBRC  , N     , M     , COMM  , DOT   , SLASH, BSLSH],
-    [ L_CTRL, L_GUI , TG(2) , L_ALT , L3SPC , L2SPC , SPACE , /**/ BS    , TD(0) , _____ , _____ , _____ ,R_SHFT,R_CTRL],
+    [ L_SHFT, Z     , X     , C     , V     , B     , LBRC  , /**/ TD(0) , N     , M     , COMM  , DOT   , SLASH, BSLSH],
+    [ L_CTRL, L_GUI , TG(2) , L_ALT , L3SPC , L2SPC , SPACE , /**/ BS    ,L2ENTER, _____ , _____ , _____ ,R_SHFT,R_CTRL],
 ];
 
 #[rustfmt::skip]
@@ -101,17 +101,12 @@ pub const KEY_CONFIG: KeyConfig = KeyConfig {
     tap_dance: [
         Some(TapDanceConfig {
             tap: [
-                Some(KeyCode::Key(Key::Enter)),
+                Some(KeyCode::Key(Key::RightBracket)),
                 Some(KeyCode::Layer(LayerOp::Toggle(2))),
                 None,
                 None,
             ],
-            hold: [
-                Some(KeyCode::Layer(LayerOp::Momentary(2))),
-                None,
-                None,
-                None,
-            ],
+            hold: [None, None, None, None],
         }),
         None,
         None,

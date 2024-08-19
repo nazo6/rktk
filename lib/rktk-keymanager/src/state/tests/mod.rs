@@ -134,7 +134,7 @@ mod prelude {
                 },
                 key_resolver: KeyResolverConfig {
                     tap_threshold: Duration::from_millis(500),
-                    tap_dash_threshold: Duration::from_millis(100),
+                    tap_dance_threshold: Duration::from_millis(100),
                     tap_dance,
                 },
             },

@@ -65,7 +65,8 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                 config: config.tap_dance[i].take(),
             }),
             tap_threshold: config.tap_threshold,
-            tap_dance_threshold: config.tap_dash_threshold,
+            tap_dance_threshold: config.tap_dance_threshold,
+     
         }
     }
 

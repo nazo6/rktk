@@ -134,7 +134,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
             },
             key_resolver: KeyResolverConfig {
                 tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
-                tap_dash_threshold: Duration::from_millis(CONFIG.default_tap_dance_threshold),
+                tap_dance_threshold: Duration::from_millis(CONFIG.default_tap_dance_threshold),
                 tap_dance: key_config.tap_dance.clone(),
             },
         },

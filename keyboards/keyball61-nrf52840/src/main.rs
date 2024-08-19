@@ -158,7 +158,7 @@ async fn main(_spawner: Spawner) {
                 let driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
                 let opts = UsbOpts {
                     config,
-                    mouse_poll_interval: 5,
+                    mouse_poll_interval: 2,
                     kb_poll_interval: 5,
                     driver,
                 };
