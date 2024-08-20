@@ -1,111 +1,56 @@
-import * as kle from "@ijprest/kle-serial";
-import { KeyAction, KeyActionLoc } from "../../../bindings";
-import { KeyData } from "..";
-import {
-  Button,
-  Popover,
-  PopoverSurface,
-  PopoverTrigger,
-  ToggleButton,
-  Toolbar,
-  ToolbarRadioButton,
-  ToolbarRadioGroup,
-} from "@fluentui/react-components";
-import { KeyActionSelector } from "./KeySelector";
-import { useState } from "react";
+import { useRef } from "react";
+import { KeyData, KeyLoc } from "../types";
+import { KeyboardView } from "./KeyboardView";
+import { LayerSelector } from "./LayerSelector";
+import useSize from "@react-hook/size";
+
+export const SIZE_MULTIPLIER = 60;
 
 export function Keyboard(
   props: {
     keys: KeyData[];
-    layers: number;
-    updateKeymap: (changes: KeyActionLoc[]) => Promise<void>;
+    layer: number;
+    layerCount: number;
+    setLayer: (layer: number) => void;
+    selectKeyLoc: (key: KeyLoc) => void;
+    selectedKeyLoc: KeyLoc | null;
   },
 ) {
-  const [layer, setLayer] = useState(0);
-  const [selectedKey, setSelectedKey] = useState<KeyActionLoc | null>(null);
+  const keyboardWidth = props.keys.reduce(
+        (acc, key) => Math.max(acc, key.kleKey.x + key.kleKey.width),
+        0,
+      ) * SIZE_MULTIPLIER + 30;
+  const keyboardHeight = props.keys.reduce(
+        (acc, key) => Math.max(acc, key.kleKey.y + key.kleKey.height),
+        0,
+      ) * SIZE_MULTIPLIER + 30;
 
-  return (
-    <div>
-      <div className="flex gap-2">
-        <div className="flex flex-col">
-          {Array.from(Array(props.layers)).map((_, i) => (
-            <ToggleButton
-              appearance="subtle"
-              key={i}
-              checked={i == layer}
-              onClick={() => setLayer(i)}
-              icon={<span>{i}</span>}
-            />
-          ))}
-        </div>
-        <div className="relative w-auto h-auto">
-          {props.keys.map((keydata, i) => (
-            <Key
-              kleKey={keydata.kleKey}
-              keyAction={keydata.actions?.[layer]}
-              key={i}
-              onClick={(ka) => {
-                setSelectedKey(ka);
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="fixed bottom-0 w-full">
-        <div className=" mb-9 mx-3 p-2 bg-gray-300/50 rounded-md">
-          {selectedKey && (
-            <div className="flex flex-col">
-              <div className="flex gap-3">
-                <p>Row: {selectedKey.row}</p>
-                <p>Col: {selectedKey.col}</p>
-                <p>Layer: {selectedKey.layer}</p>
-              </div>
-              <p>{JSON.stringify(selectedKey.key)}</p>
-              <KeyActionSelector
-                keyAction={selectedKey.key}
-                setKeyAction={(ka) => {}}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+  let containerRef = useRef<HTMLDivElement>(null);
+  const [parentWidth] = useSize(containerRef);
+  const scale = Math.min((parentWidth - 100) / keyboardWidth, 1);
 
-function Key(
-  { kleKey, keyAction, onClick }: {
-    kleKey: kle.Key;
-    keyAction: KeyActionLoc;
-    onClick?: (action: KeyActionLoc) => void;
-  },
-) {
   return (
     <div
-      className="absolute border-2 border-black"
-      style={{
-        width: kleKey.width * 50 + "px",
-        height: kleKey.height * 50 + "px",
-        top: kleKey.y * 50 + "px",
-        left: kleKey.x * 50 + "px",
-        transform: `rotate(${kleKey.rotation_angle}deg)`,
-      }}
-      onClick={() => onClick?.(keyAction)}
+      className="flex items-center justify-center w-full p-2"
+      ref={containerRef}
     >
-      {keyStr(keyAction?.key)}
+      <LayerSelector
+        layer={props.layer}
+        setLayer={props.setLayer}
+        layerCount={props.layerCount}
+      />
+      <KeyboardView
+        keys={props.keys}
+        layer={props.layer}
+        selectKeyLoc={(key) => props.selectKeyLoc(key)}
+        selectedKeyLoc={props.selectedKeyLoc}
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          width: keyboardWidth * scale + "px",
+          height: keyboardHeight * scale + "px",
+        }}
+      />
     </div>
   );
-}
-
-function keyStr(key?: KeyAction): string {
-  if (!key) {
-    return "";
-  }
-  if (typeof key != "string" && "Normal" in key) {
-    if (typeof key.Normal != "string" && "Key" in key.Normal) {
-      return key.Normal.Key;
-    }
-  }
-
-  return "";
 }

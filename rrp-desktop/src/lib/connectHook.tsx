@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { unwrapped } from "../utils";
 import { commands } from "../bindings";
 import {
@@ -10,11 +10,14 @@ import {
 
 export function useDisconnect() {
   const { dispatchToast } = useToastController();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (_notify: boolean = true) =>
       unwrapped(commands.disconnect)(),
     onSuccess: (_, notify) => {
+      queryClient.invalidateQueries({ queryKey: ["getKeymaps"] });
+      queryClient.invalidateQueries({ queryKey: ["getLayoutJson"] });
       if (!notify) return;
       dispatchToast(
         <Toast>

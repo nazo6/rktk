@@ -17,9 +17,13 @@ export default function App() {
     <div className="flex flex-col h-full">
       <TitleBar>
         {keyboardInfo && (
-          <>
-            <div>{keyboardInfo.name}</div>
+          <div className="flex ml-auto items-center gap-2">
+            <div>
+              Connected to:{" "}
+              <span className="font-bold text-[1rem]">{keyboardInfo.name}</span>
+            </div>
             <Button
+              appearance="secondary"
               onClick={async () => {
                 await disconnect.mutateAsync(true);
                 setKeyboardInfo(null);
@@ -27,7 +31,7 @@ export default function App() {
             >
               Disconnect
             </Button>
-          </>
+          </div>
         )}
       </TitleBar>
       <Toaster position="bottom-end" />
