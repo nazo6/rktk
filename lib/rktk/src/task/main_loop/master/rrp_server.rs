@@ -62,6 +62,7 @@ impl<'a> Server<'a> {
             name: heapless::String::from(CONFIG.name),
             cols: CONFIG.cols as u8,
             rows: CONFIG.rows as u8,
+            layers: CONFIG.layer_count as u8,
         }
     }
     async fn get_keymaps(

@@ -1,9 +1,13 @@
+use std::time::Duration;
+
 use futures::StreamExt as _;
 use rktk_rrp::endpoints::*;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
-use tokio::sync::RwLock;
+use tokio::{sync::RwLock, time::timeout};
+
+mod serial_ports;
 
 pub enum ConnectedState {
     Connected { client: super::rrp_client::Client },
@@ -18,14 +22,16 @@ impl State {
     }
 }
 
+#[derive(Serialize, Deserialize, Type)]
+struct SerialPortInfoType(
+    #[specta(type = serial_ports::SerialPortInfo)] tokio_serial::SerialPortInfo,
+);
+
 #[tauri::command]
 #[specta::specta]
-async fn get_serial_ports() -> Result<Vec<String>, String> {
+async fn get_serial_ports() -> Result<Vec<SerialPortInfoType>, String> {
     let ports = tokio_serial::available_ports().map_err(|e| e.to_string())?;
-    let ports = ports
-        .into_iter()
-        .map(|port| port.port_name)
-        .collect::<Vec<_>>();
+    let ports = ports.into_iter().map(SerialPortInfoType).collect();
     Ok(ports)
 }
 
@@ -42,7 +48,13 @@ async fn connect(
     }
 
     *state = ConnectedState::Connected {
-        client: super::rrp_client::Client::new(name, 115200).map_err(|e| e.to_string())?,
+        client: timeout(
+            Duration::from_secs(1),
+            super::rrp_client::Client::connect(name, 115200),
+        )
+        .await
+        .map_err(|e| format!("Timeout: {}", e))?
+        .map_err(|e| e.to_string())?,
     };
 
     let _ = ConnectionEvent(true).emit(&app);
@@ -71,10 +83,11 @@ async fn get_keyboard_info(
         return Err("Not connected".to_string());
     };
 
-    let res = client
-        .get_keyboard_info(())
+    let res = timeout(Duration::from_secs(1), client.get_keyboard_info(()))
         .await
+        .map_err(|e| format!("Timeout: {}", e))?
         .map_err(|e| e.to_string())?;
+
     Ok(res)
 }
 
@@ -85,10 +98,11 @@ async fn get_layout_json(state: tauri::State<'_, State>) -> Result<String, Strin
         return Err("Not connected".to_string());
     };
 
-    let res = client
-        .get_layout_json(())
+    let res = timeout(Duration::from_secs(1), client.get_layout_json(()))
         .await
+        .map_err(|e| format!("Timeout: {}", e))?
         .map_err(|e| e.to_string())?;
+
     let res = res.collect::<Vec<_>>().await;
     let string =
         String::from_utf8(res.into_iter().flatten().collect()).map_err(|e| e.to_string())?;
@@ -104,7 +118,10 @@ async fn get_keymaps(
         return Err("Not connected".to_string());
     };
 
-    let res = client.get_keymaps(()).await.map_err(|e| e.to_string())?;
+    let res = timeout(Duration::from_secs(1), client.get_keymaps(()))
+        .await
+        .map_err(|e| format!("Timeout: {}", e))?
+        .map_err(|e| e.to_string())?;
     let res = res.collect().await;
     Ok(res)
 }
@@ -119,10 +136,14 @@ async fn set_keymaps(
         return Err("Not connected".to_string());
     };
 
-    client
-        .set_keymaps(futures::stream::iter(keymaps.into_iter()))
-        .await
-        .map_err(|e| e.to_string())?;
+    timeout(
+        Duration::from_secs(1),
+        client.set_keymaps(futures::stream::iter(keymaps.into_iter())),
+    )
+    .await
+    .map_err(|e| format!("Timeout: {}", e))?
+    .map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
