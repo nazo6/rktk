@@ -24,7 +24,9 @@ tauri-specta = { version = "2.0.0-rc.17", features = ["derive", "typescript"] }
 specta-typescript = "0.0.7"
 
 tokio-serial = { version = "5.4.4" }
-serialport = { version = "4.5.0", features = ["serde"] }
+serialport = { version = "4.5.0", features = [
+  "serde",
+], default-features = false }
 tokio = { version = "1.39.2", features = ["full"] }
 anyhow = "1.0.86"
 futures = { workspace = true }
