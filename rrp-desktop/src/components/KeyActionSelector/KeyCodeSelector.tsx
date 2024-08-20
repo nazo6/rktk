@@ -7,15 +7,17 @@ import {
   NORMAL_KEYS,
   SPECIAL_KEYS,
 } from "../../lib/keys";
-import { KeySelector } from "./KeySelector";
+import { KeySelector, LayerKeySelector } from "./KeySelector";
 
 export function KeyCodeSelector(props: {
+  title?: string;
   keycode: KeyCode;
+  layerCount: number;
   setKeycode: (keycode: KeyCode) => void;
 }) {
   let keySelector;
   if (props.keycode == "None") {
-    keySelector = <div>None</div>;
+    keySelector = <div></div>;
   } else {
     if ("Key" in props.keycode) {
       keySelector = (
@@ -51,9 +53,11 @@ export function KeyCodeSelector(props: {
       );
     } else if ("Layer" in props.keycode) {
       keySelector = (
-        <div>
-          Not implemented
-        </div>
+        <LayerKeySelector
+          layerCount={props.layerCount}
+          selected={props.keycode.Layer}
+          setSelected={(key) => props.setKeycode({ Layer: key })}
+        />
       );
     } else if ("Special" in props.keycode) {
       keySelector = (
@@ -67,40 +71,48 @@ export function KeyCodeSelector(props: {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-gray-100/30 p-2 rounded-md">
       <div className="flex items-center">
-        KeyCode:
-        <RadioGroup layout="horizontal" className="flex-wrap">
-          <Radio checked={props.keycode == "None"} label="None" />
-          <Radio
-            checked={typeof props.keycode != "string" && "Key" in props.keycode}
-            label="Key"
-          />
-          <Radio
-            checked={typeof props.keycode != "string" &&
-              "Modifier" in props.keycode}
-            label="Modifier"
-          />
-          <Radio
-            checked={typeof props.keycode != "string" &&
-              "Mouse" in props.keycode}
-            label="Mouse"
-          />
-          <Radio
-            checked={typeof props.keycode != "string" &&
-              "Media" in props.keycode}
-            label="Media"
-          />
-          <Radio
-            checked={typeof props.keycode != "string" &&
-              "Layer" in props.keycode}
-            label="Layer"
-          />
-          <Radio
-            checked={typeof props.keycode != "string" &&
-              "Special" in props.keycode}
-            label="Special"
-          />
+        {props.title ?? "Keycode"}:
+        <RadioGroup
+          layout="horizontal"
+          className="flex-wrap"
+          value={typeof props.keycode == "string"
+            ? props.keycode
+            : Object.keys(props.keycode)[0]}
+          onChange={(_, data) => {
+            switch (data.value) {
+              case "None":
+                props.setKeycode("None");
+                break;
+              case "Key":
+                props.setKeycode({ Key: "A" });
+                break;
+              case "Mouse":
+                props.setKeycode({ Mouse: 0x01 });
+                break;
+              case "Modifier":
+                props.setKeycode({ Modifier: 0x01 });
+                break;
+              case "Layer":
+                props.setKeycode({ Layer: { Toggle: 1 } });
+                break;
+              case "Special":
+                props.setKeycode({ Special: "MoScrl" });
+                break;
+              case "Media":
+                props.setKeycode({ Media: "Play" });
+                break;
+            }
+          }}
+        >
+          <Radio value="None" label="None" />
+          <Radio value="Key" label="Key" />
+          <Radio value="Mouse" label="Mouse" />
+          <Radio value="Modifier" label="Modifier" />
+          <Radio value="Layer" label="Layer" />
+          <Radio value="Special" label="Special" />
+          <Radio value="Media" label="Media" />
         </RadioGroup>
       </div>
       {keySelector}

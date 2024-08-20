@@ -1,6 +1,5 @@
 import { KeyAction, KeyCode } from "../bindings";
 import {
-  LAYER_KEYS,
   MEDIA_KEYS,
   MODIFIER_KEYS,
   MOUSE_KEYS,
@@ -12,13 +11,15 @@ export function keyStr(key?: KeyAction): string {
   let str;
   if (!key) {
   } else if (key === "Inherit") {
-    str = "___";
+    str = "";
   } else if ("Normal" in key) {
     str = keyCodeStr(key.Normal);
   } else if ("Normal2" in key) {
     str = `${keyCodeStr(key.Normal2[0])} & ${keyCodeStr(key.Normal2[1])}`;
   } else if ("TapHold" in key) {
     str = `${keyCodeStr(key.TapHold[0])} / ${keyCodeStr(key.TapHold[1])}`;
+  } else if ("OneShot" in key) {
+    str = `OS(${keyCodeStr(key.OneShot)})`;
   } else if ("TapDance" in key) {
     str = `TD(${key.TapDance})`;
   }
@@ -29,7 +30,7 @@ export function keyStr(key?: KeyAction): string {
 function keyCodeStr(kc: KeyCode) {
   let str;
   if (kc == "None") {
-    str = "";
+    str = "XX";
   } else if ("Key" in kc) {
     str = NORMAL_KEYS.get(kc.Key);
   } else if ("Mouse" in kc) {

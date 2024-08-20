@@ -8,12 +8,12 @@ import { KeySelector } from "./KeySelector";
 import { useState } from "react";
 import { deepEqual } from "fast-equals";
 import { produce } from "immer";
-import { KeyUpdater } from "./KeyUpdate";
 import {
   Toast,
   ToastTitle,
   useToastController,
 } from "@fluentui/react-components";
+import { Toolbar } from "./Toolbar";
 
 export function Home({ keyboardInfo }: { keyboardInfo: KeyboardInfo }) {
   const queryClient = useQueryClient();
@@ -111,18 +111,33 @@ function HomeInner({ keyboardInfo, keyData, updateKeymap }: {
   updateKeymap: (changes: KeyUpdate[]) => Promise<void>;
 }) {
   const [modifiedKeysData, setModifiedKeysData] = useState<KeyData[]>(keyData);
-  const [toUpdateKeyActions, setToUpdateKeyActions] = useState<
-    { current: KeyUpdate; new: KeyUpdate }[]
-  >([]);
+  const toUpdateKeyActions = modifiedKeysData.reduce<
+    { crr: KeyUpdate; new: KeyUpdate }[]
+  >((prev, crr, i) => {
+    if (crr.changed) {
+      prev.push({ crr: keyData[i], new: crr });
+    }
+    return prev;
+  }, []);
 
   const [layer, setLayer] = useState(0);
   const [selectedKeyLoc, setSelectedKeyLoc] = useState<KeyLoc | null>(null);
-  const selectedKey = modifiedKeysData.find((kd) =>
+  const selectedKeyIdx = modifiedKeysData.findIndex((kd) =>
     deepEqual(kd.loc, selectedKeyLoc)
   );
+  const selectedKey = selectedKeyIdx >= 0
+    ? modifiedKeysData[selectedKeyIdx]
+    : null;
 
   return (
     <div className="flex flex-col items-center">
+      <Toolbar
+        toUpdateKeyActions={toUpdateKeyActions}
+        updateKeymap={updateKeymap}
+        clearKeymapModifications={() => {
+          setModifiedKeysData(keyData);
+        }}
+      />
       <Keyboard
         keys={modifiedKeysData}
         layer={layer}
@@ -131,36 +146,28 @@ function HomeInner({ keyboardInfo, keyData, updateKeymap }: {
         selectKeyLoc={(key) => setSelectedKeyLoc(key)}
         selectedKeyLoc={selectedKeyLoc}
       />
-      <div className="p-2">
-        <KeyUpdater
-          toUpdateKeyActions={toUpdateKeyActions}
-          updateKeymap={updateKeymap}
-          clearKeymapModifications={() => {
-            setToUpdateKeyActions([]);
-            setModifiedKeysData(keyData);
-          }}
-        />
-      </div>
-      <div className="p-2">
-        <KeySelector
-          selectedKey={selectedKey}
-          onChange={(action) => {
-            const keyIdx = modifiedKeysData.findIndex((kd) =>
-              deepEqual(kd.loc, selectedKeyLoc)
-            );
-            const currentKeyData = modifiedKeysData[keyIdx];
-            const newKeyData = { ...currentKeyData, action, changed: true };
+      <KeySelector
+        layerCount={keyboardInfo.layers}
+        restoreSelectedKey={() => {
+          setModifiedKeysData(produce(modifiedKeysData, (draft) => {
+            draft[selectedKeyIdx] = keyData[selectedKeyIdx];
+          }));
+        }}
+        selectedKey={selectedKey}
+        onChange={(action) => {
+          const newKeyData = { ...selectedKey!, action, changed: true };
 
-            setToUpdateKeyActions([
-              ...toUpdateKeyActions,
-              { current: currentKeyData, new: newKeyData },
-            ]);
-            setModifiedKeysData(produce(modifiedKeysData, (draft) => {
-              draft[keyIdx] = newKeyData;
-            }));
-          }}
-        />
-      </div>
+          console.log(keyData[selectedKeyIdx].action, action);
+
+          if (deepEqual(keyData[selectedKeyIdx].action, action)) {
+            newKeyData.changed = false;
+          }
+
+          setModifiedKeysData(produce(modifiedKeysData, (draft) => {
+            draft[selectedKeyIdx] = newKeyData;
+          }));
+        }}
+      />
     </div>
   );
 }
