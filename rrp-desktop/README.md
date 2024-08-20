@@ -2,7 +2,7 @@
 
 rrp (rktk remap protocol) desktop client.
 
-![image](https://github.com/user-attachments/assets/ffd3c3c1-2ba7-4708-9f7b-64d02ea5b084)
+![image](https://github.com/user-attachments/assets/cebb2232-477d-4fe0-a4a4-b6fc94428818)
 
 ## Feature
 

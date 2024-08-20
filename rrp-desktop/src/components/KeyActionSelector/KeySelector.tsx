@@ -45,6 +45,7 @@ export function LayerKeySelector(
     <div className="flex gap-2">
       <Select
         className="flex-grow"
+        value={layerOpType}
         onChange={(e) => {
           const key = e.target.value as keyof LayerOp;
           props.setSelected({ [key]: layerOpLayer } as any);
