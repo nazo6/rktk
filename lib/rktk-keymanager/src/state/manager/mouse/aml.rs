@@ -23,13 +23,14 @@ impl Aml {
         &mut self,
         now: Instant,
         mouse_event: (i8, i8),
-        continue_aml: bool,
+        mouse_key_pressed: bool,
+        non_mouse_key_pressed: bool,
     ) -> (bool, bool) {
         let mut changed = false;
         if let Some(start) = self.start {
-            if mouse_event != (0, 0) || continue_aml {
+            if mouse_event != (0, 0) || mouse_key_pressed {
                 self.start = Some(now);
-            } else if (now - start) > self.auto_mouse_duration {
+            } else if (now - start) > self.auto_mouse_duration || non_mouse_key_pressed {
                 changed = true;
                 self.start = None;
                 self.move_acc = 0;

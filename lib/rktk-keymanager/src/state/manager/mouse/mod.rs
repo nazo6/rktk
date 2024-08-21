@@ -42,6 +42,7 @@ impl MouseState {
 pub struct MouseLocalState {
     pub mouse_event: (i8, i8),
     pub mouse_button: u8,
+    pub non_mouse_key_pressed: bool,
 }
 
 impl MouseLocalState {
@@ -49,6 +50,7 @@ impl MouseLocalState {
         Self {
             mouse_event,
             mouse_button: 0,
+            non_mouse_key_pressed: false,
         }
     }
 
@@ -72,7 +74,9 @@ impl MouseLocalState {
                     }
                 },
             },
-            _ => {}
+            _ => {
+                self.non_mouse_key_pressed = true;
+            }
         }
     }
 
@@ -111,6 +115,7 @@ impl MouseLocalState {
                 common_local_state.now,
                 self.mouse_event,
                 self.mouse_button != 0 || global_mouse_state.scroll_mode,
+                self.non_mouse_key_pressed,
             );
             if changed {
                 common_state.layer_active[global_mouse_state.auto_mouse_layer] = enabled;
