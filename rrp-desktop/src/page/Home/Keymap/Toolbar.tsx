@@ -4,7 +4,7 @@ import {
   PopoverSurface,
   PopoverTrigger,
 } from "@fluentui/react-components";
-import { keyStr } from "../../lib/keyStr";
+import { keyStr } from "../../../lib/keyStr";
 import { KeyUpdate } from "./types";
 
 export function Toolbar(props: {
@@ -13,7 +13,7 @@ export function Toolbar(props: {
   clearKeymapModifications: () => void;
 }) {
   return (
-    <div className="w-full flex px-2 py-1 h-8 bg-gray-300/50">
+    <div className="w-full flex px-2 py-1 h-8 bg-blue-50">
       <div>
       </div>
       <div className="flex ml-auto gap-2">

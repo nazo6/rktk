@@ -1,4 +1,4 @@
-import { commands, KeyboardInfo } from "../bindings";
+import { commands } from "../bindings";
 import { useQuery } from "@tanstack/react-query";
 import { unwrapped } from "../utils";
 import {
@@ -11,9 +11,10 @@ import {
 } from "@fluentui/react-components";
 import { ArrowSyncRegular } from "@fluentui/react-icons";
 import { useConnect, useDisconnect } from "../lib/connectHook";
+import { ConnectionInfo } from "@/App";
 
 export function Connect(
-  props: { setKeyboardInfo: (info: KeyboardInfo) => void },
+  props: { setConnectionInfo: (info: ConnectionInfo) => void },
 ) {
   const { data: ports, error, refetch: refetchPorts } = useQuery({
     queryKey: ["getSerialPorts"],
@@ -55,7 +56,10 @@ export function Connect(
                           const keyboardInfo = await connect.mutateAsync(
                             port.port_name,
                           );
-                          props.setKeyboardInfo(keyboardInfo);
+                          props.setConnectionInfo({
+                            port,
+                            keyboard: keyboardInfo,
+                          });
                         }}
                       >
                         Connect

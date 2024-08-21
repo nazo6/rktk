@@ -8,6 +8,10 @@ use keycode::KeyAction;
 pub mod keycode;
 #[cfg(any(test, feature = "state"))]
 pub mod state;
+#[cfg(not(any(test, feature = "state")))]
+pub mod state {
+    pub mod config;
+}
 
 #[derive(Clone, Debug)]
 pub struct Layer<const ROW: usize, const COL: usize> {

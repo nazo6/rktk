@@ -1,3 +1,5 @@
+use core::time::Duration;
+
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
@@ -26,14 +28,17 @@ pub struct MouseState {
 impl MouseState {
     pub fn new(config: MouseConfig) -> Self {
         Self {
-            aml: Aml::new(config.auto_mouse_duration, config.auto_mouse_threshold),
+            aml: Aml::new(
+                Duration::from_millis(config.auto_mouse_duration as u64),
+                config.auto_mouse_threshold,
+            ),
             scroll_mode: false,
             reporter: reporter::MouseReportGenerator::new(
                 config.scroll_divider_x,
                 config.scroll_divider_y,
             ),
             arrowball_move: (0, 0),
-            auto_mouse_layer: config.auto_mouse_layer,
+            auto_mouse_layer: config.auto_mouse_layer as usize,
         }
     }
 }
@@ -75,7 +80,9 @@ impl MouseLocalState {
                 },
             },
             _ => {
-                self.non_mouse_key_pressed = true;
+                if event == EventType::Pressed {
+                    self.non_mouse_key_pressed = true;
+                }
             }
         }
     }

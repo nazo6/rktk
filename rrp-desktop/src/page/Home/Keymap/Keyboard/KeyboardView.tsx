@@ -1,4 +1,4 @@
-import { keyStr } from "../../../lib/keyStr";
+import { keyStr } from "@/lib/keyStr";
 import clsx from "clsx";
 import { deepEqual } from "fast-equals";
 import { KeyData, KeyLoc } from "../types";

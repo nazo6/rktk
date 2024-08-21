@@ -1,7 +1,7 @@
 use crate::time::{Duration, Instant};
 
 use super::config::{
-    TapDanceConfig, MAX_ONESHOT_COUNT, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_COUNT,
+    TapDanceConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
 };
 use crate::keycode::{layer::LayerOp, KeyAction, KeyCode};
 
@@ -42,13 +42,13 @@ struct TapDanceActiveState {
 /// Handles layer related events and resolve physical key position to keycode.
 pub struct KeyResolver<const ROW: usize, const COL: usize> {
     key_state: [[Option<KeyPressedState>; COL]; ROW],
-    tap_dance: [TapDance; MAX_TAP_DANCE_COUNT],
-    oneshot: heapless::Vec<OneShotState, MAX_ONESHOT_COUNT>,
+    tap_dance: [TapDance; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+    oneshot: heapless::Vec<OneShotState, { ONESHOT_STATE_SIZE as usize }>,
     tap_threshold: Duration,
     tap_dance_threshold: Duration,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EventType {
     Pressed,
     Pressing,
@@ -64,8 +64,8 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
                 state: None,
                 config: config.tap_dance[i].take(),
             }),
-            tap_threshold: config.tap_threshold,
-            tap_dance_threshold: config.tap_dance_threshold,
+            tap_threshold: Duration::from_millis(config.tap_threshold as u64),
+            tap_dance_threshold: Duration::from_millis(config.tap_dance_threshold as u64),
         }
     }
 
@@ -102,7 +102,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         cs: &mut CommonState<LAYER, ROW, COL>,
         cls: &CommonLocalState,
         events: &KeyStatusEvents,
-    ) -> heapless::Vec<(EventType, KeyCode), MAX_RESOLVED_KEY_COUNT> {
+    ) -> heapless::Vec<(EventType, KeyCode), { MAX_RESOLVED_KEY_COUNT as usize }> {
         use EventType::*;
 
         let mut resolved_keys = heapless::Vec::new();

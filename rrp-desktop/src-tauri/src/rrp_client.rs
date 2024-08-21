@@ -47,5 +47,7 @@ impl Client {
         get_keymaps normal stream
         get_layout_json normal stream
         set_keymaps stream normal
+        get_keymap_config normal normal
+        set_keymap_config normal normal
     );
 }

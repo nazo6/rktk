@@ -1,6 +1,6 @@
-import { KeyAction } from "../../bindings";
+import { KeyAction } from "../../../bindings";
 import { KeyData } from "./types";
-import { KeyActionSelector } from "../../components/KeyActionSelector/KeyActionSelector";
+import { KeyActionSelector } from "../../../components/KeyActionSelector/KeyActionSelector";
 import { Button } from "@fluentui/react-components";
 
 export function KeySelector(

@@ -3,7 +3,10 @@
 #![allow(clippy::single_match)]
 
 use crate::time::{Duration, Instant};
-use config::StateConfig;
+use config::{
+    KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
+    MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
+};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{state::common::CommonLocalState, Layer};
@@ -39,11 +42,14 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
     mouse: manager::mouse::MouseState,
     keyboard: manager::keyboard::KeyboardState,
     media_keyboard: manager::media_keyboard::MediaKeyboardState,
+
+    config: StateConfig,
 }
 
 impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, COL> {
     pub fn new(layers: [Layer<ROW, COL>; LAYER], config: StateConfig) -> Self {
         Self {
+            config: config.clone(),
             now: Instant::from_start(Duration::from_millis(0)),
             key_resolver: key_resolver::KeyResolver::new(config.key_resolver),
             pressed: pressed::Pressed::new(),
@@ -92,8 +98,22 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
         }
     }
 
-    pub fn get_keymap_mut(&mut self) -> &mut [Layer<ROW, COL>; LAYER] {
-        &mut self.cs.keymap
+    pub fn get_keymap(&self) -> &[Layer<ROW, COL>; LAYER] {
+        &self.cs.keymap
+    }
+
+    pub fn get_config(&self) -> &StateConfig {
+        &self.config
+    }
+
+    pub fn get_keymap_info() -> KeymapInfo {
+        KeymapInfo {
+            layer_count: LAYER as u8,
+            max_tap_dance_key_count: MAX_TAP_DANCE_KEY_COUNT,
+            max_tap_dance_repeat_count: MAX_TAP_DANCE_REPEAT_COUNT,
+            oneshot_state_size: ONESHOT_STATE_SIZE,
+            max_resolved_key_count: MAX_RESOLVED_KEY_COUNT,
+        }
     }
 }
 

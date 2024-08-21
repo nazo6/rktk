@@ -1,14 +1,14 @@
 import { Key, Media, Special } from "../bindings";
 
 export const MODIFIER_KEYS: Map<number, string> = new Map([
-  [0x01, "LCTRL"],
-  [0x02, "LSHIFT"],
-  [0x04, "LGUI"],
-  [0x08, "LSUPER"],
-  [0x10, "RCTRL"],
-  [0x20, "RSHIFT"],
-  [0x40, "RALT"],
-  [0x80, "RGUI"],
+  [0x01, "Ctrl(L)"],
+  [0x02, "Shft(L)"],
+  [0x04, "Alt(L)"],
+  [0x08, "Gui(L)"],
+  [0x10, "Ctrl(R)"],
+  [0x20, "Shft(R)"],
+  [0x40, "Alt(R)"],
+  [0x80, "Gui(R)"],
 ]);
 
 export const MOUSE_KEYS: Map<number, string> = new Map([
@@ -117,14 +117,14 @@ export const NORMAL_KEYS: Map<Key, string> = new Map([
   ["Pause", "Pause"],
   ["Insert", "Insert"],
   ["Home", "Home"],
-  ["PageUp", "PageUp"],
+  ["PageUp", "PgUp"],
   ["Delete", "Delete"],
   ["End", "End"],
-  ["PageDown", "PageDown"],
-  ["Right", "Right"],
-  ["Left", "Left"],
-  ["Down", "Down"],
-  ["Up", "Up"],
+  ["PageDown", "PgDn"],
+  ["Right", "→"],
+  ["Left", "←"],
+  ["Down", "↓"],
+  ["Up", "↑"],
   ["NumLock", "NumLock"],
   ["KpSlash", "KpSlash"],
   ["KpAsterisk", "KpAsterisk"],

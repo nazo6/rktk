@@ -15,6 +15,7 @@ pub struct KeyActionLoc {
 }
 
 pub mod get_keyboard_info {
+    use rktk_keymanager::state::config::KeymapInfo;
     use serde::{Deserialize, Serialize};
 
     #[derive(Serialize, Deserialize, Debug)]
@@ -30,7 +31,7 @@ pub mod get_keyboard_info {
         pub name: String,
         pub rows: u8,
         pub cols: u8,
-        pub layers: u8,
+        pub keymap: KeymapInfo,
     }
 
     pub type Request = ();
@@ -52,5 +53,14 @@ pub mod get_keymaps {
 }
 pub mod set_keymaps {
     pub type StreamRequest = super::KeyActionLoc;
+    pub type Response = ();
+}
+
+pub mod get_keymap_config {
+    pub type Request = ();
+    pub type Response = rktk_keymanager::state::config::StateConfig;
+}
+pub mod set_keymap_config {
+    pub type Request = rktk_keymanager::state::config::StateConfig;
     pub type Response = ();
 }

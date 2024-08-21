@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardInfo } from "./bindings";
+import { KeyboardInfo, SerialPortInfo } from "./bindings";
 import { Home } from "./page/Home";
 import { Connect } from "./page/Connect";
 import { Button, Toaster } from "@fluentui/react-components";
@@ -8,19 +8,32 @@ import { useDisconnect } from "./lib/connectHook";
 
 export const TOASTER_ID = "toaster";
 
+export type ConnectionInfo = {
+  keyboard: KeyboardInfo;
+  port: SerialPortInfo;
+};
+
 export default function App() {
-  const [keyboardInfo, setKeyboardInfo] = useState<KeyboardInfo | null>(null);
+  const [connectionInfo, setKeyboardInfo] = useState<ConnectionInfo | null>(
+    null,
+  );
 
   const disconnect = useDisconnect();
 
   return (
     <div className="flex flex-col h-full">
       <TitleBar>
-        {keyboardInfo && (
+        {connectionInfo && (
           <div className="flex ml-auto items-center gap-2">
             <div>
-              Connected to:{" "}
-              <span className="font-bold text-[1rem]">{keyboardInfo.name}</span>
+              Connected to{" "}
+              <span className="font-bold text-[1rem]">
+                {connectionInfo.keyboard.name}
+              </span>
+              {" at "}
+              <span className="font-bold">
+                {connectionInfo.port.port_name}
+              </span>
             </div>
             <Button
               appearance="secondary"
@@ -33,19 +46,21 @@ export default function App() {
             </Button>
           </div>
         )}
+        <Toaster position="bottom-end" />
       </TitleBar>
-      <Toaster position="bottom-end" />
-      {keyboardInfo
-        ? (
-          <Home
-            keyboardInfo={keyboardInfo}
-          />
-        )
-        : (
-          <Connect
-            setKeyboardInfo={setKeyboardInfo}
-          />
-        )}
+      <div className="min-h-0 flex-grow">
+        {connectionInfo
+          ? (
+            <Home
+              keyboardInfo={connectionInfo.keyboard}
+            />
+          )
+          : (
+            <Connect
+              setConnectionInfo={setKeyboardInfo}
+            />
+          )}
+      </div>
     </div>
   );
 }

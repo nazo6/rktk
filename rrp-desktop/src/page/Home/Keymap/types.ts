@@ -1,4 +1,4 @@
-import { KeyAction } from "../../bindings";
+import { KeyAction } from "../../../bindings";
 import * as kle from "@ijprest/kle-serial";
 
 export type KeyData = {

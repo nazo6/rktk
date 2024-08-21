@@ -27,11 +27,11 @@ export function Keyboard(
 
   let containerRef = useRef<HTMLDivElement>(null);
   const [parentWidth] = useSize(containerRef);
-  const scale = Math.min((parentWidth - 100) / keyboardWidth, 1);
+  const scale = Math.min((parentWidth - 150) / keyboardWidth, 1);
 
   return (
     <div
-      className="flex items-center justify-center w-full p-2"
+      className="flex items-center justify-center w-full p-2 bg-white rounded-md"
       ref={containerRef}
     >
       <LayerSelector

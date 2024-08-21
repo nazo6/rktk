@@ -10,6 +10,8 @@ macro_rules! def {
 #[cfg(not(no_build))]
 def!(u64_default, u64);
 #[cfg(not(no_build))]
+def!(u32_default, u32);
+#[cfg(not(no_build))]
 def!(usize_default, usize);
 #[cfg(not(no_build))]
 def!(i8_default, i8);
@@ -78,12 +80,12 @@ pub struct StaticConfig {
     pub default_cpi: u16,
 
     /// Default duration of auto mouse mode (ms)
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<500>"))]
-    pub default_auto_mouse_duration: u64,
+    #[cfg_attr(not(no_build), serde(default = "u32_default::<500>"))]
+    pub default_auto_mouse_duration: u32,
 
     /// When auto mouse mode is enabled, this layer is used
-    #[cfg_attr(not(no_build), serde(default = "usize_default::<1>"))]
-    pub default_auto_mouse_layer: usize,
+    #[cfg_attr(not(no_build), serde(default = "u8_default::<1>"))]
+    pub default_auto_mouse_layer: u8,
 
     /// Mouse movement threshold to enable auto mouse mode
     #[cfg_attr(not(no_build), serde(default = "u8_default::<1>"))]
@@ -98,10 +100,10 @@ pub struct StaticConfig {
     pub default_scroll_divider_y: i8,
 
     /// Threshold for tap (ms)
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<200>"))]
-    pub default_tap_threshold: u64,
+    #[cfg_attr(not(no_build), serde(default = "u32_default::<200>"))]
+    pub default_tap_threshold: u32,
 
     /// Threshold for tap dance (ms)
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<100>"))]
-    pub default_tap_dance_threshold: u64,
+    #[cfg_attr(not(no_build), serde(default = "u32_default::<100>"))]
+    pub default_tap_dance_threshold: u32,
 }

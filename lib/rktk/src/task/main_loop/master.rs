@@ -128,14 +128,14 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
         StateConfig {
             mouse: MouseConfig {
                 auto_mouse_layer: CONFIG.default_auto_mouse_layer,
-                auto_mouse_duration: Duration::from_millis(CONFIG.default_auto_mouse_duration),
+                auto_mouse_duration: CONFIG.default_auto_mouse_duration,
                 auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
                 scroll_divider_x: CONFIG.default_scroll_divider_x,
                 scroll_divider_y: CONFIG.default_scroll_divider_y,
             },
             key_resolver: KeyResolverConfig {
-                tap_threshold: Duration::from_millis(CONFIG.default_tap_threshold),
-                tap_dance_threshold: Duration::from_millis(CONFIG.default_tap_dance_threshold),
+                tap_threshold: CONFIG.default_tap_threshold,
+                tap_dance_threshold: CONFIG.default_tap_dance_threshold,
                 tap_dance: key_config.tap_dance.clone(),
             },
         },

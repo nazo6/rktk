@@ -11,7 +11,7 @@ export function keyStr(key?: KeyAction): string {
   let str;
   if (!key) {
   } else if (key === "Inherit") {
-    str = "";
+    str = "____";
   } else if ("Normal" in key) {
     str = keyCodeStr(key.Normal);
   } else if ("Normal2" in key) {

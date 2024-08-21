@@ -1,12 +1,14 @@
 use std::time::Duration;
 
 use futures::StreamExt as _;
+use macros::rrp_command;
 use rktk_rrp::endpoints::*;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
 use tokio::{sync::RwLock, time::timeout};
 
+mod macros;
 mod serial_ports;
 
 pub enum ConnectedState {
@@ -76,23 +78,6 @@ async fn disconnect(app: tauri::AppHandle, state: tauri::State<'_, State>) -> Re
 
 #[tauri::command]
 #[specta::specta]
-async fn get_keyboard_info(
-    state: tauri::State<'_, State>,
-) -> Result<get_keyboard_info::Response, String> {
-    let ConnectedState::Connected { client } = &mut *state.0.write().await else {
-        return Err("Not connected".to_string());
-    };
-
-    let res = timeout(Duration::from_secs(1), client.get_keyboard_info(()))
-        .await
-        .map_err(|e| format!("Timeout: {}", e))?
-        .map_err(|e| e.to_string())?;
-
-    Ok(res)
-}
-
-#[tauri::command]
-#[specta::specta]
 async fn get_layout_json(state: tauri::State<'_, State>) -> Result<String, String> {
     let ConnectedState::Connected { client } = &mut *state.0.write().await else {
         return Err("Not connected".to_string());
@@ -147,6 +132,10 @@ async fn set_keymaps(
     Ok(())
 }
 
+rrp_command!(get_keyboard_info, 1000, normal normal);
+rrp_command!(get_keymap_config, 1000, normal normal);
+rrp_command!(set_keymap_config, 1000, normal normal);
+
 #[derive(Serialize, Deserialize, Debug, Clone, Type, Event)]
 pub struct ConnectionEvent(bool);
 
@@ -162,6 +151,8 @@ pub fn tauri_specta_builder() -> TauriSpectaBuilder {
             get_keymaps,
             get_layout_json,
             set_keymaps,
+            get_keymap_config,
+            set_keymap_config,
         ]);
 
     #[cfg(debug_assertions)]

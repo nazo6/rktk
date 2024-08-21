@@ -29,9 +29,9 @@ async getSerialPorts() : Promise<Result<SerialPortInfoType[], string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getKeyboardInfo() : Promise<Result<KeyboardInfo, string>> {
+async getKeyboardInfo(req: null) : Promise<Result<KeyboardInfo, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_keyboard_info") };
+    return { status: "ok", data: await TAURI_INVOKE("get_keyboard_info", { req }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -56,6 +56,22 @@ async getLayoutJson() : Promise<Result<string, string>> {
 async setKeymaps(keymaps: KeyActionLoc[]) : Promise<Result<null, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("set_keymaps", { keymaps }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getKeymapConfig(req: null) : Promise<Result<StateConfig, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_keymap_config", { req }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setKeymapConfig(req: StateConfig) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_keymap_config", { req }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -96,7 +112,9 @@ export type KeyActionLoc = { layer: number; row: number; col: number; key: KeyAc
  * Represents each key.
  */
 export type KeyCode = "None" | { Key: Key } | { Mouse: Mouse } | { Modifier: Modifier } | { Layer: LayerOp } | { Special: Special } | { Media: Media }
-export type KeyboardInfo = { name: string; rows: number; cols: number; layers: number }
+export type KeyResolverConfig = { tap_threshold: number; tap_dance_threshold: number; tap_dance: [(TapDanceConfig | null), (TapDanceConfig | null), (TapDanceConfig | null), (TapDanceConfig | null), (TapDanceConfig | null), (TapDanceConfig | null), (TapDanceConfig | null), (TapDanceConfig | null)] }
+export type KeyboardInfo = { name: string; rows: number; cols: number; keymap: KeymapInfo }
+export type KeymapInfo = { layer_count: number; max_tap_dance_key_count: number; max_tap_dance_repeat_count: number; oneshot_state_size: number; max_resolved_key_count: number }
 /**
  * Keycode for layer operations.
  * - `Move`: Move to the layer.
@@ -109,6 +127,7 @@ export type LayerOp = { Momentary: number } | { Toggle: number }
 export type Media = "Zero" | "Play" | "Pause" | "Record" | "NextTrack" | "PrevTrack" | "Stop" | "RandomPlay" | "Repeat" | "PlayPause" | "Mute" | "VolumeIncrement" | "VolumeDecrement" | "Reserved"
 export type Modifier = number
 export type Mouse = number
+export type MouseConfig = { auto_mouse_layer: number; auto_mouse_duration: number; auto_mouse_threshold: number; scroll_divider_x: number; scroll_divider_y: number }
 /**
  * A device-independent implementation of serial port information
  */
@@ -148,6 +167,8 @@ export type SerialPortType =
  * - `MoScrl`: Enable mouse scroll mode when held.
  */
 export type Special = "MoScrl"
+export type StateConfig = { mouse: MouseConfig; key_resolver: KeyResolverConfig }
+export type TapDanceConfig = { tap: [(KeyCode | null), (KeyCode | null), (KeyCode | null), (KeyCode | null)]; hold: [(KeyCode | null), (KeyCode | null), (KeyCode | null), (KeyCode | null)] }
 export type UsbPortInfo = { 
 /**
  * Vendor ID

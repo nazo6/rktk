@@ -18,6 +18,7 @@ export function useDisconnect() {
     onSuccess: (_, notify) => {
       queryClient.invalidateQueries({ queryKey: ["getKeymaps"] });
       queryClient.invalidateQueries({ queryKey: ["getLayoutJson"] });
+      queryClient.invalidateQueries({ queryKey: ["getKeymapConfig"] });
       if (!notify) return;
       dispatchToast(
         <Toast>
@@ -55,7 +56,7 @@ export function useConnect() {
       port: string,
     ) => {
       await unwrapped(commands.connect)(port);
-      return await unwrapped(commands.getKeyboardInfo)();
+      return await unwrapped(commands.getKeyboardInfo)(null);
     },
     onSuccess: (info, opts) => {
       dispatchToast(
