@@ -31,7 +31,7 @@ use nrf_softdevice as _;
 #[cfg(not(feature = "ble-master"))]
 use rktk::interface::ble::DummyBleDriver;
 #[cfg(not(feature = "usb"))]
-use rktk::interface::usb::DummyUsbDriver;
+use rktk::interface::usb::DummyUsbDriverBuilder;
 #[cfg(feature = "ble-master")]
 use rktk_drivers_nrf52::softdevice::ble::NrfBleDriver;
 #[cfg(feature = "usb")]
@@ -166,7 +166,7 @@ async fn main(_spawner: Spawner) {
             };
 
             #[cfg(not(feature = "usb"))]
-            let usb = Option::<DummyUsbDriver>::None;
+            let usb = Option::<DummyUsbDriverBuilder>::None;
 
             usb
         },

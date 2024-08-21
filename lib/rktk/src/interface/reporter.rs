@@ -22,6 +22,7 @@ pub trait ReporterDriver {
         Err(RktkError::NotSupported)
     }
     async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<usize, RktkError> {
+        embassy_time::Timer::after(embassy_time::Duration::from_secs(10000)).await;
         Err(RktkError::NotSupported)
     }
 
