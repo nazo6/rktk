@@ -105,7 +105,7 @@ mod prelude {
     pub fn new_state(
         keymap: [crate::Layer<ROWS, COLS>; LAYER_COUNT],
     ) -> State<LAYER_COUNT, ROWS, COLS> {
-        let mut tap_dance = [const { None }; MAX_TAP_DANCE_REPEAT_COUNT];
+        let mut tap_dance = [const { None }; MAX_TAP_DANCE_REPEAT_COUNT as usize];
         tap_dance[0] = Some(TapDanceConfig {
             tap: [
                 Some(KeyCode::Key(Key::A)),
