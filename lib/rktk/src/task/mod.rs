@@ -15,7 +15,7 @@ use crate::{
         double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
         reporter::DummyReporterDriver, split::SplitDriver, usb::UsbDriver, DriverBuilder,
     },
-    KeyConfig, Layer,
+    KeyConfig,
 };
 
 mod backlight;

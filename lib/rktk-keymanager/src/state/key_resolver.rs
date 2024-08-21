@@ -1,4 +1,4 @@
-use embassy_time::{Duration, Instant};
+use crate::time::{Duration, Instant};
 
 use super::config::{
     TapDanceConfig, MAX_ONESHOT_COUNT, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_COUNT,
@@ -66,7 +66,6 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
             }),
             tap_threshold: config.tap_threshold,
             tap_dance_threshold: config.tap_dance_threshold,
-     
         }
     }
 

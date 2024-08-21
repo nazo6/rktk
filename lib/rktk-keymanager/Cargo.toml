@@ -7,7 +7,6 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
-embassy-time = { workspace = true, optional = true }
 bitflags = { version = "2.6.0" }
 heapless = { workspace = true }
 usbd-hid = { workspace = true, optional = true }
@@ -22,7 +21,6 @@ postcard = { workspace = true, optional = true, features = [
 specta = { workspace = true, optional = true, features = ["derive"] }
 
 [dev-dependencies]
-embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
 critical-section = { version = "1.1.2", features = ["std"] }
 pretty_assertions = "1.4.0"
 usbd-hid = { workspace = true }
@@ -30,7 +28,7 @@ usbd-hid = { workspace = true }
 [features]
 default = ["serde"]
 # Enables state management.
-state = ["dep:embassy-time", "dep:usbd-hid"]
+state = ["dep:usbd-hid"]
 # Enables serialization.
 serde = ["dep:serde"]
 # Enables serialization with postcard.

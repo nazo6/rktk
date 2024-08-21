@@ -2,8 +2,8 @@
 
 #![allow(clippy::single_match)]
 
+use crate::time::{Duration, Instant};
 use config::StateConfig;
-use embassy_time::Instant;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{state::common::CommonLocalState, Layer};
@@ -30,6 +30,8 @@ pub struct KeyChangeEvent {
 }
 
 pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
+    now: Instant,
+
     key_resolver: key_resolver::KeyResolver<ROW, COL>,
     pressed: pressed::Pressed<COL, ROW>,
 
@@ -42,6 +44,7 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
 impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, COL> {
     pub fn new(layers: [Layer<ROW, COL>; LAYER], config: StateConfig) -> Self {
         Self {
+            now: Instant::from_start(Duration::from_millis(0)),
             key_resolver: key_resolver::KeyResolver::new(config.key_resolver),
             pressed: pressed::Pressed::new(),
 
@@ -58,9 +61,11 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
         &mut self,
         key_events: &mut [KeyChangeEvent],
         mouse_event: (i8, i8),
-        now: Instant,
+        since_last_update: Duration,
     ) -> StateReport {
-        let mut cls = CommonLocalState::new(now);
+        self.now = self.now + since_last_update;
+
+        let mut cls = CommonLocalState::new(self.now);
 
         let mut mls = manager::mouse::MouseLocalState::new(mouse_event);
         let mut kls = manager::keyboard::KeyboardLocalState::new();

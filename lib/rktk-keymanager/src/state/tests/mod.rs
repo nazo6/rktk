@@ -5,8 +5,7 @@ mod keymap;
 
 #[allow(unused_imports)]
 mod prelude {
-
-    pub use embassy_time::{Duration, Instant};
+    pub use crate::time::{Duration, Instant};
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
@@ -19,8 +18,8 @@ mod prelude {
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*},
     };
 
-    pub const fn time(ms: u64) -> Instant {
-        Instant::from_millis(ms)
+    pub const fn time(ms: u64) -> Duration {
+        Duration::from_millis(ms)
     }
 
     pub const ROWS: usize = 5;

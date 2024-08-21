@@ -1,9 +1,10 @@
 use embassy_futures::{join::join, select::select};
-use embassy_time::{Duration, Timer};
+use embassy_time::Timer;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, StateConfig},
     KeyChangeEvent, State, StateReport,
 };
+use rktk_keymanager::time::Duration;
 
 use crate::{
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
@@ -147,8 +148,11 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
     loop {
         select(
             async {
+                let mut prev_time = embassy_time::Instant::now();
                 loop {
                     let start = embassy_time::Instant::now();
+                    let since_last_update = start - prev_time;
+                    prev_time = start;
 
                     let mut mouse_move: (i8, i8) = (0, 0);
 
@@ -166,7 +170,11 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
 
                     receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
 
-                    let state_report = state.lock().await.update(&mut events, mouse_move, start);
+                    let state_report = state.lock().await.update(
+                        &mut events,
+                        mouse_move,
+                        since_last_update.into(),
+                    );
 
                     crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 

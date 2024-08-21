@@ -1,4 +1,4 @@
-use embassy_time::Instant;
+use crate::time::Instant;
 
 use crate::{keycode::KeyAction, Keymap};
 

@@ -1,6 +1,6 @@
 #![allow(clippy::collapsible_if)]
 
-use embassy_time::{Duration, Instant};
+use crate::time::{Duration, Instant};
 
 pub struct Aml {
     start: Option<Instant>,
@@ -29,7 +29,7 @@ impl Aml {
         if let Some(start) = self.start {
             if mouse_event != (0, 0) || continue_aml {
                 self.start = Some(now);
-            } else if now.duration_since(start) > self.auto_mouse_duration {
+            } else if (now - start) > self.auto_mouse_duration {
                 changed = true;
                 self.start = None;
                 self.move_acc = 0;

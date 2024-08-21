@@ -4027,7 +4027,6 @@ version = "0.0.1"
 dependencies = [
  "bitflags 2.6.0",
  "critical-section",
- "embassy-time",
  "heapless 0.7.17",
  "paste",
  "postcard",

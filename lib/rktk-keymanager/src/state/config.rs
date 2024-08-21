@@ -1,4 +1,4 @@
-use embassy_time::Duration;
+use core::time::Duration;
 
 use crate::keycode::KeyCode;
 
