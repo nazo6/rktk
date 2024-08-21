@@ -1,4 +1,5 @@
 use rktk_rrp::endpoint_client;
+use tauri::async_runtime::spawn_blocking;
 use tokio::{
     io::{AsyncReadExt as _, AsyncWriteExt as _},
     sync::Mutex,
@@ -10,8 +11,11 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(name: &str, baud: u32) -> anyhow::Result<Self> {
-        let stream = tokio_serial::new(name, baud).open_native_async()?;
+    pub async fn connect(name: &str, baud: u32) -> anyhow::Result<Self> {
+        let serial = tokio_serial::new(name, baud);
+        let stream = spawn_blocking(move || serial.open_native_async())
+            .await
+            .unwrap()?;
         Ok(Client {
             stream: Mutex::new(stream),
         })

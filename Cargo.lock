@@ -4078,6 +4078,7 @@ dependencies = [
  "rktk-rrp",
  "serde",
  "serde_json",
+ "serialport",
  "specta",
  "specta-typescript",
  "tauri",
@@ -4366,6 +4367,7 @@ dependencies = [
  "mach2",
  "nix",
  "scopeguard",
+ "serde",
  "unescaper",
  "winapi",
 ]

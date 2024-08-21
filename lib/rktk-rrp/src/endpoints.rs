@@ -30,6 +30,7 @@ pub mod get_keyboard_info {
         pub name: String,
         pub rows: u8,
         pub cols: u8,
+        pub layers: u8,
     }
 
     pub type Request = ();

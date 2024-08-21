@@ -19,12 +19,14 @@ tauri = { version = "2.0.0-rc", features = [] }
 tauri-plugin-shell = "2.0.0-rc"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-
 specta = { workspace = true }
 tauri-specta = { version = "2.0.0-rc.17", features = ["derive", "typescript"] }
 specta-typescript = "0.0.7"
 
-tokio-serial = "5.4.4"
+tokio-serial = { version = "5.4.4" }
+serialport = { version = "4.5.0", features = [
+  "serde",
+], default-features = false }
 tokio = { version = "1.39.2", features = ["full"] }
 anyhow = "1.0.86"
 futures = { workspace = true }

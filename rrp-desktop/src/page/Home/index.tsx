@@ -1,176 +1,173 @@
-import { notifications } from "@mantine/notifications";
+import { commands, KeyActionLoc, KeyboardInfo } from "../../bindings";
+import * as kle from "@ijprest/kle-serial";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { unwrapped } from "../../utils";
+import { Keyboard } from "./Keyboard";
+import { KeyData, KeyLoc, KeyUpdate } from "./types";
+import { KeySelector } from "./KeySelector";
+import { useState } from "react";
+import { deepEqual } from "fast-equals";
+import { produce } from "immer";
 import {
-  commands,
-  KeyAction,
-  KeyActionLoc,
-  KeyboardInfo,
-  Result,
-} from "../../bindings";
-import { useEffect, useState } from "react";
-import { Button, NavLink } from "@mantine/core";
+  Toast,
+  ToastTitle,
+  useToastController,
+} from "@fluentui/react-components";
+import { Toolbar } from "./Toolbar";
 
-export function Home() {
-  const [data, setData] = useState<KeyboardInfo | null>(null);
+export function Home({ keyboardInfo }: { keyboardInfo: KeyboardInfo }) {
+  const queryClient = useQueryClient();
+  const { dispatchToast } = useToastController();
 
-  useEffect(() => {
-    (async () => {
-      const data = await Promise.race([
-        new Promise<Result<KeyboardInfo, string>>((resolve) =>
-          commands.getKeyboardInfo().then((res) => resolve(res))
-        ),
-        new Promise<"timeout">((resolve) =>
-          setTimeout(() => resolve("timeout"), 1000)
-        ),
-      ]);
-      if (data == "timeout") {
-        notifications.show({
-          message: "Failed to connect to keyboard (timeout). Disconnecting...",
+  const { data: layout, error: layoutError } = useQuery({
+    queryKey: ["getLayoutJson"],
+    queryFn: async () => {
+      const layoutJson = await unwrapped(commands.getLayoutJson)();
+      const layout = kle.Serial.parse(
+        JSON.stringify(JSON.parse(layoutJson).keymap),
+      );
+      return layout;
+    },
+  });
+
+  const { data: keys, dataUpdatedAt, error: keymapError } = useQuery({
+    enabled: !!layout,
+    queryKey: ["getKeymaps"],
+    queryFn: async () => {
+      const keymaps = await unwrapped(commands.getKeymaps)();
+      const keys: KeyData[] = [];
+      layout?.keys.forEach((key) => {
+        const col = parseInt(key.labels[0].split(",")[1]);
+        const row = parseInt(key.labels[0].split(",")[0]);
+
+        keymaps.forEach((k) => {
+          if (k.col == col && k.row == row) {
+            keys.push({
+              kleKey: key,
+              changed: false,
+              action: k.key,
+              loc: { col, row, layer: k.layer },
+            });
+          }
         });
-        await commands.disconnect();
-      } else {
-        if (data.status == "ok") {
-          setData(data.data);
-        } else {
-          notifications.show({
-            message:
-              `Failed to connect to keyboard (${data.error}). Disconnecting...`,
-          });
-          await commands.disconnect();
-        }
-      }
-    })();
-  }, []);
+      });
 
-  return (
-    data ? <HomeInner keyboardInfo={data} /> : <div>Connecting...</div>
-  );
-}
+      return keys;
+    },
+  });
 
-function HomeInner(props: { keyboardInfo: KeyboardInfo }) {
-  const [keymaps, setKeymaps] = useState<KeyActionLoc[] | null>(null);
-  const [layout, setLayout] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      let res = await commands.getKeymaps();
-      if (res.status == "ok") {
-        setKeymaps(res.data);
-      } else {
-        notifications.show({
-          message: `Failed to get keymaps (${res.error})`,
-        });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      let res = await commands.getLayoutJson();
-      if (res.status == "ok") {
-        setLayout(res.data);
-      } else {
-        notifications.show({
-          message: `Failed to get layout (${res.error})`,
-        });
-      }
-    })();
-  }, []);
+  const setKey = useMutation({
+    mutationFn: async (changes: KeyActionLoc[]) => {
+      await unwrapped(commands.setKeymaps)(changes);
+    },
+    onSuccess: (_, changes) => {
+      queryClient.invalidateQueries({ queryKey: ["getKeymaps"] });
+      dispatchToast(
+        <Toast>
+          <ToastTitle>
+            Updated {changes.length} key(s)
+          </ToastTitle>
+        </Toast>,
+        { intent: "success" },
+      );
+    },
+  });
 
   return (
     <div>
-      <h1>Connected to {props.keyboardInfo.name}</h1>
-      <Button
-        onClick={async () => {
-          await commands.disconnect();
-        }}
-      >
-        Disconnect
-      </Button>
-      {layout && keymaps
-        ? <Keyboard keyboardJson={layout} keymaps={keymaps} />
-        : <div>Loading layout...</div>}
+      {keys
+        ? (
+          <HomeInner
+            keyboardInfo={keyboardInfo}
+            keyDataUpdatedAt={dataUpdatedAt}
+            keyData={keys}
+            updateKeymap={(updates) =>
+              setKey.mutateAsync(updates.map((update) => ({
+                row: update.loc.row,
+                col: update.loc.col,
+                layer: update.loc.layer,
+                key: update.action,
+              })))}
+          />
+        )
+        : (
+          <div className="flex justify-center items-center pt-5">
+            {layoutError && (
+              <div>Error fetching layout: {layoutError.message}</div>
+            )}
+            {keymapError && (
+              <div>Error fetching keymap: {keymapError.message}</div>
+            )}
+          </div>
+        )}
     </div>
   );
 }
 
-import * as kle from "@ijprest/kle-serial";
+function HomeInner({ keyboardInfo, keyData, updateKeymap }: {
+  keyboardInfo: KeyboardInfo;
+  keyData: KeyData[];
+  keyDataUpdatedAt: number;
+  updateKeymap: (changes: KeyUpdate[]) => Promise<void>;
+}) {
+  const [modifiedKeysData, setModifiedKeysData] = useState<KeyData[]>(keyData);
+  const toUpdateKeyActions = modifiedKeysData.reduce<
+    { crr: KeyUpdate; new: KeyUpdate }[]
+  >((prev, crr, i) => {
+    if (crr.changed) {
+      prev.push({ crr: keyData[i], new: crr });
+    }
+    return prev;
+  }, []);
 
-function Keyboard(props: { keymaps: KeyActionLoc[]; keyboardJson: string }) {
-  console.log(props.keyboardJson);
-
-  const val = JSON.parse(props.keyboardJson);
-  const kb = kle.Serial.parse(JSON.stringify(val.keymap));
-
-  console.log(kb);
-
-  const [selectedKey, setSelectedKey] = useState<
-    { row: number; col: number; layer: number } | null
-  >(null);
-  const selectedKeymap = selectedKey
-    ? props.keymaps.find((v) =>
-      v.col == selectedKey.col && v.row == selectedKey.row &&
-      v.layer == selectedKey.layer
-    )
+  const [layer, setLayer] = useState(0);
+  const [selectedKeyLoc, setSelectedKeyLoc] = useState<KeyLoc | null>(null);
+  const selectedKeyIdx = modifiedKeysData.findIndex((kd) =>
+    deepEqual(kd.loc, selectedKeyLoc)
+  );
+  const selectedKey = selectedKeyIdx >= 0
+    ? modifiedKeysData[selectedKeyIdx]
     : null;
 
   return (
-    <div className="flex flex-col">
-      <div className="relative h-72">
-        {kb.keys.map((key) => (
-          <div
-            className="absolute border-2 border-black"
-            style={{
-              width: key.width * 50 + "px",
-              height: key.height * 50 + "px",
-              top: key.y * 50 + "px",
-              left: key.x * 50 + "px",
-              transform: `rotate(${key.rotation_angle}deg)`,
-            }}
-            onClick={() => {
-              const loc = key.labels[0];
-              const [row, col] = loc.split(",").map((x) => parseInt(x));
-              setSelectedKey({ row, col, layer: 0 });
-            }}
-          >
-            {displayKey(
-              props.keymaps.find((v) =>
-                v.col == parseInt(key.labels[0].split(",")[1]) &&
-                v.row == parseInt(key.labels[0].split(",")[0]) &&
-                v.layer == 0
-              )?.key,
-            )}
-          </div>
-        ))}
-      </div>
-      <div>
-        {selectedKey
-          ? (
-            <div>
-              <h2>Selected key</h2>
-              <p>Row: {selectedKey.row}</p>
-              <p>Col: {selectedKey.col}</p>
-              <p>Layer: {selectedKey.layer}</p>
-              <p>
-                Keymap:{" "}
-                {selectedKeymap ? JSON.stringify(selectedKeymap.key) : "None"}
-              </p>
-            </div>
-          )
-          : <div>No key selected</div>}
-      </div>
+    <div className="flex flex-col items-center">
+      <Toolbar
+        toUpdateKeyActions={toUpdateKeyActions}
+        updateKeymap={updateKeymap}
+        clearKeymapModifications={() => {
+          setModifiedKeysData(keyData);
+        }}
+      />
+      <Keyboard
+        keys={modifiedKeysData}
+        layer={layer}
+        layerCount={keyboardInfo.layers}
+        setLayer={setLayer}
+        selectKeyLoc={(key) => setSelectedKeyLoc(key)}
+        selectedKeyLoc={selectedKeyLoc}
+      />
+      <KeySelector
+        layerCount={keyboardInfo.layers}
+        restoreSelectedKey={() => {
+          setModifiedKeysData(produce(modifiedKeysData, (draft) => {
+            draft[selectedKeyIdx] = keyData[selectedKeyIdx];
+          }));
+        }}
+        selectedKey={selectedKey}
+        onChange={(action) => {
+          const newKeyData = { ...selectedKey!, action, changed: true };
+
+          console.log(keyData[selectedKeyIdx].action, action);
+
+          if (deepEqual(keyData[selectedKeyIdx].action, action)) {
+            newKeyData.changed = false;
+          }
+
+          setModifiedKeysData(produce(modifiedKeysData, (draft) => {
+            draft[selectedKeyIdx] = newKeyData;
+          }));
+        }}
+      />
     </div>
   );
-}
-
-function displayKey(key?: KeyAction): string {
-  if (!key) {
-    return "";
-  }
-  if (typeof key != "string" && "Normal" in key) {
-    if (typeof key.Normal != "string" && "Key" in key.Normal) {
-      return key.Normal.Key;
-    }
-  }
-
-  return "";
 }

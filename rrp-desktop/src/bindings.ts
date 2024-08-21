@@ -21,7 +21,7 @@ async disconnect() : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getSerialPorts() : Promise<Result<string[], string>> {
+async getSerialPorts() : Promise<Result<SerialPortInfoType[], string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_serial_ports") };
 } catch (e) {
@@ -96,7 +96,7 @@ export type KeyActionLoc = { layer: number; row: number; col: number; key: KeyAc
  * Represents each key.
  */
 export type KeyCode = "None" | { Key: Key } | { Mouse: Mouse } | { Modifier: Modifier } | { Layer: LayerOp } | { Special: Special } | { Media: Media }
-export type KeyboardInfo = { name: string; rows: number; cols: number }
+export type KeyboardInfo = { name: string; rows: number; cols: number; layers: number }
 /**
  * Keycode for layer operations.
  * - `Move`: Move to the layer.
@@ -110,11 +110,65 @@ export type Media = "Zero" | "Play" | "Pause" | "Record" | "NextTrack" | "PrevTr
 export type Modifier = number
 export type Mouse = number
 /**
+ * A device-independent implementation of serial port information
+ */
+export type SerialPortInfo = { 
+/**
+ * The short name of the serial port
+ */
+port_name: string; 
+/**
+ * The hardware device type that exposes this port
+ */
+port_type: SerialPortType }
+export type SerialPortInfoType = SerialPortInfo
+/**
+ * The physical type of a `SerialPort`
+ */
+export type SerialPortType = 
+/**
+ * The serial port is connected via USB
+ */
+{ UsbPort: UsbPortInfo } | 
+/**
+ * The serial port is connected via PCI (permanent port)
+ */
+"PciPort" | 
+/**
+ * The serial port is connected via Bluetooth
+ */
+"BluetoothPort" | 
+/**
+ * It can't be determined how the serial port is connected
+ */
+"Unknown"
+/**
  * Special key definitions.
  * 
  * - `MoScrl`: Enable mouse scroll mode when held.
  */
 export type Special = "MoScrl"
+export type UsbPortInfo = { 
+/**
+ * Vendor ID
+ */
+vid: number; 
+/**
+ * Product ID
+ */
+pid: number; 
+/**
+ * Serial number (arbitrary string)
+ */
+serial_number: string | null; 
+/**
+ * Manufacturer (arbitrary string)
+ */
+manufacturer: string | null; 
+/**
+ * Product name (arbitrary string)
+ */
+product: string | null }
 
 /** tauri-specta globals **/
 
