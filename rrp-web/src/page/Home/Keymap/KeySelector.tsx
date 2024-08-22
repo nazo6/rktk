@@ -1,7 +1,7 @@
-import { KeyAction } from "../../../bindings";
 import { KeyData } from "./types";
 import { KeyActionSelector } from "../../../components/KeyActionSelector/KeyActionSelector";
 import { Button } from "@fluentui/react-components";
+import { KeyAction } from "rrp-client-web";
 
 export function KeySelector(
   props: {
@@ -12,7 +12,7 @@ export function KeySelector(
   },
 ) {
   return (
-    <div className="bg-white rounded-md p-2 max-w-3xl w-full">
+    <div className="bg-white dark:bg-gray-800 rounded-md p-2 max-w-3xl w-full">
       {props.selectedKey && (
         <div className="flex flex-col gap-1">
           <p className="text-lg font-bold">Selected key</p>

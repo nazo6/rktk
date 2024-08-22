@@ -2,12 +2,57 @@ import { Home } from "./page/Home";
 import { Connect } from "./page/Connect";
 import { Button, Toaster } from "@fluentui/react-components";
 import { TitleBar } from "./components/TitleBar";
-import { useAtomValue } from "jotai";
+import { atom, useAtomValue } from "jotai";
 import { connectionAtom, useDisconnect } from "./lib/connection";
+import { QueryClientProvider } from "@tanstack/react-query";
+import {
+  FluentProvider,
+  webDarkTheme,
+  webLightTheme,
+} from "@fluentui/react-components";
+import { queryClient } from "./queryClient";
+import { useEffect } from "react";
 
 export const TOASTER_ID = "toaster";
 
-export default function App() {
+export const themeAtom = atom<"light" | "dark" | "system">(
+  localStorage.getItem("theme") as "light" | "dark" | "system" || "dark",
+);
+
+export function Providers() {
+  const theme = useAtomValue(themeAtom);
+  const themeResolved = theme === "system"
+    ? window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light"
+    : theme;
+
+  useEffect(() => {
+    localStorage.setItem("theme", themeResolved);
+  }, [theme]);
+
+  useEffect(() => {
+    if (themeResolved === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }, [themeResolved]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <FluentProvider
+        theme={themeResolved == "dark" ? webDarkTheme : webLightTheme}
+      >
+        <div className="h-[100vh]">
+          <App />
+        </div>
+      </FluentProvider>
+    </QueryClientProvider>
+  );
+}
+
+function App() {
   const connection = useAtomValue(connectionAtom);
 
   const serialSupported = !!navigator.serial;

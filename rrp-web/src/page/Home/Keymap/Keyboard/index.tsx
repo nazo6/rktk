@@ -31,7 +31,7 @@ export function Keyboard(
 
   return (
     <div
-      className="flex items-center justify-center w-full p-2 bg-white rounded-md"
+      className="flex items-center justify-center w-full p-2 bg-white dark:bg-gray-800 rounded-md"
       ref={containerRef}
     >
       <LayerSelector

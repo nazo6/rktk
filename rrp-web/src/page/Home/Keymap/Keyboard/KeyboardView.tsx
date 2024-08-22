@@ -2,8 +2,6 @@ import { keyStr } from "@/lib/keyStr";
 import clsx from "clsx";
 import { deepEqual } from "fast-equals";
 import { KeyData, KeyLoc } from "../types";
-import { useRef } from "react";
-import useSize from "@react-hook/size";
 import { SIZE_MULTIPLIER } from ".";
 
 export function KeyboardView(
@@ -48,9 +46,10 @@ function Key(
   return (
     <div
       className={clsx(
-        "absolute border-2 border-black p-1 font-bold",
+        "absolute border-2 p-1 font-bold cursor-pointer hover:bg-gray-500/20",
         keyData.changed && "text-red-500",
-        selected && "border-blue-500",
+        selected && "border-blue-500 dark:border-blue-400",
+        !selected && "border-black dark:border-gray-500",
       )}
       style={{
         width: keyData.kleKey.width * SIZE_MULTIPLIER - 3 + "px",

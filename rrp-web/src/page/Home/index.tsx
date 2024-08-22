@@ -31,7 +31,7 @@ export function Home({ connection }: { connection: Connection }) {
           Keyboard options
         </Tab>
       </TabList>
-      <div className="overflow-auto flex-grow bg-gray-200">
+      <div className="overflow-auto flex-grow bg-gray-200 dark:bg-gray-900">
         {page}
       </div>
     </div>

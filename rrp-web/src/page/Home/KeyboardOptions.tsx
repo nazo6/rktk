@@ -69,7 +69,7 @@ function KeyboardOptionsPageInner(
   return (
     <div className="p-2 flex justify-center w-full">
       <form
-        className="w-full max-w-xl bg-white rounded-md p-2 flex flex-col gap-2"
+        className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-md p-2 flex flex-col gap-2"
         onSubmit={onSubmit}
       >
         <Title2>Mouse</Title2>
