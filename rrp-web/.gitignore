@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 
 rust/pkg
+dev-dist
