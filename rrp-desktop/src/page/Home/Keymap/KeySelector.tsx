@@ -12,7 +12,7 @@ export function KeySelector(
   },
 ) {
   return (
-    <div className="bg-gray-300/50 rounded-md p-2 max-w-3xl w-full">
+    <div className="bg-white rounded-md p-2 max-w-3xl w-full">
       {props.selectedKey && (
         <div className="flex flex-col gap-1">
           <p className="text-lg font-bold">Selected key</p>
@@ -26,11 +26,13 @@ export function KeySelector(
               </Button>
             )}
           </div>
-          <KeyActionSelector
-            layerCount={props.layerCount}
-            keyAction={props.selectedKey.action}
-            setKeyAction={props.onChange}
-          />
+          <div className="p-2 rounded-md bg-gray-400/30">
+            <KeyActionSelector
+              layerCount={props.layerCount}
+              keyAction={props.selectedKey.action}
+              setKeyAction={props.onChange}
+            />
+          </div>
         </div>
       )}
     </div>

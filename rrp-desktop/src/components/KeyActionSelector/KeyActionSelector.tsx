@@ -56,49 +56,47 @@ export function KeyActionSelector(props: {
   }
 
   return (
-    <div className="p-2 rounded-md bg-gray-400/30">
-      <div className="flex flex-col">
-        <div className="flex items-center">
-          KeyAction:
-          <RadioGroup
-            layout="horizontal"
-            className="flex-wrap"
-            value={typeof props.keyAction == "string"
-              ? props.keyAction
-              : Object.keys(props.keyAction)[0]}
-            onChange={(_, data) => {
-              switch (data.value) {
-                case "Inherit":
-                  props.setKeyAction("Inherit");
-                  break;
-                case "Normal":
-                  props.setKeyAction({ Normal: "None" });
-                  break;
-                case "Normal2":
-                  props.setKeyAction({ Normal2: ["None", "None"] });
-                  break;
-                case "TapHold":
-                  props.setKeyAction({ TapHold: ["None", "None"] });
-                  break;
-                case "OneShot":
-                  props.setKeyAction({ OneShot: "None" });
-                  break;
-                case "TapDance":
-                  props.setKeyAction({ TapDance: 0 });
-                  break;
-              }
-            }}
-          >
-            <Radio value="Inherit" label="Inherit" />
-            <Radio value="Normal" label="Normal" />
-            <Radio value="Normal2" label="Normal2" />
-            <Radio value="TapHold" label="TapHold" />
-            <Radio value="OneShot" label="OneShot" />
-            <Radio value="TapDance" label="TapDance" />
-          </RadioGroup>
-        </div>
-        {kcSelector}
+    <div className="flex flex-col">
+      <div className="flex items-center">
+        KeyAction:
+        <RadioGroup
+          layout="horizontal"
+          className="flex-wrap"
+          value={typeof props.keyAction == "string"
+            ? props.keyAction
+            : Object.keys(props.keyAction)[0]}
+          onChange={(_, data) => {
+            switch (data.value) {
+              case "Inherit":
+                props.setKeyAction("Inherit");
+                break;
+              case "Normal":
+                props.setKeyAction({ Normal: "None" });
+                break;
+              case "Normal2":
+                props.setKeyAction({ Normal2: ["None", "None"] });
+                break;
+              case "TapHold":
+                props.setKeyAction({ TapHold: ["None", "None"] });
+                break;
+              case "OneShot":
+                props.setKeyAction({ OneShot: "None" });
+                break;
+              case "TapDance":
+                props.setKeyAction({ TapDance: 0 });
+                break;
+            }
+          }}
+        >
+          <Radio value="Inherit" label="Inherit" />
+          <Radio value="Normal" label="Normal" />
+          <Radio value="Normal2" label="Normal2" />
+          <Radio value="TapHold" label="TapHold" />
+          <Radio value="OneShot" label="OneShot" />
+          <Radio value="TapDance" label="TapDance" />
+        </RadioGroup>
       </div>
+      {kcSelector}
     </div>
   );
 }
