@@ -12,7 +12,7 @@ script = 'cd keyboards/keyball61-nrf52840 && cargo make run-usb'
 script = 'cd keyboards/keyball61-nrf52840 && cargo make run-ble'
 
 [tasks.run-rrp]
-script = 'cd rrp-desktop && pnpm tauri dev'
+script = 'cd rrp-web && pnpm dev'
 
 [tasks.check-all]
 script = '''
