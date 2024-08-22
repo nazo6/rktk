@@ -12,6 +12,7 @@ heapless = { workspace = true }
 usbd-hid = { workspace = true, optional = true }
 
 paste = "1.0.15"
+macro_rules_attribute = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive"] }
 postcard = { workspace = true, optional = true, features = [
@@ -19,6 +20,9 @@ postcard = { workspace = true, optional = true, features = [
 ] }
 
 specta = { workspace = true, optional = true, features = ["derive"] }
+
+tsify-next = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
 
 [dev-dependencies]
 critical-section = { version = "1.1.2", features = ["std"] }
@@ -37,3 +41,4 @@ postcard = ["dep:postcard", "serde"]
 std = []
 # Enables type export by specta.
 specta = ["std", "dep:specta", "postcard"]
+tsify = ["std", "dep:tsify-next", "dep:wasm-bindgen", "postcard"]

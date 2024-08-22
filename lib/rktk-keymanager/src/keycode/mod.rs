@@ -7,9 +7,12 @@
 //! ```
 //! This is too complex for normal usage, so these normal keys as provided as constants.
 
+use macro_rules_attribute::apply;
+
+use crate::macros::common_derive;
+
 pub mod key;
 pub mod layer;
-pub mod macros;
 pub mod media;
 pub mod modifier;
 pub mod mouse;
@@ -21,13 +24,8 @@ pub mod utils;
 /// - `Normal`: Normal key press.
 /// - `Normal2`: Press key with another key.
 /// - `TapHold`: If tapped term is too short, treat as `Tap` (first key is used). If tapped term is longer than `TAP_THRESHOLD`, treat as `Hold` (second key is used).
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Clone, Debug, PartialEq, Eq, Copy)]
+#[apply(common_derive)]
+#[derive(Copy)]
 pub enum KeyAction {
     Inherit,
     Normal(KeyCode),
@@ -38,13 +36,8 @@ pub enum KeyAction {
 }
 
 /// Represents each key.
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Clone, Debug, PartialEq, Eq, Copy)]
+#[apply(common_derive)]
+#[derive(Copy)]
 pub enum KeyCode {
     None,
     Key(key::Key),

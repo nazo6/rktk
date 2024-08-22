@@ -51,15 +51,17 @@ macro_rules! endpoint_client {
         use $crate::__reexports::postcard::from_bytes_cobs;
         use $crate::__reexports::postcard::to_stdvec_cobs;
         use $crate::__reexports::heapless::String;
+        use anyhow::Context as _;
 
-        let name_buf = to_stdvec_cobs(&stringify!($ep))?;
-        $self.send_all(&name_buf).await?;
+        let name = stringify!($ep);
+        let name_buf = to_stdvec_cobs(&name).with_context(|| format!("Failed to serialize ep name: {}", name))?;
+        $self.send_all(&name_buf).await.with_context(|| format!("Failed to send ep name: {}", name))?;
     };
 
     (@get_res normal $self:expr, $ep:ident) => {{
         let mut buf = vec![];
-        let _ = $self.read_until_zero(&mut buf).await;
-        let req = from_bytes_cobs::<Response>(&mut buf)?;
+        let _ = $self.read_until_zero(&mut buf).await.with_context(|| format!("Failed to receive response of ep {}", stringify!($ep)))?;
+        let req = from_bytes_cobs::<Response>(&mut buf).with_context(|| format!("Failed to deserialize response of ep {}", stringify!($ep)))?;
         req
     }};
     (@get_res stream $et:expr, $ep:ident) => {{
@@ -71,7 +73,7 @@ macro_rules! endpoint_client {
                 let Ok(size) = $et.read_until_zero(&mut buf).await else {
                     continue;
                 };
-                if size == 1 {
+                if buf.len() == 1 {
                     return None;
                 }
                 let Ok(req) = from_bytes_cobs::<StreamResponse>(&mut buf) else {
@@ -84,8 +86,8 @@ macro_rules! endpoint_client {
 
     (@send_req normal $et:expr, $ep:ident, $data:expr) => {{
         let res: Request = $data;
-        let res = to_stdvec_cobs(&res)?;
-        let _ = $et.send_all(&res).await;
+        let res = to_stdvec_cobs(&res).with_context(|| format!("Failed to serialize request ({})", stringify!($ep)))?;
+        $et.send_all(&res).await.context("Failed to send request")?;
     }};
 
     (@send_req stream $et:expr, $ep:ident, $data:expr) => {{
@@ -98,6 +100,6 @@ macro_rules! endpoint_client {
             };
             let _ = $et.send_all(&res).await;
         }
-        let _ = $et.send_all(&[0x00]).await;
+        $et.send_all(&[0x00]).await.context("Failed to send request")?;
     }};
 }

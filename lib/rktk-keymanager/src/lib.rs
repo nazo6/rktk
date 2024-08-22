@@ -1,4 +1,5 @@
-#![cfg_attr(all(not(test), not(feature = "specta")), no_std)]
+#![cfg_attr(all(not(test), not(feature = "std")), no_std)]
+#![allow(non_snake_case)]
 
 //! # rktk-keymanager
 //! A library for managing key state and keymaps for self-made keyboards.
@@ -6,6 +7,7 @@
 use keycode::KeyAction;
 
 pub mod keycode;
+mod macros;
 #[cfg(any(test, feature = "state"))]
 pub mod state;
 #[cfg(not(any(test, feature = "state")))]

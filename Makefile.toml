@@ -53,9 +53,11 @@ for path in ${handle}
   if ends_with ${path} Cargo.toml
     if not eq ${path} ./Cargo.toml
       dir = dirname ${path}
-      cd ${dir}
-      exec cargo clippy --message-format=json --tests
-      cd ${pwd}
+      if ends_with ${dir} ${2}
+        cd ${dir}
+        exec cargo clippy --message-format=json --tests
+        cd ${pwd}
+      end
     end
   end
 end

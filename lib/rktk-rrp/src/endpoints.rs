@@ -1,12 +1,20 @@
+use macro_rules_attribute::{apply, attribute_alias};
 use rktk_keymanager::keycode::KeyAction;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[cfg_attr(
-    not(feature = "std"),
-    derive(postcard::experimental::max_size::MaxSize)
-)]
+attribute_alias! {
+    #[apply(common_derive)] =
+        #[derive(serde::Serialize, serde::Deserialize, Debug)]
+        #[cfg_attr(feature = "specta", derive(specta::Type))]
+        #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
+        #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]
+        #[cfg_attr(
+            not(feature = "std"),
+            derive(postcard::experimental::max_size::MaxSize)
+        )]
+    ;
+}
+
+#[apply(common_derive)]
 pub struct KeyActionLoc {
     pub layer: u8,
     pub row: u8,
@@ -15,15 +23,10 @@ pub struct KeyActionLoc {
 }
 
 pub mod get_keyboard_info {
+    use macro_rules_attribute::apply;
     use rktk_keymanager::state::config::KeymapInfo;
-    use serde::{Deserialize, Serialize};
 
-    #[derive(Serialize, Deserialize, Debug)]
-    #[cfg_attr(feature = "specta", derive(specta::Type))]
-    #[cfg_attr(
-        not(feature = "std"),
-        derive(postcard::experimental::max_size::MaxSize)
-    )]
+    #[apply(super::common_derive)]
     pub struct KeyboardInfo {
         #[cfg(not(feature = "std"))]
         pub name: heapless::String<64>,
