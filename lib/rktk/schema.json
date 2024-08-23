@@ -9,87 +9,10 @@
     "rows"
   ],
   "properties": {
-    "name": {
-      "description": "The name of the keyboard.",
-      "type": "string"
-    },
-    "layout_json": {
-      "description": "The layout of the keyboard.",
-      "type": "string"
-    },
-    "split_usb_timeout": {
-      "description": "Timeout for detecting split USB connection (ms).",
-      "default": 200,
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0.0
-    },
-    "double_tap_threshold": {
-      "description": "Threshold for double tap (ms).",
-      "default": 500,
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0.0
-    },
-    "scan_interval_keyboard": {
-      "description": "Time (ms) to wait for the next keyboard scan",
-      "default": 5,
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0.0
-    },
-    "scan_interval_mouse": {
-      "description": "Time (ms) to wait for the next mouse scan",
-      "default": 5,
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0.0
-    },
     "cols": {
       "description": "The number of columns in the keyboard matrix.",
       "type": "integer",
       "format": "uint",
-      "minimum": 0.0
-    },
-    "rows": {
-      "description": "The number of rows in the keyboard matrix.",
-      "type": "integer",
-      "format": "uint",
-      "minimum": 0.0
-    },
-    "layer_count": {
-      "description": "The number of layers in the keyboard.",
-      "default": 5,
-      "type": "integer",
-      "format": "uint",
-      "minimum": 0.0
-    },
-    "right_led_count": {
-      "description": "Backlight led count for right side",
-      "default": 0,
-      "type": "integer",
-      "format": "uint",
-      "minimum": 0.0
-    },
-    "left_led_count": {
-      "description": "Backlight led count for left side. This is also used for non-split keyboard.",
-      "default": 0,
-      "type": "integer",
-      "format": "uint",
-      "minimum": 0.0
-    },
-    "split_channel_size": {
-      "description": "The size of the split channel. Usually, you don't need to change this value.",
-      "default": 64,
-      "type": "integer",
-      "format": "uint",
-      "minimum": 0.0
-    },
-    "default_cpi": {
-      "description": "Default CPI value for mouse",
-      "default": 600,
-      "type": "integer",
-      "format": "uint16",
       "minimum": 0.0
     },
     "default_auto_mouse_duration": {
@@ -113,6 +36,13 @@
       "format": "uint8",
       "minimum": 0.0
     },
+    "default_cpi": {
+      "description": "Default CPI value for mouse",
+      "default": 600,
+      "type": "integer",
+      "format": "uint16",
+      "minimum": 0.0
+    },
     "default_scroll_divider_x": {
       "description": "Scroll divider for x axis",
       "default": 20,
@@ -125,6 +55,13 @@
       "type": "integer",
       "format": "int8"
     },
+    "default_tap_dance_threshold": {
+      "description": "Threshold for tap dance (ms)",
+      "default": 100,
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0.0
+    },
     "default_tap_threshold": {
       "description": "Threshold for tap (ms)",
       "default": 200,
@@ -132,11 +69,74 @@
       "format": "uint32",
       "minimum": 0.0
     },
-    "default_tap_dance_threshold": {
-      "description": "Threshold for tap dance (ms)",
-      "default": 100,
+    "double_tap_threshold": {
+      "description": "Threshold for double tap (ms).",
+      "default": 500,
       "type": "integer",
-      "format": "uint32",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "layer_count": {
+      "description": "The number of layers in the keyboard.",
+      "default": 5,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "layout_json": {
+      "description": "The layout of the keyboard.",
+      "type": "string"
+    },
+    "left_led_count": {
+      "description": "Backlight led count for left side. This is also used for non-split keyboard.",
+      "default": 0,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "name": {
+      "description": "The name of the keyboard.",
+      "type": "string"
+    },
+    "right_led_count": {
+      "description": "Backlight led count for right side",
+      "default": 0,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "rows": {
+      "description": "The number of rows in the keyboard matrix.",
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "scan_interval_keyboard": {
+      "description": "Time (ms) to wait for the next keyboard scan",
+      "default": 5,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "scan_interval_mouse": {
+      "description": "Time (ms) to wait for the next mouse scan",
+      "default": 5,
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "split_channel_size": {
+      "description": "The size of the split channel. Usually, you don't need to change this value.",
+      "default": 64,
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0.0
+    },
+    "split_usb_timeout": {
+      "description": "Timeout for detecting split USB connection (ms).",
+      "default": 200,
+      "type": "integer",
+      "format": "uint64",
       "minimum": 0.0
     }
   }

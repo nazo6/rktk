@@ -1,0 +1,52 @@
+name: lib
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - '.github/workflows/lib.yml'
+      - '**.toml'
+      - '**.rs'
+      - '**.lock'
+  pull_request:
+    paths:
+      - '.github/workflows/lib.yml'
+      - '**.toml'
+      - '**.rs'
+      - '**.lock'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup rust
+      uses: ./.github/workflows/setup-rust
+      with:
+        components: "clippy,rust-src"
+        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+        tools: "cargo-make"
+
+    - name: Run rust check
+      run: cargo make check-all
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup rust
+      uses: ./.github/workflows/setup-rust
+      with:
+        components: "rust-src"
+        target: ""
+        tools: "cargo-make"
+
+    - name: Run rust test
+      run: cargo make test-all

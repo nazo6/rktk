@@ -7,7 +7,7 @@ include!("../src/config/static_config/schema.rs");
 fn main() {
     let config_path = std::env::var("RKTK_CONFIG_PATH").expect("RKTK_CONFIG_PATH is not set");
 
-    println!("cargo:warning=Using config: {}", config_path);
+    // println!("cargo:warning=Using config: {}", config_path);
     // println!("cargo:warning=current_time:{:?}", std::time::Instant::now());
 
     println!("cargo:rerun-if-env-changed=RKTK_CONFIG_PATH");

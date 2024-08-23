@@ -17,7 +17,7 @@ embassy-rp = { workspace = true, features = [
   "critical-section-impl",
 ] }
 embassy-executor = { workspace = true, features = [
-  "task-arena-size-32768",
+  "task-arena-size-65536",
   "arch-cortex-m",
   "executor-thread",
   "executor-interrupt",

@@ -1,15 +1,10 @@
 use bitflags::bitflags;
+use macro_rules_attribute::apply;
 
-use super::macros::normal;
-use super::{KeyAction, KeyCode};
+use crate::macros::{common_derive, normal};
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[apply(common_derive)]
+#[derive(Copy)]
 pub struct Mouse(u8);
 
 bitflags! {

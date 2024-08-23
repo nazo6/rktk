@@ -1,17 +1,15 @@
 #![allow(non_snake_case)]
 
+use macro_rules_attribute::apply;
+
 use super::{KeyAction, KeyCode};
+use crate::macros::common_derive;
 
 /// Keycode for layer operations.
 /// - `Move`: Move to the layer.
 /// - `Toggle`: Move layer only while key is pressed.
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[apply(common_derive)]
+#[derive(Copy)]
 pub enum LayerOp {
     Momentary(u8),
     Toggle(u8),

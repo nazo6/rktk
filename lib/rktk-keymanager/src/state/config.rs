@@ -1,26 +1,15 @@
-use core::time::Duration;
+use crate::macros::common_derive;
+use macro_rules_attribute::apply;
 
 use crate::keycode::KeyCode;
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Debug, Clone)]
+#[apply(common_derive)]
 pub struct StateConfig {
     pub mouse: MouseConfig,
     pub key_resolver: KeyResolverConfig,
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Debug, Clone)]
+#[apply(common_derive)]
 pub struct MouseConfig {
     pub auto_mouse_layer: u8,
     pub auto_mouse_duration: u32,
@@ -29,38 +18,20 @@ pub struct MouseConfig {
     pub scroll_divider_y: i8,
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Debug, Clone)]
+#[apply(common_derive)]
 pub struct KeyResolverConfig {
     pub tap_threshold: u32,
     pub tap_dance_threshold: u32,
     pub tap_dance: [Option<TapDanceConfig>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Debug, Clone)]
+#[apply(common_derive)]
 pub struct TapDanceConfig {
     pub tap: [Option<KeyCode>; MAX_TAP_DANCE_KEY_COUNT as usize],
     pub hold: [Option<KeyCode>; MAX_TAP_DANCE_KEY_COUNT as usize],
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Debug, Clone)]
+#[apply(common_derive)]
 pub struct KeymapInfo {
     pub layer_count: u8,
     pub max_tap_dance_key_count: u8,

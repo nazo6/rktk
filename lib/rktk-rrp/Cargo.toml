@@ -12,7 +12,11 @@ postcard = { workspace = true, features = ["experimental-derive"] }
 heapless = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+macro_rules_attribute = { workspace = true }
+
 specta = { workspace = true, optional = true, features = ["derive"] }
+tsify-next = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
 
 [features]
 server = []
@@ -20,3 +24,9 @@ server = []
 std = ["postcard/use-std"]
 client = ["std"]
 specta = ["client", "dep:specta", "rktk-keymanager/specta"]
+tsify = [
+  "client",
+  "dep:tsify-next",
+  "dep:wasm-bindgen",
+  "rktk-keymanager/tsify",
+]

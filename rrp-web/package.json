@@ -1,0 +1,51 @@
+{
+  "name": "rrp-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev:vite": "vite",
+    "dev:rust": "cd rrp-client-web && cargo watch -s \"wasm-pack build\"",
+    "dev": "conc -c auto npm:dev:*",
+    "build": "cd rrp-client-web && wasm-pack build --release && cd .. && vite build",
+    "preview": "vite preview",
+    "generate-pwa-assets": "pwa-assets-generator",
+    "cf-deploy": "wrangler pages deploy ./dist --project-name rrpc"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "^9.54.13",
+    "@fluentui/react-icons": "^2.0.253",
+    "@fluentui/react-list-preview": "^0.3.5",
+    "@ijprest/kle-serial": "https://github.com/kevin-wells/kle-serial",
+    "@react-hook/size": "^2.1.2",
+    "@tanstack/react-query": "^5.51.24",
+    "clsx": "^2.1.1",
+    "fast-equals": "^5.0.1",
+    "immer": "^10.1.1",
+    "jotai": "^2.9.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.52.2",
+    "rrp-client-web": "file:./rrp-client-web/pkg",
+    "wrangler": "^3.72.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@types/w3c-web-serial": "^1.0.6",
+    "@vite-pwa/assets-generator": "^0.2.4",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.4.41",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.2.2",
+    "vite": "^5.4.2",
+    "vite-plugin-pwa": "^0.20.1",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.3.0",
+    "vite-tsconfig-paths": "^5.0.1"
+  }
+}
