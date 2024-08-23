@@ -15,7 +15,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rrp-web-check:
+  check-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -47,5 +47,12 @@ jobs:
     - name: pnpm install
       run: cd rrp-web && pnpm install
 
-    - name: Type check rrp-web
-      run: cd rrp-web && pnpm tsc --noEmit
+    - name: Type check rrp-web and build
+      run: cd rrp-web && pnpm tsc --noEmit && pnpm build
+
+    - name: Deploy
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        command: pages deploy ./rrp-web/dist --project-name=rrpc
