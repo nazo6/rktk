@@ -22,8 +22,6 @@ runs:
       toolchain: "nightly-2024-08-23"
       components: "${{ inputs.components }}"
       targets: "${{ inputs.target }}"
-      rustflags: ""
-      cache: false
 
   - id: rust-override
     shell: bash
