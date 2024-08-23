@@ -35,7 +35,7 @@ jobs:
       run: cargo make test-all
 
     - name: Build rust library for rrp-web
-      run: cd rrp-web && wasm-pack build --release
+      run: cd rrp-web/rrp-client-web && wasm-pack build --release
 
     - name: Upload rrp-web-client package
       uses: actions/upload-artifact@v4
