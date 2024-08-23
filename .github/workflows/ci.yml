@@ -46,6 +46,8 @@ jobs:
         rustflags: ""
         cache: false
     - uses: Swatinem/rust-cache@v2
+      with:
+        cache-all-crates: "true"
 
     - name: Install cargo deps
       uses: taiki-e/install-action@v2
@@ -86,7 +88,6 @@ jobs:
       with:
         version: 9
         run_install: false
-        cwd: rrp-web
 
     - name: Install Node.js
       uses: actions/setup-node@v4
