@@ -1,22 +1,21 @@
-on:
-  workflow_call:
+name: Setup Rust
 
-jobs:
-  setup-rust:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-    - uses: actions-rust-lang/setup-rust-toolchain@v1
-      id: setup-rust
-      with:
-        toolchain: "nightly-2024-08-23"
-        components: "clippy,rust-src"
-        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf,wasm32-unknown-unknown"
-        rustflags: ""
-        cache: false
-    - uses: Swatinem/rust-cache@v2
+description: "Setup Rust toolchain"
 
-    - name: Install cargo deps
-      uses: taiki-e/install-action@v2
-      with:
-        tool: cargo-make,wasm-pack
+runs:
+  using: "composite"
+  steps:
+  - uses: actions-rust-lang/setup-rust-toolchain@v1
+    id: setup-rust
+    with:
+      toolchain: "nightly-2024-08-23"
+      components: "clippy,rust-src"
+      target: "thumbv6m-none-eabi,thumbv7em-none-eabihf,wasm32-unknown-unknown"
+      rustflags: ""
+      cache: false
+  - uses: Swatinem/rust-cache@v2
+
+  - name: Install cargo deps
+    uses: taiki-e/install-action@v2
+    with:
+      tool: cargo-make,wasm-pack
