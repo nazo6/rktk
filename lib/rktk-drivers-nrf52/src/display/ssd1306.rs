@@ -6,9 +6,9 @@ use embassy_nrf::{
 };
 pub use rktk_drivers_common::display::ssd1306::Ssd1306Display;
 use rktk_drivers_common::display::ssd1306::Ssd1306DisplayBuilder;
-use ssd1306::size::DisplaySize;
+use ssd1306::size::{DisplaySize, DisplaySizeAsync};
 
-pub fn create_ssd1306<'d, T: Instance, SIZE: DisplaySize>(
+pub fn create_ssd1306<'d, T: Instance, SIZE: DisplaySize + DisplaySizeAsync>(
     twim: impl Peripheral<P = T> + 'd,
     _irq: impl Binding<T::Interrupt, InterruptHandler<T>> + 'd,
     sda: impl Peripheral<P = impl Pin> + 'd,

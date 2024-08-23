@@ -8,7 +8,7 @@ macro_rules! print {
         use $crate::task::display::*;
         use core::fmt::Write as _;
 
-        let mut str = heapless::String::<256>::new();
+        let mut str = $crate::reexports::heapless::String::<256>::new();
         write!(str, $($arg)*).unwrap();
         let _ = DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.try_send(str);
     }};
@@ -18,7 +18,7 @@ macro_rules! print {
 macro_rules! format {
     ($($arg:tt)*) => {{
         use core::fmt::Write as _;
-        let mut str = heapless::String::<256>::new();
+        let mut str = $crate::reexports::heapless::String::<256>::new();
         write!(str, $($arg)*).unwrap();
         str
     }};

@@ -16,15 +16,14 @@ pub trait DisplayDriver: DrawTarget + Sized {
     const MAX_TEXT_WIDTH: usize;
     const TEXT_STYLE: MonoTextStyle<'static, Self::Color>;
 
-    fn flush(&mut self) -> Result<(), DisplayError>;
     fn clear_buffer(&mut self);
-    async fn flush_async(&mut self) -> Result<(), DisplayError>;
+    async fn flush(&mut self) -> Result<(), DisplayError>;
 
     fn calculate_point(col: i32, row: i32) -> Point;
 
     async fn clear_flush(&mut self) -> Result<(), DisplayError> {
         self.clear_buffer();
-        self.flush_async().await
+        self.flush().await
     }
 
     fn draw_text(&mut self, text: &str, point: Point) {
@@ -33,12 +32,7 @@ pub trait DisplayDriver: DrawTarget + Sized {
 
     async fn update_text(&mut self, text: &str, point: Point) -> Result<(), DisplayError> {
         let _ = Text::with_baseline(text, point, Self::TEXT_STYLE, Baseline::Top).draw(self);
-        self.flush_async().await
-    }
-
-    fn update_text_sync(&mut self, text: &str, point: Point) -> Result<(), DisplayError> {
-        let _ = Text::with_baseline(text, point, Self::TEXT_STYLE, Baseline::Top).draw(self);
-        self.flush()
+        self.flush().await
     }
 
     /// Print a message on the display.
@@ -55,7 +49,7 @@ pub trait DisplayDriver: DrawTarget + Sized {
             self.draw_text(msg, Self::calculate_point(1, 2));
         }
 
-        let _ = self.flush_async().await;
+        let _ = self.flush().await;
     }
 }
 
@@ -85,13 +79,10 @@ impl DisplayDriver for DummyDisplayDriver {
         .build();
     const MAX_TEXT_WIDTH: usize = 10;
 
-    fn flush(&mut self) -> Result<(), DisplayError> {
-        unreachable!()
-    }
     fn clear_buffer(&mut self) {
         unreachable!()
     }
-    async fn flush_async(&mut self) -> Result<(), DisplayError> {
+    async fn flush(&mut self) -> Result<(), DisplayError> {
         unreachable!()
     }
     fn calculate_point(_col: i32, _row: i32) -> Point {

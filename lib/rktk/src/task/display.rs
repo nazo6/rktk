@@ -24,7 +24,7 @@ pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<
 
 pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<Output = D>) {
     let Ok(mut display) = display_builder.build().await else {
-        panic!("Failed to build display");
+        return;
     };
 
     loop {

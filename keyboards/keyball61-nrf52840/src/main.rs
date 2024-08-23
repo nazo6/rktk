@@ -182,21 +182,5 @@ async fn main(_spawner: Spawner) {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    use embassy_nrf::peripherals::{P0_17, P0_20, TWISPI0};
-
-    let display = unsafe {
-        create_ssd1306(
-            TWISPI0::steal(),
-            Irqs,
-            P0_17::steal(),
-            P0_20::steal(),
-            ssd1306::size::DisplaySize128x32,
-        )
-    }
-    .build_sync()
-    .unwrap();
-
-    rktk::panicking::display_panic_message(display, info);
-
     cortex_m::asm::udf()
 }

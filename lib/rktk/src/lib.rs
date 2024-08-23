@@ -11,6 +11,11 @@ pub mod panicking;
 pub mod task;
 mod utils;
 
+#[doc(hidden)]
+pub mod reexports {
+    pub use heapless;
+}
+
 use config::static_config::CONFIG;
 pub use rktk_keymanager as keymanager;
 use rktk_keymanager::state::config::TapDanceConfig;

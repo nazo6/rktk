@@ -4,9 +4,9 @@ use embassy_rp::{
     Peripheral,
 };
 use rktk_drivers_common::display::ssd1306::Ssd1306DisplayBuilder;
-use ssd1306::size::DisplaySize;
+use ssd1306::size::{DisplaySize, DisplaySizeAsync};
 
-pub fn create_ssd1306<'a, I: Instance, SIZE: DisplaySize>(
+pub fn create_ssd1306<'a, I: Instance, SIZE: DisplaySize + DisplaySizeAsync>(
     i2c: impl Peripheral<P = I> + 'a,
     _irq: impl Binding<I::Interrupt, InterruptHandler<I>>,
     sda: impl Peripheral<P = impl SdaPin<I>> + 'a,

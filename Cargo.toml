@@ -52,7 +52,9 @@ usbd-hid = "0.8.2"
 smart-leds = "0.4.0"
 display-interface = "0.5.0"
 embedded-graphics = "0.8.1"
-ssd1306 = { git = "https://github.com/bugadani/ssd1306", branch = "ehal1" }
+ssd1306 = { git = "https://github.com/sjoerdsimons/ssd1306", branch = "async", features = [
+  "async",
+] }
 
 # embedded pattern
 heapless = "0.7.0"
