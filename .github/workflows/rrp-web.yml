@@ -55,4 +55,5 @@ jobs:
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        command: pages deploy ./rrp-web/dist --project-name=rrpc
+        command: pages deploy ./dist --project-name=rrpc
+        workingDirectory: "rrp-web"
