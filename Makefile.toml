@@ -24,7 +24,7 @@ for path in ${handle}
     if not eq ${path} ./Cargo.toml
       dir = dirname ${path}
       cd ${dir}
-      exec --fail-on-error cargo clippy
+      exec --fail-on-error cargo clippy --verbose
       cd ${pwd}
     end
   end
