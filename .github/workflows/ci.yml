@@ -37,28 +37,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - uses: actions-rust-lang/setup-rust-toolchain@v1
-      id: setup-rust
-      with:
-        toolchain: "nightly-2024-08-23"
-        components: "clippy,rust-src"
-        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf,wasm32-unknown-unknown"
-        rustflags: ""
-        cache: false
-    - uses: Swatinem/rust-cache@v2
-      with:
-        cache-all-crates: "true"
-
-    - name: Install cargo deps
-      uses: taiki-e/install-action@v2
-      with:
-        tool: cargo-make,wasm-pack
+    - name: Setup rust
+      uses: ./github/workflows/setup-rust.yml
 
     - name: Run rust check
       run: cargo make check-all
-
-    - name: Run rust test
-      run: cargo make test-all
 
     - name: Build rust library for rrp-web
       run: cd rrp-web/rrp-client-web && wasm-pack build --release
@@ -68,6 +51,21 @@ jobs:
       with:
         name: rrp-client-web
         path: rrp-web/rrp-client-web/pkg
+
+  # split job is splitted because by executing test cache becomes dirty
+  lib-test:
+    runs-on: ubuntu-latest
+    needs: paths-filter
+    if: needs.paths-filter.outputs.rust == 'true'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup rust
+      uses: ./github/workflows/setup-rust.yml
+
+    - name: Run rust test
+      run: cargo make test-all
 
   rrp-web-check:
     runs-on: ubuntu-latest
