@@ -25,7 +25,7 @@ runs:
       rustflags: ""
       cache: false
 
-  - id: override rust
+  - id: rust-override
     shell: bash
     run: "rustup override set ${{steps.toolchain.outputs.name}}"
 
