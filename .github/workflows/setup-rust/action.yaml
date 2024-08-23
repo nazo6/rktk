@@ -30,6 +30,8 @@ runs:
     run: "rustup override set ${{steps.toolchain.outputs.name}}"
 
   - uses: Swatinem/rust-cache@v2
+    with:
+      cache-all-crates: "true"
 
   - name: Install cargo deps
     uses: taiki-e/install-action@v2
