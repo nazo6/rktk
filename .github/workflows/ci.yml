@@ -38,7 +38,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup rust
-      uses: ./.github/workflows/setup-rust.yml
+      uses: ./.github/workflows/setup-rust
 
     - name: Run rust check
       run: cargo make check-all
@@ -62,7 +62,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup rust
-      uses: ./.github/workflows/setup-rust.yml
+      uses: ./.github/workflows/setup-rust
 
     - name: Run rust test
       run: cargo make test-all
