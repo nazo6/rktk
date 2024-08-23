@@ -4,7 +4,7 @@ import {
   PopoverSurface,
   PopoverTrigger,
 } from "@fluentui/react-components";
-import { keyStr } from "../../../lib/keyStr";
+import { keyStr } from "@/lib/keyStr";
 import { KeyUpdate } from "./types";
 
 export function Toolbar(props: {

@@ -48,8 +48,8 @@ importers:
         specifier: ^7.52.2
         version: 7.52.2(react@18.3.1)
       rrp-client-web:
-        specifier: link:rrp-client-web\pkg
-        version: link:rrp-client-web/pkg
+        specifier: file:./rrp-client-web/pkg
+        version: file:rrp-client-web/pkg
       wrangler:
         specifier: ^3.72.2
         version: 3.72.2
@@ -3099,6 +3099,9 @@ packages:
     resolution: {integrity: sha512-6rbWBChcnSGzIlXeIdNIZTopKYad8ZG8ajhl78lGRLsI2rX8IkaotQhVas2Ma+GPxJav19wrSzvRvuiv0YKzWw==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
+
+  rrp-client-web@file:rrp-client-web/pkg:
+    resolution: {directory: rrp-client-web/pkg, type: directory}
 
   rtl-css-js@1.16.1:
     resolution: {integrity: sha512-lRQgou1mu19e+Ya0LsTvKrVJ5TYUbqCVPAiImX3UfLTenarvPUl1QFdvu5Z3PYmHT9RCcwIfbjRQBntExyj3Zg==}
@@ -7308,6 +7311,8 @@ snapshots:
       '@rollup/rollup-win32-ia32-msvc': 4.20.0
       '@rollup/rollup-win32-x64-msvc': 4.20.0
       fsevents: 2.3.3
+
+  rrp-client-web@file:rrp-client-web/pkg: {}
 
   rtl-css-js@1.16.1:
     dependencies:

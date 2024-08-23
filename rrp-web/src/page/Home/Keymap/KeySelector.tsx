@@ -1,5 +1,5 @@
 import { KeyData } from "./types";
-import { KeyActionSelector } from "../../../components/KeyActionSelector/KeyActionSelector";
+import { KeyActionSelector } from "@/components/KeyActionSelector/KeyActionSelector";
 import { Button } from "@fluentui/react-components";
 import { KeyAction } from "rrp-client-web";
 

@@ -1,4 +1,4 @@
-import { KeyAction, KeyCode } from "../bindings";
+import { KeyAction, KeyCode } from "rrp-client-web";
 import {
   MEDIA_KEYS,
   MODIFIER_KEYS,

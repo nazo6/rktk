@@ -1,5 +1,4 @@
 import { Radio, RadioGroup } from "@fluentui/react-components";
-import { KeyCode } from "../../bindings";
 import {
   MEDIA_KEYS,
   MODIFIER_KEYS,
@@ -8,6 +7,7 @@ import {
   SPECIAL_KEYS,
 } from "../../lib/keys";
 import { KeySelector, LayerKeySelector } from "./KeySelector";
+import { KeyCode } from "rrp-client-web";
 
 export function KeyCodeSelector(props: {
   title?: string;

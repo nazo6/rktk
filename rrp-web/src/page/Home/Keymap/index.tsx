@@ -1,6 +1,5 @@
 import * as kle from "@ijprest/kle-serial";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { unwrapped } from "../../../utils";
 import { Keyboard } from "./Keyboard";
 import { KeyData, KeyLoc, KeyUpdate } from "./types";
 import { KeySelector } from "./KeySelector";
@@ -14,7 +13,7 @@ import {
 } from "@fluentui/react-components";
 import { Toolbar } from "./Toolbar";
 import { Connection } from "@/lib/connection";
-import { KeyActionLoc, KeyboardInfo } from "rrp-client-web";
+import { KeyActionLoc } from "rrp-client-web";
 
 export function KeymapPage({ connection }: { connection: Connection }) {
   const { data: layout, error: layoutError } = useQuery({
