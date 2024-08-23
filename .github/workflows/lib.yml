@@ -1,4 +1,4 @@
-name: check
+name: lib
 
 on:
   push:
@@ -19,7 +19,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lib-check:
+  check:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -35,8 +35,7 @@ jobs:
     - name: Run rust check
       run: cargo make check-all
 
-  # split job is splitted because by executing test cache becomes dirty
-  lib-test:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
