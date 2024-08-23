@@ -7,9 +7,10 @@
     "dev:vite": "vite",
     "dev:rust": "cd rrp-client-web && cargo watch -s \"wasm-pack build\"",
     "dev": "conc -c auto npm:dev:*",
-    "build": "tsc && vite build",
+    "build": "cd rrp-client-web && wasm-pack build --release && cd .. && vite build",
     "preview": "vite preview",
-    "generate-pwa-assets": "pwa-assets-generator"
+    "generate-pwa-assets": "pwa-assets-generator",
+    "cf-deploy": "wrangler pages deploy ./dist --project-name rrpc"
   },
   "dependencies": {
     "@fluentui/react-components": "^9.54.13",
@@ -25,7 +26,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.52.2",
-    "rrp-client-web": "link:rrp-client-web\\pkg"
+    "rrp-client-web": "link:rrp-client-web\\pkg",
+    "wrangler": "^3.72.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

@@ -16,7 +16,7 @@ import { useEffect } from "react";
 export const TOASTER_ID = "toaster";
 
 export const themeAtom = atom<"light" | "dark" | "system">(
-  localStorage.getItem("theme") as "light" | "dark" | "system" || "dark",
+  localStorage.getItem("theme") as "light" | "dark" | "system" ?? "system",
 );
 
 export function Providers() {
@@ -62,25 +62,28 @@ function App() {
   return (
     <div className="flex flex-col h-full">
       <TitleBar>
-        {connection && (
-          <div className="flex ml-auto items-center gap-2">
-            <div>
-              Connected to{" "}
-              <span className="font-bold text-[1rem]">
-                {connection.keyboard.name}
-              </span>
+        {connection
+          ? (
+            <div className="flex items-center gap-2">
+              <div>
+                Connected to:
+                <span className="font-bold text-lg pl-1">
+                  {connection.keyboard.name}
+                </span>
+              </div>
+              <Button
+                appearance="secondary"
+                size="small"
+                onClick={() => disconnect.mutate(true)}
+              >
+                Disconnect
+              </Button>
             </div>
-            <Button
-              appearance="secondary"
-              onClick={() => disconnect.mutate(true)}
-            >
-              Disconnect
-            </Button>
-          </div>
-        )}
-        <Toaster position="bottom-end" />
+          )
+          : "Disconnected"}
       </TitleBar>
       <div className="min-h-0 flex-grow">
+        <Toaster position="bottom-end" />
         {serialSupported
           ? connection ? <Home connection={connection} /> : <Connect />
           : (
