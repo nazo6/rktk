@@ -16,7 +16,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - uses: dtolnay/rust-toolchain@mster
+  - uses: dtolnay/rust-toolchain@master
     id: toolchain
     with:
       toolchain: "nightly-2024-08-23"
