@@ -6,7 +6,7 @@ inherits = "release"
 opt-level = "z"
 lto = true
 panic = "abort"
-rustflags = ["-Zlocation-detail=none"]
+# rustflags = ["-Zlocation-detail=none"]
 strip = true
 
 [alias]
@@ -17,3 +17,4 @@ RKTK_CONFIG_PATH = { value = "keyboards/rktk.keyball.toml", relative = true }
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]
+
