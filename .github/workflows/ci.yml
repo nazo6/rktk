@@ -17,27 +17,38 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set rust version
-      run: rustup override set nightly-2024-08-01
-
     - uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: "nightly-2024-08-01"
         components: "clippy,rust-src"
         target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
-    - name: Install cargo-make
+    - name: Install cargo deps
       uses: taiki-e/install-action@v2
       with:
-        tool: cargo-make
+        tool: cargo-make,wasm-pack
 
-    - name: Install deps
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-    - name: Run check
+    - name: Run rust check
       run: cargo make check-all
 
-    - name: Run test
+    - name: Run rust test
       run: cargo make test-all
+
+    - uses: pnpm/action-setup@v4
+      name: Setup pnpm
+      with:
+        version: 9
+        run_install: true
+        cwd: rrp-web
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+
+    - name: Build rust library for rrp-web
+      run: cd rrp-web && wasm-pack build --release
+
+    - name: Type check rrp-web
+      run: cd rrp-web && pnpm tsc --noEmit
