@@ -27,7 +27,7 @@ runs:
 
   - id: override rust
     shell: bash
-    run: rustup override set ${{steps.toolchain.outputs.name}}
+    run: "rustup override set ${{steps.toolchain.outputs.name}}"
 
   - uses: Swatinem/rust-cache@v2
 
