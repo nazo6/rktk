@@ -17,13 +17,24 @@ script = 'cargo run --profile size-opt -Z build-std=core,panic_abort -Z build-st
 script = '''
 #!@duckscript
 alias ef exec --fail-on-error
-ef utils/arm-none-eabi-objcopy.exe -Oihex ${1} ${1}.hex
+
+os = os_family
+if eq ${os} windows
+  ef utils/arm-none-eabi-objcopy.exe -Oihex ${1} ${1}.hex
+else
+  ef arm-none-eabi-objcopy -Oihex ${1} ${1}.hex
+end
+
 ef python3 utils/uf2conv.py ${1}.hex -o ${1}.uf2 -c -b 0x26000 -f 0xADA52840
 success = set false
 r = range 1 30
 for i in ${r}
   if not ${success}
-    code = exec --get-exit-code cmd /c "copy ${1}.uf2 E:\\"
+    if eq ${os} windows
+      code = exec --get-exit-code cmd /c "copy ${1}.uf2 E:\\"
+    else
+      code = exec --get-exit-code cp ${1}.uf2 /mnt/e
+    end
     success = eq ${code} 0
   end
   if not ${success}
