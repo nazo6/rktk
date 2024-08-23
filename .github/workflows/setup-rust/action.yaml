@@ -2,6 +2,17 @@ name: Setup Rust
 
 description: "Setup Rust toolchain"
 
+inputs:
+  components:
+    description: 'rustup components to install'
+    required: true
+  target:
+    description: 'rustup target to install'
+    required: true
+  tools:
+    description: 'tools to install'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -9,8 +20,8 @@ runs:
     id: setup-rust
     with:
       toolchain: "nightly-2024-08-23"
-      components: "clippy,rust-src"
-      target: "thumbv6m-none-eabi,thumbv7em-none-eabihf,wasm32-unknown-unknown"
+      components: "${{ inputs.components }}"
+      target: "${{ inputs.target }}"
       rustflags: ""
       cache: false
   - uses: Swatinem/rust-cache@v2
@@ -18,4 +29,4 @@ runs:
   - name: Install cargo deps
     uses: taiki-e/install-action@v2
     with:
-      tool: cargo-make,wasm-pack
+      tool: "${{ inputs.tools }}"

@@ -1,0 +1,51 @@
+name: rrp-web
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - 'rrp-web/**'
+      - '.github/workflows/rrp-web.yml'
+  pull_request:
+    paths:
+      - 'rrp-web/**'
+      - '.github/workflows/rrp-web.yml'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rrp-web-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup rust
+      uses: ./.github/workflows/setup-rust
+      with:
+        components: "rust-src"
+        target: "wasm32-unknown-unknown"
+        tools: "wasm-pack"
+    
+    - name: Build rust library
+      run: cd rrp-web/rrp-client-web && wasm-pack build --release
+
+    - uses: pnpm/action-setup@v4
+      name: Setup pnpm
+      with:
+        version: 9
+        run_install: false
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+        cache-dependency-path: rrp-web/pnpm-lock.yaml
+
+    - name: pnpm install
+      run: cd rrp-web && pnpm install
+
+    - name: Type check rrp-web
+      run: cd rrp-web && pnpm tsc --noEmit
