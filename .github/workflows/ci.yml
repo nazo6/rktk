@@ -45,6 +45,7 @@ jobs:
 
   rrp-web:
     runs-on: ubuntu-latest
+    needs: lib-check
     steps:
     - name: Download rrp-client-web packages
       uses: actions/download-artifact@v4
