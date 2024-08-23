@@ -34,11 +34,29 @@ jobs:
     - name: Run rust test
       run: cargo make test-all
 
+    - name: Build rust library for rrp-web
+      run: cd rrp-web && wasm-pack build --release
+
+    - name: Upload rrp-web-client package
+      uses: actions/upload-artifact@v4
+      with:
+        name: rrp-client-web
+        path: rrp-web/rrp-client-web/pkg
+
+  rrp-web:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download rrp-client-web packages
+      uses: actions/download-artifact@v4
+      with:
+        name: rrp-client-web
+        path: rrp-web/rrp-client-web/pkg
+
     - uses: pnpm/action-setup@v4
       name: Setup pnpm
       with:
         version: 9
-        run_install: true
+        run_install: false
         cwd: rrp-web
 
     - name: Install Node.js
@@ -46,9 +64,10 @@ jobs:
       with:
         node-version: 20
         cache: 'pnpm'
+        cache-dependency-path: rrp-web/pnpm-lock.yaml
 
-    - name: Build rust library for rrp-web
-      run: cd rrp-web && wasm-pack build --release
+    - name: pnpm install
+      run: cd rrp-web && pnpm install
 
     - name: Type check rrp-web
       run: cd rrp-web && pnpm tsc --noEmit
