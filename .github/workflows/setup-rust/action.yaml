@@ -16,14 +16,19 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - uses: actions-rust-lang/setup-rust-toolchain@v1
-    id: setup-rust
+  - uses: dtolnay/rust-toolchain@mster
+    id: toolchain
     with:
       toolchain: "nightly-2024-08-23"
       components: "${{ inputs.components }}"
-      target: "${{ inputs.target }}"
+      targets: "${{ inputs.target }}"
       rustflags: ""
       cache: false
+
+  - id: override rust
+    shell: bash
+    run: rustup override set ${{steps.toolchain.outputs.name}}
+
   - uses: Swatinem/rust-cache@v2
 
   - name: Install cargo deps
