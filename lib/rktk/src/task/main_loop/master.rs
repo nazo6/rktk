@@ -4,7 +4,6 @@ use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, StateConfig},
     KeyChangeEvent, State, StateReport,
 };
-use rktk_keymanager::time::Duration;
 
 use crate::{
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},

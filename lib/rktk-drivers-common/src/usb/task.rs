@@ -138,7 +138,7 @@ pub async fn rrp(mut writer: impl SerialWriter + 'static, mut reader: impl Seria
             loop {
                 let mut buf = [0u8; 64];
                 let to_send_bytes = RRP_SEND_PIPE.read(&mut buf).await;
-                let _ = writer.write_packet(&buf[..to_send_bytes]).await.unwrap();
+                let _ = writer.write_packet(&buf[..to_send_bytes]).await;
             }
         },
     )

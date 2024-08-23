@@ -8,7 +8,7 @@ use core::panic::PanicInfo;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::Flex;
-use keymap::{KEYMAP, KEY_CONFIG};
+use keymap::KEY_CONFIG;
 use rktk::{
     interface::{
         backlight::DummyBacklightDriver, ble::DummyBleDriver, display::DummyDisplayDriverBuilder,

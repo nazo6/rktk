@@ -39,9 +39,9 @@ impl SecurityHandler for Bonder {
     fn on_bonded(
         &self,
         _conn: &Connection,
-        master_id: MasterId,
-        key: EncryptionInfo,
-        peer_id: IdentityKey,
+        _master_id: MasterId,
+        _key: EncryptionInfo,
+        _peer_id: IdentityKey,
     ) {
     }
 }

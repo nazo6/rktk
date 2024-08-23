@@ -16,7 +16,9 @@ impl ReporterDriver for CommonUsbDriver {
         &self,
         _report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), rktk::interface::error::RktkError> {
-        HID_KEYBOARD_CHANNEL.try_send(_report);
+        HID_KEYBOARD_CHANNEL.try_send(_report).map_err(|_| {
+            rktk::interface::error::RktkError::GeneralError("hid_keyboard_channel full")
+        })?;
         Ok(())
     }
 
@@ -24,7 +26,9 @@ impl ReporterDriver for CommonUsbDriver {
         &self,
         _report: usbd_hid::descriptor::MediaKeyboardReport,
     ) -> Result<(), rktk::interface::error::RktkError> {
-        HID_MEDIA_KEYBOARD_CHANNEL.try_send(_report);
+        HID_MEDIA_KEYBOARD_CHANNEL.try_send(_report).map_err(|_| {
+            rktk::interface::error::RktkError::GeneralError("hid_media_keyboard_channel full")
+        })?;
         Ok(())
     }
 
@@ -32,7 +36,9 @@ impl ReporterDriver for CommonUsbDriver {
         &self,
         _report: usbd_hid::descriptor::MouseReport,
     ) -> Result<(), rktk::interface::error::RktkError> {
-        HID_MOUSE_CHANNEL.try_send(_report);
+        HID_MOUSE_CHANNEL.try_send(_report).map_err(|_| {
+            rktk::interface::error::RktkError::GeneralError("hid_mouse_channel full")
+        })?;
         Ok(())
     }
 
