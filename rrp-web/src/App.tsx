@@ -28,7 +28,7 @@ export function Providers() {
     : theme;
 
   useEffect(() => {
-    localStorage.setItem("theme", themeResolved);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   useEffect(() => {
