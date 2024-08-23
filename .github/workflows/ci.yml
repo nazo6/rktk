@@ -1,0 +1,95 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  paths-filter:
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      rrp-web: ${{ steps.filter.outputs.rrp-web }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          rust:
+            - '.github/workflows/ci.yml'
+            - '**.toml'
+            - '**.rs'
+            - '**.lock'
+          rrp-web:
+            - '.github/workflows/ci.yml'
+            - 'rrp-web/**'
+
+  lib-check:
+    runs-on: ubuntu-latest
+    needs: paths-filter
+    if: needs.paths-filter.outputs.rust == 'true'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: "nightly-2024-08-01"
+        components: "clippy,rust-src"
+        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+        rustflags: ""
+
+    - name: Install cargo deps
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-make,wasm-pack
+
+    - name: Run rust check
+      run: cargo make check-all
+
+    - name: Run rust test
+      run: cargo make test-all
+
+    - name: Build rust library for rrp-web
+      run: cd rrp-web/rrp-client-web && wasm-pack build --release
+
+    - name: Upload rrp-web-client package
+      uses: actions/upload-artifact@v4
+      with:
+        name: rrp-client-web
+        path: rrp-web/rrp-client-web/pkg
+
+  rrp-web-check:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: lib-check
+    steps:
+    - name: Download rrp-client-web packages
+      uses: actions/download-artifact@v4
+      with:
+        name: rrp-client-web
+        path: rrp-web/rrp-client-web/pkg
+
+    - uses: pnpm/action-setup@v4
+      name: Setup pnpm
+      with:
+        version: 9
+        run_install: false
+        cwd: rrp-web
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+        cache-dependency-path: rrp-web/pnpm-lock.yaml
+
+    - name: pnpm install
+      run: cd rrp-web && pnpm install
+
+    - name: Type check rrp-web
+      run: cd rrp-web && pnpm tsc --noEmit
