@@ -2,9 +2,12 @@ name: Rust check
 
 on:
   push:
-    branches: [ "master" ]
+    paths:
+      - '.github/workflows/lib-check.yml'
+      - '**.rs'
+      - '**.toml'
+      - '**.lock'
   pull_request:
-    branches: [ "master", "ci" ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -43,33 +46,3 @@ jobs:
       with:
         name: rrp-client-web
         path: rrp-web/rrp-client-web/pkg
-
-  rrp-web:
-    runs-on: ubuntu-latest
-    needs: lib-check
-    steps:
-    - name: Download rrp-client-web packages
-      uses: actions/download-artifact@v4
-      with:
-        name: rrp-client-web
-        path: rrp-web/rrp-client-web/pkg
-
-    - uses: pnpm/action-setup@v4
-      name: Setup pnpm
-      with:
-        version: 9
-        run_install: false
-        cwd: rrp-web
-
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'pnpm'
-        cache-dependency-path: rrp-web/pnpm-lock.yaml
-
-    - name: pnpm install
-      run: cd rrp-web && pnpm install
-
-    - name: Type check rrp-web
-      run: cd rrp-web && pnpm tsc --noEmit
