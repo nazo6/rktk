@@ -21,12 +21,12 @@ jobs:
       with:
         filters: |
           rust:
-            - '.github/workflows/ci.yml'
+            - '.github/workflows/*.yml'
             - '**.toml'
             - '**.rs'
             - '**.lock'
           rrp-web:
-            - '.github/workflows/ci.yml'
+            - '.github/workflows/*.yml'
             - 'rrp-web/**'
 
   lib-check:
@@ -38,7 +38,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup rust
-      uses: ./github/workflows/setup-rust.yml
+      uses: ./.github/workflows/setup-rust.yml
 
     - name: Run rust check
       run: cargo make check-all
@@ -62,7 +62,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup rust
-      uses: ./github/workflows/setup-rust.yml
+      uses: ./.github/workflows/setup-rust.yml
 
     - name: Run rust test
       run: cargo make test-all
