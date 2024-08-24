@@ -71,7 +71,7 @@ export function KeyCodeSelector(props: {
   }
 
   return (
-    <div className="flex flex-col bg-gray-100/30 p-2 rounded-md">
+    <div className="flex flex-col bg-gray-400/30 p-2 rounded-md">
       <div className="flex items-center">
         {props.title ?? "Keycode"}:
         <RadioGroup

@@ -31,3 +31,4 @@ console_log = "1.0.0"
 futures = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
 tsify-next = { workspace = true }
+async-lock = "3.4.0"

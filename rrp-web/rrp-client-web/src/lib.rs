@@ -1,3 +1,4 @@
+use async_lock::Mutex;
 use futures::stream::StreamExt as _;
 
 use log::info;
@@ -16,7 +17,11 @@ pub fn main() {
 
 #[wasm_bindgen]
 pub struct Client {
-    serial_client: client::SerialClient,
+    // Web Serial API calls do not require mut. So why use mutex here?
+    // Because RRP does not have an ordering control mechanism like TCP, so the order in which data is sent and received is very important.
+    // When multiple commands are called from JS at the same time, sending data from one request in the middle of another request will cause communication problems.
+    // For this reason, Mutex is used for exclusion control so that only one command can be called at a time.
+    serial_client: Mutex<client::SerialClient>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, tsify_next::Tsify)]
@@ -28,24 +33,26 @@ impl Client {
     #[wasm_bindgen(constructor)]
     pub fn new(serial_port: SerialPort) -> Self {
         Client {
-            serial_client: client::SerialClient {
+            serial_client: Mutex::new(client::SerialClient {
                 stream: serial_port,
-            },
+            }),
         }
     }
 
     #[wasm_bindgen]
-    pub async fn get_keyboard_info(&mut self) -> Result<get_keyboard_info::Response, String> {
+    pub async fn get_keyboard_info(&self) -> Result<get_keyboard_info::Response, String> {
         self.serial_client
+            .lock()
+            .await
             .get_keyboard_info(())
             .await
             .map_err(|e| format!("{:?}", e))
     }
 
     #[wasm_bindgen]
-    pub async fn get_keymaps(&mut self) -> Result<VecGetKeymapsStreamResponse, String> {
-        let stream = self
-            .serial_client
+    pub async fn get_keymaps(&self) -> Result<VecGetKeymapsStreamResponse, String> {
+        let mut serial = self.serial_client.lock().await;
+        let stream = serial
             .get_keymaps(())
             .await
             .map_err(|e| format!("{:?}", e))?;
@@ -55,9 +62,9 @@ impl Client {
     }
 
     #[wasm_bindgen]
-    pub async fn get_layout_json(&mut self) -> Result<String, String> {
-        let stream = self
-            .serial_client
+    pub async fn get_layout_json(&self) -> Result<String, String> {
+        let mut serial = self.serial_client.lock().await;
+        let stream = serial
             .get_layout_json(())
             .await
             .map_err(|e| format!("{:?}", e))?;
@@ -73,7 +80,8 @@ impl Client {
         &mut self,
         keymaps: Vec<set_keymaps::StreamRequest>,
     ) -> Result<(), String> {
-        self.serial_client
+        let mut serial = self.serial_client.lock().await;
+        serial
             .set_keymaps(futures::stream::iter(keymaps.into_iter()))
             .await
             .map_err(|e| format!("{:?}", e))?;
@@ -81,8 +89,9 @@ impl Client {
     }
 
     #[wasm_bindgen]
-    pub async fn get_keymap_config(&mut self) -> Result<get_keymap_config::Response, String> {
-        self.serial_client
+    pub async fn get_keymap_config(&self) -> Result<get_keymap_config::Response, String> {
+        let mut serial = self.serial_client.lock().await;
+        serial
             .get_keymap_config(())
             .await
             .map_err(|e| format!("{:?}", e))
@@ -93,7 +102,8 @@ impl Client {
         &mut self,
         keymap_config: set_keymap_config::Request,
     ) -> Result<set_keymap_config::Response, String> {
-        self.serial_client
+        let mut serial = self.serial_client.lock().await;
+        serial
             .set_keymap_config(keymap_config)
             .await
             .map_err(|e| format!("{:?}", e))

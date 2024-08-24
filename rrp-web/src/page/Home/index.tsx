@@ -1,12 +1,40 @@
 import { KeymapPage } from "./Keymap";
-import { Tab, TabList } from "@fluentui/react-components";
-import { useState } from "react";
+import {
+  Tab,
+  TabList,
+  Toast,
+  ToastTitle,
+  useToastController,
+} from "@fluentui/react-components";
+import { useEffect, useState } from "react";
 import { KeyboardFilled, OptionsFilled } from "@fluentui/react-icons";
 import { KeyboardOptionsPage } from "./KeyboardOptions";
-import { Connection } from "@/lib/connection";
+import { Connection, useDisconnect } from "@/lib/connection";
 
 export function Home({ connection }: { connection: Connection }) {
   const [selectedTab, setSelectedTab] = useState<"keymap" | "option">("keymap");
+
+  const { dispatchToast } = useToastController();
+  const disconnect = useDisconnect();
+
+  useEffect(() => {
+    const handler = () => {
+      disconnect.mutate(false);
+      dispatchToast(
+        <Toast>
+          <ToastTitle>
+            Serial closed. disconnecting...
+          </ToastTitle>
+        </Toast>,
+        { intent: "warning" },
+      );
+    };
+    connection.port.addEventListener("disconnect", handler);
+
+    return () => {
+      connection.port.removeEventListener("disconnect", handler);
+    };
+  }, []);
 
   let page;
   if (selectedTab === "keymap") {

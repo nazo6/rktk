@@ -25,6 +25,7 @@ export function useDisconnect() {
   return useMutation({
     mutationFn: async (_notify: boolean = true) => {
       if (connection) {
+        connection.client.free();
         await connection.port.close();
         setConnection(null);
       } else {
