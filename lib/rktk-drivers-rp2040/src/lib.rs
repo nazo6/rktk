@@ -9,3 +9,4 @@ pub mod keyscan;
 pub mod mouse;
 pub mod split;
 pub mod usb;
+pub use rktk_drivers_common::panic_utils;

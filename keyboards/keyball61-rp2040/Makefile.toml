@@ -1,0 +1,21 @@
+[config]
+skip_core_tasks = true
+skip_git_env_info = true
+skip_rust_env_info = true
+skip_crate_env_info = true
+
+[tasks.run-rp]
+script = '''
+#!@duckscript
+success = set false
+r = range 1 30
+for i in ${r}
+  if not ${success}
+    code = exec --get-exit-code cargo run --release
+    success = eq ${code} 0
+  end
+  if not ${success}
+    sleep 750
+  end
+end
+'''

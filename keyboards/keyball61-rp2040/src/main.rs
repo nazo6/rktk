@@ -16,6 +16,7 @@ use rktk_drivers_rp2040::{
     double_tap::DoubleTapResetRp,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
+    panic_utils,
     split::pio_half_duplex::PioHalfDuplexSplitDriver,
     usb::{new_usb, UsbOpts},
 };
@@ -47,6 +48,10 @@ async fn main(_spawner: Spawner) {
         p.PIN_3,
         ssd1306::size::DisplaySize128x32,
     );
+
+    let Some(display) = panic_utils::display_message_if_panicked(display).await else {
+        cortex_m::asm::udf()
+    };
 
     let ball = create_pmw3360(
         p.SPI0, p.PIN_22, p.PIN_23, p.PIN_20, p.DMA_CH0, p.DMA_CH1, p.PIN_21,
@@ -110,6 +115,8 @@ async fn main(_spawner: Spawner) {
 }
 
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+fn panic(info: &PanicInfo) -> ! {
+    cortex_m::interrupt::disable();
+    panic_utils::save_panic_info(info);
+    cortex_m::peripheral::SCB::sys_reset()
 }

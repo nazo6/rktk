@@ -14,6 +14,9 @@ script = 'cd keyboards/keyball61-nrf52840 && cargo make run-ble'
 [tasks.run-rrp]
 script = 'cd rrp-web && pnpm dev'
 
+[tasks.run-rp]
+script = 'cd keyboards/keyball61-rp2040 && cargo make run-rp'
+
 [tasks.check-all]
 script = '''
 #!@duckscript
@@ -55,7 +58,7 @@ for path in ${handle}
       dir = dirname ${path}
       if ends_with ${dir} ${2}
         cd ${dir}
-        exec cargo clippy --message-format=json --tests
+        exec cargo clippy --message-format=json
         cd ${pwd}
       end
     end
