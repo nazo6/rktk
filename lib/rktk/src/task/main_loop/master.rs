@@ -140,7 +140,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
         },
     ));
 
-    crate::print!("Master start");
+    // crate::print!("Master start");
 
     let mut latest_led: Option<BacklightCtrl> = None;
 

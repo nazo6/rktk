@@ -7,7 +7,6 @@
 pub mod config;
 #[allow(async_fn_in_trait)]
 pub mod interface;
-pub mod panicking;
 pub mod task;
 mod utils;
 

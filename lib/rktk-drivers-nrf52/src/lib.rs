@@ -8,3 +8,4 @@ pub mod mouse;
 pub mod softdevice;
 pub mod split;
 pub mod usb;
+pub use rktk_drivers_common::panic_utils;

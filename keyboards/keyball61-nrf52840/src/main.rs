@@ -20,7 +20,7 @@ use rktk::{
 };
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
-    keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360,
+    keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360, panic_utils,
     softdevice::ble::init_ble_server, split::uart_half_duplex::UartHalfDuplexSplitDriver,
     usb::UsbOpts,
 };
@@ -79,6 +79,18 @@ async fn main(_spawner: Spawner) {
     interrupt::SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0.set_priority(Priority::P2);
     interrupt::UARTE1.set_priority(Priority::P2);
 
+    let display = create_ssd1306(
+        p.TWISPI0,
+        Irqs,
+        p.P0_17,
+        p.P0_20,
+        ssd1306::size::DisplaySize128x32,
+    );
+
+    let Some(display) = panic_utils::display_message_if_panicked(display).await else {
+        cortex_m::asm::udf()
+    };
+
     let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09);
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
@@ -96,14 +108,6 @@ async fn main(_spawner: Spawner) {
             Flex::new(p.P1_15),
         ],
         (2, 6),
-    );
-
-    let display = create_ssd1306(
-        p.TWISPI0,
-        Irqs,
-        p.P0_17,
-        p.P0_20,
-        ssd1306::size::DisplaySize128x32,
     );
 
     let split = UartHalfDuplexSplitDriver::new(
@@ -182,5 +186,7 @@ async fn main(_spawner: Spawner) {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    cortex_m::asm::udf()
+    cortex_m::interrupt::disable();
+    panic_utils::save_panic_info(info);
+    cortex_m::peripheral::SCB::sys_reset()
 }
