@@ -26,6 +26,7 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
     let Ok(mut display) = display_builder.build().await else {
         return;
     };
+    let _ = display.clear_flush().await;
 
     loop {
         match select(
