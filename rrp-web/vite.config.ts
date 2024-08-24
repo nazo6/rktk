@@ -6,9 +6,6 @@ import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 import { VitePWA } from "vite-plugin-pwa";
 
-// @ts-expect-error process is a nodejs global
-const host = process.env.TAURI_DEV_HOST;
-
 // https://vitejs.dev/config/
 export default defineConfig(async (env) => ({
   plugins: [
@@ -16,7 +13,7 @@ export default defineConfig(async (env) => ({
       registerType: "autoUpdate",
       injectRegister: "auto",
       devOptions: {
-        enabled: env.mode === "development",
+        enabled: false,
       },
       manifest: {
         name: "RRP Client",
@@ -45,20 +42,4 @@ export default defineConfig(async (env) => ({
       },
     }),
   ],
-  clearScreen: false,
-  server: {
-    port: 1420,
-    strictPort: true,
-    host: host || false,
-    hmr: host
-      ? {
-        protocol: "ws",
-        host,
-        port: 1421,
-      }
-      : undefined,
-    watch: {
-      ignored: ["**/src-tauri/**"],
-    },
-  },
 }));

@@ -30,17 +30,18 @@ type M2sRx<'a> =
 type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 
 pub async fn start<
+    'a,
     KS: KeyscanDriver,
     M: MouseDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
     R: ReporterDriver,
-    EkvFlash: ekv::flash::Flash + 'static,
+    EkvFlash: ekv::flash::Flash,
 >(
     reporter: Option<&R>,
     mut key_scanner: KS,
     mouse: Option<M>,
-    storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
+    storage: Option<&'a ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
     mut split: SP,
     backlight: Option<BL>,
     key_config: KeyConfig,

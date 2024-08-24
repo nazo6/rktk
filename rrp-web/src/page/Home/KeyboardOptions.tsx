@@ -4,6 +4,7 @@ import {
   Input,
   Title2,
   Toast,
+  ToastBody,
   ToastTitle,
   useToastController,
 } from "@fluentui/react-components";
@@ -44,7 +45,8 @@ function KeyboardOptionsPageInner(
   const queryClient = useQueryClient();
 
   const setKeymapConfig = useMutation({
-    mutationFn: props.connection.client.set_keymap_config,
+    mutationFn: async (conf: StateConfig) =>
+      await props.connection.client.set_keymap_config(conf),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getKeymapConfig"] });
       dispatchToast(
@@ -54,6 +56,19 @@ function KeyboardOptionsPageInner(
           </ToastTitle>
         </Toast>,
         { intent: "success" },
+      );
+    },
+    onError: (e) => {
+      dispatchToast(
+        <Toast>
+          <ToastTitle>
+            Failed to update keymap config
+          </ToastTitle>
+          <ToastBody>
+            {e.message}
+          </ToastBody>
+        </Toast>,
+        { intent: "error" },
       );
     },
   });

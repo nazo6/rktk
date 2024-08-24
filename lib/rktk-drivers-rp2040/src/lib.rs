@@ -5,6 +5,7 @@
 pub mod backlight;
 pub mod display;
 pub mod double_tap;
+pub mod flash;
 pub mod keyscan;
 pub mod mouse;
 pub mod split;

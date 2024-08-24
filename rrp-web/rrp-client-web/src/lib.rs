@@ -11,7 +11,7 @@ mod client;
 pub fn main() {
     use log::Level;
     console_log::init_with_level(Level::Trace).expect("error initializing log");
-    info!("Hello, world from rust");
+    info!("rrp-client-web started!");
 }
 
 #[wasm_bindgen]

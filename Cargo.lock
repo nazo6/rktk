@@ -1815,6 +1815,7 @@ dependencies = [
  "embassy-sync 0.6.0",
  "embassy-time",
  "embedded-graphics",
+ "embedded-storage-async",
  "futures",
  "heapless 0.7.17",
  "itertools 0.13.0",
@@ -1883,6 +1884,7 @@ name = "rktk-drivers-rp2040"
 version = "0.0.1"
 dependencies = [
  "display-interface",
+ "ekv",
  "embassy-executor",
  "embassy-futures",
  "embassy-rp",
@@ -1893,6 +1895,7 @@ dependencies = [
  "fixed-macro",
  "pio",
  "pio-proc",
+ "rand_core",
  "rktk",
  "rktk-drivers-common",
  "smart-leds",

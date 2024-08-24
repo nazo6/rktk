@@ -1,12 +1,14 @@
-use ekv::{flash::Flash, WriteError};
+use core::fmt::Debug;
+use ekv::WriteError;
 
-pub enum ConfigWriteError<F: Flash> {
-    WriteError(WriteError<F::Error>),
+#[derive(Debug)]
+pub enum ConfigWriteError<E: Debug> {
+    WriteError(WriteError<E>),
     EncodeError,
 }
 
-impl<F: Flash> From<WriteError<F::Error>> for ConfigWriteError<F> {
-    fn from(e: WriteError<F::Error>) -> Self {
+impl<E: Debug> From<WriteError<E>> for ConfigWriteError<E> {
+    fn from(e: WriteError<E>) -> Self {
         ConfigWriteError::WriteError(e)
     }
 }
@@ -24,8 +26,8 @@ macro_rules! write_trait {
             )*
         }
 
-        impl<F: Flash + 'static, M: RawMutex + 'static> WriteConfig for WriteTransaction<'_, F, M> {
-            type Error = ConfigWriteError<F>;
+        impl<F: Flash, M: RawMutex> WriteConfig for WriteTransaction<'_, F, M> {
+            type Error = ConfigWriteError<F::Error>;
             $(
             impl_write!([<write_ $name>], $key, $input => $output);
             impl_delete!([<delete_ $name>], $key, $input => $output);

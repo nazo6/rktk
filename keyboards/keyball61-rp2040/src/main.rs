@@ -14,6 +14,7 @@ use rktk_drivers_rp2040::{
     backlight::ws2812_pio::Ws2812Pio,
     display::ssd1306::create_ssd1306,
     double_tap::DoubleTapResetRp,
+    flash::RpFlash,
     keyscan::duplex_matrix::create_duplex_matrix,
     mouse::pmw3360::create_pmw3360,
     panic_utils,
@@ -99,6 +100,9 @@ async fn main(_spawner: Spawner) {
     let pio = Pio::new(p.PIO1, Irqs);
     let backlight = Ws2812Pio::new(pio, p.PIN_0, p.DMA_CH2);
 
+    let storage =
+        rktk_drivers_rp2040::flash::init_db::<'_, _, { 2 * 1024 * 1024 }>(p.FLASH, p.DMA_CH3);
+
     let drivers = Drivers {
         key_scanner,
         double_tap_reset: Some(dtr),
@@ -108,7 +112,7 @@ async fn main(_spawner: Spawner) {
         split,
         backlight: Some(backlight),
         ble: Option::<DummyBleDriver>::None,
-        storage: Option::<&DummyStorage>::None,
+        storage: Some(&storage),
     };
 
     rktk::task::start(drivers, keymap::KEY_CONFIG).await;

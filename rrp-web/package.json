@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:vite": "vite",
-    "dev:rust": "cd rrp-client-web && cargo watch -s \"wasm-pack build\"",
+    "dev:rust": "cd rrp-client-web && cargo watch -s \"wasm-pack build --debug\"",
     "dev": "conc -c auto npm:dev:*",
     "build": "cd rrp-client-web && wasm-pack build --release && cd .. && vite build",
     "preview": "vite preview",
@@ -26,7 +26,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.52.2",
-    "rrp-client-web": "file:./rrp-client-web/pkg",
+    "rrp-client-web": "link:rrp-client-web/pkg",
     "wrangler": "^3.72.2"
   },
   "devDependencies": {

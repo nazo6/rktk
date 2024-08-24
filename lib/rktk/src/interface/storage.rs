@@ -1,5 +1,7 @@
+pub use ekv;
 use ekv::Database;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+pub use embedded_storage_async;
 
 pub enum DummyFlash {}
 

@@ -1,12 +1,14 @@
-use ekv::{flash::Flash, ReadError};
+use core::fmt::Debug;
+use ekv::ReadError;
 
-pub enum ConfigReadError<F: Flash> {
-    ReadError(ReadError<F::Error>),
+#[derive(Debug)]
+pub enum ConfigReadError<E: Debug> {
+    ReadError(ReadError<E>),
     DecodeError,
 }
 
-impl<F: Flash> From<ReadError<F::Error>> for ConfigReadError<F> {
-    fn from(e: ReadError<F::Error>) -> Self {
+impl<E: Debug> From<ReadError<E>> for ConfigReadError<E> {
+    fn from(e: ReadError<E>) -> Self {
         ConfigReadError::ReadError(e)
     }
 }
@@ -23,8 +25,8 @@ macro_rules! read_trait {
             )*
         }
 
-        impl<F: Flash + 'static, M: RawMutex + 'static> ReadConfig for ReadTransaction<'_, F, M> {
-            type Error = ConfigReadError<F>;
+        impl<F: Flash, M: RawMutex> ReadConfig for ReadTransaction<'_, F, M> {
+            type Error = ConfigReadError<F::Error>;
             $(
             impl_read!([<read_ $name>], $key, $input => $output);
             )*

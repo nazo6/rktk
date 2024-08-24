@@ -15,6 +15,7 @@ embassy-futures = { workspace = true }
 
 usbd-hid = { workspace = true }
 
+embedded-storage-async = { workspace = true }
 embedded-graphics = { workspace = true }
 display-interface = { workspace = true }
 

@@ -54,7 +54,7 @@ macro_rules! send_res {
 
 fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
-        ev.col = CONFIG.cols as u8 - 1 - ev.col;
+        ev.col = CONFIG.cols - 1 - ev.col;
     }
 }
 
@@ -117,27 +117,38 @@ fn handle_led(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn start<
-    KS: KeyscanDriver,
-    M: MouseDriver,
-    R: ReporterDriver,
-    EkvFlash: Flash + 'static,
->(
-    m2s_tx: M2sTx<'_>,
-    s2m_rx: S2mRx<'_>,
-    reporter: &R,
+pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, EkvFlash: Flash>(
+    m2s_tx: M2sTx<'a>,
+    s2m_rx: S2mRx<'a>,
+    reporter: &'a R,
     mut key_scanner: KS,
-    storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
+    storage: Option<&'a ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
     mut mouse: Option<M>,
     key_config: KeyConfig,
     hand: crate::interface::keyscan::Hand,
 ) {
+    let now = embassy_time::Instant::now();
     let (state_config, keymap) = if let Some(storage) = storage {
         if (storage.mount().await).is_err() {
             if let Err(e) = storage.format().await {
-                // crate::print!("Failed to format storage: {:?}", e);
+                crate::print!("Failed to format storage: {:?}", e);
+            } else {
+                crate::print!("Storage formatted");
             }
         }
+
+        let mut tx = storage.write_transaction().await;
+        tx.write(&[0, 1, 2, 3], &[4, 5, 6, 7]).await.unwrap();
+        tx.commit().await.unwrap();
+
+        let mut buf = [0, 0, 0, 0];
+        storage
+            .read_transaction()
+            .await
+            .read(&[0, 1, 2, 3], &mut buf)
+            .await
+            .expect("read fail");
+        assert_eq!(&buf, &[4, 5, 6, 7]);
 
         let tx = storage.read_transaction().await;
 
@@ -146,17 +157,28 @@ pub async fn start<
             for r in 0..CONFIG.rows {
                 for c in 0..CONFIG.cols {
                     let key_id = (l as u32) << 16 | (r as u32) << 8 | c as u32;
-                    if let Ok(key) = tx.read_keymap(key_id).await {
-                        keymap[l as usize].map[r as usize][c as usize] = key;
+                    match tx.read_keymap(key_id).await {
+                        Ok(key) => {
+                            keymap[l as usize].map[r as usize][c as usize] = key;
+                            crate::print!("{:?} {:?} {:?} \n{:?}", l, r, c, key);
+                        }
+                        Err(e) => {
+                            // crate::print!("read:{:?}", e);
+                        }
                     }
                 }
             }
         }
 
-        (tx.read_state_config().await.ok(), keymap)
+        let c = tx.read_state_config().await;
+
+        (c.ok(), keymap)
     } else {
         (None, key_config.keymap)
     };
+
+    crate::print!("config load took: {}", now.elapsed().as_millis());
+
     let state_config = state_config.unwrap_or_else(|| StateConfig {
         mouse: MouseConfig {
             auto_mouse_layer: CONFIG.default_auto_mouse_layer,
