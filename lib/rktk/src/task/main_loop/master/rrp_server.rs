@@ -1,10 +1,12 @@
+use ekv::flash::Flash;
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use futures::{Stream, StreamExt as _};
 use get_keyboard_info::KeyboardInfo;
 use rktk_keymanager::state::State;
 use rktk_rrp::{endpoint_server, endpoints::*, server::EndpointTransport};
 
 use crate::{
-    config::static_config::CONFIG,
+    config::{flash_config::WriteConfig as _, static_config::CONFIG},
     interface::{error::RktkError, reporter::ReporterDriver},
     utils::ThreadModeMutex,
 };
@@ -46,12 +48,14 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
     }
 }
 
-type ConfiguredState = State<{ CONFIG.layer_count }, { CONFIG.rows }, { CONFIG.cols }>;
+type ConfiguredState =
+    State<{ CONFIG.layer_count as usize }, { CONFIG.rows as usize }, { CONFIG.cols as usize }>;
 
-pub struct Server<'a> {
+pub struct Server<'a, EkvFlash: Flash + 'static> {
     pub state: &'a ThreadModeMutex<ConfiguredState>,
+    pub storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
 }
-impl<'a> Server<'a> {
+impl<'a, EkvFlash: Flash + 'static> Server<'a, EkvFlash> {
     endpoint_server!(
         get_keyboard_info normal normal => get_info
         get_layout_json normal stream => get_layout_json
@@ -64,8 +68,8 @@ impl<'a> Server<'a> {
     async fn get_info(&mut self, _req: get_keyboard_info::Request) -> get_keyboard_info::Response {
         KeyboardInfo {
             name: heapless::String::from(CONFIG.name),
-            cols: CONFIG.cols as u8,
-            rows: CONFIG.rows as u8,
+            cols: CONFIG.cols,
+            rows: CONFIG.rows,
             keymap: ConfiguredState::get_keymap_info(),
         }
     }
@@ -77,10 +81,10 @@ impl<'a> Server<'a> {
         futures::stream::iter(
             itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols).map(
                 move |(layer, row, col)| KeyActionLoc {
-                    layer: layer as u8,
-                    row: row as u8,
-                    col: col as u8,
-                    key: keymap[layer].map[row][col],
+                    layer,
+                    row,
+                    col,
+                    key: keymap[layer as usize].map[row as usize][col as usize],
                 },
             ),
         )
@@ -127,6 +131,13 @@ impl<'a> Server<'a> {
     ) -> set_keymap_config::Response {
         let keymap = self.state.lock().await.get_keymap().clone();
 
+        if let Some(storage) = self.storage {
+            storage
+                .write_transaction()
+                .await
+                .write_state_config(req.clone())
+                .await;
+        }
         *self.state.lock().await = State::new(keymap, req);
     }
 }

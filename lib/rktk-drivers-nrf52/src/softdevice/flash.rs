@@ -8,7 +8,7 @@ pub struct FlashWrapper(nrf_softdevice::Flash);
 
 pub type NrfDb = Database<FlashWrapper, CriticalSectionRawMutex>;
 
-const START: u32 = 0x00081920;
+const START: u32 = 0x000F5000;
 
 static DATABASE: StaticCell<NrfDb> = StaticCell::new();
 
@@ -28,12 +28,13 @@ impl ekv::flash::Flash for FlashWrapper {
     type Error = nrf_softdevice::FlashError;
 
     fn page_count(&self) -> usize {
-        ekv::config::MAX_PAGE_COUNT
+        1
     }
 
     async fn erase(&mut self, page_id: ekv::flash::PageID) -> Result<(), Self::Error> {
         let start = START + page_id.index() as u32 * ekv::config::PAGE_SIZE as u32;
         let end = start + ekv::config::PAGE_SIZE as u32;
+        rktk::print!("erase");
         self.0.erase(start, end).await
     }
 
@@ -43,6 +44,7 @@ impl ekv::flash::Flash for FlashWrapper {
         offset: usize,
         data: &mut [u8],
     ) -> Result<(), Self::Error> {
+        rktk::print!("read");
         self.0
             .read(
                 page_id.index() as u32 * ekv::config::PAGE_SIZE as u32 + offset as u32,
@@ -57,6 +59,7 @@ impl ekv::flash::Flash for FlashWrapper {
         offset: usize,
         data: &[u8],
     ) -> Result<(), Self::Error> {
+        rktk::print!("write");
         self.0
             .write(
                 page_id.index() as u32 * ekv::config::PAGE_SIZE as u32 + offset as u32,

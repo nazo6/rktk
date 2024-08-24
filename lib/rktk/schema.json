@@ -12,7 +12,7 @@
     "cols": {
       "description": "The number of columns in the keyboard matrix.",
       "type": "integer",
-      "format": "uint",
+      "format": "uint8",
       "minimum": 0.0
     },
     "default_auto_mouse_duration": {
@@ -80,7 +80,7 @@
       "description": "The number of layers in the keyboard.",
       "default": 5,
       "type": "integer",
-      "format": "uint",
+      "format": "uint8",
       "minimum": 0.0
     },
     "layout_json": {
@@ -108,7 +108,7 @@
     "rows": {
       "description": "The number of rows in the keyboard matrix.",
       "type": "integer",
-      "format": "uint",
+      "format": "uint8",
       "minimum": 0.0
     },
     "scan_interval_keyboard": {

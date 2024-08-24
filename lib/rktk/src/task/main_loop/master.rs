@@ -1,4 +1,6 @@
+use ekv::flash::Flash;
 use embassy_futures::{join::join, select::select};
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_time::Timer;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, StateConfig},
@@ -6,6 +8,7 @@ use rktk_keymanager::state::{
 };
 
 use crate::{
+    config::flash_config::ReadConfig as _,
     config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
     interface::{
         backlight::{BacklightCtrl, BacklightMode},
@@ -113,32 +116,63 @@ fn handle_led(
     *latest_led = Some(led);
 }
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
+#[allow(clippy::too_many_arguments)]
+pub async fn start<
+    KS: KeyscanDriver,
+    M: MouseDriver,
+    R: ReporterDriver,
+    EkvFlash: Flash + 'static,
+>(
     m2s_tx: M2sTx<'_>,
     s2m_rx: S2mRx<'_>,
     reporter: &R,
     mut key_scanner: KS,
+    storage: Option<&'static ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
     mut mouse: Option<M>,
     key_config: KeyConfig,
     hand: crate::interface::keyscan::Hand,
 ) {
-    let state = ThreadModeMutex::new(State::new(
-        key_config.keymap.clone(),
-        StateConfig {
-            mouse: MouseConfig {
-                auto_mouse_layer: CONFIG.default_auto_mouse_layer,
-                auto_mouse_duration: CONFIG.default_auto_mouse_duration,
-                auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
-                scroll_divider_x: CONFIG.default_scroll_divider_x,
-                scroll_divider_y: CONFIG.default_scroll_divider_y,
-            },
-            key_resolver: KeyResolverConfig {
-                tap_threshold: CONFIG.default_tap_threshold,
-                tap_dance_threshold: CONFIG.default_tap_dance_threshold,
-                tap_dance: key_config.tap_dance.clone(),
-            },
+    let (state_config, keymap) = if let Some(storage) = storage {
+        if (storage.mount().await).is_err() {
+            if let Err(e) = storage.format().await {
+                // crate::print!("Failed to format storage: {:?}", e);
+            }
+        }
+
+        let tx = storage.read_transaction().await;
+
+        let mut keymap = key_config.keymap;
+        for l in 0..CONFIG.layer_count {
+            for r in 0..CONFIG.rows {
+                for c in 0..CONFIG.cols {
+                    let key_id = (l as u32) << 16 | (r as u32) << 8 | c as u32;
+                    if let Ok(key) = tx.read_keymap(key_id).await {
+                        keymap[l as usize].map[r as usize][c as usize] = key;
+                    }
+                }
+            }
+        }
+
+        (tx.read_state_config().await.ok(), keymap)
+    } else {
+        (None, key_config.keymap)
+    };
+    let state_config = state_config.unwrap_or_else(|| StateConfig {
+        mouse: MouseConfig {
+            auto_mouse_layer: CONFIG.default_auto_mouse_layer,
+            auto_mouse_duration: CONFIG.default_auto_mouse_duration,
+            auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
+            scroll_divider_x: CONFIG.default_scroll_divider_x,
+            scroll_divider_y: CONFIG.default_scroll_divider_y,
         },
-    ));
+        key_resolver: KeyResolverConfig {
+            tap_threshold: CONFIG.default_tap_threshold,
+            tap_dance_threshold: CONFIG.default_tap_dance_threshold,
+            tap_dance: key_config.tap_dance.clone(),
+        },
+    });
+
+    let state = ThreadModeMutex::new(State::new(keymap, state_config));
 
     // crate::print!("Master start");
 
@@ -199,7 +233,10 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver>(
                 }
             },
             async {
-                let mut server = rrp_server::Server { state: &state };
+                let mut server = rrp_server::Server {
+                    state: &state,
+                    storage,
+                };
                 let et = rrp_server::EndpointTransportImpl(reporter);
                 server.handle(&et).await;
             },

@@ -54,14 +54,14 @@ pub struct StaticConfig {
     pub scan_interval_mouse: u64,
 
     /// The number of columns in the keyboard matrix.
-    pub cols: usize,
+    pub cols: u8,
 
     /// The number of rows in the keyboard matrix.
-    pub rows: usize,
+    pub rows: u8,
 
     /// The number of layers in the keyboard.
-    #[cfg_attr(not(no_build), serde(default = "usize_default::<5>"))]
-    pub layer_count: usize,
+    #[cfg_attr(not(no_build), serde(default = "u8_default::<5>"))]
+    pub layer_count: u8,
 
     /// Backlight led count for right side
     #[cfg_attr(not(no_build), serde(default = "usize_default::<0>"))]

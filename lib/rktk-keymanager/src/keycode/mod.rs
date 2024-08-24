@@ -25,8 +25,9 @@ pub mod utils;
 /// - `Normal2`: Press key with another key.
 /// - `TapHold`: If tapped term is too short, treat as `Tap` (first key is used). If tapped term is longer than `TAP_THRESHOLD`, treat as `Hold` (second key is used).
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, Default)]
 pub enum KeyAction {
+    #[default]
     Inherit,
     Normal(KeyCode),
     Normal2(KeyCode, KeyCode),

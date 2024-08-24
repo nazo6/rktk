@@ -20,6 +20,16 @@ pub struct Layer<const ROW: usize, const COL: usize> {
     pub map: [[KeyAction; COL]; ROW],
     pub arrowmouse: bool,
 }
+
+impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
+    fn default() -> Self {
+        Self {
+            map: [[KeyAction::default(); COL]; ROW],
+            arrowmouse: false,
+        }
+    }
+}
+
 pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
 pub type Keymap<const LAYER: usize, const ROW: usize, const COL: usize> = [Layer<ROW, COL>; LAYER];
 
