@@ -6,8 +6,9 @@ inherits = "release"
 opt-level = "z"
 lto = true
 panic = "abort"
-# rustflags = ["-Zlocation-detail=none"]
-strip = true
+rustflags = ["-Zlocation-detail=none"]
+# strip = true
+codegen-units = 1
 
 [alias]
 custom-ra-check = "make ra-check"
