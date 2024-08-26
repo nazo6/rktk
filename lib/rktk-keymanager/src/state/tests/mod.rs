@@ -5,6 +5,7 @@ mod keymap;
 
 #[allow(unused_imports)]
 mod prelude {
+    use crate::state::manager::transparent::TransparentReport;
     pub use crate::time::{Duration, Instant};
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
@@ -31,6 +32,7 @@ mod prelude {
         mouse_report: None,
         media_keyboard_report: None,
         highest_layer: 0,
+        transparent_report: TransparentReport::new(),
     };
     pub const EMPTY_REPORT: StateReport = StateReport {
         keyboard_report: Some(KeyboardReport {
@@ -47,6 +49,7 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: Some(MediaKeyboardReport { usage_id: 0 }),
+        transparent_report: TransparentReport::new(),
         highest_layer: 0,
     };
     pub const KEYBOARD_ONLY_REPORT: StateReport = StateReport {
@@ -58,6 +61,7 @@ mod prelude {
         }),
         mouse_report: None,
         media_keyboard_report: None,
+        transparent_report: TransparentReport::new(),
         highest_layer: 0,
     };
     pub const MOUSE_ONLY_REPORT: StateReport = StateReport {
@@ -70,6 +74,7 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: None,
+        transparent_report: TransparentReport::new(),
         highest_layer: 0,
     };
 

@@ -8,9 +8,21 @@ use crate::{
     state::key_resolver::EventType,
 };
 
-#[derive(Clone, Default, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TransparentReport {
     pub flash_clear: bool,
+}
+
+impl Default for TransparentReport {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl TransparentReport {
+    pub const fn new() -> Self {
+        Self { flash_clear: false }
+    }
 }
 
 pub struct TransparentLocalState {
@@ -18,9 +30,9 @@ pub struct TransparentLocalState {
 }
 
 impl TransparentLocalState {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
-            report: TransparentReport::default(),
+            report: TransparentReport::new(),
         }
     }
 
