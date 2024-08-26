@@ -21,6 +21,7 @@ export const MOUSE_KEYS: Map<number, string> = new Map([
 
 export const SPECIAL_KEYS: Map<Special, string> = new Map([
   ["MoScrl", "MoScrl"],
+  ["FlashClear", "Clear Flash"],
 ]);
 
 export const LAYER_KEYS: Map<string, string> = new Map([

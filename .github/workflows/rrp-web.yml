@@ -5,10 +5,14 @@ on:
     branches: ["master"]
     paths:
       - 'rrp-web/**'
+      - 'lib/rktk-keymanager/**.rs'
+      - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rrp-web.yml'
   pull_request:
     paths:
       - 'rrp-web/**'
+      - 'lib/rktk-keymanager/**.rs'
+      - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rrp-web.yml'
 
 env:

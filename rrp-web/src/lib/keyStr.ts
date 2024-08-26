@@ -24,7 +24,7 @@ export function keyStr(key?: KeyAction): string {
     str = `TD(${key.TapDance})`;
   }
 
-  return str ?? "";
+  return str ?? "UNKNOWN";
 }
 
 function keyCodeStr(kc: KeyCode) {
