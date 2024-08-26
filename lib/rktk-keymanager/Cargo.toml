@@ -15,6 +15,9 @@ paste = "1.0.15"
 macro_rules_attribute = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive"] }
+serde_with = { version = "3.9.0", optional = true, default-features = false, features = [
+  "macros",
+] }
 postcard = { workspace = true, optional = true, features = [
   "experimental-derive",
 ] }
@@ -34,7 +37,7 @@ default = ["serde"]
 # Enables state management.
 state = ["dep:usbd-hid"]
 # Enables serialization.
-serde = ["dep:serde"]
+serde = ["dep:serde", "dep:serde_with"]
 # Enables serialization with postcard.
 postcard = ["dep:postcard", "serde"]
 

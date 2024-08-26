@@ -26,6 +26,8 @@ const L4GRV: KeyAction = KeyAction::TapHold(
     KeyCode::Layer(LayerOp::Momentary(4)),
 );
 
+const FL_CLR: KeyAction = KeyAction::Normal(KeyCode::Special(Special::FlashClear));
+
 #[rustfmt::skip]
 const L0: LayerMap = [
     [ L4GRV , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
@@ -57,7 +59,7 @@ const L2: LayerMap = [
 
 #[rustfmt::skip]
 const L3: LayerMap = [
-    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
+    [ FL_CLR, _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , KP7   , KP8   , KP9   , _____ , _____ , /**/ _____ , SF(D1), SF(D2), SF(D3), SF(D4), SF(D5), _____ ],
     [ _____ , _____ , KP4   , KP5   , KP6   , _____ , _____ , /**/ _____ , SF(D6), SF(D7), SF(D8), SF(D9), SF(D0), _____ ],
     [ _____ , _____ , KP1   , KP2   , KP3   , _____ , _____ , /**/ _____ , QUOTE,SF(QUOTE),EQUAL,SF(EQUAL), _____ , _____ ],

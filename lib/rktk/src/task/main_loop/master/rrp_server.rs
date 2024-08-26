@@ -6,9 +6,7 @@ use rktk_keymanager::state::State;
 use rktk_rrp::{endpoint_server, endpoints::*, server::EndpointTransport};
 
 use crate::{
-    config::{
-        flash_config::ReadConfig as _, flash_config::WriteConfig as _, static_config::CONFIG,
-    },
+    config::{flash_config::WriteConfig as _, static_config::CONFIG},
     interface::{error::RktkError, reporter::ReporterDriver},
     utils::ThreadModeMutex,
 };
@@ -118,11 +116,8 @@ impl<'a, EkvFlash: Flash + 'a> Server<'a, EkvFlash> {
             keymap[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
             if let Some(storage) = self.storage {
                 let mut tx = storage.write_transaction().await;
-                tx.write_keymap(
-                    (key.layer as u32) << 16 | (key.row as u32) << 8 | key.col as u32,
-                    &key.key,
-                )
-                .await;
+                tx.write_keymap(key.layer as u32, &keymap[key.layer as usize])
+                    .await;
                 tx.commit().await;
             }
         }

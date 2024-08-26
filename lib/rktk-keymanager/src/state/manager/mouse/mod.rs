@@ -72,11 +72,13 @@ impl MouseLocalState {
                     Special::MoScrl => {
                         global_mouse_state.scroll_mode = false;
                     }
+                    _ => {}
                 },
                 _ => match special_op {
                     Special::MoScrl => {
                         global_mouse_state.scroll_mode = true;
                     }
+                    _ => {}
                 },
             },
             _ => {

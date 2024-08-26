@@ -154,18 +154,12 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, Ekv
 
         let mut keymap = key_config.keymap;
         for l in 0..CONFIG.layer_count {
-            for r in 0..CONFIG.rows {
-                for c in 0..CONFIG.cols {
-                    let key_id = (l as u32) << 16 | (r as u32) << 8 | c as u32;
-                    match tx.read_keymap(key_id).await {
-                        Ok(key) => {
-                            keymap[l as usize].map[r as usize][c as usize] = key;
-                            crate::print!("{:?} {:?} {:?} \n{:?}", l, r, c, key);
-                        }
-                        Err(e) => {
-                            // crate::print!("read:{:?}", e);
-                        }
-                    }
+            match tx.read_keymap(l as u32).await {
+                Ok(layer) => {
+                    keymap[l as usize] = layer;
+                }
+                Err(e) => {
+                    // crate::print!("read:{:?}", e);
                 }
             }
         }
@@ -177,7 +171,7 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, Ekv
         (None, key_config.keymap)
     };
 
-    crate::print!("config load took: {}", now.elapsed().as_millis());
+    crate::print!("config load: {}ms", now.elapsed().as_millis());
 
     let state_config = state_config.unwrap_or_else(|| StateConfig {
         mouse: MouseConfig {
@@ -243,6 +237,12 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, Ekv
                     }
                     if let Some(report) = state_report.media_keyboard_report {
                         let _ = reporter.try_send_media_keyboard_report(report);
+                    }
+                    if state_report.transparent_report.flash_clear {
+                        if let Some(storage) = storage {
+                            let _ = storage.format().await;
+                            crate::print!("Storage formatted");
+                        }
                     }
 
                     handle_led(&state_report, m2s_tx, &mut latest_led);

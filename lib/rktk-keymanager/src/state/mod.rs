@@ -7,6 +7,7 @@ use config::{
     KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
     MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
 };
+use manager::transparent::TransparentReport;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::{state::common::CommonLocalState, Layer};
@@ -22,6 +23,7 @@ pub struct StateReport {
     pub keyboard_report: Option<KeyboardReport>,
     pub mouse_report: Option<MouseReport>,
     pub media_keyboard_report: Option<MediaKeyboardReport>,
+    pub transparent_report: TransparentReport,
     pub highest_layer: u8,
 }
 
@@ -76,6 +78,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
         let mut mls = manager::mouse::MouseLocalState::new(mouse_event);
         let mut kls = manager::keyboard::KeyboardLocalState::new();
         let mut mkls = manager::media_keyboard::MediaKeyboardLocalState::new();
+        let mut tls = manager::transparent::TransparentLocalState::new();
 
         let events_with_pressing = self.pressed.update_pressed(key_events);
         for (event, kc) in self
@@ -85,6 +88,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             mls.process_event(&mut self.mouse, &kc, event);
             kls.process_event(&mut cls, &kc, event);
             mkls.process_event(&kc);
+            tls.process_event(&kc, event);
         }
 
         let highest_layer = self.cs.highest_layer();
@@ -94,6 +98,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             keyboard_report: kls.report(&cls, &mut self.keyboard),
             mouse_report: mls.report(&mut self.mouse),
             media_keyboard_report: mkls.report(&mut self.media_keyboard),
+            transparent_report: tls.report(),
             highest_layer: highest_layer as u8,
         }
     }

@@ -1,13 +1,15 @@
 use ekv::{flash::Flash, ReadTransaction, WriteTransaction};
 use embassy_sync::blocking_mutex::raw::RawMutex;
 use paste::paste;
-use rktk_keymanager::{keycode::KeyAction, state::config::StateConfig};
+use rktk_keymanager::state::config::StateConfig;
 
 mod read;
 mod write;
 
 pub use read::*;
 pub use write::*;
+
+use crate::Layer;
 
 const CONFIG_VERSION: u8 = 0x00;
 
@@ -30,5 +32,5 @@ macro_rules! def_reader_writer {
 
 def_reader_writer! {
     0, state_config, none => StateConfig
-    1, keymap, idx => KeyAction
+    1, keymap, idx => Layer
 }

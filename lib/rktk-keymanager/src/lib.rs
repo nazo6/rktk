@@ -15,9 +15,21 @@ pub mod state {
     pub mod config;
 }
 
-#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", serde_with::serde_as)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "postcard",
+    derive(postcard::experimental::max_size::MaxSize)
+)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Layer<const ROW: usize, const COL: usize> {
-    pub map: [[KeyAction; COL]; ROW],
+    // NOTE: This is workaround for issue that serde_as cannot be used with cfg-attr.
+    // ref: https://github.com/jonasbb/serde_with/issues/355
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<[[serde_with::Same; COL]; ROW]>")
+    )]
+    pub map: LayerMap<ROW, COL>,
     pub arrowmouse: bool,
 }
 

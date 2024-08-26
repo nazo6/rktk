@@ -7,4 +7,5 @@ use crate::macros::{common_derive, with_consts};
 #[derive(Copy)]
 pub enum Special {
     MoScrl,
+    FlashClear,
 }
