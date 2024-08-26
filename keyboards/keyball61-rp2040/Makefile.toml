@@ -16,7 +16,7 @@ success = set false
 r = range 1 30
 for i in ${r}
   if not ${success}
-    code = exec --get-exit-code cargo run --release
+    code = exec --get-exit-code cargo run -Z build-std=core,panic_abort -Z build-std-features=panic_immediate_abort --profile size-opt
     success = eq ${code} 0
   end
   if not ${success}
