@@ -1,5 +1,5 @@
 use embassy_usb::class::cdc_acm::CdcAcmClass;
-use embassy_usb::class::hid::{HidReaderWriter, State};
+use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 
 use embassy_usb::Builder;
@@ -24,8 +24,8 @@ macro_rules! singleton {
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,
     keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
-    mouse_hid: HidReaderWriter<'static, D, 1, 8>,
-    media_key_hid: HidReaderWriter<'static, D, 1, 8>,
+    mouse_hid: HidWriter<'static, D, 8>,
+    media_key_hid: HidWriter<'static, D, 8>,
     wakeup_signal: &'static RemoteWakeupSignal,
     rrp_serial: CdcAcmClass<'static, D>,
 }
@@ -68,7 +68,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
                 poll_ms: opts.mouse_poll_interval,
                 max_packet_size: 64,
             };
-            HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
+            HidWriter::<_, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
         let media_key_hid = {
             let config = embassy_usb::class::hid::Config {
@@ -77,7 +77,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
                 poll_ms: opts.kb_poll_interval,
                 max_packet_size: 64,
             };
-            HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
+            HidWriter::<_, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
 
         let rrp_serial = CdcAcmClass::new(

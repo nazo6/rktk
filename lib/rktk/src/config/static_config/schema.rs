@@ -38,7 +38,7 @@ pub struct StaticConfig {
     pub layout_json: &'static str,
 
     /// Timeout for detecting split USB connection (ms).
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<200>"))]
+    #[cfg_attr(not(no_build), serde(default = "u64_default::<600>"))]
     pub split_usb_timeout: u64,
 
     /// Threshold for double tap (ms).

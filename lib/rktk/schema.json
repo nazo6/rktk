@@ -134,7 +134,7 @@
     },
     "split_usb_timeout": {
       "description": "Timeout for detecting split USB connection (ms).",
-      "default": 200,
+      "default": 600,
       "type": "integer",
       "format": "uint64",
       "minimum": 0.0

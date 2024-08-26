@@ -1,7 +1,7 @@
 use embassy_futures::join::join;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, pipe::Pipe};
 use embassy_usb::class::cdc_acm;
-use embassy_usb::class::hid::HidReaderWriter;
+use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::{Driver, EndpointError};
 use embassy_usb::UsbDevice;
 use usbd_hid::descriptor::AsInputReport;
@@ -70,6 +70,11 @@ trait HidWriterTrait {
 impl<'d, D: Driver<'d>, const M: usize, const N: usize> HidWriterTrait
     for HidReaderWriter<'d, D, M, N>
 {
+    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError> {
+        self.write_serialize(r).await
+    }
+}
+impl<'d, D: Driver<'d>, const N: usize> HidWriterTrait for HidWriter<'d, D, N> {
     async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError> {
         self.write_serialize(r).await
     }
