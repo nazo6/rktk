@@ -26,32 +26,6 @@ use super::{M2sTx, S2mRx};
 
 mod rrp_server;
 
-#[macro_export]
-macro_rules! get_req {
-    ($ep_name:ident, $reporter:expr) => {{
-        use rktk_rrp::endpoints::$ep_name::*;
-        let mut buf = [0u8; Request::POSTCARD_MAX_SIZE + Request::POSTCARD_MAX_SIZE / 254 + 2];
-        read_until_zero($reporter, &mut buf).await;
-        let Ok(req) = postcard::from_bytes_cobs::<Request>(&mut buf) else {
-            continue;
-        };
-        req
-    }};
-}
-
-#[macro_export]
-macro_rules! send_res {
-    ($ep_name:ident, $reporter:expr, $val:expr) => {{
-        use rktk_rrp::endpoints::$ep_name::*;
-        let mut buf = [0u8; Response::POSTCARD_MAX_SIZE + Response::POSTCARD_MAX_SIZE / 254 + 2];
-        let val: &Response = $val;
-        let Ok(res) = postcard::to_slice_cobs(val, &mut buf) else {
-            continue;
-        };
-        let _ = $reporter.send_rrp_data(res).await;
-    }};
-}
-
 fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
         ev.col = CONFIG.cols - 1 - ev.col;
