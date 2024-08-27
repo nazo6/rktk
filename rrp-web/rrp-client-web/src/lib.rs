@@ -1,5 +1,5 @@
 use async_lock::Mutex;
-use futures::stream::StreamExt as _;
+use futures::{stream::StreamExt as _, StreamExt};
 
 use log::info;
 use rktk_rrp::endpoints::*;
@@ -107,5 +107,36 @@ impl Client {
             .set_keymap_config(keymap_config)
             .await
             .map_err(|e| format!("{:?}", e))
+    }
+
+    #[wasm_bindgen]
+    pub async fn get_log(&self) -> Result<Vec<String>, String> {
+        let mut serial = self.serial_client.lock().await;
+        let stream = serial.get_log(()).await.map_err(|e| format!("{:?}", e))?;
+        let mut stream = std::pin::pin!(stream);
+
+        let mut logs = Vec::new();
+        let mut log = Vec::new();
+        let mut breaking = true;
+        while let Some(chunk) = stream.next().await {
+            match chunk {
+                get_log::LogChunk::Bytes { bytes, len } => {
+                    breaking = false;
+                    log.extend_from_slice(&bytes[..len as usize]);
+                }
+                get_log::LogChunk::Break => {
+                    if !breaking {
+                        let Ok(str) = String::from_utf8(log.clone()).map_err(|e| e.to_string())
+                        else {
+                            continue;
+                        };
+                        logs.push(str);
+                        log.clear();
+                        breaking = true;
+                    }
+                }
+            }
+        }
+        Ok(logs)
     }
 }

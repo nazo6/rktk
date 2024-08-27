@@ -1,5 +1,5 @@
 use embassy_futures::join::join;
-use embassy_time::Timer;
+use embassy_time::{Duration, Timer};
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, StateConfig},
     KeyChangeEvent, State, StateReport,
@@ -108,7 +108,7 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
 
         match s.read_version().await {
             Ok(1) => {
-                crate::print!("Storage version matched!");
+                // crate::print!("Storage version matched!");
                 config_storage = Some(s);
             }
             Ok(i) => {
@@ -164,6 +164,11 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
     join(
         async {
             let mut prev_time = embassy_time::Instant::now();
+
+            let mut duration_max = Duration::from_millis(0);
+            let mut duration_sum = Duration::from_millis(0);
+            let mut loop_count = 0;
+
             loop {
                 let start = embassy_time::Instant::now();
                 let since_last_update = start - prev_time;
@@ -216,6 +221,22 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
                 handle_led(&state_report, m2s_tx, &mut latest_led);
 
                 let took = start.elapsed();
+
+                if took > duration_max {
+                    duration_max = took;
+                }
+                duration_sum += took;
+                loop_count += 1;
+                if loop_count % 100 == 0 {
+                    log::info!(
+                        "Max: {}us, Avg: {}us",
+                        duration_max.as_micros(),
+                        duration_sum.as_micros() / loop_count
+                    );
+                    duration_max = Duration::from_millis(0);
+                    duration_sum = Duration::from_millis(0);
+                    loop_count = 0;
+                }
 
                 if took < SCAN_INTERVAL_KEYBOARD {
                     Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;

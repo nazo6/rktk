@@ -67,3 +67,21 @@ pub mod set_keymap_config {
     pub type Request = rktk_keymanager::state::config::StateConfig;
     pub type Response = ();
 }
+
+pub mod get_log {
+    use macro_rules_attribute::apply;
+
+    #[serde_with::serde_as]
+    #[apply(super::common_derive)]
+    pub enum LogChunk {
+        Bytes {
+            #[serde(with = "serde_with::As::<[serde_with::Same; 128]>")]
+            bytes: [u8; 128],
+            len: u8,
+        },
+        Break,
+    }
+
+    pub type Request = ();
+    pub type StreamResponse = LogChunk;
+}

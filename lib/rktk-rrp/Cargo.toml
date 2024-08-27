@@ -12,6 +12,7 @@ postcard = { workspace = true, features = ["experimental-derive"] }
 heapless = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+serde_with = { workspace = true, features = ["macros"] }
 macro_rules_attribute = { workspace = true }
 
 specta = { workspace = true, optional = true, features = ["derive"] }

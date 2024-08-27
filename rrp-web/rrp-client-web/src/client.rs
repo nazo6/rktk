@@ -1,3 +1,5 @@
+use futures::future::select;
+use gloo_timers::future::TimeoutFuture;
 use rktk_rrp::endpoint_client;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
@@ -45,36 +47,43 @@ impl SerialClient {
             .dyn_into::<web_sys::ReadableStreamByobReader>()
             .expect("Invalid readable stream");
 
-        let res = async {
-            loop {
-                let typed_array = web_sys::js_sys::Uint8Array::new(&JsValue::from(1));
-                let promise = reader.read_with_array_buffer_view(&typed_array);
-                let obj = JsFuture::from(promise)
-                    .await
-                    .map_err(|e| anyhow::anyhow!("Failed to read data: {:?}", e))?;
+        let res = match select(
+            std::pin::pin!(async {
+                loop {
+                    let typed_array = web_sys::js_sys::Uint8Array::new(&JsValue::from(1));
+                    let promise = reader.read_with_array_buffer_view(&typed_array);
+                    let obj = JsFuture::from(promise)
+                        .await
+                        .map_err(|e| anyhow::anyhow!("Failed to read data: {:?}", e))?;
 
-                let done = js_sys::Reflect::get(&obj, &JsValue::from("done"))
-                    .expect("Failed to get done property of data")
-                    .as_bool()
-                    .unwrap_or(false);
-                if done {
-                    Err(anyhow::anyhow!("EOF"))?;
-                } else {
-                    let array = js_sys::Reflect::get(&obj, &JsValue::from("value"))
-                        .expect("Failed to get value property of data")
-                        .dyn_into::<js_sys::Uint8Array>()
-                        .expect("Expected Uint8Array");
+                    let done = js_sys::Reflect::get(&obj, &JsValue::from("done"))
+                        .expect("Failed to get done property of data")
+                        .as_bool()
+                        .unwrap_or(false);
+                    if done {
+                        Err(anyhow::anyhow!("EOF"))?;
+                    } else {
+                        let array = js_sys::Reflect::get(&obj, &JsValue::from("value"))
+                            .expect("Failed to get value property of data")
+                            .dyn_into::<js_sys::Uint8Array>()
+                            .expect("Expected Uint8Array");
 
-                    let val = array.get_index(0);
-                    buf.push(val);
-                    if val == 0 {
-                        break;
+                        let val = array.get_index(0);
+                        buf.push(val);
+                        if val == 0 {
+                            break;
+                        }
                     }
                 }
-            }
-            Result::<(), anyhow::Error>::Ok(())
-        }
-        .await;
+                Result::<(), anyhow::Error>::Ok(())
+            }),
+            TimeoutFuture::new(500),
+        )
+        .await
+        {
+            futures::future::Either::Left((res, _)) => res,
+            futures::future::Either::Right(_) => Err(anyhow::anyhow!("Timeout")),
+        };
 
         reader.release_lock();
 
@@ -90,5 +99,6 @@ impl SerialClient {
         set_keymaps stream normal
         get_keymap_config normal normal
         set_keymap_config normal normal
+        get_log normal stream
     );
 }

@@ -19,6 +19,7 @@ use crate::{
 
 mod backlight;
 pub mod display;
+mod logger;
 mod main_loop;
 
 /// All drivers required to run the keyboard.
@@ -87,6 +88,13 @@ pub async fn start<
     >,
     key_config: KeyConfig,
 ) {
+    critical_section::with(|_| unsafe {
+        let _ = log::set_logger_racy(&logger::RRP_LOGGER);
+        log::set_max_level_racy(log::LevelFilter::Info);
+    });
+
+    log::info!("RKTK Start");
+
     if let Some(dtr) = &mut drivers.double_tap_reset {
         dtr.execute(Duration::from_millis(CONFIG.double_tap_threshold))
             .await;

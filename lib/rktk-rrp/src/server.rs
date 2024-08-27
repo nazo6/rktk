@@ -76,7 +76,8 @@ macro_rules! endpoint_server {
 
     (@send stream $et:expr, $ep:ident, $data:expr) => {{
         use $crate::__reexports::futures::stream::StreamExt;
-        while let Some(res) = $data.next().await {
+        let mut data = core::pin::pin!($data);
+        while let Some(res) = data.next().await {
             let res: StreamResponse = res;
             let mut buf = [0u8; StreamResponse::POSTCARD_MAX_SIZE + StreamResponse::POSTCARD_MAX_SIZE / 254 + 2];
             let Ok(res) = postcard::to_slice_cobs(&res, &mut buf) else {

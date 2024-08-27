@@ -274,9 +274,9 @@ dependencies = [
 
 [[package]]
 name = "critical-section"
-version = "1.1.2"
+version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7059fff8937831a9ae6f0fe4d658ffabf58f2ca96aa9dec1c889f936f705f216"
+checksum = "f64009896348fc5af4222e9cf7d7d82a95a256c634ebcf61c53e4ea461422242"
 
 [[package]]
 name = "crossbeam-utils"
@@ -1018,6 +1018,18 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
+]
+
+[[package]]
+name = "gloo-timers"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "js-sys",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1861,6 +1873,7 @@ dependencies = [
  "futures",
  "heapless 0.7.17",
  "itertools 0.13.0",
+ "log",
  "paste",
  "postcard",
  "pretty_assertions",
@@ -1975,6 +1988,7 @@ dependencies = [
  "postcard",
  "rktk-keymanager",
  "serde",
+ "serde_with",
  "specta",
  "tsify-next",
  "wasm-bindgen",
@@ -2007,6 +2021,7 @@ dependencies = [
  "async-lock",
  "console_log",
  "futures",
+ "gloo-timers",
  "log",
  "rktk-keymanager",
  "rktk-rrp",

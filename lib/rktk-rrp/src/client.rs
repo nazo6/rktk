@@ -46,16 +46,17 @@ macro_rules! endpoint_client {
             let mut buf = vec![];
             loop {
                 let Ok(size) = $et.read_until_zero(&mut buf).await else {
-                    continue;
+                    break;
                 };
                 if buf.len() == 1 {
-                    return None;
+                    break;
                 }
                 let Ok(req) = from_bytes_cobs::<$crate::endpoints::$endpoint::StreamResponse>(&mut buf) else {
-                    continue;
+                    break;
                 };
                 return Some((req, ()));
             }
+            return None;
         })
     }};
 

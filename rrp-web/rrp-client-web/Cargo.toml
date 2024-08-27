@@ -32,3 +32,4 @@ futures = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
 tsify-next = { workspace = true }
 async-lock = "3.4.0"
+gloo-timers = { version = "0.3.0", features = ["futures"] }

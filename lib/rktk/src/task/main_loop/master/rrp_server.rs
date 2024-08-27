@@ -61,6 +61,7 @@ impl<'a, S: StorageDriver> Server<'a, S> {
         set_keymaps stream normal => set_keymaps
         get_keymap_config normal normal => get_keymap_config
         set_keymap_config normal normal => set_keymap_config
+        get_log normal stream => get_log
     );
 
     async fn get_info(&mut self, _req: get_keyboard_info::Request) -> get_keyboard_info::Response {
@@ -143,5 +144,18 @@ impl<'a, S: StorageDriver> Server<'a, S> {
             }
         }
         *self.state.lock().await = State::new(keymap, req);
+    }
+
+    async fn get_log(
+        &mut self,
+        _req: get_log::Request,
+    ) -> impl Stream<Item = get_log::StreamResponse> + '_ {
+        futures::stream::iter(core::iter::from_fn(|| {
+            if let Ok(chunk) = crate::task::logger::LOG_CHANNEL.try_receive() {
+                Some(chunk)
+            } else {
+                None
+            }
+        }))
     }
 }
