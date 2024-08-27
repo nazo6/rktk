@@ -3,7 +3,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 export function LogViewerPage(props: { connection: Connection }) {
-  const { data, error, fetchNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage } = useInfiniteQuery({
     queryKey: ["getLog"],
     queryFn: async () => {
       const data = await props.connection.client.get_log();
