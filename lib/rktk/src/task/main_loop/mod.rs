@@ -6,6 +6,7 @@ use crate::{
         mouse::MouseDriver,
         reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
+        storage::StorageDriver,
     },
     KeyConfig,
 };
@@ -36,12 +37,12 @@ pub async fn start<
     SP: SplitDriver,
     BL: BacklightDriver,
     R: ReporterDriver,
-    EkvFlash: ekv::flash::Flash,
+    S: StorageDriver,
 >(
     reporter: Option<&R>,
     mut key_scanner: KS,
     mouse: Option<M>,
-    storage: Option<&'a ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
+    storage: Option<S>,
     mut split: SP,
     backlight: Option<BL>,
     key_config: KeyConfig,

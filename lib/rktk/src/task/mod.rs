@@ -1,11 +1,9 @@
 //! Program entrypoint.
 
-use ekv::flash::Flash;
 use embassy_futures::{
     join::join,
     select::{select, Either},
 };
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_time::{Duration, Timer};
 
 use crate::{
@@ -13,7 +11,8 @@ use crate::{
     interface::{
         backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
         double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
-        reporter::DummyReporterDriver, split::SplitDriver, usb::UsbDriver, DriverBuilder,
+        reporter::DummyReporterDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
+        DriverBuilder,
     },
     KeyConfig,
 };
@@ -27,7 +26,6 @@ mod main_loop;
 /// Only the `key_scanner` and `usb` drivers are required.
 /// For other drivers, if the value is None, it will be handled appropriately.
 pub struct Drivers<
-    'a,
     // required drivers
     KeyScan: KeyscanDriver,
     Split: SplitDriver,
@@ -39,7 +37,7 @@ pub struct Drivers<
     Backlight: BacklightDriver,
     Ble: BleDriver,
     DoubleTapReset: DoubleTapResetDriver,
-    EkvFlash: Flash,
+    Storage: StorageDriver,
     // optional drivers of builder
     Mouse: MouseDriver,
     Display: DisplayDriver,
@@ -50,7 +48,7 @@ pub struct Drivers<
     pub split: Split,
     pub backlight: Option<Backlight>,
     pub ble: Option<Ble>,
-    pub storage: Option<&'a ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
+    pub storage: Option<Storage>,
 
     pub usb_builder: Option<UsbBuilder>,
     pub mouse_builder: Option<MouseBuilder>,
@@ -68,13 +66,12 @@ pub async fn start<
     Backlight: BacklightDriver,
     Ble: BleDriver,
     DoubleTapReset: DoubleTapResetDriver,
-    EkvFlash: Flash,
+    Storage: StorageDriver,
     Mouse: MouseDriver,
     Display: DisplayDriver,
     Usb: UsbDriver,
 >(
     mut drivers: Drivers<
-        '_,
         KeyScan,
         Split,
         MouseBuilder,
@@ -83,7 +80,7 @@ pub async fn start<
         Backlight,
         Ble,
         DoubleTapReset,
-        EkvFlash,
+        Storage,
         Mouse,
         Display,
         Usb,

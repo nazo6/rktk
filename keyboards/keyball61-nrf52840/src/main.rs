@@ -14,14 +14,15 @@ use embassy_nrf::{
 };
 use once_cell::sync::OnceCell;
 
-use rktk::{
-    interface::{double_tap::DummyDoubleTapResetDriver, rand::RandomDriver as _},
-    task::Drivers,
-};
+use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
 use rktk_drivers_nrf52::{
-    backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
-    keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360::create_pmw3360, panic_utils,
-    softdevice::ble::init_ble_server, split::uart_half_duplex::UartHalfDuplexSplitDriver,
+    backlight::ws2812_pwm::Ws2812Pwm,
+    display::ssd1306::create_ssd1306,
+    keyscan::duplex_matrix::create_duplex_matrix,
+    mouse::pmw3360::create_pmw3360,
+    panic_utils,
+    softdevice::{ble::init_ble_server, flash::get_flash},
+    split::uart_half_duplex::UartHalfDuplexSplitDriver,
     usb::UsbOpts,
 };
 
@@ -128,14 +129,14 @@ async fn main(_spawner: Spawner) {
 
     embassy_time::Timer::after_millis(50).await;
 
-    let rand = rktk_drivers_nrf52::softdevice::rand::SdRand::new(sd);
+    // let rand = rktk_drivers_nrf52::softdevice::rand::SdRand::new(sd);
 
-    let storage =
-        rktk_drivers_nrf52::softdevice::flash::init_database(sd, rand.get_random().unwrap());
+    let (flash, cache) = get_flash(sd);
+    let storage = rktk_drivers_nrf52::softdevice::flash::create_storage_driver(&flash, &cache);
 
     let ble = {
         #[cfg(feature = "ble-master")]
-        let ble = Some(NrfBleDriver::new(sd, server, "keyball61", storage).await);
+        let ble = Some(NrfBleDriver::new(sd, server, "keyball61", flash).await);
 
         #[cfg(not(feature = "ble-master"))]
         let ble = Option::<DummyBleDriver>::None;

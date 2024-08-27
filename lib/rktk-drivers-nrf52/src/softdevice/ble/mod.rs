@@ -16,7 +16,7 @@ use rktk::interface::{ble::BleDriver, error::RktkError, reporter::ReporterDriver
 use server::Server;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use super::flash::NrfDb;
+use super::flash::SharedFlash;
 
 mod bonder;
 mod constant;
@@ -47,7 +47,7 @@ impl NrfBleDriver {
         sd: &'static Softdevice,
         server: Server,
         name: &'static str,
-        flash: &'static NrfDb,
+        flash: &'static SharedFlash,
     ) -> Self {
         let spawner = embassy_executor::Spawner::for_current_executor().await;
         spawner.spawn(server_task(sd, server, name, flash)).unwrap();
@@ -89,7 +89,7 @@ async fn server_task(
     sd: &'static Softdevice,
     server: Server,
     name: &'static str,
-    db: &'static NrfDb,
+    db: &'static SharedFlash,
 ) -> ! {
     let adv_data: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
         .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])

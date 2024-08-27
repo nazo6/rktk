@@ -34,7 +34,6 @@ nrf-softdevice = { workspace = true, features = [
 ] }
 embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
-ekv = { workspace = true }
 
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }

@@ -5,4 +5,5 @@ pub mod display;
 pub mod keyscan;
 pub mod mouse;
 pub mod panic_utils;
+pub mod storage;
 pub mod usb;

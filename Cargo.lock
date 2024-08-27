@@ -500,15 +500,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "60b1af1c220855b6ceac025d3f6ecdd2b7c4894bfe9cd9bda4fbb4bc7c0d4cf0"
 
 [[package]]
-name = "ekv"
-version = "0.1.0"
-source = "git+https://github.com/embassy-rs/ekv#fa338d275c22c35347331bf839510c03f90525b5"
-dependencies = [
- "embassy-sync 0.6.0",
- "heapless 0.8.0",
-]
-
-[[package]]
 name = "embassy-embedded-hal"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1863,12 +1854,10 @@ dependencies = [
  "bitflags 2.6.0",
  "critical-section",
  "display-interface",
- "ekv",
  "embassy-futures",
  "embassy-sync 0.6.0",
  "embassy-time",
  "embedded-graphics",
- "embedded-storage-async",
  "futures",
  "heapless 0.7.17",
  "itertools 0.13.0",
@@ -1898,8 +1887,10 @@ dependencies = [
  "embedded-graphics",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
+ "embedded-storage-async",
  "heapless 0.7.17",
  "rktk",
+ "sequential-storage",
  "ssd1306",
  "static_cell",
  "usbd-hid",
@@ -1912,7 +1903,6 @@ dependencies = [
  "bitvec",
  "defmt",
  "display-interface",
- "ekv",
  "embassy-executor",
  "embassy-futures",
  "embassy-nrf",
@@ -1937,13 +1927,13 @@ name = "rktk-drivers-rp2040"
 version = "0.0.1"
 dependencies = [
  "display-interface",
- "ekv",
  "embassy-executor",
  "embassy-futures",
  "embassy-rp",
  "embassy-sync 0.6.0",
  "embassy-time",
  "embassy-usb",
+ "embedded-storage-async",
  "fixed",
  "fixed-macro",
  "pio",
@@ -2108,6 +2098,15 @@ name = "semver-parser"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
+
+[[package]]
+name = "sequential-storage"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b80693b2169b3fe0f9c68d5fae804490cc437113c0526dbabb75c01e758db597"
+dependencies = [
+ "embedded-storage-async",
+]
 
 [[package]]
 name = "serde"

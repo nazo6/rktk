@@ -1,6 +1,4 @@
-use ekv::flash::Flash;
-use embassy_futures::{join::join, select::select};
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_futures::join::join;
 use embassy_time::Timer;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, StateConfig},
@@ -8,14 +6,17 @@ use rktk_keymanager::state::{
 };
 
 use crate::{
-    config::flash_config::ReadConfig as _,
-    config::static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
+    config::{
+        static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
+        storage_config::StorageConfigManager,
+    },
     interface::{
         backlight::{BacklightCtrl, BacklightMode},
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster},
+        storage::StorageDriver,
     },
     task::backlight::BACKLIGHT_CTRL,
     utils::ThreadModeMutex,
@@ -91,61 +92,53 @@ fn handle_led(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, EkvFlash: Flash>(
+pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: StorageDriver>(
     m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
     reporter: &'a R,
     mut key_scanner: KS,
-    storage: Option<&'a ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
+    storage: Option<S>,
     mut mouse: Option<M>,
     key_config: KeyConfig,
     hand: crate::interface::keyscan::Hand,
 ) {
-    let now = embassy_time::Instant::now();
-    let (state_config, keymap) = if let Some(storage) = storage {
-        if (storage.mount().await).is_err() {
-            if let Err(e) = storage.format().await {
-                crate::print!("Failed to format storage: {:?}", e);
-            } else {
-                crate::print!("Storage formatted");
+    let mut config_storage = None;
+    if let Some(s) = storage {
+        let s = StorageConfigManager::new(s);
+
+        match s.read_version().await {
+            Ok(1) => {
+                crate::print!("Storage version matched!");
+                config_storage = Some(s);
             }
-        }
-
-        let mut tx = storage.write_transaction().await;
-        tx.write(&[0, 1, 2, 3], &[4, 5, 6, 7]).await.unwrap();
-        tx.commit().await.unwrap();
-
-        let mut buf = [0, 0, 0, 0];
-        storage
-            .read_transaction()
-            .await
-            .read(&[0, 1, 2, 3], &mut buf)
-            .await
-            .expect("read fail");
-        assert_eq!(&buf, &[4, 5, 6, 7]);
-
-        let tx = storage.read_transaction().await;
-
-        let mut keymap = key_config.keymap;
-        for l in 0..CONFIG.layer_count {
-            match tx.read_keymap(l as u32).await {
-                Ok(layer) => {
-                    keymap[l as usize] = layer;
+            Ok(i) => {
+                crate::print!("Storage version mismatch: {}", i);
+            }
+            Err(_e) => match s.write_version(1).await {
+                Ok(_) => {
+                    config_storage = Some(s);
                 }
                 Err(e) => {
-                    // crate::print!("read:{:?}", e);
+                    crate::print!("Failed to access storage: {:?}", e);
                 }
+            },
+        }
+    }
+
+    let (state_config, keymap) = if let Some(storage) = &config_storage {
+        let mut keymap = key_config.keymap;
+        for l in 0..CONFIG.layer_count {
+            if let Ok(layer) = storage.read_keymap(l).await {
+                keymap[l as usize] = layer;
             }
         }
 
-        let c = tx.read_state_config().await;
+        let c = storage.read_state_config().await;
 
         (c.ok(), keymap)
     } else {
         (None, key_config.keymap)
     };
-
-    crate::print!("config load: {}ms", now.elapsed().as_millis());
 
     let state_config = state_config.unwrap_or_else(|| StateConfig {
         mouse: MouseConfig {
@@ -168,75 +161,75 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, Ekv
 
     let mut latest_led: Option<BacklightCtrl> = None;
 
-    loop {
-        select(
-            async {
-                let mut prev_time = embassy_time::Instant::now();
-                loop {
-                    let start = embassy_time::Instant::now();
-                    let since_last_update = start - prev_time;
-                    prev_time = start;
+    join(
+        async {
+            let mut prev_time = embassy_time::Instant::now();
+            loop {
+                let start = embassy_time::Instant::now();
+                let since_last_update = start - prev_time;
+                prev_time = start;
 
-                    let mut mouse_move: (i8, i8) = (0, 0);
+                let mut mouse_move: (i8, i8) = (0, 0);
 
-                    let (mut events, _) = join(key_scanner.scan(), async {
-                        if let Some(mouse) = &mut mouse {
-                            if let Ok((x, y)) = mouse.read().await {
-                                mouse_move.0 += x;
-                                mouse_move.1 += y;
-                            }
-                        }
-                    })
-                    .await;
-
-                    events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
-
-                    receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
-
-                    let state_report = state.lock().await.update(
-                        &mut events,
-                        mouse_move,
-                        since_last_update.into(),
-                    );
-
-                    crate::utils::display_state!(HighestLayer, state_report.highest_layer);
-
-                    if let Some(report) = state_report.keyboard_report {
-                        let _ = reporter.try_send_keyboard_report(report);
-                        let _ = reporter.wakeup();
-                    }
-                    if let Some(report) = state_report.mouse_report {
-                        crate::utils::display_state!(MouseMove, (report.x, report.y));
-                        let _ = reporter.try_send_mouse_report(report);
-                    }
-                    if let Some(report) = state_report.media_keyboard_report {
-                        let _ = reporter.try_send_media_keyboard_report(report);
-                    }
-                    if state_report.transparent_report.flash_clear {
-                        if let Some(storage) = storage {
-                            let _ = storage.format().await;
-                            crate::print!("Storage formatted");
+                let (mut events, _) = join(key_scanner.scan(), async {
+                    if let Some(mouse) = &mut mouse {
+                        if let Ok((x, y)) = mouse.read().await {
+                            mouse_move.0 += x;
+                            mouse_move.1 += y;
                         }
                     }
+                })
+                .await;
 
-                    handle_led(&state_report, m2s_tx, &mut latest_led);
+                events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
 
-                    let took = start.elapsed();
+                receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
 
-                    if took < SCAN_INTERVAL_KEYBOARD {
-                        Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
+                let state_report =
+                    state
+                        .lock()
+                        .await
+                        .update(&mut events, mouse_move, since_last_update.into());
+
+                crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+
+                if let Some(report) = state_report.keyboard_report {
+                    let _ = reporter.try_send_keyboard_report(report);
+                    let _ = reporter.wakeup();
+                }
+                if let Some(report) = state_report.mouse_report {
+                    crate::utils::display_state!(MouseMove, (report.x, report.y));
+                    let _ = reporter.try_send_mouse_report(report);
+                }
+                if let Some(report) = state_report.media_keyboard_report {
+                    let _ = reporter.try_send_media_keyboard_report(report);
+                }
+                if state_report.transparent_report.flash_clear {
+                    if let Some(ref storage) = config_storage {
+                        match storage.storage.format().await {
+                            Ok(_) => crate::print!("Storage formatted"),
+                            Err(e) => crate::print!("Failed to format storage: {:?}", e),
+                        }
                     }
                 }
-            },
-            async {
-                let mut server = rrp_server::Server {
-                    state: &state,
-                    storage,
-                };
-                let et = rrp_server::EndpointTransportImpl(reporter);
-                server.handle(&et).await;
-            },
-        )
-        .await;
-    }
+
+                handle_led(&state_report, m2s_tx, &mut latest_led);
+
+                let took = start.elapsed();
+
+                if took < SCAN_INTERVAL_KEYBOARD {
+                    Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
+                }
+            }
+        },
+        async {
+            let mut server = rrp_server::Server {
+                state: &state,
+                storage: config_storage.as_ref(),
+            };
+            let et = rrp_server::EndpointTransportImpl(reporter);
+            server.handle(&et).await;
+        },
+    )
+    .await;
 }

@@ -30,4 +30,4 @@ smart-leds = { workspace = true }
 pio-proc = "0.2.2"
 pio = "0.2.1"
 rand_core = { workspace = true }
-ekv = { workspace = true, features = ["max-page-count-1024"] }
+embedded-storage-async = { workspace = true }

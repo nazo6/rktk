@@ -1,13 +1,11 @@
-use ekv::flash::Flash;
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use futures::{Stream, StreamExt as _};
 use get_keyboard_info::KeyboardInfo;
 use rktk_keymanager::state::State;
 use rktk_rrp::{endpoint_server, endpoints::*, server::EndpointTransport};
 
 use crate::{
-    config::{flash_config::WriteConfig as _, static_config::CONFIG},
-    interface::{error::RktkError, reporter::ReporterDriver},
+    config::{static_config::CONFIG, storage_config::StorageConfigManager},
+    interface::{error::RktkError, reporter::ReporterDriver, storage::StorageDriver},
     utils::ThreadModeMutex,
 };
 
@@ -51,11 +49,11 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
 type ConfiguredState =
     State<{ CONFIG.layer_count as usize }, { CONFIG.rows as usize }, { CONFIG.cols as usize }>;
 
-pub struct Server<'a, EkvFlash: Flash> {
+pub struct Server<'a, S: StorageDriver> {
     pub state: &'a ThreadModeMutex<ConfiguredState>,
-    pub storage: Option<&'a ekv::Database<EkvFlash, CriticalSectionRawMutex>>,
+    pub storage: Option<&'a StorageConfigManager<S>>,
 }
-impl<'a, EkvFlash: Flash + 'a> Server<'a, EkvFlash> {
+impl<'a, S: StorageDriver> Server<'a, S> {
     endpoint_server!(
         get_keyboard_info normal normal => get_info
         get_layout_json normal stream => get_layout_json
@@ -115,10 +113,12 @@ impl<'a, EkvFlash: Flash + 'a> Server<'a, EkvFlash> {
         while let Some(key) = req.next().await {
             keymap[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
             if let Some(storage) = self.storage {
-                let mut tx = storage.write_transaction().await;
-                tx.write_keymap(key.layer as u32, &keymap[key.layer as usize])
-                    .await;
-                tx.commit().await;
+                if let Err(_e) = storage
+                    .write_keymap(key.layer, &keymap[key.layer as usize])
+                    .await
+                {
+                    crate::print!("set_keymaps failed");
+                }
             }
         }
         *self.state.lock().await = State::new(keymap, config);
@@ -138,9 +138,9 @@ impl<'a, EkvFlash: Flash + 'a> Server<'a, EkvFlash> {
         let keymap = self.state.lock().await.get_keymap().clone();
 
         if let Some(storage) = self.storage {
-            let mut tx = storage.write_transaction().await;
-            tx.write_state_config(req.clone()).await;
-            tx.commit().await;
+            if let Err(_e) = storage.write_state_config(&req).await {
+                crate::print!("set_keymap_config failed");
+            }
         }
         *self.state.lock().await = State::new(keymap, req);
     }

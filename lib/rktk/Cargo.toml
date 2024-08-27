@@ -15,7 +15,6 @@ embassy-futures = { workspace = true }
 
 usbd-hid = { workspace = true }
 
-embedded-storage-async = { workspace = true }
 embedded-graphics = { workspace = true }
 display-interface = { workspace = true }
 
@@ -23,7 +22,6 @@ smart-leds = { workspace = true }
 
 heapless = { workspace = true }
 serde = { version = "1.0.203", default-features = false, features = ["derive"] }
-ekv = { workspace = true }
 
 paste = "1.0.15"
 bitflags = "2.6.0"

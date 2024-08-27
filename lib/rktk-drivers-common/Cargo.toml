@@ -20,6 +20,8 @@ embassy-usb = { workspace = true, features = [
 ] }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
+embedded-storage-async = { workspace = true }
+sequential-storage = { workspace = true }
 
 usbd-hid = { workspace = true }
 

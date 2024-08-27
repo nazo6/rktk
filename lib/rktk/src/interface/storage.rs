@@ -1,38 +1,23 @@
-pub use ekv;
-use ekv::Database;
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-pub use embedded_storage_async;
+use core::fmt::Debug;
 
-pub enum DummyFlash {}
+/// Storage driver interface
+pub trait StorageDriver {
+    type Error: Debug;
+    async fn format(&self) -> Result<(), Self::Error>;
+    async fn read<const N: usize>(&self, key: u64, buf: &mut [u8]) -> Result<(), Self::Error>;
+    async fn write<const N: usize>(&self, key: u64, buf: &[u8]) -> Result<(), Self::Error>;
+}
 
-impl ekv::flash::Flash for DummyFlash {
+pub enum DummyStorageDriver {}
+impl StorageDriver for DummyStorageDriver {
     type Error = ();
-
-    fn page_count(&self) -> usize {
+    async fn format(&self) -> Result<(), Self::Error> {
         unimplemented!()
     }
-
-    async fn erase(&mut self, _page_id: ekv::flash::PageID) -> Result<(), Self::Error> {
+    async fn read<const N: usize>(&self, _key: u64, _buf: &mut [u8]) -> Result<(), Self::Error> {
         unimplemented!()
     }
-
-    async fn read(
-        &mut self,
-        _page_id: ekv::flash::PageID,
-        _offset: usize,
-        _data: &mut [u8],
-    ) -> Result<(), Self::Error> {
-        unimplemented!()
-    }
-
-    async fn write(
-        &mut self,
-        _page_id: ekv::flash::PageID,
-        _offset: usize,
-        _data: &[u8],
-    ) -> Result<(), Self::Error> {
+    async fn write<const N: usize>(&self, _key: u64, _buf: &[u8]) -> Result<(), Self::Error> {
         unimplemented!()
     }
 }
-
-pub type DummyStorage = Database<DummyFlash, CriticalSectionRawMutex>;
