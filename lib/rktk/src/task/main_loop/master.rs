@@ -108,10 +108,11 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
 
         match s.read_version().await {
             Ok(1) => {
-                // crate::print!("Storage version matched!");
+                log::info!("Storage version matched");
                 config_storage = Some(s);
             }
             Ok(i) => {
+                log::warn!("Storage version matched");
                 crate::print!("Storage version mismatch: {}", i);
             }
             Err(_e) => match s.write_version(1).await {
@@ -119,6 +120,7 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
                     config_storage = Some(s);
                 }
                 Err(e) => {
+                    log::error!("Storage to write version to storage: {:?}", e);
                     crate::print!("Failed to access storage: {:?}", e);
                 }
             },
@@ -157,17 +159,13 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
 
     let state = ThreadModeMutex::new(State::new(keymap, state_config));
 
-    // crate::print!("Master start");
+    log::info!("Master side task start");
 
     let mut latest_led: Option<BacklightCtrl> = None;
 
     join(
         async {
             let mut prev_time = embassy_time::Instant::now();
-
-            let mut duration_max = Duration::from_millis(0);
-            let mut duration_sum = Duration::from_millis(0);
-            let mut loop_count = 0;
 
             loop {
                 let start = embassy_time::Instant::now();
@@ -199,21 +197,33 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
                 crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
                 if let Some(report) = state_report.keyboard_report {
-                    let _ = reporter.try_send_keyboard_report(report);
+                    if let Err(e) = reporter.try_send_keyboard_report(report) {
+                        log::warn!("Failed to send keyboard report: {:?}", e);
+                    }
                     let _ = reporter.wakeup();
                 }
                 if let Some(report) = state_report.mouse_report {
                     crate::utils::display_state!(MouseMove, (report.x, report.y));
-                    let _ = reporter.try_send_mouse_report(report);
+                    if let Err(e) = reporter.try_send_mouse_report(report) {
+                        log::warn!("Failed to send mouse report: {:?}", e);
+                    }
                 }
                 if let Some(report) = state_report.media_keyboard_report {
-                    let _ = reporter.try_send_media_keyboard_report(report);
+                    if let Err(e) = reporter.try_send_media_keyboard_report(report) {
+                        log::warn!("Failed to send media keyboard report: {:?}", e);
+                    }
                 }
                 if state_report.transparent_report.flash_clear {
                     if let Some(ref storage) = config_storage {
                         match storage.storage.format().await {
-                            Ok(_) => crate::print!("Storage formatted"),
-                            Err(e) => crate::print!("Failed to format storage: {:?}", e),
+                            Ok(_) => {
+                                log::info!("Storage formatted by report");
+                                crate::print!("Storage formatted")
+                            }
+                            Err(e) => {
+                                log::error!("Failed to format storage: {:?}", e);
+                                crate::print!("Failed to format storage: {:?}", e)
+                            }
                         }
                     }
                 }
@@ -221,22 +231,6 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
                 handle_led(&state_report, m2s_tx, &mut latest_led);
 
                 let took = start.elapsed();
-
-                if took > duration_max {
-                    duration_max = took;
-                }
-                duration_sum += took;
-                loop_count += 1;
-                if loop_count % 100 == 0 {
-                    log::info!(
-                        "Max: {}us, Avg: {}us",
-                        duration_max.as_micros(),
-                        duration_sum.as_micros() / loop_count
-                    );
-                    duration_max = Duration::from_millis(0);
-                    duration_sum = Duration::from_millis(0);
-                    loop_count = 0;
-                }
 
                 if took < SCAN_INTERVAL_KEYBOARD {
                     Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;

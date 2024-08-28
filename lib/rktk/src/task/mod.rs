@@ -93,7 +93,15 @@ pub async fn start<
         log::set_max_level_racy(log::LevelFilter::Info);
     });
 
-    log::info!("RKTK Start");
+    log::info!(
+        "RKTK Starting... (backlight: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
+        drivers.backlight.is_some(),
+        drivers.ble.is_some(),
+        drivers.usb_builder.is_some(),
+        drivers.storage.is_some(),
+        drivers.mouse_builder.is_some(),
+        drivers.display_builder.is_some(),
+    );
 
     if let Some(dtr) = &mut drivers.double_tap_reset {
         dtr.execute(Duration::from_millis(CONFIG.double_tap_threshold))

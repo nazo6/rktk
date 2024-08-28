@@ -23,8 +23,12 @@ pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<
 > = Channel::new();
 
 pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<Output = D>) {
-    let Ok(mut display) = display_builder.build().await else {
-        return;
+    let mut display = match display_builder.build().await {
+        Ok(display) => display,
+        Err(_e) => {
+            log::error!("Failed to initialize display");
+            return;
+        }
     };
     let _ = display.clear_flush().await;
 

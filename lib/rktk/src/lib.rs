@@ -9,6 +9,7 @@ pub mod config;
 pub mod interface;
 pub mod task;
 mod utils;
+pub use log;
 
 #[doc(hidden)]
 pub mod reexports {
@@ -16,7 +17,6 @@ pub mod reexports {
 }
 
 use config::static_config::CONFIG;
-pub use log;
 pub use rktk_keymanager as keymanager;
 use rktk_keymanager::state::config::TapDanceConfig;
 

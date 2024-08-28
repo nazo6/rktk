@@ -51,13 +51,7 @@ pub async fn start<
                             let _ = received_sender.try_send(data);
                             if id - recv_id > 1 {
                                 recv_err += 1;
-                                crate::print!(
-                                    "RE:{} {}\n{}/{}",
-                                    id,
-                                    embassy_time::Instant::now().as_millis(),
-                                    recv_err,
-                                    recv_cnt
-                                );
+                                log::warn!("Split communication loss detected. id:{} recv_err:{} recv_cnt{}", id, recv_err, recv_cnt);
                             }
                             recv_id = id;
                             recv_cnt += 1;
@@ -70,7 +64,7 @@ pub async fn start<
                 let mut send_buf = [0u8; MAX_DATA_SIZE];
                 if let Ok(bytes) = to_slice_cobs(&(send_id, send_data), &mut send_buf) {
                     if let Err(e) = split.send(bytes, is_master).await {
-                        crate::print!("SE: {:?} {}", e, embassy_time::Instant::now())
+                        log::error!("Split send error: {:?}", e)
                     }
                     send_id += 1;
                 }

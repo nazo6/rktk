@@ -53,7 +53,7 @@ pub async fn start_usb(
             embassy_futures::select::Either::First(_) => {}
             embassy_futures::select::Either::Second(_) => {
                 if let Err(e) = device.remote_wakeup().await {
-                    rktk::print!("Failed to send remote wakeup: {:?}", e);
+                    rktk::log::warn!("Failed to send remote wakeup: {:?}", e);
                 }
             }
         }

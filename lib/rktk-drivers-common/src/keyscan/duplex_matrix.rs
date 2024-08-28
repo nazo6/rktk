@@ -169,7 +169,6 @@ impl<
             events.push(e).ok();
         })
         .await;
-        // rktk::print!("{:?}                    ", self.pressed);
         events
     }
 
