@@ -91,8 +91,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> 
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S, OP>> {
-        // TODO: propagate errors
-
         // Write any value to Motion_burst register
         // if any write occured before
         if self.rw_flag {
@@ -108,8 +106,12 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
             .await
             .map_err(Pmw3360Error::Spi)?;
 
+        // NOTE: The datasheet says to wait for 35us here, but it seems to work without it.
+        // It seems that embassy_time is not good at waiting for such small values,
+        // and simply turning off Timer reduces the processing time of this function from maxium 3 ms to almost 0.
+
         // tSRAD_MOTBR
-        Timer::after_micros(35).await;
+        // Timer::after_micros(35).await;
 
         // Read the 12 bytes of burst data
         let mut buf = [0u8; 12];
@@ -123,13 +125,16 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
 
         // Raise NCS
         self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
+
+        // NOTE: Same as tSRAD_MOTBR. temporary disabled.
+        //
         // tBEXIT
-        Timer::after_micros(1).await;
+        // Timer::after_micros(1).await;
 
         //combine the register values
         let data = BurstData {
             motion: (buf[0] & 0x80) != 0,
-            on_surface: (buf[0] & 0x08) == 0, // 0 if on surface / 1 if off surface
+            on_surface: (buf[0] & 0x08) == 0,
             dx: (buf[3] as i16) << 8 | (buf[2] as i16),
             dy: (buf[5] as i16) << 8 | (buf[4] as i16),
             surface_quality: buf[6],
@@ -161,8 +166,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
-        // TODO: propagate errors
-
         let srom = self.read(reg::SROM_ID).await.unwrap_or(0);
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INVERSE_PRODUCT_ID).await.unwrap_or(0);
@@ -183,8 +186,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S, OP>> {
-        // TODO: propagate errors
-
         self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
@@ -213,7 +214,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S, OP>> {
-        // TODO: propagate errors
         self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
@@ -246,7 +246,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
-        // TODO: propagate errors
         // sensor reset not active
         // self.reset_pin.set_high().ok();
 
@@ -292,7 +291,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S, OP>> {
-        // TODO: propagate errors
         // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
         self.write(reg::CONFIG_2, 0x00).await?;
 

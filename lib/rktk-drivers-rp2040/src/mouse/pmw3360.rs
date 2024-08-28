@@ -16,7 +16,7 @@ pub fn create_pmw3360<'d, T: Instance + 'd>(
     ncs: impl Peripheral<P = impl Pin> + 'd,
 ) -> Pmw3360Builder<'static, Spi<'d, T, Async>, Output<'d>> {
     let mut config = embassy_rp::spi::Config::default();
-    config.frequency = 2_000_000;
+    config.frequency = 7_000_000;
     config.polarity = embassy_rp::spi::Polarity::IdleHigh;
     config.phase = embassy_rp::spi::Phase::CaptureOnSecondTransition;
     let ncs = Output::new(ncs, embassy_rp::gpio::Level::High);
