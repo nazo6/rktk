@@ -22,8 +22,8 @@ impl Write for LogWriter {
             return Ok(());
         }
 
-        for chunk in s.as_bytes().chunks(128) {
-            let mut buf = [0; 128];
+        for chunk in s.as_bytes().chunks(32) {
+            let mut buf = [0; 32];
             buf[..chunk.len()].copy_from_slice(chunk);
 
             if let Err(_e) = LOG_CHANNEL.try_send(LogChunk::Bytes {
@@ -39,7 +39,7 @@ impl Write for LogWriter {
     }
 }
 
-pub static LOG_CHANNEL: Channel<CriticalSectionRawMutex, LogChunk, 32> = Channel::new();
+pub static LOG_CHANNEL: Channel<CriticalSectionRawMutex, LogChunk, 64> = Channel::new();
 
 pub struct RrpLogger;
 

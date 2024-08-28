@@ -59,6 +59,11 @@ pub mod set_keymaps {
     pub type Response = ();
 }
 
+pub mod get_now {
+    pub type Request = ();
+    pub type Response = u64;
+}
+
 pub mod get_keymap_config {
     pub type Request = ();
     pub type Response = rktk_keymanager::state::config::StateConfig;
@@ -75,8 +80,8 @@ pub mod get_log {
     #[apply(super::common_derive)]
     pub enum LogChunk {
         Bytes {
-            #[serde(with = "serde_with::As::<[serde_with::Same; 128]>")]
-            bytes: [u8; 128],
+            #[serde(with = "serde_with::As::<[serde_with::Same; 32]>")]
+            bytes: [u8; 32],
             len: u8,
         },
         Break,

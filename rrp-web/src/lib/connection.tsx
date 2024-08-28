@@ -32,9 +32,10 @@ export function useDisconnect() {
       }
     },
     onSuccess: (_, notify) => {
-      queryClient.invalidateQueries({ queryKey: ["getKeymaps"] });
-      queryClient.invalidateQueries({ queryKey: ["getLayoutJson"] });
-      queryClient.invalidateQueries({ queryKey: ["getKeymapConfig"] });
+      queryClient.resetQueries({ queryKey: ["getKeymaps"] });
+      queryClient.resetQueries({ queryKey: ["getLayoutJson"] });
+      queryClient.resetQueries({ queryKey: ["getKeymapConfig"] });
+      queryClient.resetQueries({ queryKey: ["getLog"] });
       if (!notify) return;
       dispatchToast(
         <Toast>
@@ -71,7 +72,7 @@ export function useConnect() {
   return useMutation({
     mutationFn: async () => {
       const port = await navigator.serial.requestPort();
-      await port.open({ baudRate: 115200 });
+      await port.open({ baudRate: 500000 });
       const client = new Client(port);
       try {
         const kb = await client.get_keyboard_info();

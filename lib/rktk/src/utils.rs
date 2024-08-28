@@ -2,12 +2,14 @@
 macro_rules! print {
     ($literal:literal) => {{
         use $crate::task::display::*;
+        $crate::log::info!($literal);
         let _ = DISPLAY_CONTROLLER.try_send(DisplayMessage::Message($literal));
     }};
     ($($arg:tt)*) => {{
         use $crate::task::display::*;
         use core::fmt::Write as _;
 
+        $crate::log::info!($($arg)*);
         let mut str = $crate::reexports::heapless::String::<256>::new();
         write!(str, $($arg)*).unwrap();
         let _ = DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.try_send(str);

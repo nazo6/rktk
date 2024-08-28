@@ -27,7 +27,7 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
             if let Some(byte) = buf.get_mut(read) {
                 *byte = reader[0];
             } else {
-                crate::print!("Invalid byte received");
+                log::warn!("Invalid byte received");
 
                 return Err(RktkError::GeneralError("Invalid byte received"));
             }
@@ -62,6 +62,7 @@ impl<'a, S: StorageDriver> Server<'a, S> {
         get_keymap_config normal normal => get_keymap_config
         set_keymap_config normal normal => set_keymap_config
         get_log normal stream => get_log
+        get_now normal normal => get_now
     );
 
     async fn get_info(&mut self, _req: get_keyboard_info::Request) -> get_keyboard_info::Response {
@@ -157,5 +158,9 @@ impl<'a, S: StorageDriver> Server<'a, S> {
                 None
             }
         }))
+    }
+
+    async fn get_now(&mut self, _req: get_now::Request) -> get_now::Response {
+        embassy_time::Instant::now().as_millis()
     }
 }
