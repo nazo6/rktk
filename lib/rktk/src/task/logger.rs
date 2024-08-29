@@ -59,7 +59,7 @@ impl log::Log for RrpLogger {
         )
         .unwrap();
 
-        LOG_CHANNEL.try_send(LogChunk::End).unwrap();
+        let _ = LOG_CHANNEL.try_send(LogChunk::End);
     }
     fn flush(&self) {}
 }
