@@ -78,13 +78,30 @@ pub mod get_log {
 
     #[serde_with::serde_as]
     #[apply(super::common_derive)]
+    #[derive(Default)]
+    pub enum LogLevel {
+        Trace,
+        Debug,
+        #[default]
+        Info,
+        Warn,
+        Error,
+    }
+
+    #[serde_with::serde_as]
+    #[apply(super::common_derive)]
     pub enum LogChunk {
+        Start {
+            time: u64,
+            level: LogLevel,
+            line: Option<u32>,
+        },
         Bytes {
             #[serde(with = "serde_with::As::<[serde_with::Same; 32]>")]
             bytes: [u8; 32],
             len: u8,
         },
-        Break,
+        End,
     }
 
     pub type Request = ();

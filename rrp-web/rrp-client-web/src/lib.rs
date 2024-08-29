@@ -28,6 +28,17 @@ pub struct Client {
 #[tsify(into_wasm_abi, from_wasm_abi)]
 pub struct VecGetKeymapsStreamResponse(pub Vec<KeyActionLoc>);
 
+#[derive(serde::Serialize, serde::Deserialize, tsify_next::Tsify, Default)]
+pub struct LogEntry {
+    time: u64,
+    level: get_log::LogLevel,
+    message: String,
+    line: Option<u32>,
+}
+#[derive(serde::Serialize, serde::Deserialize, tsify_next::Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct VecLogEntry(pub Vec<LogEntry>);
+
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
@@ -110,33 +121,44 @@ impl Client {
     }
 
     #[wasm_bindgen]
-    pub async fn get_log(&self) -> Result<Vec<String>, String> {
+    pub async fn get_now(&self) -> Result<u64, String> {
+        let mut serial = self.serial_client.lock().await;
+        serial.get_now(()).await.map_err(|e| format!("{:?}", e))
+    }
+
+    #[wasm_bindgen]
+    pub async fn get_log(&self) -> Result<VecLogEntry, String> {
         let mut serial = self.serial_client.lock().await;
         let stream = serial.get_log(()).await.map_err(|e| format!("{:?}", e))?;
         let mut stream = std::pin::pin!(stream);
 
         let mut logs = Vec::new();
-        let mut log = Vec::new();
-        let mut breaking = true;
+        let mut log = LogEntry::default();
+        let mut log_bytes = Vec::new();
         while let Some(chunk) = stream.next().await {
             match chunk {
-                get_log::LogChunk::Bytes { bytes, len } => {
-                    breaking = false;
-                    log.extend_from_slice(&bytes[..len as usize]);
+                get_log::LogChunk::Start { time, level, line } => {
+                    log.time = time;
+                    log.level = level;
+                    log.line = line;
                 }
-                get_log::LogChunk::Break => {
-                    if !breaking {
-                        let Ok(str) = String::from_utf8(log.clone()).map_err(|e| e.to_string())
-                        else {
-                            continue;
-                        };
-                        logs.push(str);
-                        log.clear();
-                        breaking = true;
-                    }
+                get_log::LogChunk::Bytes { bytes, len } => {
+                    log_bytes.extend_from_slice(&bytes[..len as usize]);
+                }
+                get_log::LogChunk::End => {
+                    let Ok(message) =
+                        String::from_utf8(log_bytes.clone()).map_err(|e| e.to_string())
+                    else {
+                        continue;
+                    };
+                    log.message = message;
+                    logs.push(log);
+
+                    log = LogEntry::default();
+                    log_bytes.clear();
                 }
             }
         }
-        Ok(logs)
+        Ok(VecLogEntry(logs))
     }
 }

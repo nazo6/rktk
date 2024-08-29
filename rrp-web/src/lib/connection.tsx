@@ -36,6 +36,7 @@ export function useDisconnect() {
       queryClient.resetQueries({ queryKey: ["getLayoutJson"] });
       queryClient.resetQueries({ queryKey: ["getKeymapConfig"] });
       queryClient.resetQueries({ queryKey: ["getLog"] });
+      queryClient.resetQueries({ queryKey: ["getNow"] });
       if (!notify) return;
       dispatchToast(
         <Toast>

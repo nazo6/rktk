@@ -100,5 +100,6 @@ impl SerialClient {
         get_keymap_config normal normal
         set_keymap_config normal normal
         get_log normal stream
+        get_now normal normal
     );
 }
