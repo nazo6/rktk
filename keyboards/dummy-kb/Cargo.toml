@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rktk-drivers-rp2040 = { path = "../../lib/rktk-drivers-rp2040" }
-rktk = { path = "../../lib/rktk" }
+rktk-drivers-rp2040 = { workspace = true }
+rktk = { workspace = true }
 cortex-m = { workspace = true, features = ["inline-asm"] }
 cortex-m-rt = { workspace = true }
 defmt-rtt = { workspace = true }

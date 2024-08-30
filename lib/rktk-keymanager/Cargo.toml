@@ -11,7 +11,7 @@ bitflags = { version = "2.6.0" }
 heapless = { workspace = true }
 usbd-hid = { workspace = true, optional = true }
 
-paste = "1.0.15"
+paste = { workspace = true }
 macro_rules_attribute = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive"] }

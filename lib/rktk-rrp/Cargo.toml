@@ -7,7 +7,7 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
-rktk-keymanager = { path = "../rktk-keymanager", features = ["postcard"] }
+rktk-keymanager = { workspace = true, features = ["postcard"] }
 postcard = { workspace = true, features = ["experimental-derive"] }
 heapless = { workspace = true }
 futures = { workspace = true }

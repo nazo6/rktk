@@ -8,8 +8,8 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-rktk = { path = "../rktk" }
-rktk-drivers-common = { path = "../rktk-drivers-common" }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }

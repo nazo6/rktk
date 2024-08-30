@@ -7,8 +7,8 @@ edition = "2021"
 forced-target = "thumbv6m-none-eabi"
 
 [dependencies]
-rktk-drivers-rp2040 = { path = "../../lib/rktk-drivers-rp2040" }
-rktk = { path = "../../lib/rktk" }
+rktk-drivers-rp2040 = { workspace = true }
+rktk = { workspace = true }
 
 embassy-rp = { workspace = true, features = [
   "defmt",

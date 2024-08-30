@@ -1861,9 +1861,8 @@ dependencies = [
 
 [[package]]
 name = "rktk"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
- "bitflags 2.6.0",
  "critical-section",
  "display-interface",
  "embassy-futures",
@@ -1876,7 +1875,6 @@ dependencies = [
  "log",
  "paste",
  "postcard",
- "pretty_assertions",
  "rktk-keymanager",
  "rktk-rrp",
  "schemars",
@@ -1889,7 +1887,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-common"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "display-interface",
  "embassy-executor",
@@ -1911,7 +1909,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-nrf52"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "bitvec",
  "defmt",
@@ -1937,7 +1935,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-rp2040"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "display-interface",
  "embassy-executor",
@@ -1961,7 +1959,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-keymanager"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "bitflags 2.6.0",
  "critical-section",
@@ -1980,7 +1978,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-rrp"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "futures",
  "heapless 0.7.17",
@@ -2015,7 +2013,7 @@ dependencies = [
 
 [[package]]
 name = "rrp-client-web"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -2449,7 +2447,8 @@ dependencies = [
 [[package]]
 name = "tsify-next"
 version = "0.5.4"
-source = "git+https://github.com/siefkenj/tsify#27d6982b979ef9e7bc42814ea8654a56c00dd6a2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f4a645dca4ee0800f5ab60ce166deba2db6a0315de795a2691e138a3d55d756"
 dependencies = [
  "gloo-utils",
  "serde",
@@ -2462,7 +2461,8 @@ dependencies = [
 [[package]]
 name = "tsify-next-macros"
 version = "0.5.4"
-source = "git+https://github.com/siefkenj/tsify#27d6982b979ef9e7bc42814ea8654a56c00dd6a2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0d5c06f8a51d759bb58129e30b2631739e7e1e4579fad1f30ac09a6c88e488a6"
 dependencies = [
  "proc-macro2",
  "quote",

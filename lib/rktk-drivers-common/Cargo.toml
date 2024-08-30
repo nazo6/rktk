@@ -8,7 +8,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-rktk = { path = "../rktk" }
+rktk = { workspace = true }
 
 embassy-executor = { workspace = true }
 embedded-hal-async = { workspace = true }

@@ -10,10 +10,10 @@ repository.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-serde = { workspace = true }
+rktk-rrp = { workspace = true, features = ["tsify"] }
+rktk-keymanager = { workspace = true, default-features = false }
+
 wasm-bindgen = { workspace = true }
-rktk-rrp = { path = "../../lib/rktk-rrp", features = ["tsify"] }
-rktk-keymanager = { path = "../../lib/rktk-keymanager", default-features = false }
 web-sys = { version = "0.3.70", features = [
   "SerialPort",
   "WritableStream",
@@ -24,12 +24,16 @@ web-sys = { version = "0.3.70", features = [
   "ReadableStreamReaderMode",
   "ReadableStreamByobReader",
 ] }
-anyhow = "1.0.86"
 wasm-bindgen-futures = "0.4.43"
-log = "0.4.22"
 console_log = "1.0.0"
-futures = { workspace = true }
+
+serde = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
-tsify-next = { workspace = true }
+
+anyhow = "1.0.86"
+log = { workspace = true }
+futures = { workspace = true }
 async-lock = "3.4.0"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
+
+tsify-next = { workspace = true }
