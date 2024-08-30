@@ -2272,8 +2272,8 @@ dependencies = [
 
 [[package]]
 name = "ssd1306"
-version = "0.8.4"
-source = "git+https://github.com/sjoerdsimons/ssd1306?branch=async#73284096c96c86f7073ab8e844d61d683507eec4"
+version = "0.9.0"
+source = "git+https://github.com/rust-embedded-community/ssd1306#e345fcd707b4167c4a821c49d899d5ac929639ea"
 dependencies = [
  "display-interface",
  "display-interface-i2c",
