@@ -34,7 +34,9 @@ bind_interrupts!(pub struct Irqs {
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
-    let p = embassy_rp::init(Default::default());
+    let mut cfg = embassy_rp::config::Config::default();
+    cfg.clocks.sys_clk.div_int = 2;
+    let p = embassy_rp::init(cfg);
 
     let dtr = DoubleTapResetRp;
 
