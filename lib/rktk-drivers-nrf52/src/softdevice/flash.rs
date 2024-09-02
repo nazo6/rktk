@@ -24,8 +24,8 @@ pub fn get_flash(
     )
 }
 
-const FLASH_START: u32 = 0x000F5000;
-const FLASH_END: u32 = 0x000F5000 + 0x10000;
+const FLASH_START: u32 = 4096 * 160;
+const FLASH_END: u32 = FLASH_START + 4096 * 3;
 
 pub fn create_storage_driver<'a>(
     flash: &'a SharedFlash,
