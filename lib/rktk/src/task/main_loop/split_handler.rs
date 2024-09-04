@@ -26,7 +26,6 @@ pub async fn start<
 ) {
     let mut send_id: usize = 0;
     let mut recv_id: usize = 0;
-    let mut recv_cnt: usize = 0;
     let mut recv_err: usize = 0;
 
     loop {
@@ -45,19 +44,25 @@ pub async fn start<
                 //
                 // I measured the time in this block using embassy-time, and while it was on the order of microseconds, I do not believe this is an accurate figure.
                 // In fact, removing rktk::print from this block improved the error rate.
-                if res.is_ok() {
-                    match from_bytes_cobs::<(usize, R)>(&mut recv_buf.clone()) {
+                match res {
+                    Ok(_) => match from_bytes_cobs::<(usize, R)>(&mut recv_buf.clone()) {
                         Ok((id, data)) => {
                             let _ = received_sender.try_send(data);
                             if id - recv_id > 1 {
                                 recv_err += 1;
-                                log::warn!("Split communication loss detected. id:{} recv_err:{} recv_cnt{}", id, recv_err, recv_cnt);
+                                log::warn!(
+                                    "Split communication loss detected: id:{}, err count:{}",
+                                    id,
+                                    recv_err
+                                );
                             }
                             recv_id = id;
-                            recv_cnt += 1;
                         }
-                        Err(_e) => {}
-                    }
+                        Err(e) => {
+                            log::warn!("Split data decode failed: {:?}", e);
+                        }
+                    },
+                    Err(e) => log::warn!("Failed to receive split data: {:?}", e),
                 }
             }
             Either::Second(send_data) => {
