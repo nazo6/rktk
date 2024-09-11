@@ -1,8 +1,8 @@
-use embedded_hal::{digital::OutputPin, spi::ErrorType};
+use core::fmt::Debug;
 
 #[derive(Debug)]
-pub enum Pmw3360Error<SE: ErrorType, OP: OutputPin> {
+pub enum Pmw3360Error<SpiError: Debug, GpioError: Debug> {
     InvalidSignature,
-    Spi(SE::Error),
-    Gpio(OP::Error),
+    Spi(SpiError),
+    Gpio(GpioError),
 }

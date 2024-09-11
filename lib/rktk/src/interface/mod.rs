@@ -15,6 +15,6 @@ pub mod usb;
 
 pub trait DriverBuilder {
     type Output;
-    type Error;
+    type Error: core::fmt::Debug;
     async fn build(self) -> Result<Self::Output, Self::Error>;
 }

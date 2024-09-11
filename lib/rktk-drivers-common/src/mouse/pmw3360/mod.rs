@@ -44,7 +44,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360Builder<'d, S, OP> {
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Pmw3360Builder<'d, S, OP> {
     type Output = Pmw3360<'d, S, OP>;
 
-    type Error = Pmw3360Error<S, OP>;
+    type Error = Pmw3360Error<S::Error, OP::Error>;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Pmw3360 {
@@ -90,7 +90,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> 
 }
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
-    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S, OP>> {
+    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S::Error, OP::Error>> {
         // Write any value to Motion_burst register
         // if any write occured before
         if self.rw_flag {
@@ -147,7 +147,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(data)
     }
 
-    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S, OP>> {
+    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
         let val: u16;
         if cpi < 100 {
             val = 0
@@ -165,7 +165,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok((val + 1) * 100)
     }
 
-    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
+    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S::Error, OP::Error>> {
         let srom = self.read(reg::SROM_ID).await.unwrap_or(0);
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INVERSE_PRODUCT_ID).await.unwrap_or(0);
@@ -175,7 +175,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     #[allow(dead_code)]
-    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
+    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error<S::Error, OP::Error>> {
         self.write(reg::SROM_ENABLE, 0x15).await?;
         Timer::after_micros(10000).await;
 
@@ -185,7 +185,11 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(u == 0xBE && l == 0xEF)
     }
 
-    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S, OP>> {
+    async fn write(
+        &mut self,
+        address: u8,
+        data: u8,
+    ) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
         self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
@@ -213,7 +217,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(())
     }
 
-    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S, OP>> {
+    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S::Error, OP::Error>> {
         self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
@@ -245,7 +249,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(ret)
     }
 
-    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S, OP>> {
+    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S::Error, OP::Error>> {
         // sensor reset not active
         // self.reset_pin.set_high().ok();
 
@@ -281,7 +285,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(is_valid_signature)
     }
 
-    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S, OP>> {
+    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
         let is_valid_signature = self.power_up_inner().await?;
         if is_valid_signature {
             Ok(())
@@ -290,7 +294,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         }
     }
 
-    async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S, OP>> {
+    async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
         // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
         self.write(reg::CONFIG_2, 0x00).await?;
 
