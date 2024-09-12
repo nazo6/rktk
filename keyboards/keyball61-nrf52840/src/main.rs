@@ -132,7 +132,7 @@ async fn main(_spawner: Spawner) {
     // let rand = rktk_drivers_nrf52::softdevice::rand::SdRand::new(sd);
 
     let (flash, cache) = get_flash(sd);
-    let storage = rktk_drivers_nrf52::softdevice::flash::create_storage_driver(&flash, &cache);
+    let storage = rktk_drivers_nrf52::softdevice::flash::create_storage_driver(flash, &cache);
 
     let ble = {
         #[cfg(feature = "ble-master")]
