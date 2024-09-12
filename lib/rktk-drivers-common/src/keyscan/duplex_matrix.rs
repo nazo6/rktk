@@ -183,6 +183,7 @@ impl<
             row.set_as_output();
             row.set_high();
             Self::wait_for_high(self.output_awaitable, row).await;
+            embassy_time::Timer::after_ticks(50).await;
 
             if col.is_high() {
                 Hand::Left
