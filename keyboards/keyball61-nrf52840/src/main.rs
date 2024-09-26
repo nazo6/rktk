@@ -19,7 +19,7 @@ use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm,
     display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix,
-    mouse::pmw3360::create_pmw3360,
+    mouse::paw3395,
     panic_utils,
     softdevice::{ble::init_ble_server, flash::get_flash},
     split::uart_half_duplex::UartHalfDuplexSplitDriver,
@@ -92,8 +92,17 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let ball = rktk_drivers_nrf52::mouse::paw3395::create_paw3395(
-        p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09,
+    let ball = paw3395::create_paw3395(
+        p.SPI2,
+        Irqs,
+        p.P1_13,
+        p.P1_11,
+        p.P0_10,
+        p.P0_09,
+        paw3395::config::Config {
+            mode: paw3395::config::LP_MODE,
+            lift_cutoff: paw3395::config::LiftCutoff::_2mm,
+        },
     );
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(

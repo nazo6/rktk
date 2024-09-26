@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+pub mod config;
 mod error;
 mod power_up;
 mod registers;
@@ -13,8 +14,10 @@ use rktk::interface::{mouse::MouseDriver, DriverBuilder};
 
 #[derive(Default)]
 pub struct BurstData {
-    pub motion: bool,
-    pub on_surface: bool,
+    pub op_mode: u8,
+    pub lift_stat: bool,
+    pub mot: bool,
+    pub observation: u8,
     pub dx: i16,
     pub dy: i16,
     pub surface_quality: u8,
@@ -27,14 +30,16 @@ pub struct BurstData {
 pub struct Paw3395Builder<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
     spi: S,
     cs_pin: OP,
+    config: config::Config,
     _marker: core::marker::PhantomData<&'d ()>,
 }
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395Builder<'d, S, OP> {
-    pub fn new(spi: S, cs_pin: OP) -> Self {
+    pub fn new(spi: S, cs_pin: OP, config: config::Config) -> Self {
         Self {
             spi,
             cs_pin,
+            config,
             _marker: core::marker::PhantomData,
         }
     }
@@ -50,10 +55,9 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Paw3395Builder<'d
             _marker: core::marker::PhantomData,
             spi: self.spi,
             cs_pin: self.cs_pin,
-            rw_flag: false,
         };
 
-        driver.power_up().await?;
+        driver.power_up(self.config).await?;
 
         Ok(driver)
     }
@@ -63,9 +67,6 @@ pub struct Paw3395<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
     _marker: core::marker::PhantomData<&'d ()>,
     spi: S,
     cs_pin: OP,
-    // reset_pin: RESET,
-    // rw_flag is set if any writes or reads were performed
-    rw_flag: bool,
 }
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Paw3395<'d, S, OP> {
@@ -123,8 +124,10 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
 
         //combine the register values
         let data = BurstData {
-            motion: (buf[0] & 0x80) != 0,
-            on_surface: (buf[0] & 0x08) == 0,
+            op_mode: buf[0] & 0b11,
+            lift_stat: buf[0] >> 3 & 1 == 1,
+            mot: buf[0] >> 7 & 1 == 1,
+            observation: buf[1],
             dx: (buf[3] as i16) << 8 | (buf[2] as i16),
             dy: (buf[5] as i16) << 8 | (buf[4] as i16),
             surface_quality: buf[6],
@@ -190,8 +193,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         // tSWW/tSWR minus tSCLK-NCS (write)
         Timer::after_micros(145).await;
 
-        self.rw_flag = true;
-
         Ok(())
     }
 
@@ -222,12 +223,13 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         //  tSRW/tSRR minus tSCLK-NCS
         Timer::after_micros(20).await;
 
-        self.rw_flag = true;
-
         Ok(ret)
     }
 
-    async fn power_up_inner(&mut self) -> Result<bool, Paw3395Error<S::Error, OP::Error>> {
+    async fn power_up(
+        &mut self,
+        config: config::Config,
+    ) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
         self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
         Timer::after_micros(50).await;
         self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
@@ -263,30 +265,31 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         self.read(reg::DELTA_Y_L).await?;
         self.read(reg::DELTA_Y_H).await?;
 
-        let is_valid_signature = self.check_signature().await.unwrap_or(false);
+        if !self.check_signature().await.unwrap_or(false) {
+            return Err(Paw3395Error::InvalidSignature);
+        }
 
         Timer::after_micros(100).await;
 
+        // set mode
+        for (addr, data) in config.mode.commands.iter() {
+            self.write(*addr, *data).await?;
+        }
+        if let Some(c) = config.mode._0x40 {
+            let mut _0x40 = self.read(0x40).await?;
+            _0x40 |= c;
+            self.write(0x40, _0x40).await?;
+        }
+
+        // set lift cutoff config
         self.write(0x7F, 0x0C).await?;
         let lift_config = self.read(0x4E).await?;
         self.write(0x7F, 0x00).await?;
-
-        let lift_config = lift_config | 0b10;
+        let lift_config = lift_config | config.lift_cutoff as u8;
         self.write(0x7F, 0x0C).await?;
         self.write(0x4E, lift_config).await?;
         self.write(0x7F, 0x00).await?;
 
-        let squal = self.read(reg::SQUAL).await?;
-
-        Ok(is_valid_signature)
-    }
-
-    async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
-        let is_valid_signature = self.power_up_inner().await?;
-        if is_valid_signature {
-            Ok(())
-        } else {
-            Err(Paw3395Error::InvalidSignature)
-        }
+        Ok(())
     }
 }
