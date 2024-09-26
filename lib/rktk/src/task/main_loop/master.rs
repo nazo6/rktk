@@ -176,9 +176,15 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
 
                 let (mut events, _) = join(key_scanner.scan(), async {
                     if let Some(mouse) = &mut mouse {
-                        if let Ok((x, y)) = mouse.read().await {
-                            mouse_move.0 += x;
-                            mouse_move.1 += y;
+                        match mouse.read().await {
+                            Ok((x, y)) => {
+                                mouse_move.0 += x;
+                                mouse_move.1 += y;
+                            }
+                            Err(e) => {
+                                log::warn!("Failed to read mouse: {:?}", e);
+                                crate::print!("{:?}", e);
+                            }
                         }
                     }
                 })

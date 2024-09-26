@@ -92,7 +92,9 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let ball = create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09);
+    let ball = rktk_drivers_nrf52::mouse::paw3395::create_paw3395(
+        p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09,
+    );
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
