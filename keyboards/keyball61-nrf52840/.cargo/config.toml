@@ -6,4 +6,4 @@ target = "thumbv7em-none-eabihf"
 
 [env]
 DEFMT_LOG = "info"
-RKTK_CONFIG_PATH = { value = "../rktk.keyball.toml", relative = true }
+RKTK_CONFIG_PATH = { value = "../rktk.json", relative = true }

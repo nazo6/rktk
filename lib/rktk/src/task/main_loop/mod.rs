@@ -1,5 +1,5 @@
 use crate::{
-    config::static_config::CONFIG,
+    config::static_config::{KEYBOARD, RKTK_CONFIG},
     interface::{
         backlight::BacklightDriver,
         keyscan::{Hand, KeyscanDriver},
@@ -20,17 +20,19 @@ mod master;
 mod slave;
 mod split_handler;
 
-type S2mChannel = Channel<CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
+type S2mChannel =
+    Channel<CriticalSectionRawMutex, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
 type S2mRx<'a> =
-    Receiver<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
+    Receiver<'a, CriticalSectionRawMutex, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
 pub type S2mTx<'a> =
-    Sender<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
+    Sender<'a, CriticalSectionRawMutex, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
 
-type M2sChannel = Channel<CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
+type M2sChannel =
+    Channel<CriticalSectionRawMutex, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
 type M2sRx<'a> =
-    Receiver<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
+    Receiver<'a, CriticalSectionRawMutex, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
 pub type M2sTx<'a> =
-    Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
+    Sender<'a, CriticalSectionRawMutex, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
 
 #[allow(clippy::too_many_arguments)]
 pub async fn start<
@@ -61,14 +63,14 @@ pub async fn start<
             if let Some(backlight) = backlight {
                 match hand {
                     Hand::Right => {
-                        super::backlight::start::<{ CONFIG.right_led_count }>(
+                        super::backlight::start::<{ KEYBOARD.right_led_count }>(
                             backlight,
                             hooks.backlight,
                         )
                         .await
                     }
                     Hand::Left => {
-                        super::backlight::start::<{ CONFIG.left_led_count }>(
+                        super::backlight::start::<{ KEYBOARD.left_led_count }>(
                             backlight,
                             hooks.backlight,
                         )

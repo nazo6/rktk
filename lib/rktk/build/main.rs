@@ -17,10 +17,10 @@ fn main() {
     println!("cargo:rustc-cfg=no_build");
 
     let config = std::fs::read_to_string(config_path).expect("Failed to read config file");
-    let config: StaticConfig = toml::from_str(&config).expect("Failed to parse config file");
+    let config: StaticConfig = serde_json::from_str(&config).expect("Failed to parse config file");
 
     let code = format!(
-        "pub const CONFIG: StaticConfig = {};",
+        "pub use schema::*;pub const CONFIG: StaticConfig = {};",
         ser_codegen::to_string(&config).unwrap()
     );
 

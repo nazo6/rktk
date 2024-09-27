@@ -4,7 +4,10 @@ use rktk_keymanager::state::State;
 use rktk_rrp::{endpoint_server, endpoints::*, server::EndpointTransport};
 
 use crate::{
-    config::{static_config::CONFIG, storage_config::StorageConfigManager},
+    config::{
+        static_config::{KEYBOARD, RKTK_CONFIG},
+        storage_config::StorageConfigManager,
+    },
     interface::{error::RktkError, reporter::ReporterDriver, storage::StorageDriver},
     utils::ThreadModeMutex,
 };
@@ -46,8 +49,11 @@ impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
     }
 }
 
-type ConfiguredState =
-    State<{ CONFIG.layer_count as usize }, { CONFIG.rows as usize }, { CONFIG.cols as usize }>;
+type ConfiguredState = State<
+    { RKTK_CONFIG.layer_count as usize },
+    { KEYBOARD.rows as usize },
+    { KEYBOARD.cols as usize },
+>;
 
 pub struct Server<'a, S: StorageDriver> {
     pub state: &'a ThreadModeMutex<ConfiguredState>,
@@ -67,9 +73,9 @@ impl<'a, S: StorageDriver> Server<'a, S> {
 
     async fn get_info(&mut self, _req: get_keyboard_info::Request) -> get_keyboard_info::Response {
         KeyboardInfo {
-            name: heapless::String::from(CONFIG.name),
-            cols: CONFIG.cols,
-            rows: CONFIG.rows,
+            name: heapless::String::from(KEYBOARD.name),
+            cols: KEYBOARD.cols,
+            rows: KEYBOARD.rows,
             keymap: ConfiguredState::get_keymap_info(),
         }
     }
@@ -79,14 +85,17 @@ impl<'a, S: StorageDriver> Server<'a, S> {
     ) -> impl Stream<Item = get_keymaps::StreamResponse> + '_ {
         let keymap = self.state.lock().await.get_keymap().clone();
         futures::stream::iter(
-            itertools::iproduct!(0..CONFIG.layer_count, 0..CONFIG.rows, 0..CONFIG.cols).map(
-                move |(layer, row, col)| KeyActionLoc {
-                    layer,
-                    row,
-                    col,
-                    key: keymap[layer as usize].map[row as usize][col as usize],
-                },
-            ),
+            itertools::iproduct!(
+                0..RKTK_CONFIG.layer_count,
+                0..KEYBOARD.rows,
+                0..KEYBOARD.cols
+            )
+            .map(move |(layer, row, col)| KeyActionLoc {
+                layer,
+                row,
+                col,
+                key: keymap[layer as usize].map[row as usize][col as usize],
+            }),
         )
     }
 
@@ -94,7 +103,7 @@ impl<'a, S: StorageDriver> Server<'a, S> {
         &mut self,
         _req: get_layout_json::Request,
     ) -> impl Stream<Item = get_layout_json::StreamResponse> + '_ {
-        futures::stream::iter(CONFIG.layout_json.as_bytes().chunks(64).map(|chunk| {
+        futures::stream::iter(KEYBOARD.layout.as_bytes().chunks(64).map(|chunk| {
             let mut vec = heapless::Vec::new();
             vec.extend_from_slice(chunk).unwrap();
             vec

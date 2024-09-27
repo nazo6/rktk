@@ -10,6 +10,7 @@ use embassy_executor::Spawner;
 use embassy_rp::gpio::Flex;
 use keymap::KEY_CONFIG;
 use rktk::{
+    hooks::create_empty_hooks,
     interface::{
         backlight::DummyBacklightDriver, ble::DummyBleDriver, display::DummyDisplayDriverBuilder,
         double_tap::DummyDoubleTapResetDriver, mouse::DummyMouseDriverBuilder,
@@ -54,7 +55,7 @@ async fn main(_spawner: Spawner) {
         storage: Option::<DummyStorageDriver>::None,
     };
 
-    rktk::task::start(drivers, KEY_CONFIG).await;
+    rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;
 }
 
 #[panic_handler]

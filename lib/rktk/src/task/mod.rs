@@ -7,7 +7,7 @@ use embassy_futures::{
 use embassy_time::{Duration, Timer};
 
 use crate::{
-    config::static_config::CONFIG,
+    config::static_config::RKTK_CONFIG,
     hooks::Hooks,
     interface::{
         backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
@@ -107,7 +107,7 @@ pub async fn start<
     );
 
     if let Some(dtr) = &mut drivers.double_tap_reset {
-        dtr.execute(Duration::from_millis(CONFIG.double_tap_threshold))
+        dtr.execute(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
             .await;
     }
 
@@ -121,7 +121,7 @@ pub async fn start<
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 match mouse_builder.build().await {
                     Ok(mut mouse) => {
-                        let _ = mouse.set_cpi(CONFIG.default_cpi).await;
+                        let _ = mouse.set_cpi(RKTK_CONFIG.default_cpi).await;
                         Some(mouse)
                     }
                     Err(e) => {
@@ -152,7 +152,7 @@ pub async fn start<
                 (_, Some(usb_builder)) => {
                     let usb = match select(
                         usb_builder.build(),
-                        Timer::after(Duration::from_millis(CONFIG.split_usb_timeout)),
+                        Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
                     )
                     .await
                     {

@@ -75,7 +75,7 @@ const L4: LayerMap = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
 ];
 
-pub const KEYMAP: [Layer; CONFIG.layer_count as usize] = [
+pub const KEYMAP: [Layer; CONFIG.config.rktk.layer_count as usize] = [
     Layer {
         map: L0,
         arrowmouse: false,

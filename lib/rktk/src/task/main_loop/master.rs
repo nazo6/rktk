@@ -7,7 +7,7 @@ use rktk_keymanager::state::{
 
 use crate::{
     config::{
-        static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
+        static_config::{KEYBOARD, RKTK_CONFIG, SCAN_INTERVAL_KEYBOARD},
         storage_config::StorageConfigManager,
     },
     hooks::MainHooks,
@@ -30,7 +30,7 @@ mod rrp_server;
 
 fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
-        ev.col = CONFIG.cols - 1 - ev.col;
+        ev.col = KEYBOARD.cols - 1 - ev.col;
     }
 }
 
@@ -138,7 +138,7 @@ pub async fn start<
 
     let (state_config, keymap) = if let Some(storage) = &config_storage {
         let mut keymap = key_config.keymap;
-        for l in 0..CONFIG.layer_count {
+        for l in 0..RKTK_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
                 keymap[l as usize] = layer;
             }
@@ -153,15 +153,15 @@ pub async fn start<
 
     let state_config = state_config.unwrap_or_else(|| StateConfig {
         mouse: MouseConfig {
-            auto_mouse_layer: CONFIG.default_auto_mouse_layer,
-            auto_mouse_duration: CONFIG.default_auto_mouse_duration,
-            auto_mouse_threshold: CONFIG.default_auto_mouse_threshold,
-            scroll_divider_x: CONFIG.default_scroll_divider_x,
-            scroll_divider_y: CONFIG.default_scroll_divider_y,
+            auto_mouse_layer: RKTK_CONFIG.default_auto_mouse_layer,
+            auto_mouse_duration: RKTK_CONFIG.default_auto_mouse_duration,
+            auto_mouse_threshold: RKTK_CONFIG.default_auto_mouse_threshold,
+            scroll_divider_x: RKTK_CONFIG.default_scroll_divider_x,
+            scroll_divider_y: RKTK_CONFIG.default_scroll_divider_y,
         },
         key_resolver: KeyResolverConfig {
-            tap_threshold: CONFIG.default_tap_threshold,
-            tap_dance_threshold: CONFIG.default_tap_dance_threshold,
+            tap_threshold: RKTK_CONFIG.default_tap_threshold,
+            tap_dance_threshold: RKTK_CONFIG.default_tap_dance_threshold,
             tap_dance: key_config.tap_dance.clone(),
         },
     });

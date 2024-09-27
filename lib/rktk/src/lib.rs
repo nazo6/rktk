@@ -16,22 +16,22 @@ pub mod reexports {
     pub use heapless;
 }
 
-use config::static_config::CONFIG;
+use config::static_config::{KEYBOARD, RKTK_CONFIG};
 pub use rktk_keymanager as keymanager;
 use rktk_keymanager::state::config::TapDanceConfig;
 
-pub type Layer = keymanager::Layer<{ CONFIG.rows as usize }, { CONFIG.cols as usize }>;
-pub type LayerMap = keymanager::LayerMap<{ CONFIG.rows as usize }, { CONFIG.cols as usize }>;
+pub type Layer = keymanager::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+pub type LayerMap = keymanager::LayerMap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
 pub type Keymap = keymanager::Keymap<
-    { CONFIG.layer_count as usize },
-    { CONFIG.rows as usize },
-    { CONFIG.cols as usize },
+    { RKTK_CONFIG.layer_count as usize },
+    { KEYBOARD.rows as usize },
+    { KEYBOARD.cols as usize },
 >;
 pub struct KeyConfig {
     pub keymap: keymanager::Keymap<
-        { CONFIG.layer_count as usize },
-        { CONFIG.rows as usize },
-        { CONFIG.cols as usize },
+        { RKTK_CONFIG.layer_count as usize },
+        { KEYBOARD.rows as usize },
+        { KEYBOARD.cols as usize },
     >,
     pub tap_dance: [Option<TapDanceConfig>; 8],
 }
