@@ -8,11 +8,11 @@ use embassy_time::{Duration, Timer};
 
 use crate::{
     config::static_config::CONFIG,
+    hooks::Hooks,
     interface::{
         backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
         double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
-        reporter::DummyReporterDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
-        DriverBuilder,
+        split::SplitDriver, storage::StorageDriver, usb::UsbDriver, DriverBuilder,
     },
     KeyConfig,
 };
@@ -20,7 +20,7 @@ use crate::{
 mod backlight;
 pub mod display;
 mod logger;
-mod main_loop;
+pub(crate) mod main_loop;
 
 /// All drivers required to run the keyboard.
 ///
@@ -71,6 +71,8 @@ pub async fn start<
     Mouse: MouseDriver,
     Display: DisplayDriver,
     Usb: UsbDriver,
+    MainHooks: crate::hooks::MainHooks,
+    BacklightHooks: crate::hooks::BacklightHooks,
 >(
     mut drivers: Drivers<
         KeyScan,
@@ -87,6 +89,7 @@ pub async fn start<
         Usb,
     >,
     key_config: KeyConfig,
+    hooks: Hooks<MainHooks, BacklightHooks>,
 ) {
     critical_section::with(|_| unsafe {
         let _ = log::set_logger_racy(&logger::RRP_LOGGER);
@@ -142,45 +145,34 @@ pub async fn start<
                         drivers.split,
                         drivers.backlight,
                         key_config,
+                        hooks,
                     )
                     .await;
                 }
                 (_, Some(usb_builder)) => {
-                    match select(
+                    let usb = match select(
                         usb_builder.build(),
                         Timer::after(Duration::from_millis(CONFIG.split_usb_timeout)),
                     )
                     .await
                     {
-                        Either::First(usb) => {
-                            let Ok(usb) = usb else {
-                                panic!("Failed to build USB");
-                            };
-
-                            main_loop::start(
-                                Some(&usb),
-                                drivers.key_scanner,
-                                mouse,
-                                drivers.storage,
-                                drivers.split,
-                                drivers.backlight,
-                                key_config,
-                            )
-                            .await;
+                        Either::First(Ok(usb)) => Some(usb),
+                        Either::First(_) => {
+                            panic!("Failed to build USB");
                         }
-                        Either::Second(_) => {
-                            main_loop::start(
-                                Option::<DummyReporterDriver>::None.as_ref(),
-                                drivers.key_scanner,
-                                mouse,
-                                drivers.storage,
-                                drivers.split,
-                                drivers.backlight,
-                                key_config,
-                            )
-                            .await;
-                        }
-                    }
+                        Either::Second(_) => None,
+                    };
+                    main_loop::start(
+                        usb.as_ref(),
+                        drivers.key_scanner,
+                        mouse,
+                        drivers.storage,
+                        drivers.split,
+                        drivers.backlight,
+                        key_config,
+                        hooks,
+                    )
+                    .await;
                 }
                 (None, None) => {
                     panic!("No USB or BLE driver is provided");

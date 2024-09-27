@@ -5,8 +5,8 @@ use core::panic::PanicInfo;
 
 use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_rp::{flash::Flash, gpio::Flex, peripherals::PIO1, pio::Pio};
-use rktk::{interface::ble::DummyBleDriver, task::Drivers};
+use embassy_rp::{gpio::Flex, peripherals::PIO1, pio::Pio};
+use rktk::{hooks::create_empty_hooks, interface::ble::DummyBleDriver, task::Drivers};
 use rktk_drivers_rp2040::{
     backlight::ws2812_pio::Ws2812Pio,
     display::ssd1306::create_ssd1306,
@@ -113,7 +113,7 @@ async fn main(_spawner: Spawner) {
         storage: Some(storage),
     };
 
-    rktk::task::start(drivers, keymap::KEY_CONFIG).await;
+    rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;
 }
 
 #[panic_handler]

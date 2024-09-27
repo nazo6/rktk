@@ -1187,6 +1187,7 @@ dependencies = [
  "defmt-rtt",
  "embassy-executor",
  "embassy-nrf",
+ "embassy-sync 0.6.0",
  "embassy-time",
  "nrf-softdevice",
  "once_cell",

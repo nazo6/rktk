@@ -3,6 +3,7 @@ use embassy_time::Timer;
 
 use crate::{
     config::static_config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
+    hooks::MainHooks,
     interface::{
         keyscan::KeyscanDriver,
         mouse::MouseDriver,
@@ -13,13 +14,19 @@ use crate::{
 
 use super::{M2sRx, S2mTx};
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks>(
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
     mut key_scanner: KS,
     mut mouse: Option<M>,
+    mut hooks: MH,
 ) {
     crate::print!("Slave start");
+
+    hooks
+        .on_slave_init(&mut key_scanner, mouse.as_mut(), &s2m_tx)
+        .await;
+
     join3(
         async {
             if let Some(mouse) = &mut mouse {

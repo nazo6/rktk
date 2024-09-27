@@ -14,7 +14,9 @@ use embassy_nrf::{
 };
 use once_cell::sync::OnceCell;
 
-use rktk::{interface::double_tap::DummyDoubleTapResetDriver, task::Drivers};
+use rktk::{
+    hooks::create_empty_hooks, interface::double_tap::DummyDoubleTapResetDriver, task::Drivers,
+};
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm,
     display::ssd1306::create_ssd1306,
@@ -193,7 +195,7 @@ async fn main(_spawner: Spawner) {
         ble,
     };
 
-    rktk::task::start(drivers, keymap::KEY_CONFIG).await;
+    rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;
 }
 
 #[panic_handler]

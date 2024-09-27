@@ -25,6 +25,7 @@ embassy-nrf = { workspace = true, features = [
   "nrf52840",
   "nfc-pins-as-gpio",
 ] }
+embassy-sync = { workspace = true }
 nrf-softdevice = { workspace = true, features = [
   "ble-peripheral",
   "ble-central",

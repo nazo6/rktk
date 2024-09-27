@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{backlight::BacklightCtrl, error::RktkError};
+use super::{backlight::BacklightCommand, error::RktkError};
 
 pub trait SplitDriver {
     async fn init(&mut self) -> Result<(), RktkError> {
@@ -28,7 +28,7 @@ impl SplitDriver for DummySplitDriver {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub enum MasterToSlave {
-    Backlight(BacklightCtrl),
+    Backlight(BacklightCommand),
     Message(u8),
 }
 

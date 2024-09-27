@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use smart_leds::RGB8;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
-pub enum BacklightCtrl {
+pub enum BacklightCommand {
     Start(BacklightMode),
     Reset,
 }

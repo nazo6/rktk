@@ -23,13 +23,16 @@ mod split_handler;
 type S2mChannel = Channel<CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
 type S2mRx<'a> =
     Receiver<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
-type S2mTx<'a> = Sender<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
+pub type S2mTx<'a> =
+    Sender<'a, CriticalSectionRawMutex, SlaveToMaster, { CONFIG.split_channel_size }>;
 
 type M2sChannel = Channel<CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 type M2sRx<'a> =
     Receiver<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
-type M2sTx<'a> = Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
+pub type M2sTx<'a> =
+    Sender<'a, CriticalSectionRawMutex, MasterToSlave, { CONFIG.split_channel_size }>;
 
+#[allow(clippy::too_many_arguments)]
 pub async fn start<
     'a,
     KS: KeyscanDriver,
@@ -38,33 +41,55 @@ pub async fn start<
     BL: BacklightDriver,
     R: ReporterDriver,
     S: StorageDriver,
+    MainHooks: crate::hooks::MainHooks,
+    BacklightHooks: crate::hooks::BacklightHooks,
 >(
     reporter: Option<&R>,
     mut key_scanner: KS,
-    mouse: Option<M>,
-    storage: Option<S>,
+    mut mouse: Option<M>,
+    mut storage: Option<S>,
     mut split: SP,
     backlight: Option<BL>,
     key_config: KeyConfig,
+    mut hooks: crate::hooks::Hooks<MainHooks, BacklightHooks>,
 ) {
     let hand = key_scanner.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
 
     join(
-        async move {
+        async {
             if let Some(backlight) = backlight {
                 match hand {
                     Hand::Right => {
-                        super::backlight::start::<{ CONFIG.right_led_count }>(backlight).await
+                        super::backlight::start::<{ CONFIG.right_led_count }>(
+                            backlight,
+                            hooks.backlight,
+                        )
+                        .await
                     }
                     Hand::Left => {
-                        super::backlight::start::<{ CONFIG.left_led_count }>(backlight).await
+                        super::backlight::start::<{ CONFIG.left_led_count }>(
+                            backlight,
+                            hooks.backlight,
+                        )
+                        .await
                     }
                 }
             }
         },
-        async move {
+        async {
             let _ = split.init().await;
+
+            hooks
+                .main
+                .on_init(
+                    hand,
+                    &mut key_scanner,
+                    mouse.as_mut(),
+                    reporter,
+                    storage.as_mut(),
+                )
+                .await;
 
             let is_master = reporter.is_some();
 
@@ -90,13 +115,14 @@ pub async fn start<
                         mouse,
                         key_config,
                         hand,
+                        hooks.main,
                     ),
                 )
                 .await;
             } else {
                 join(
                     split_handler::start(split, m2s_tx, s2m_rx, is_master),
-                    slave::start(s2m_tx, m2s_rx, key_scanner, mouse),
+                    slave::start(s2m_tx, m2s_rx, key_scanner, mouse, hooks.main),
                 )
                 .await;
             }

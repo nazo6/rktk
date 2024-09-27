@@ -1,5 +1,5 @@
 use embassy_futures::join::join;
-use embassy_time::{Duration, Timer};
+use embassy_time::Timer;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, StateConfig},
     KeyChangeEvent, State, StateReport,
@@ -10,8 +10,9 @@ use crate::{
         static_config::{CONFIG, SCAN_INTERVAL_KEYBOARD},
         storage_config::StorageConfigManager,
     },
+    hooks::MainHooks,
     interface::{
-        backlight::{BacklightCtrl, BacklightMode},
+        backlight::{BacklightCommand, BacklightMode},
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
@@ -71,14 +72,14 @@ fn receive_from_slave<const N: usize>(
 fn handle_led(
     state_report: &StateReport,
     m2s_tx: M2sTx<'_>,
-    latest_led: &mut Option<BacklightCtrl>,
+    latest_led: &mut Option<BacklightCommand>,
 ) {
     let led = match state_report.highest_layer {
-        1 => BacklightCtrl::Start(BacklightMode::SolidColor(0, 0, 1)),
-        2 => BacklightCtrl::Start(BacklightMode::SolidColor(1, 0, 0)),
-        3 => BacklightCtrl::Start(BacklightMode::SolidColor(0, 1, 0)),
-        4 => BacklightCtrl::Start(BacklightMode::SolidColor(1, 1, 0)),
-        _ => BacklightCtrl::Start(BacklightMode::SolidColor(0, 0, 0)),
+        1 => BacklightCommand::Start(BacklightMode::SolidColor(0, 0, 1)),
+        2 => BacklightCommand::Start(BacklightMode::SolidColor(1, 0, 0)),
+        3 => BacklightCommand::Start(BacklightMode::SolidColor(0, 1, 0)),
+        4 => BacklightCommand::Start(BacklightMode::SolidColor(1, 1, 0)),
+        _ => BacklightCommand::Start(BacklightMode::SolidColor(0, 0, 0)),
     };
 
     if let Some(latest_led) = &latest_led {
@@ -92,7 +93,14 @@ fn handle_led(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: StorageDriver>(
+pub async fn start<
+    'a,
+    KS: KeyscanDriver,
+    M: MouseDriver,
+    R: ReporterDriver,
+    S: StorageDriver,
+    MH: MainHooks,
+>(
     m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
     reporter: &'a R,
@@ -101,6 +109,7 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
     mut mouse: Option<M>,
     key_config: KeyConfig,
     hand: crate::interface::keyscan::Hand,
+    mut hook: MH,
 ) {
     let mut config_storage = None;
     if let Some(s) = storage {
@@ -161,7 +170,10 @@ pub async fn start<'a, KS: KeyscanDriver, M: MouseDriver, R: ReporterDriver, S: 
 
     log::info!("Master side task start");
 
-    let mut latest_led: Option<BacklightCtrl> = None;
+    hook.on_master_init(&mut key_scanner, mouse.as_mut(), reporter, &m2s_tx)
+        .await;
+
+    let mut latest_led: Option<BacklightCommand> = None;
 
     join(
         async {
