@@ -28,6 +28,14 @@ use super::{M2sTx, S2mRx};
 
 mod rrp_server;
 
+/// TODO: Currently, split index is changed like below.
+/// Splitted:
+/// 0 1 2 3 4   4 3 2 1 0
+/// ↓
+/// Entire:
+/// 0 1 2 3 4   5 6 7 8 9
+///
+/// I'm not sure this is a common practice.
 fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
         ev.col = KEYBOARD.cols - 1 - ev.col;

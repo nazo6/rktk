@@ -20,7 +20,7 @@ use rktk::{
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm,
     display::ssd1306::create_ssd1306,
-    keyscan::duplex_matrix::create_duplex_matrix,
+    keyscan::duplex_matrix::{create_duplex_matrix, ScanDir},
     mouse::paw3395,
     panic_utils,
     softdevice::{ble::init_ble_server, flash::get_flash},
@@ -109,19 +109,28 @@ async fn main(_spawner: Spawner) {
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
-            Flex::new(p.P0_22),
-            Flex::new(p.P0_24),
-            Flex::new(p.P1_00),
-            Flex::new(p.P0_11),
-            Flex::new(p.P1_04),
+            Flex::new(p.P0_22), // ROW0
+            Flex::new(p.P0_24), // ROW1
+            Flex::new(p.P1_00), // ROW2
+            Flex::new(p.P0_11), // ROW3
+            Flex::new(p.P1_04), // ROW4
         ],
         [
-            Flex::new(p.P0_31),
-            Flex::new(p.P0_29),
-            Flex::new(p.P0_02),
-            Flex::new(p.P1_15),
+            Flex::new(p.P0_31), // COL0
+            Flex::new(p.P0_29), // COL1
+            Flex::new(p.P0_02), // COL2
+            Flex::new(p.P1_15), // COL3
         ],
         (2, 6),
+        |dir, row, col| match dir {
+            ScanDir::Col2Row => {
+                if col == 3 {
+                    return None;
+                }
+                Some((row, col))
+            }
+            ScanDir::Row2Col => Some((row, col + 3)),
+        },
     );
 
     let split = UartHalfDuplexSplitDriver::new(

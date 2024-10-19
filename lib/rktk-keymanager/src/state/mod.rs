@@ -85,6 +85,10 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             .key_resolver
             .resolve_key(&mut self.cs, &cls, &events_with_pressing)
         {
+            if event != key_resolver::EventType::Pressing {
+                log::info!("{:?} {:?}", event, kc);
+            }
+
             mls.process_event(&mut self.mouse, &kc, event);
             kls.process_event(&mut cls, &kc, event);
             mkls.process_event(&kc);

@@ -18,7 +18,7 @@ pub fn create_paw3395<'d, T: Instance + 'd>(
     config: config::Config,
 ) -> Paw3395Builder<'d, Spim<'d, T>, Output<'d>> {
     let mut spi_config = SpiConfig::default();
-    spi_config.frequency = Frequency::M8;
+    spi_config.frequency = Frequency::M2;
     spi_config.mode.polarity = Polarity::IdleHigh;
     spi_config.mode.phase = Phase::CaptureOnSecondTransition;
     let ncs = Output::new(ncs, Level::High, OutputDrive::Standard);

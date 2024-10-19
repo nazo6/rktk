@@ -50,18 +50,25 @@ test ./lib/rktk-keymanager
 [tasks.ra-check]
 script = '''
 #!@duckscript
-pwd = pwd
-handle = gitignore_path_array ./
-for path in ${handle}
-  if ends_with ${path} Cargo.toml
-    if not eq ${path} ./Cargo.toml
-      dir = dirname ${path}
-      if ends_with ${dir} ${2}
-        cd ${dir}
-        exec cargo clippy --message-format=json
-        cd ${pwd}
-      end
-    end
-  end
+path = set ${1}
+
+:start
+
+path = dirname ${path}
+if not ${path}
+  goto :end
 end
+
+existing = is_path_exists ${path}/Cargo.toml
+
+if ${existing}
+  goto :end
+else
+  goto :start
+end
+
+:end
+
+cd ${path}
+exec cargo clippy --message-format=json
 '''

@@ -25,6 +25,10 @@ impl<'a> FlexPin for FlexWrap<'a> {
         self.0.is_high()
     }
 
+    fn is_low(&self) -> bool {
+        self.0.is_low()
+    }
+
     async fn wait_for_high(&mut self) {
         self.0.wait_for_high().await;
     }
