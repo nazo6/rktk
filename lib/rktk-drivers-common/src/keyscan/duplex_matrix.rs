@@ -93,7 +93,6 @@ impl<
     ) {
         for output in outputs.iter_mut() {
             output.set_low();
-            output.set_as_output();
         }
         for inputs in inputs.iter_mut() {
             inputs.set_pull(Pull::Down);
@@ -104,6 +103,7 @@ impl<
 
         for (o_i, output) in outputs.iter_mut().enumerate() {
             output.set_high();
+            output.set_as_output();
             Self::wait_for_high(output_awaitable, output).await;
 
             for (i_i, input) in inputs.iter_mut().enumerate() {
@@ -112,6 +112,7 @@ impl<
 
             output.set_low();
             Self::wait_for_low(output_awaitable, output).await;
+            output.set_as_input();
         }
     }
 
