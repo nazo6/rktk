@@ -12,7 +12,7 @@ use rktk_drivers_rp2040::{
     display::ssd1306::create_ssd1306,
     double_tap::DoubleTapResetRp,
     keyscan::duplex_matrix::create_duplex_matrix,
-    mouse::pmw3360::create_pmw3360,
+    mouse::paw3395,
     panic_utils,
     split::pio_half_duplex::PioHalfDuplexSplitDriver,
     usb::{new_usb, UsbOpts},
@@ -52,8 +52,18 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let ball = create_pmw3360(
-        p.SPI0, p.PIN_22, p.PIN_23, p.PIN_20, p.DMA_CH0, p.DMA_CH1, p.PIN_21,
+    let ball = paw3395::create_paw3395(
+        p.SPI0,
+        p.PIN_22,
+        p.PIN_23,
+        p.PIN_20,
+        p.DMA_CH0,
+        p.DMA_CH1,
+        p.PIN_21,
+        paw3395::config::Config {
+            mode: paw3395::config::LP_MODE,
+            lift_cutoff: paw3395::config::LiftCutoff::_2mm,
+        },
     );
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
