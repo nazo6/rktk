@@ -9,11 +9,6 @@ hardware-independent and can be easily extended.
 Our current goal is to port it to the NRF52840 chip and connect it via
 bluetooth.
 
-## MSRV
-
-rktk actually doesn't depends on nightly feature of _rustc_, but uses nightly
-cargo features like `per-package-target`. So, it requires nightly toolchain.
-
 ## Features
 
 - ✅ : Working
@@ -90,6 +85,28 @@ cargo features like `per-package-target`. So, it requires nightly toolchain.
 | RP2040 | NRF52840 |
 | ------ | -------- |
 | ✅     |          |
+
+## Development
+
+This project uses [xtask](https://github.com/matklad/cargo-xtask) pattern, which
+can be called by `cargo x`.
+
+See `cargo x --help` and `.vscode/tasks.json` to build firmware and start
+development.
+
+### Dependencies
+
+You need to install some tools to generate firmware.
+
+- [elf2uf2-rs](https://github.com/JoNil/elf2uf2-rs): Required to generate uf2
+  firmware for RP2040
+- arm-none-eabi-objcopy and python3: Required to generate uf2 firmware for
+  nRF52840
+
+## MSRV
+
+rktk actually doesn't depends on nightly feature of _rustc_, but uses nightly
+cargo features like `per-package-target`. So, it requires nightly toolchain.
 
 ## Architecture
 
