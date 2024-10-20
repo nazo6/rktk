@@ -7,55 +7,61 @@ pub fn start(name: String) -> anyhow::Result<()> {
     let metadata = cargo_metadata::MetadataCommand::new().no_deps().exec()?;
 
     if &name == "all" {
-        let mut crate_dirs = Vec::new();
+        let mut crates = Vec::new();
         for package in metadata.workspace_packages() {
-            crate_dirs.push(package.manifest_path.parent().context("no parent dir")?);
+            crates.push((
+                package.manifest_path.parent().context("no parent dir")?,
+                package,
+            ));
         }
-        xprintln!("Checking all {} crates...", crate_dirs.len());
+        xprintln!("Checking all {} crates...", crates.len());
 
         let mut results = Vec::new();
-        for crate_dir in crate_dirs {
+        for (crate_path, package) in crates {
             eprintln!();
-            xprintln!("Checking crate at {:?}", crate_dir);
+            xprintln!("Checking crate at {:?}", crate_path);
 
             let now = std::time::Instant::now();
 
-            let res = cmd!("cargo", "clippy",)
-                .dir(crate_dir)
-                .run()
-                .with_context(|| format!("Failed to run clippy for {:?}", crate_dir));
+            let res = cmd!("cargo", "clippy").dir(crate_path).run();
 
             let elapsed = now.elapsed();
 
-            results.push((crate_dir, res, elapsed));
+            results.push((crate_path, package, res, elapsed));
         }
 
         let mut failed = Vec::new();
-        for (dir, result, duration) in results {
+        for (crate_path, package, result, duration) in results {
             match result {
                 Ok(_) => {
                     xprintln!(
-                        "{}  at {} ({}s)",
-                        " PASS ".on_blue(),
-                        dir,
+                        "{}  `{}` ({}) in {}s",
+                        " PASS ".on_green(),
+                        package.name,
+                        crate_path,
                         duration.as_secs()
                     );
                 }
                 Err(err) => {
                     xprintln!(
-                        "{} at {} ({}s): {}",
+                        "{} `{}` ({}) in {}s: {}",
                         " ERROR ".on_red(),
-                        dir,
+                        package.name,
+                        crate_path,
                         duration.as_secs(),
                         err.to_string().red()
                     );
-                    failed.push(dir);
+                    failed.push((crate_path, package.name.clone()));
                 }
             }
         }
 
         if !failed.is_empty() {
-            anyhow::bail!("Some crates failed to pass clippy: {:?}", failed);
+            let mut msg = "Some crates failed to pass clippy: ".to_string();
+            for (crate_path, name) in failed {
+                msg.push_str(&format!("\n  - {} ({})", name, crate_path));
+            }
+            anyhow::bail!(msg);
         }
     } else {
         let package = metadata
@@ -66,7 +72,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         let dir = package.manifest_path.parent().context("no parent dir")?;
 
         xprintln!("Checking crate at {:?}", dir);
-        cmd!("cargo", "clippy",)
+        cmd!("cargo", "clippy")
             .dir(dir)
             .run()
             .with_context(|| format!("Failed to run clippy for crate: {}", dir))?;

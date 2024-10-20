@@ -48,6 +48,15 @@ pub mod build {
         MaxPerf,
     }
 
+    impl ToString for BuildProfile {
+        fn to_string(&self) -> String {
+            match self {
+                Self::MinSize => "min-size".to_string(),
+                Self::MaxPerf => "max-perf".to_string(),
+            }
+        }
+    }
+
     #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
     pub enum BuildMcu {
         Rp2040,

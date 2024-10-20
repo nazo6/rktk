@@ -9,6 +9,11 @@ hardware-independent and can be easily extended.
 Our current goal is to port it to the NRF52840 chip and connect it via
 bluetooth.
 
+## MSRV
+
+rktk actually doesn't depends on nightly feature of _rustc_, but uses nightly
+cargo features like `per-package-target`. So, it requires nightly toolchain.
+
 ## Features
 
 - ✅ : Working

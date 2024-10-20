@@ -1,7 +1,7 @@
 {
   "rust-analyzer.check.overrideCommand": [
     "cargo",
-    "make",
+    "x",
     "ra-check",
     "$saved_file"
   ]

@@ -12,3 +12,6 @@ anyhow = "1.0.90"
 duct = "0.13.7"
 colored = "2.1.0"
 cargo_metadata = "0.18.1"
+tempfile = "3.13.0"
+toml = "0.8.19"
+serde = { workspace = true }
