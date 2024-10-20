@@ -17,6 +17,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CLICOLOR_FORCE: 1
 
 jobs:
   check:
@@ -33,8 +34,6 @@ jobs:
 
     - name: Run rust check
       run: cargo x check all
-      env:
-        CLICOLOR_FORCE: 1
 
   test:
     runs-on: ubuntu-latest
@@ -51,5 +50,3 @@ jobs:
 
     - name: Run rust test
       run: cargo x test all
-      env:
-        CLICOLOR_FORCE: 1
