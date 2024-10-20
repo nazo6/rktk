@@ -32,6 +32,8 @@ jobs:
         components: "clippy,rust-src"
         target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
+    - uses: r7kamura/rust-problem-matchers@v1
+
     - name: Run rust check
       run: cargo x check all
 
@@ -47,6 +49,8 @@ jobs:
         components: "rust-src"
         target: ""
         tools: "cargo-make"
+
+    - uses: r7kamura/rust-problem-matchers@v1
 
     - name: Run rust test
       run: cargo x test all
