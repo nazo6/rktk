@@ -12,7 +12,7 @@ pub struct Profile {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CargoProfile {
     pub inherits: String,
-    #[serde(rename = "opt-level")]
+    #[serde(rename = "opt-level", serialize_with = "serialize_opt_level")]
     pub opt_level: Option<String>,
     pub lto: Option<String>,
     pub panic: Option<String>,
@@ -20,6 +20,21 @@ pub struct CargoProfile {
     pub codegen_units: Option<u32>,
     pub strip: Option<bool>,
     pub rustflags: Option<Vec<String>>,
+}
+
+fn serialize_opt_level<S: serde::Serializer>(
+    val: &Option<String>,
+    s: S,
+) -> Result<S::Ok, S::Error> {
+    if let Some(val) = val {
+        if let Ok(level_num) = val.parse::<u32>() {
+            s.serialize_u32(level_num)
+        } else {
+            s.serialize_str(val)
+        }
+    } else {
+        s.serialize_none()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

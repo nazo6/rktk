@@ -13,9 +13,14 @@ pub enum Commands {
     Build(build::BuildCommand),
     /// Run `cargo clippy` for rktk crates.
     Check {
-        /// (relative) path to the crate to check
+        /// crate name to check
         /// If 'all' is specified, all crates will be checked.
-        crate_path: String,
+        crate_name: String,
+    },
+    Test {
+        /// crate name to run test
+        /// If 'all' is specified, all crates will be tested.
+        crate_name: String,
     },
     /// Intended to be used from rust-analyzer to provide per-crate `cargo clippy` diagnostics.
     RaCheck { saved_file: String },
@@ -32,29 +37,27 @@ pub mod build {
         /// Deploy the binary to the specified path
         /// If this is specified, `uf2` will be ignored and always set to true.
         #[arg(long, short)]
-        pub deploy: Option<String>,
+        pub deploy_dir: Option<String>,
         /// Profile to use for building the binary.
         /// This internally use cargo profile, but they are different things.
-        #[arg(long, default_value_t = BuildProfile::MaxPerf, value_enum)]
+        #[arg(long, short, default_value_t = BuildProfile::MinSize, value_enum)]
         pub profile: BuildProfile,
         /// Convert the binary to uf2 format.
         #[arg(long, default_value_t = true)]
         pub uf2: bool,
+        /// Retry count for deploying the binary.
+        #[arg(long, default_value_t = 40)]
+        pub deploy_retry_count: u32,
+
+        /// Additional options for `cargo build`.
+        #[arg(last = true)]
+        pub cargo_build_opts: Vec<String>,
     }
 
     #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
     pub enum BuildProfile {
         MinSize,
         MaxPerf,
-    }
-
-    impl ToString for BuildProfile {
-        fn to_string(&self) -> String {
-            match self {
-                Self::MinSize => "min-size".to_string(),
-                Self::MaxPerf => "max-perf".to_string(),
-            }
-        }
     }
 
     #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]

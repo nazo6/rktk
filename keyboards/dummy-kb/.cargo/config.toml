@@ -1,6 +1,0 @@
-[target.'cfg(all(target_arch = "arm", target_os = "none"))']
-runner = "elf2uf2-rs -d"
-
-[env]
-DEFMT_LOG = "info"
-RKTK_CONFIG_PATH = { value = "../rktk.json", relative = true }

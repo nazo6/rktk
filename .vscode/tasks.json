@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "deploy keyball61 rp2040",
+      "type": "shell",
+      "command": "cargo x build keyboards/keyball61-rp2040 rp2040 -d /mnt/e"
+    },
+    {
+      "label": "deploy keyball61 nrf52840 (1.usb)",
+      "type": "shell",
+      "command": "cargo x build keyboards/keyball61-nrf52840 nrf52840 -d /mnt/e -- --no-default-features --features usb"
+    },
+    {
+      "label": "deploy keyball61 nrf52840 (2.ble)",
+      "type": "shell",
+      "command": "cargo x build keyboards/keyball61-nrf52840 nrf52840 -d /mnt/e -- --no-default-features --features usb"
+    },
+    {
+      "label": "check all",
+      "type": "shell",
+      "command": "cargo x check all"
+    },
+    {
+      "label": "test all",
+      "type": "shell",
+      "command": "cargo x test all"
+    },
+    {
+      "label": "start rrp-client",
+      "type": "shell",
+      "command": "cd rrp-web && pnpm dev"
+    },
+    {
+      "label": "clean",
+      "type": "shell",
+      "command": "cargo clean"
+    }
+  ]
+}
