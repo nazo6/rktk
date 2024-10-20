@@ -26,3 +26,6 @@ embassy-executor = { workspace = true, features = [
 portable-atomic = { version = "1.6.0", features = [
   "unsafe-assume-single-core",
 ] }
+
+# to import example keymap
+keyball-common = { path = "../keyball-common" }

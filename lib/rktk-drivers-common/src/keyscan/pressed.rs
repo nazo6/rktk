@@ -9,8 +9,8 @@ impl<const COLS: usize, const ROWS: usize> Pressed<COLS, ROWS> {
     /// Returns None if the key state is not changed.
     /// Returns Some(true) if the key is changed to pressed.
     /// Returns Some(false) if the key is changed to released.
-    pub fn set_pressed(&mut self, pressed: bool, row: u8, col: u8) -> Option<bool> {
-        let prev_pressed = &mut self.0[row as usize][col as usize];
+    pub fn set_pressed(&mut self, pressed: bool, row: usize, col: usize) -> Option<bool> {
+        let prev_pressed = &mut self.0[row][col];
         if prev_pressed == &pressed {
             None
         } else if !*prev_pressed {

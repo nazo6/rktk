@@ -1,6 +1,9 @@
 use embassy_rp::gpio::Flex;
 use rktk::interface::keyscan::KeyscanDriver;
-use rktk_drivers_common::keyscan::duplex_matrix::{DuplexMatrixScanner, FlexPin};
+use rktk_drivers_common::keyscan::{
+    duplex_matrix::{DuplexMatrixScanner, ScanDir},
+    flex_pin::{FlexPin, Pull},
+};
 
 struct FlexWrap<'a>(Flex<'a>);
 
@@ -25,6 +28,10 @@ impl<'a> FlexPin for FlexWrap<'a> {
         self.0.is_high()
     }
 
+    fn is_low(&self) -> bool {
+        self.0.is_low()
+    }
+
     async fn wait_for_high(&mut self) {
         self.0.wait_for_high().await;
     }
@@ -33,10 +40,10 @@ impl<'a> FlexPin for FlexWrap<'a> {
         self.0.wait_for_low().await;
     }
 
-    fn set_pull(&mut self, pull: rktk_drivers_common::keyscan::duplex_matrix::Pull) {
+    fn set_pull(&mut self, pull: Pull) {
         self.0.set_pull(match pull {
-            rktk_drivers_common::keyscan::duplex_matrix::Pull::Up => embassy_rp::gpio::Pull::Up,
-            rktk_drivers_common::keyscan::duplex_matrix::Pull::Down => embassy_rp::gpio::Pull::Down,
+            Pull::Up => embassy_rp::gpio::Pull::Up,
+            Pull::Down => embassy_rp::gpio::Pull::Down,
         });
     }
 }
@@ -50,14 +57,16 @@ pub fn create_duplex_matrix<
 >(
     rows: [Flex<'a>; ROW_PIN_COUNT],
     cols: [Flex<'a>; COL_PIN_COUNT],
-    left_detect_jumper_key: (usize, usize),
+    left_detect_key: (usize, usize),
+    translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
 ) -> impl KeyscanDriver + 'a {
     let rows = rows.map(FlexWrap);
     let cols = cols.map(FlexWrap);
-    DuplexMatrixScanner::<'a, FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
+    DuplexMatrixScanner::<FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
         rows,
         cols,
-        left_detect_jumper_key,
+        left_detect_key,
         true,
+        translate_key_position,
     )
 }

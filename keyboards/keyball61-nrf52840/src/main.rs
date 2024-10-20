@@ -28,6 +28,8 @@ use rktk_drivers_nrf52::{
     usb::UsbOpts,
 };
 
+use keyball_common::*;
+
 use defmt_rtt as _;
 use nrf_softdevice as _;
 
@@ -39,8 +41,6 @@ use rktk::interface::usb::DummyUsbDriverBuilder;
 use rktk_drivers_nrf52::softdevice::ble::NrfBleDriver;
 #[cfg(feature = "usb")]
 use rktk_drivers_nrf52::usb::new_usb;
-
-mod keymap;
 
 use embassy_nrf::{bind_interrupts, peripherals::USBD};
 
@@ -101,27 +101,25 @@ async fn main(_spawner: Spawner) {
         p.P1_11,
         p.P0_10,
         p.P0_09,
-        paw3395::config::Config {
-            mode: paw3395::config::LP_MODE,
-            lift_cutoff: paw3395::config::LiftCutoff::_2mm,
-        },
+        PAW3395_CONFIG,
     );
 
     let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
-            Flex::new(p.P0_22),
-            Flex::new(p.P0_24),
-            Flex::new(p.P1_00),
-            Flex::new(p.P0_11),
-            Flex::new(p.P1_04),
+            Flex::new(p.P0_22), // ROW0
+            Flex::new(p.P0_24), // ROW1
+            Flex::new(p.P1_00), // ROW2
+            Flex::new(p.P0_11), // ROW3
+            Flex::new(p.P1_04), // ROW4
         ],
         [
-            Flex::new(p.P0_31),
-            Flex::new(p.P0_29),
-            Flex::new(p.P0_02),
-            Flex::new(p.P1_15),
+            Flex::new(p.P0_31), // COL0
+            Flex::new(p.P0_29), // COL1
+            Flex::new(p.P0_02), // COL2
+            Flex::new(p.P1_15), // COL3
         ],
         (2, 6),
+        translate_key_position,
     );
 
     let split = UartHalfDuplexSplitDriver::new(
@@ -164,18 +162,10 @@ async fn main(_spawner: Spawner) {
         usb_builder: {
             #[cfg(feature = "usb")]
             let usb = {
-                let mut config = rktk_drivers_nrf52::usb::Config::new(0xc0de, 0xcafe);
-                config.manufacturer = Some("Yowkees/nazo6");
-                config.product = Some("keyball");
-                config.serial_number = Some("12345678");
-                config.max_power = 100;
-                config.max_packet_size_0 = 64;
-                config.supports_remote_wakeup = true;
-
                 let vbus = SOFTWARE_VBUS.get_or_init(|| SoftwareVbusDetect::new(true, true));
                 let driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
                 let opts = UsbOpts {
-                    config,
+                    config: USB_CONFIG,
                     mouse_poll_interval: 2,
                     kb_poll_interval: 5,
                     driver,

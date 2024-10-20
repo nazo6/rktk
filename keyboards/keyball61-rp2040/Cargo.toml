@@ -34,3 +34,5 @@ portable-atomic = { version = "1.6.0", features = [
 defmt-rtt = { workspace = true }
 
 ssd1306 = { workspace = true }
+
+keyball-common = { path = "../keyball-common" }

@@ -44,6 +44,8 @@ once_cell = { version = "1.19.0", default-features = false, features = [
 ] }
 ssd1306 = { workspace = true }
 
+keyball-common = { path = "../keyball-common" }
+
 [features]
 usb = []
 # Enables ble driver. If this feature is enabled, this side is always master.

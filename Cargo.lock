@@ -482,6 +482,7 @@ dependencies = [
  "defmt-rtt",
  "embassy-executor",
  "embassy-rp",
+ "keyball-common",
  "portable-atomic",
  "rktk",
  "rktk-drivers-rp2040",
@@ -1179,6 +1180,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "keyball-common"
+version = "0.1.0"
+dependencies = [
+ "rktk",
+ "rktk-drivers-common",
+]
+
+[[package]]
 name = "keyball61-nrf52840"
 version = "0.1.0"
 dependencies = [
@@ -1189,6 +1198,7 @@ dependencies = [
  "embassy-nrf",
  "embassy-sync 0.6.0",
  "embassy-time",
+ "keyball-common",
  "nrf-softdevice",
  "once_cell",
  "rktk",
@@ -1205,6 +1215,7 @@ dependencies = [
  "defmt-rtt",
  "embassy-executor",
  "embassy-rp",
+ "keyball-common",
  "portable-atomic",
  "rktk",
  "rktk-drivers-rp2040",

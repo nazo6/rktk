@@ -1,10 +1,14 @@
-use embassy_nrf::gpio::{Flex, OutputDrive, Pull};
+use embassy_nrf::gpio::{Flex, OutputDrive, Pull as NrfPull};
 use rktk::interface::keyscan::KeyscanDriver;
-use rktk_drivers_common::keyscan::duplex_matrix::{DuplexMatrixScanner, FlexPin};
+pub use rktk_drivers_common::keyscan::duplex_matrix::ScanDir;
+use rktk_drivers_common::keyscan::{
+    duplex_matrix::DuplexMatrixScanner,
+    flex_pin::{FlexPin, Pull},
+};
 
 struct FlexWrap<'a> {
     pin: Flex<'a>,
-    pull: Pull,
+    pull: NrfPull,
     drive: OutputDrive,
 }
 
@@ -12,9 +16,9 @@ impl<'a> FlexPin for FlexWrap<'a> {
     fn set_as_input(&mut self) {
         #[allow(clippy::needless_match)]
         let pull = match self.pull {
-            Pull::Up => Pull::Up,
-            Pull::Down => Pull::Down,
-            Pull::None => Pull::None,
+            NrfPull::Up => NrfPull::Up,
+            NrfPull::Down => NrfPull::Down,
+            NrfPull::None => NrfPull::None,
         };
         self.pin.set_as_input(pull);
     }
@@ -35,6 +39,10 @@ impl<'a> FlexPin for FlexWrap<'a> {
         self.pin.is_high()
     }
 
+    fn is_low(&self) -> bool {
+        self.pin.is_low()
+    }
+
     async fn wait_for_high(&mut self) {
         self.pin.wait_for_high().await;
     }
@@ -43,10 +51,10 @@ impl<'a> FlexPin for FlexWrap<'a> {
         self.pin.wait_for_low().await;
     }
 
-    fn set_pull(&mut self, pull: rktk_drivers_common::keyscan::duplex_matrix::Pull) {
+    fn set_pull(&mut self, pull: Pull) {
         self.pull = match pull {
-            rktk_drivers_common::keyscan::duplex_matrix::Pull::Up => Pull::Up,
-            rktk_drivers_common::keyscan::duplex_matrix::Pull::Down => Pull::Down,
+            Pull::Up => NrfPull::Up,
+            Pull::Down => NrfPull::Down,
         };
     }
 }
@@ -60,22 +68,24 @@ pub fn create_duplex_matrix<
 >(
     rows: [Flex<'a>; ROW_PIN_COUNT],
     cols: [Flex<'a>; COL_PIN_COUNT],
-    left_detect_jumper_key: (usize, usize),
+    left_detect_key: (usize, usize),
+    translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
 ) -> impl KeyscanDriver + 'a {
     let rows = rows.map(|pin| FlexWrap {
         pin,
-        pull: Pull::None,
+        pull: NrfPull::None,
         drive: OutputDrive::Standard,
     });
     let cols = cols.map(|pin| FlexWrap {
         pin,
-        pull: Pull::None,
+        pull: NrfPull::None,
         drive: OutputDrive::Standard,
     });
-    DuplexMatrixScanner::<'a, FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
+    DuplexMatrixScanner::<FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
         rows,
         cols,
-        left_detect_jumper_key,
+        left_detect_key,
         false,
+        translate_key_position,
     )
 }

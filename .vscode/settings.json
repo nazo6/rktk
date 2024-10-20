@@ -1,5 +1,8 @@
 {
-  "rust-analyzer.check.workspace": false,
-  "rust-analyzer.check.allTargets": false,
-  "rust-analyzer.check.command": "custom-ra-check"
+  "rust-analyzer.check.overrideCommand": [
+    "cargo",
+    "make",
+    "ra-check",
+    "$saved_file"
+  ]
 }

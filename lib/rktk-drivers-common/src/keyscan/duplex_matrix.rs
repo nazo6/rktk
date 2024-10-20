@@ -1,68 +1,67 @@
-use super::pressed::Pressed;
+use super::{
+    flex_pin::{FlexPin, Pull},
+    pressed::Pressed,
+};
 use rktk::{
     interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
 };
 
-pub enum Pull {
-    Up,
-    Down,
-}
-
-#[allow(async_fn_in_trait)]
-pub trait FlexPin {
-    fn set_as_input(&mut self);
-    fn set_as_output(&mut self);
-    fn set_low(&mut self);
-    fn set_high(&mut self);
-    fn is_high(&self) -> bool;
-    async fn wait_for_high(&mut self);
-    async fn wait_for_low(&mut self);
-    fn set_pull(&mut self, pull: Pull);
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ScanDir {
+    Col2Row,
+    Row2Col,
 }
 
 pub struct DuplexMatrixScanner<
-    'a,
-    F: FlexPin + 'a,
+    F: FlexPin,
     const ROW_PIN_COUNT: usize,
     const COL_PIN_COUNT: usize,
     const COLS: usize,
     const ROWS: usize,
 > {
-    _phantom: core::marker::PhantomData<&'a ()>,
     rows: [F; ROW_PIN_COUNT],
     cols: [F; COL_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
-    left_detect_jumper_key: (usize, usize),
-    /// In rp2040, wait_for_{low,high} can be used for output mode.
-    /// On the other hand, in nrf, this doesn't work and never returns.
-    /// In such case, set this to false and will be fallback to just wait some time
     output_awaitable: bool,
+    left_detect_key: (usize, usize),
+    translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
 }
 
 impl<
-        'a,
-        F: FlexPin + 'a,
+        F: FlexPin,
         const ROW_PIN_COUNT: usize,
         const COL_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > DuplexMatrixScanner<'a, F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    > DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     /// Detect the hand and initialize the scanner.
+    ///
+    /// # Arguments
+    /// - `rows`: Row pins of the matrix.
+    /// - `cols`: Column pins of the matrix.
+    /// - `output_awaitable`: Whether the output pins can be awaited for high/low.
+    ///    In rp2040, wait_for_{low,high} can be used for output mode.
+    ///    On the other hand, in nrf, this doesn't work and never returns.
+    ///    In such case, set this to false and will be fallback to just wait some time
+    /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
+    /// - `translate_key_position`: Function to translate key position from pin number and scan direction to key
+    ///    (scan direction, row, col) -> Option<(row, col)>
     pub fn new(
         rows: [F; ROW_PIN_COUNT],
         cols: [F; COL_PIN_COUNT],
-        left_detect_jumper_key: (usize, usize),
+        left_detect_key: (usize, usize),
         output_awaitable: bool,
+        translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
     ) -> Self {
         Self {
-            _phantom: core::marker::PhantomData,
             rows,
             cols,
-            left_detect_jumper_key,
+            left_detect_key,
             pressed: Pressed::new(),
             output_awaitable,
+            translate_key_position,
         }
     }
 
@@ -82,86 +81,91 @@ impl<
         }
     }
 
-    async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
-        // col -> row scan
-        {
-            for row in self.rows.iter_mut() {
-                row.set_pull(Pull::Down);
-                row.set_as_input();
+    /// Scan the matrix using specific direction.
+    ///
+    /// # Arguments
+    /// - `cb`: ([output pin index], [input pin index]) -> ()
+    async fn scan_dir(
+        outputs: &mut [F],
+        inputs: &mut [F],
+        output_awaitable: bool,
+        mut cb: impl FnMut(usize, usize, bool),
+    ) {
+        for output in outputs.iter_mut() {
+            output.set_low();
+        }
+        for inputs in inputs.iter_mut() {
+            inputs.set_pull(Pull::Down);
+            inputs.set_as_input();
+        }
+
+        embassy_time::Timer::after_micros(10).await;
+
+        for (o_i, output) in outputs.iter_mut().enumerate() {
+            output.set_high();
+            output.set_as_output();
+            Self::wait_for_high(output_awaitable, output).await;
+
+            for (i_i, input) in inputs.iter_mut().enumerate() {
+                cb(o_i, i_i, input.is_high());
             }
 
-            for (j, col) in self.cols.iter_mut().enumerate() {
-                // col -> rowスキャンではcol=3は該当キーなし
-                if j == 3 {
-                    continue;
-                }
+            output.set_low();
+            Self::wait_for_low(output_awaitable, output).await;
+            output.set_as_input();
+        }
+    }
 
-                col.set_high();
-                col.set_as_output();
-                Self::wait_for_high(self.output_awaitable, col).await;
-
-                for (i, row) in self.rows.iter_mut().enumerate() {
-                    if let Some(change) = self.pressed.set_pressed(row.is_high(), i as u8, j as u8)
-                    {
+    async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
+        Self::scan_dir(
+            &mut self.rows,
+            &mut self.cols,
+            self.output_awaitable,
+            |row_pin_idx, col_pin_idx, pressed| {
+                if let Some((row, col)) =
+                    (self.translate_key_position)(ScanDir::Row2Col, row_pin_idx, col_pin_idx)
+                {
+                    if let Some(change) = self.pressed.set_pressed(pressed, row, col) {
                         cb(KeyChangeEvent {
-                            row: i as u8,
-                            col: j as u8,
+                            row: row as u8,
+                            col: col as u8,
                             pressed: change,
                         });
                     }
                 }
-                col.set_low();
-                Self::wait_for_low(self.output_awaitable, col).await;
-                col.set_as_input();
-            }
-        }
+            },
+        )
+        .await;
 
-        // row -> col scan
-        {
-            for col in self.cols.iter_mut() {
-                col.set_as_input();
-                col.set_pull(Pull::Down);
-            }
-
-            for (i, row) in self.rows.iter_mut().enumerate() {
-                row.set_high();
-                row.set_as_output();
-                Self::wait_for_high(self.output_awaitable, row).await;
-
-                for (j, col) in self.cols.iter_mut().enumerate() {
-                    // In left side, this is always high.
-                    if (i, j + 3) == self.left_detect_jumper_key {
-                        continue;
-                    }
-
-                    if let Some(change) =
-                        self.pressed
-                            .set_pressed(col.is_high(), i as u8, (j + 3) as u8)
-                    {
+        Self::scan_dir(
+            &mut self.cols,
+            &mut self.rows,
+            self.output_awaitable,
+            |col_pin_idx, row_pin_idx, pressed| {
+                if let Some((row, col)) =
+                    (self.translate_key_position)(ScanDir::Col2Row, row_pin_idx, col_pin_idx)
+                {
+                    if let Some(change) = self.pressed.set_pressed(pressed, row, col) {
                         cb(KeyChangeEvent {
-                            row: i as u8,
-                            col: (j + 3) as u8,
+                            row: row as u8,
+                            col: col as u8,
                             pressed: change,
-                        })
+                        });
                     }
                 }
-
-                row.set_low();
-                Self::wait_for_low(self.output_awaitable, row).await;
-                row.set_as_input();
-            }
-        }
+            },
+        )
+        .await;
     }
 }
 
 impl<
-        'a,
-        F: FlexPin + 'a,
+        F: FlexPin,
         const ROW_PIN_COUNT: usize,
         const COL_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > KeyscanDriver for DuplexMatrixScanner<'a, F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    > KeyscanDriver for DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32> {
         let mut events = heapless::Vec::new();
@@ -173,25 +177,14 @@ impl<
     }
 
     async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
-        if self.left_detect_jumper_key.1 >= 4 {
-            let row = &mut self.rows[self.left_detect_jumper_key.0];
-            let col = &mut self.cols[self.left_detect_jumper_key.1 - 3];
-
-            col.set_as_input();
-            col.set_pull(Pull::Down);
-
-            row.set_as_output();
-            row.set_high();
-            Self::wait_for_high(self.output_awaitable, row).await;
-            embassy_time::Timer::after_ticks(50).await;
-
-            if col.is_high() {
-                Hand::Left
-            } else {
-                Hand::Right
+        let mut hand = Hand::Right;
+        let left_detect_key = self.left_detect_key;
+        self.scan_with_cb(|e| {
+            if e.row == left_detect_key.0 as u8 && e.col == left_detect_key.1 as u8 && e.pressed {
+                hand = Hand::Left;
             }
-        } else {
-            panic!("Invalid left detect jumper config");
-        }
+        })
+        .await;
+        hand
     }
 }
