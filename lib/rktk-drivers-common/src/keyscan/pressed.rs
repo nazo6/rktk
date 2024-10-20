@@ -38,7 +38,7 @@ pub struct PressedIter<'a, const COLS: usize, const ROWS: usize> {
     idx_col: usize,
 }
 
-impl<'a, const COLS: usize, const ROWS: usize> Iterator for PressedIter<'a, COLS, ROWS> {
+impl<const COLS: usize, const ROWS: usize> Iterator for PressedIter<'_, COLS, ROWS> {
     type Item = (u8, u8);
     fn next(&mut self) -> Option<Self::Item> {
         for i in self.idx_row..ROWS {
