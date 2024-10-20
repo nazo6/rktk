@@ -12,6 +12,7 @@ members = [
   "keyboards/keyball61-rp2040",
   "keyboards/keyball61-nrf52840",
   "rrp-web/rrp-client-web",
+  "keyboards/keyball-common",
 ]
 resolver = "2"
 

@@ -68,7 +68,7 @@ pub fn create_duplex_matrix<
 >(
     rows: [Flex<'a>; ROW_PIN_COUNT],
     cols: [Flex<'a>; COL_PIN_COUNT],
-    left_detect_jumper_key: (usize, usize),
+    left_detect_key: (usize, usize),
     translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
 ) -> impl KeyscanDriver + 'a {
     let rows = rows.map(|pin| FlexWrap {
@@ -84,7 +84,7 @@ pub fn create_duplex_matrix<
     DuplexMatrixScanner::<FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
         rows,
         cols,
-        left_detect_jumper_key,
+        left_detect_key,
         false,
         translate_key_position,
     )

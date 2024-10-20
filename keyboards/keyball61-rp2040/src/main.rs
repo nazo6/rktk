@@ -3,9 +3,14 @@
 
 use core::panic::PanicInfo;
 
-use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_rp::{gpio::Flex, peripherals::PIO1, pio::Pio};
+use embassy_rp::{
+    bind_interrupts,
+    gpio::Flex,
+    peripherals::{I2C1, PIO0, PIO1, USB},
+    pio::Pio,
+};
+
 use rktk::{hooks::create_empty_hooks, interface::ble::DummyBleDriver, task::Drivers};
 use rktk_drivers_rp2040::{
     backlight::ws2812_pio::Ws2812Pio,
@@ -18,12 +23,9 @@ use rktk_drivers_rp2040::{
     usb::{new_usb, UsbOpts},
 };
 
-mod keymap;
+use keyball_common::*;
 
-use embassy_rp::{
-    bind_interrupts,
-    peripherals::{I2C1, PIO0, USB},
-};
+use defmt_rtt as _;
 
 bind_interrupts!(pub struct Irqs {
     USBCTRL_IRQ => embassy_rp::usb::InterruptHandler<USB>;
@@ -81,19 +83,13 @@ async fn main(_spawner: Spawner) {
             Flex::new(p.PIN_26),
         ],
         (2, 6),
+        translate_key_position,
     );
 
     let usb = {
-        let mut config = rktk_drivers_rp2040::usb::Config::new(0xc0de, 0xcafe);
-        config.manufacturer = Some("Yowkees/nazo6");
-        config.product = Some("keyball");
-        config.serial_number = Some("12345678");
-        config.max_power = 100;
-        config.max_packet_size_0 = 64;
-        config.supports_remote_wakeup = true;
         let driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
         let usb_opts = UsbOpts {
-            config,
+            config: USB_CONFIG,
             mouse_poll_interval: 5,
             kb_poll_interval: 5,
             driver,
@@ -108,6 +104,8 @@ async fn main(_spawner: Spawner) {
     let pio = Pio::new(p.PIO1, Irqs);
     let backlight = Ws2812Pio::new(pio, p.PIN_0, p.DMA_CH2);
 
+    // NOTE: needed for some macro thing. maybe this can be avoided.
+    #[allow(clippy::needless_late_init)]
     let storage;
     rktk_drivers_rp2040::init_storage!(storage, p.FLASH, p.DMA_CH3, { 4 * 1024 * 1024 });
 
