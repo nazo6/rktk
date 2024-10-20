@@ -11,7 +11,7 @@ rustflags = ["-Zlocation-detail=none"]
 codegen-units = 1
 
 [alias]
-custom-ra-check = "make ra-check"
+x = "run -p xtask --"
 
 [env]
 RKTK_CONFIG_PATH = { value = "keyboards/rktk.json", relative = true }

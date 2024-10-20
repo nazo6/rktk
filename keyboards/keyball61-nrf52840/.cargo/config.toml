@@ -1,9 +1,0 @@
-[target.'cfg(all(target_arch = "arm", target_os = "none"))']
-runner = "cargo make deploy"
-
-[build]
-target = "thumbv7em-none-eabihf"
-
-[env]
-DEFMT_LOG = "info"
-RKTK_CONFIG_PATH = { value = "../rktk.json", relative = true }

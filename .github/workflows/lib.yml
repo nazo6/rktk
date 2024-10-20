@@ -17,6 +17,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  CLICOLOR_FORCE: 1
 
 jobs:
   check:
@@ -30,10 +31,9 @@ jobs:
       with:
         components: "clippy,rust-src"
         target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
-        tools: "cargo-make"
 
     - name: Run rust check
-      run: cargo make check-all
+      run: cargo x check all
 
   test:
     runs-on: ubuntu-latest
@@ -49,4 +49,4 @@ jobs:
         tools: "cargo-make"
 
     - name: Run rust test
-      run: cargo make test-all
+      run: cargo x test all
