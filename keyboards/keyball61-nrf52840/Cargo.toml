@@ -49,5 +49,5 @@ keyball-common = { path = "../keyball-common" }
 [features]
 usb = []
 # Enables ble driver. If this feature is enabled, this side is always master.
-ble-master = []
-default = ["ble-master", "usb"]
+ble = []
+default = ["ble", "usb"]

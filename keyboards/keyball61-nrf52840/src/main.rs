@@ -35,11 +35,11 @@ use keyball_common::*;
 use defmt_rtt as _;
 use nrf_softdevice as _;
 
-#[cfg(not(feature = "ble-master"))]
+#[cfg(not(feature = "ble"))]
 use rktk::interface::ble::DummyBleDriver;
 #[cfg(not(feature = "usb"))]
 use rktk::interface::usb::DummyUsbDriverBuilder;
-#[cfg(feature = "ble-master")]
+#[cfg(feature = "ble")]
 use rktk_drivers_nrf52::softdevice::ble::NrfBleDriver;
 #[cfg(feature = "usb")]
 use rktk_drivers_nrf52::usb::new_usb;
@@ -148,10 +148,10 @@ async fn main(_spawner: Spawner) {
     let storage = rktk_drivers_nrf52::softdevice::flash::create_storage_driver(flash, &cache);
 
     let ble = {
-        #[cfg(feature = "ble-master")]
+        #[cfg(feature = "ble")]
         let ble = Some(NrfBleDriver::new(sd, server, "keyball61", flash).await);
 
-        #[cfg(not(feature = "ble-master"))]
+        #[cfg(not(feature = "ble"))]
         let ble = Option::<DummyBleDriver>::None;
 
         ble

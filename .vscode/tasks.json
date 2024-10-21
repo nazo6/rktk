@@ -14,7 +14,7 @@
     {
       "label": "deploy keyball61 nrf52840 (2.ble)",
       "type": "shell",
-      "command": "cargo rktk build keyboards/keyball61-nrf52840 -d /mnt/e -- --no-default-features --features usb"
+      "command": "cargo rktk build keyboards/keyball61-nrf52840 -d /mnt/e -- --no-default-features --features ble"
     },
     {
       "label": "check all",
