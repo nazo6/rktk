@@ -35,7 +35,7 @@ jobs:
     - uses: r7kamura/rust-problem-matchers@v1
 
     - name: Run rust check
-      run: cargo rktk check all
+      run: cargo rktk internal check all
 
   test:
     runs-on: ubuntu-latest
@@ -53,4 +53,4 @@ jobs:
     - uses: r7kamura/rust-problem-matchers@v1
 
     - name: Run rust test
-      run: cargo rktk test all
+      run: cargo rktk internal test all
