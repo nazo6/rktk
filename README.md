@@ -88,9 +88,6 @@ bluetooth.
 
 ## Development
 
-This project uses [xtask](https://github.com/matklad/cargo-xtask) pattern, which
-can be called by `cargo x`.
-
 See `cargo x --help` and `.vscode/tasks.json` to build firmware and start
 development.
 

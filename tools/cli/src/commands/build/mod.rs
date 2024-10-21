@@ -6,10 +6,46 @@ use colored::Colorize as _;
 use profile::PROFILE_CONFIG_TOML;
 use std::{io::Write as _, path::PathBuf};
 
-use crate::{
-    cli::build::{BuildCommand, BuildMcu, BuildProfile},
-    utils::{xprintln, METADATA},
-};
+use crate::utils::{xprintln, METADATA};
+
+use clap::{Args, ValueEnum};
+
+#[derive(Debug, Args)]
+pub struct BuildCommand {
+    pub path: String,
+    #[arg(value_enum)]
+    pub mcu: BuildMcu,
+    /// Deploy the binary to the specified path
+    /// If this is specified, `uf2` will be ignored and always set to true.
+    #[arg(long, short)]
+    pub deploy_dir: Option<String>,
+    /// Profile to use for building the binary.
+    /// This internally use cargo profile, but they are different things.
+    #[arg(long, short, default_value_t = BuildProfile::MinSize, value_enum)]
+    pub profile: BuildProfile,
+    /// Convert the binary to uf2 format.
+    #[arg(long, default_value_t = true)]
+    pub uf2: bool,
+    /// Retry count for deploying the binary.
+    #[arg(long, default_value_t = 40)]
+    pub deploy_retry_count: u32,
+
+    /// Additional options for `cargo build`.
+    #[arg(last = true)]
+    pub cargo_build_opts: Vec<String>,
+}
+
+#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
+pub enum BuildProfile {
+    MinSize,
+    MaxPerf,
+}
+
+#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
+pub enum BuildMcu {
+    Rp2040,
+    Nrf52840,
+}
 
 pub fn start(args: BuildCommand) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
@@ -143,7 +179,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
                     "-f",
                     "0xADA52840"
                 )
-                .stdin_bytes(include_bytes!("build/uf2conv.py"))
+                .stdin_bytes(include_bytes!("uf2conv.py"))
                 .run()
                 .context("Failed to convert to uf2. Is python3 installed?")?;
             }

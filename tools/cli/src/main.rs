@@ -1,21 +1,30 @@
-use clap::Parser as _;
-use cli::Cli;
 use utils::xprintln;
 
-mod cli;
 mod commands;
 mod utils;
+
+use clap::{Parser, Subcommand};
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum Commands {
+    /// Builds keyboard
+    Build(commands::build::BuildCommand),
+    #[command(subcommand)]
+    Internal(commands::internal::InternalCommands),
+}
 
 fn main() {
     let args = Cli::parse();
     let res = match args.command {
-        cli::Commands::Build(build_command) => commands::build::start(build_command),
-        cli::Commands::Check {
-            crate_name: crate_path,
-        } => commands::check::start(crate_path),
-        cli::Commands::Test {
-            crate_name: crate_path,
-        } => commands::test::start(crate_path),
+        Commands::Build(build_args) => commands::build::start(build_args),
+        Commands::Internal(internal_command) => commands::internal::start(internal_command),
     };
 
     eprintln!();
