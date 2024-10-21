@@ -2,6 +2,7 @@ use crate::{
     config::static_config::{KEYBOARD, RKTK_CONFIG},
     interface::{
         backlight::BacklightDriver,
+        debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
@@ -38,6 +39,7 @@ pub type M2sTx<'a> =
 pub async fn start<
     'a,
     KS: KeyscanDriver,
+    DB: DebounceDriver,
     M: MouseDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
@@ -47,7 +49,8 @@ pub async fn start<
     BacklightHooks: crate::hooks::BacklightHooks,
 >(
     reporter: Option<&R>,
-    mut key_scanner: KS,
+    mut keyscan: KS,
+    debounce: DB,
     mut mouse: Option<M>,
     mut storage: Option<S>,
     mut split: SP,
@@ -55,7 +58,7 @@ pub async fn start<
     key_config: KeyConfig,
     mut hooks: crate::hooks::Hooks<MainHooks, BacklightHooks>,
 ) {
-    let hand = key_scanner.current_hand().await;
+    let hand = keyscan.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
 
     join(
@@ -86,7 +89,7 @@ pub async fn start<
                 .main
                 .on_init(
                     hand,
-                    &mut key_scanner,
+                    &mut keyscan,
                     mouse.as_mut(),
                     reporter,
                     storage.as_mut(),
@@ -109,22 +112,15 @@ pub async fn start<
                 join(
                     split_handler::start(split, s2m_tx, m2s_rx, is_master),
                     master::start(
-                        m2s_tx,
-                        s2m_rx,
-                        reporter,
-                        key_scanner,
-                        storage,
-                        mouse,
-                        key_config,
-                        hand,
-                        hooks.main,
+                        m2s_tx, s2m_rx, reporter, keyscan, debounce, storage, mouse, key_config,
+                        hand, hooks.main,
                     ),
                 )
                 .await;
             } else {
                 join(
                     split_handler::start(split, m2s_tx, s2m_rx, is_master),
-                    slave::start(s2m_tx, m2s_rx, key_scanner, mouse, hooks.main),
+                    slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.main),
                 )
                 .await;
             }

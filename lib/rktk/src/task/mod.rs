@@ -10,9 +10,10 @@ use crate::{
     config::static_config::RKTK_CONFIG,
     hooks::Hooks,
     interface::{
-        backlight::BacklightDriver, ble::BleDriver, display::DisplayDriver,
-        double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
-        split::SplitDriver, storage::StorageDriver, usb::UsbDriver, DriverBuilder,
+        backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver,
+        display::DisplayDriver, double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver,
+        mouse::MouseDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
+        DriverBuilder,
     },
     KeyConfig,
 };
@@ -29,6 +30,7 @@ pub(crate) mod main_loop;
 pub struct Drivers<
     // required drivers
     KeyScan: KeyscanDriver,
+    Debounce: DebounceDriver,
     Split: SplitDriver,
     // builder drivers
     MouseBuilder: DriverBuilder<Output = Mouse>,
@@ -45,7 +47,8 @@ pub struct Drivers<
     Usb: UsbDriver,
 > {
     pub double_tap_reset: Option<DoubleTapReset>,
-    pub key_scanner: KeyScan,
+    pub keyscan: KeyScan,
+    pub debounce: Debounce,
     pub split: Split,
     pub backlight: Option<Backlight>,
     pub ble: Option<Ble>,
@@ -60,6 +63,7 @@ pub struct Drivers<
 /// This function must not be called more than once.
 pub async fn start<
     KeyScan: KeyscanDriver,
+    Debounce: DebounceDriver,
     Split: SplitDriver,
     MouseBuilder: DriverBuilder<Output = Mouse>,
     DisplayBuilder: DriverBuilder<Output = Display>,
@@ -76,6 +80,7 @@ pub async fn start<
 >(
     mut drivers: Drivers<
         KeyScan,
+        Debounce,
         Split,
         MouseBuilder,
         DisplayBuilder,
@@ -139,7 +144,8 @@ pub async fn start<
                 (Some(ble), _) => {
                     main_loop::start(
                         Some(&ble),
-                        drivers.key_scanner,
+                        drivers.keyscan,
+                        drivers.debounce,
                         mouse,
                         drivers.storage,
                         drivers.split,
@@ -164,7 +170,8 @@ pub async fn start<
                     };
                     main_loop::start(
                         usb.as_ref(),
-                        drivers.key_scanner,
+                        drivers.keyscan,
+                        drivers.debounce,
                         mouse,
                         drivers.storage,
                         drivers.split,

@@ -69,7 +69,7 @@ impl<
         if output_awaitable {
             pin.wait_for_low().await;
         } else {
-            embassy_time::Timer::after_micros(10).await;
+            embassy_time::Timer::after_micros(20).await;
         }
     }
 
@@ -77,7 +77,7 @@ impl<
         if output_awaitable {
             pin.wait_for_high().await;
         } else {
-            embassy_time::Timer::after_micros(10).await;
+            embassy_time::Timer::after_micros(20).await;
         }
     }
 

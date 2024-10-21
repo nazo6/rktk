@@ -3,6 +3,7 @@
 
 pub mod backlight;
 pub mod ble;
+pub mod debounce;
 pub mod display;
 pub mod double_tap;
 pub mod error;

@@ -5,6 +5,7 @@ use crate::{
     config::static_config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
     hooks::MainHooks,
     interface::{
+        debounce::DebounceDriver,
         keyscan::KeyscanDriver,
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
@@ -14,17 +15,18 @@ use crate::{
 
 use super::{M2sRx, S2mTx};
 
-pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: DebounceDriver>(
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
-    mut key_scanner: KS,
+    mut keyscan: KS,
+    mut debounce: DB,
     mut mouse: Option<M>,
     mut hooks: MH,
 ) {
     crate::print!("Slave start");
 
     hooks
-        .on_slave_init(&mut key_scanner, mouse.as_mut(), &s2m_tx)
+        .on_slave_init(&mut keyscan, mouse.as_mut(), &s2m_tx)
         .await;
 
     join3(
@@ -55,9 +57,12 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks>(
             loop {
                 let start = embassy_time::Instant::now();
 
-                let key_events = key_scanner.scan().await;
+                let key_events = keyscan.scan().await;
 
-                for event in key_events {
+                for event in key_events
+                    .iter()
+                    .filter(|ev| !debounce.should_ignore_event(ev, start))
+                {
                     let event = if event.pressed {
                         SlaveToMaster::Pressed(event.row, event.col)
                     } else {

@@ -11,10 +11,10 @@ use keyball_common::KEY_CONFIG;
 use rktk::{
     hooks::create_empty_hooks,
     interface::{
-        backlight::DummyBacklightDriver, ble::DummyBleDriver, display::DummyDisplayDriverBuilder,
-        double_tap::DummyDoubleTapResetDriver, keyscan::DummyKeyscanDriver,
-        mouse::DummyMouseDriverBuilder, split::DummySplitDriver, storage::DummyStorageDriver,
-        usb::DummyUsbDriverBuilder,
+        backlight::DummyBacklightDriver, ble::DummyBleDriver, debounce::NoopDebounceDriver,
+        display::DummyDisplayDriverBuilder, double_tap::DummyDoubleTapResetDriver,
+        keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder, split::DummySplitDriver,
+        storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
     },
     task::Drivers,
 };
@@ -24,7 +24,7 @@ async fn main(_spawner: Spawner) {
     let _p = embassy_rp::init(Default::default());
 
     let drivers = Drivers {
-        key_scanner: DummyKeyscanDriver,
+        keyscan: DummyKeyscanDriver,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse_builder: Option::<DummyMouseDriverBuilder>::None,
         usb_builder: Option::<DummyUsbDriverBuilder>::None,
@@ -33,6 +33,7 @@ async fn main(_spawner: Spawner) {
         backlight: Option::<DummyBacklightDriver>::None,
         ble: Option::<DummyBleDriver>::None,
         storage: Option::<DummyStorageDriver>::None,
+        debounce: NoopDebounceDriver,
     };
 
     rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;

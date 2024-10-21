@@ -74,12 +74,12 @@ pub fn create_duplex_matrix<
     let rows = rows.map(|pin| FlexWrap {
         pin,
         pull: NrfPull::None,
-        drive: OutputDrive::Standard,
+        drive: OutputDrive::HighDrive,
     });
     let cols = cols.map(|pin| FlexWrap {
         pin,
         pull: NrfPull::None,
-        drive: OutputDrive::Standard,
+        drive: OutputDrive::HighDrive,
     });
     DuplexMatrixScanner::<FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
         rows,

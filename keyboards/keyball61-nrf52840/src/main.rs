@@ -15,7 +15,9 @@ use embassy_nrf::{
 use once_cell::sync::OnceCell;
 
 use rktk::{
-    hooks::create_empty_hooks, interface::double_tap::DummyDoubleTapResetDriver, task::Drivers,
+    hooks::create_empty_hooks,
+    interface::{debounce::EagerDebounceDriver, double_tap::DummyDoubleTapResetDriver},
+    task::Drivers,
 };
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm,
@@ -104,7 +106,7 @@ async fn main(_spawner: Spawner) {
         PAW3395_CONFIG,
     );
 
-    let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
+    let keyscan = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
             Flex::new(p.P0_22), // ROW0
             Flex::new(p.P0_24), // ROW1
@@ -156,7 +158,7 @@ async fn main(_spawner: Spawner) {
     };
 
     let drivers = Drivers {
-        key_scanner,
+        keyscan,
         double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
         mouse_builder: Some(ball),
         usb_builder: {
@@ -183,6 +185,8 @@ async fn main(_spawner: Spawner) {
         backlight: Some(backlight),
         storage: Some(storage),
         ble,
+        // debounce: rktk::interface::debounce::NoopDebounceDriver,
+        debounce: EagerDebounceDriver::new(embassy_time::Duration::from_millis(10)),
     };
 
     rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;

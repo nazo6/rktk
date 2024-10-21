@@ -13,6 +13,7 @@ use crate::{
     hooks::MainHooks,
     interface::{
         backlight::{BacklightCommand, BacklightMode},
+        debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
@@ -104,6 +105,7 @@ fn handle_led(
 pub async fn start<
     'a,
     KS: KeyscanDriver,
+    DB: DebounceDriver,
     M: MouseDriver,
     R: ReporterDriver,
     S: StorageDriver,
@@ -112,7 +114,8 @@ pub async fn start<
     m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
     reporter: &'a R,
-    mut key_scanner: KS,
+    mut keyscan: KS,
+    mut debounce: DB,
     storage: Option<S>,
     mut mouse: Option<M>,
     key_config: KeyConfig,
@@ -178,7 +181,7 @@ pub async fn start<
 
     log::info!("Master side task start");
 
-    hook.on_master_init(&mut key_scanner, mouse.as_mut(), reporter, &m2s_tx)
+    hook.on_master_init(&mut keyscan, mouse.as_mut(), reporter, &m2s_tx)
         .await;
 
     let mut latest_led: Option<BacklightCommand> = None;
@@ -194,7 +197,7 @@ pub async fn start<
 
                 let mut mouse_move: (i8, i8) = (0, 0);
 
-                let (mut events, _) = join(key_scanner.scan(), async {
+                let (mut events, _) = join(keyscan.scan(), async {
                     if let Some(mouse) = &mut mouse {
                         match mouse.read().await {
                             Ok((x, y)) => {
@@ -210,7 +213,10 @@ pub async fn start<
                 })
                 .await;
 
-                events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
+                events
+                    .iter_mut()
+                    .filter(|ev| !debounce.should_ignore_event(ev, start))
+                    .for_each(|ev| split_to_entire(ev, hand));
 
                 receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
 

@@ -11,7 +11,11 @@ use embassy_rp::{
     pio::Pio,
 };
 
-use rktk::{hooks::create_empty_hooks, interface::ble::DummyBleDriver, task::Drivers};
+use rktk::{
+    hooks::create_empty_hooks,
+    interface::{ble::DummyBleDriver, debounce::NoopDebounceDriver},
+    task::Drivers,
+};
 use rktk_drivers_rp2040::{
     backlight::ws2812_pio::Ws2812Pio,
     display::ssd1306::create_ssd1306,
@@ -68,7 +72,7 @@ async fn main(_spawner: Spawner) {
         },
     );
 
-    let key_scanner = create_duplex_matrix::<'_, 5, 4, 5, 7>(
+    let keyscan = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
             Flex::new(p.PIN_4),
             Flex::new(p.PIN_5),
@@ -110,7 +114,7 @@ async fn main(_spawner: Spawner) {
     rktk_drivers_rp2040::init_storage!(storage, p.FLASH, p.DMA_CH3, { 4 * 1024 * 1024 });
 
     let drivers = Drivers {
-        key_scanner,
+        keyscan,
         double_tap_reset: Some(dtr),
         mouse_builder: Some(ball),
         usb_builder: Some(usb),
@@ -119,6 +123,7 @@ async fn main(_spawner: Spawner) {
         backlight: Some(backlight),
         ble: Option::<DummyBleDriver>::None,
         storage: Some(storage),
+        debounce: NoopDebounceDriver,
     };
 
     rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;
