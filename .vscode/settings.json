@@ -1,8 +1,10 @@
 {
   "rust-analyzer.check.overrideCommand": [
     "cargo",
-    "x",
+    "run",
+    "-p",
     "ra-check",
+    "--",
     "$saved_file"
   ]
 }

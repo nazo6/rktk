@@ -1,6 +1,9 @@
 use anyhow::Context as _;
 
-pub fn start(saved_file: String) -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
+    let args = std::env::args().collect::<Vec<_>>();
+    let saved_file = &args.get(1).context("No saved file path provided")?;
+
     let mut path = std::path::PathBuf::from(saved_file.clone());
 
     loop {

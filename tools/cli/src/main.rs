@@ -16,7 +16,6 @@ fn main() {
         cli::Commands::Test {
             crate_name: crate_path,
         } => commands::test::start(crate_path),
-        cli::Commands::RaCheck { saved_file } => commands::ra_check::start(saved_file),
     };
 
     eprintln!();

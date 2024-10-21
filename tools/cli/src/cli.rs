@@ -22,8 +22,6 @@ pub enum Commands {
         /// If 'all' is specified, all crates will be tested.
         crate_name: String,
     },
-    /// Intended to be used from rust-analyzer to provide per-crate `cargo clippy` diagnostics.
-    RaCheck { saved_file: String },
 }
 
 pub mod build {

@@ -1,5 +1,5 @@
 [package]
-name = "xtask"
+name = "rktk-cli"
 authors.workspace = true
 license.workspace = true
 version.workspace = true
@@ -8,7 +8,7 @@ repository.workspace = true
 
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
-anyhow = "1.0.90"
+anyhow = { workspace = true }
 duct = "0.13.7"
 colored = "2.1.0"
 cargo_metadata = "0.18.1"
