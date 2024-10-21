@@ -2,7 +2,7 @@ macro_rules! xprintln {
     ($($arg:tt)*) => {{
         use colored::*;
 
-        eprint!("{} ", " xtask ".on_blue(),);
+        eprint!("{} ", " rktk ".on_blue(),);
         eprintln!($($arg)*);
     }};
 }

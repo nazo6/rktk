@@ -1,29 +1,34 @@
+mod config;
 mod mcu;
 mod profile;
 
 use anyhow::Context as _;
 use colored::Colorize as _;
+use config::{BuildConfig, BuildMcu, BuildProfile};
 use profile::PROFILE_CONFIG_TOML;
 use std::{io::Write as _, path::PathBuf};
 
 use crate::utils::{xprintln, METADATA};
 
-use clap::{Args, ValueEnum};
+use clap::Args;
 
 #[derive(Debug, Args)]
 pub struct BuildCommand {
-    #[arg(value_enum)]
-    pub mcu: BuildMcu,
     #[arg(default_value_t = {".".to_string()})]
     pub path: String,
+    /// Chip mcu.
+    /// Overrides value in `rktk.build.json`
+    #[arg(long, short, value_enum)]
+    pub mcu: Option<BuildMcu>,
     /// Deploy the binary to the specified path
     /// If this is specified, `uf2` will be ignored and always set to true.
-    #[arg(long, short)]
-    pub deploy_dir: Option<String>,
     /// Profile to use for building the binary.
     /// This internally use cargo profile, but they are different things.
-    #[arg(long, short, default_value_t = BuildProfile::MinSize, value_enum)]
-    pub profile: BuildProfile,
+    /// Overrides value in `rktk.build.json`
+    #[arg(long, short, value_enum)]
+    pub profile: Option<BuildProfile>,
+    #[arg(long, short)]
+    pub deploy_dir: Option<String>,
     /// Doesn't generate uf2 file.
     #[arg(long)]
     pub no_uf2: bool,
@@ -36,29 +41,8 @@ pub struct BuildCommand {
     pub cargo_build_opts: Vec<String>,
 }
 
-#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
-pub enum BuildProfile {
-    MinSize,
-    MaxPerf,
-}
-
-#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
-pub enum BuildMcu {
-    Rp2040,
-    Nrf52840,
-}
-
-pub fn start(args: BuildCommand) -> anyhow::Result<()> {
-    let Some(metadata) = METADATA.as_ref() else {
-        anyhow::bail!("No metadata found. Are you running this command from a workspace?");
-    };
-
-    let kb_crate_path = std::path::PathBuf::from(&args.path).canonicalize()?;
-
-    let config_toml_file_path = metadata
-        .target_directory
-        .clone()
-        .join("profile_config.toml");
+fn write_profile_config_toml(target_dir: &std::path::Path) -> anyhow::Result<PathBuf> {
+    let config_toml_file_path = target_dir.join("profile_config.toml");
     let mut config_toml_file = std::fs::OpenOptions::new()
         .create(true)
         .write(true)
@@ -73,18 +57,74 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
     )
     .context("Failed to write to the temporary file")?;
 
-    let mcu_config = match args.mcu {
+    Ok(config_toml_file_path)
+}
+
+pub fn start(args: BuildCommand) -> anyhow::Result<()> {
+    let Some(metadata) = METADATA.as_ref() else {
+        anyhow::bail!("No metadata found. Are you running this command from a workspace?");
+    };
+
+    let keyboard_crate_dir = {
+        let mut specified_path = std::path::PathBuf::from(&args.path).canonicalize()?;
+        loop {
+            let cargo_toml_path = specified_path.join("Cargo.toml");
+            if cargo_toml_path.exists() {
+                break specified_path;
+            }
+
+            let Some(p) = specified_path.parent() else {
+                anyhow::bail!("Cargo.toml not found. This should be bug.")
+            };
+            specified_path = p.to_path_buf();
+        }
+    };
+
+    let keyboard_build_config = {
+        if let Ok(str) = std::fs::read_to_string(keyboard_crate_dir.join("rktk.build.json")) {
+            let keyboard_build_config: BuildConfig =
+                serde_json::from_str(&str).context("Invalid rktk.build.json file")?;
+            Some(keyboard_build_config)
+        } else {
+            None
+        }
+    };
+
+    let mcu = if let Some(mcu) = args.mcu {
+        mcu
+    } else if let Some(Some(mcu)) = keyboard_build_config.as_ref().map(|c| c.mcu) {
+        mcu
+    } else {
+        anyhow::bail!(
+            "Neither config or command line args doesn't specify mcu. Please specify it."
+        );
+    };
+
+    let profile = if let Some(profile) = args.profile {
+        profile
+    } else if let Some(Some(profile)) = keyboard_build_config.as_ref().map(|c| c.profile) {
+        profile
+    } else {
+        xprintln!(
+            "Neither config or command line args doesn't specify profile. Using `min-size` profile."
+        );
+        BuildProfile::MinSize
+    };
+
+    let mcu_config = match mcu {
         BuildMcu::Rp2040 => mcu::MCU_CONFIG_RP2040,
         BuildMcu::Nrf52840 => mcu::MCU_CONFIG_NRF52840,
     };
-    let profile = match args.profile {
+    let profile = match profile {
         BuildProfile::MinSize => &profile::PROFILE_MIN_SIZE,
         BuildProfile::MaxPerf => &profile::PROFILE_MAX_PERF,
     };
 
+    let config_toml_file_path = write_profile_config_toml(metadata.target_directory.as_std_path())?;
+
     let mut cmd_args = vec![
         "--config".to_string(),
-        config_toml_file_path.to_string(),
+        config_toml_file_path.to_string_lossy().to_string(),
         "build".to_string(),
         "--message-format=json-render-diagnostics".to_string(),
         "--profile".to_string(),
@@ -108,15 +148,15 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
     xprintln!(
         "Building with profile `{}`, target `{}`\n\tat  : {:?}\n\targs: {:?}",
         profile.name.cyan(),
-        format!("{:?}", args.mcu).cyan(),
-        kb_crate_path,
+        format!("{:?}", mcu).cyan(),
+        keyboard_crate_dir,
         cmd_args
     );
     eprintln!();
 
     let cmd = duct::cmd("cargo", cmd_args)
         .stdout_capture()
-        .dir(kb_crate_path);
+        .dir(keyboard_crate_dir);
 
     let output = cmd.run()?;
     let stdout = String::from_utf8(output.stdout)?;
@@ -157,7 +197,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
             .to_string_lossy();
         let uf2_path = artifact_dir.join(format!("{}.uf2", artifact_stem));
 
-        match args.mcu {
+        match mcu {
             BuildMcu::Rp2040 => {
                 duct::cmd!("elf2uf2-rs", &artifact_path, &uf2_path)
                     .run()
@@ -197,7 +237,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
             let deploy_path = PathBuf::from(deploy_path).join(uf2_path.file_name().unwrap());
 
             let bar = indicatif::ProgressBar::new(0)
-                .with_prefix(format!("{} ", " xtask ".on_blue()))
+                .with_prefix(format!("{} ", " rktk ".on_blue()))
                 .with_style(
                     indicatif::ProgressStyle::with_template(
                         "{prefix} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
