@@ -12,9 +12,10 @@ use clap::{Args, ValueEnum};
 
 #[derive(Debug, Args)]
 pub struct BuildCommand {
-    pub path: String,
     #[arg(value_enum)]
     pub mcu: BuildMcu,
+    #[arg(default_value_t = {".".to_string()})]
+    pub path: String,
     /// Deploy the binary to the specified path
     /// If this is specified, `uf2` will be ignored and always set to true.
     #[arg(long, short)]
@@ -23,9 +24,9 @@ pub struct BuildCommand {
     /// This internally use cargo profile, but they are different things.
     #[arg(long, short, default_value_t = BuildProfile::MinSize, value_enum)]
     pub profile: BuildProfile,
-    /// Convert the binary to uf2 format.
-    #[arg(long, default_value_t = true)]
-    pub uf2: bool,
+    /// Doesn't generate uf2 file.
+    #[arg(long)]
+    pub no_uf2: bool,
     /// Retry count for deploying the binary.
     #[arg(long, default_value_t = 40)]
     pub deploy_retry_count: u32,
@@ -105,9 +106,10 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
 
     eprintln!();
     xprintln!(
-        "Building with profile `{}`, target `{}`\n\targs: {:?}",
+        "Building with profile `{}`, target `{}`\n\tat  : {:?}\n\targs: {:?}",
         profile.name.cyan(),
         format!("{:?}", args.mcu).cyan(),
+        kb_crate_path,
         cmd_args
     );
     eprintln!();
@@ -144,7 +146,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         get_bytes(&artifact_path)
     );
 
-    if args.uf2 || args.deploy_dir.is_some() {
+    if !args.no_uf2 || args.deploy_dir.is_some() {
         let artifact_path = PathBuf::from(artifact_path);
         let artifact_dir = artifact_path
             .parent()
