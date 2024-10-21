@@ -14,20 +14,24 @@ use clap::Args;
 
 #[derive(Debug, Args)]
 pub struct BuildCommand {
+    /// Path of the keyboard crate to build. If not specified, the current directory will be used.
     #[arg(default_value_t = {".".to_string()})]
     pub path: String,
+
     /// Chip mcu.
     /// Overrides value in `rktk.build.json`
-    #[arg(long, short, value_enum)]
+    #[arg(long, short, value_enum, verbatim_doc_comment)]
     pub mcu: Option<BuildMcu>,
-    /// Deploy the binary to the specified path
-    /// If this is specified, `uf2` will be ignored and always set to true.
-    /// Profile to use for building the binary.
-    /// This internally use cargo profile, but they are different things.
+
+    /// Profile to use for building the binary. This internally use cargo profile, but they are different things.
+    /// If not specified, `min-size` will be used.
     /// Overrides value in `rktk.build.json`
-    #[arg(long, short, value_enum)]
+    #[arg(long, short, value_enum, verbatim_doc_comment)]
     pub profile: Option<BuildProfile>,
-    #[arg(long, short)]
+
+    /// Deploy the binary to the specified path
+    /// If this is specified, `--no-uf2` will be ignored.
+    #[arg(long, short, verbatim_doc_comment)]
     pub deploy_dir: Option<String>,
     /// Doesn't generate uf2 file.
     #[arg(long)]
