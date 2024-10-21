@@ -1,6 +1,6 @@
 [toolchain]
 channel = "nightly"
-components = ["clippy", "rust-std"]
+components = ["clippy", "rust-std", "rust-src"]
 targets = [
   "thumbv6m-none-eabi",
   "thumbv7em-none-eabihf",

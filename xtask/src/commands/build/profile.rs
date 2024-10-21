@@ -51,12 +51,12 @@ pub static PROFILE_MIN_SIZE: LazyLock<Profile> = LazyLock::new(|| Profile {
         lto: Some("fat".to_string()),
         panic: Some("abort".to_string()),
         codegen_units: Some(1),
-        strip: Some(true),
+        strip: Some(false),
         rustflags: Some(vec!["-Zlocation-detail=none".to_string()]),
     },
     cargo_cmd: CargoCmd {
         build_std: Some("core,panic_abort".to_string()),
-        build_std_features: Some("panic_immediate_abort".to_string()),
+        build_std_features: Some("panic_immediate_abort,optimize_for_size".to_string()),
     },
 });
 
