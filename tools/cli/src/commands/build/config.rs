@@ -1,11 +1,7 @@
 use clap::ValueEnum;
 use serde::Deserialize;
 
-#[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq, Deserialize)]
-pub enum BuildProfile {
-    MinSize,
-    MaxPerf,
-}
+use super::profile::BuildProfileList;
 
 #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum BuildMcu {
@@ -15,6 +11,6 @@ pub enum BuildMcu {
 
 #[derive(Debug, Deserialize)]
 pub struct BuildConfig {
-    pub profile: Option<BuildProfile>,
+    pub profile: Option<BuildProfileList>,
     pub mcu: Option<BuildMcu>,
 }

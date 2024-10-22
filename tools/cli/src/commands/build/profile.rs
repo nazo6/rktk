@@ -43,56 +43,99 @@ pub struct CargoCmd {
     pub build_std_features: Option<String>,
 }
 
-pub static PROFILE_MIN_SIZE: LazyLock<Profile> = LazyLock::new(|| Profile {
-    name: "min-size".to_string(),
-    cargo_profile: CargoProfile {
-        inherits: "release".to_string(),
-        opt_level: Some("z".to_string()),
-        lto: Some("fat".to_string()),
-        panic: Some("abort".to_string()),
-        codegen_units: Some(1),
-        strip: Some(false),
-        rustflags: Some(vec!["-Zlocation-detail=none".to_string()]),
-    },
-    cargo_cmd: CargoCmd {
-        build_std: Some("core,panic_abort".to_string()),
-        build_std_features: Some("panic_immediate_abort,optimize_for_size".to_string()),
-    },
-});
-
-pub static PROFILE_MAX_PERF: LazyLock<Profile> = LazyLock::new(|| Profile {
-    name: "max-perf".to_string(),
-    cargo_profile: CargoProfile {
-        inherits: "release".to_string(),
-        opt_level: Some("3".to_string()),
-        lto: Some("thin".to_string()),
-        panic: None,
-        codegen_units: Some(1),
-        strip: Some(true),
-        rustflags: None,
-    },
-    cargo_cmd: CargoCmd {
-        build_std: Some("core".to_string()),
-        build_std_features: None,
-    },
-});
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProfileConfigToml {
     profile: HashMap<String, CargoProfile>,
 }
 
-pub static PROFILE_CONFIG_TOML: LazyLock<ProfileConfigToml> = LazyLock::new(|| ProfileConfigToml {
-    profile: {
-        let mut map = HashMap::new();
-        map.insert(
-            "min-size".to_string(),
-            PROFILE_MIN_SIZE.cargo_profile.clone(),
-        );
-        map.insert(
-            "max-perf".to_string(),
-            PROFILE_MAX_PERF.cargo_profile.clone(),
-        );
-        map
+macro_rules! gen_profile {
+    ($($name:ident: $val:tt,)*) => {
+        paste::paste! {
+            #[derive(clap::ValueEnum, Copy, Clone, Debug, PartialEq, Eq, Deserialize)]
+            pub enum BuildProfileList {
+                $([<$name>],)*
+            }
+
+            impl BuildProfileList {
+                pub fn get_profile(&self) -> &'static Profile {
+                    match self {
+                        $(BuildProfileList::$name => &*[<PROFILE_ $name:snake:upper>],)*
+                    }
+                }
+            }
+
+            pub static PROFILE_CONFIG_TOML: LazyLock<ProfileConfigToml> = LazyLock::new(|| ProfileConfigToml {
+                profile: {
+                    let mut map = HashMap::new();
+                    $(
+                        map.insert(
+                            stringify!([<$name:snake>]).to_string(),
+                            [<PROFILE_ $name:snake:upper>].cargo_profile.clone(),
+                        );
+                    )*
+                    map
+                },
+            });
+        }
+
+        $(
+            gen_profile!(@profile, $name: $val,);
+        )*
+    };
+    (@profile, $name:ident: $val:tt,) => {
+        paste::paste! {
+            pub static [<PROFILE_ $name:snake:upper>]: LazyLock<Profile> = LazyLock::new(|| Profile $val);
+        }
+    }
+}
+
+gen_profile!(
+    MinSize: {
+        name: "min_size".to_string(),
+        cargo_profile: CargoProfile {
+            inherits: "release".to_string(),
+            opt_level: Some("z".to_string()),
+            lto: Some("fat".to_string()),
+            panic: Some("abort".to_string()),
+            codegen_units: Some(1),
+            strip: Some(false),
+            rustflags: Some(vec!["-Zlocation-detail=none".to_string()]),
+        },
+        cargo_cmd: CargoCmd {
+            build_std: Some("core,panic_abort".to_string()),
+            build_std_features: Some("panic_immediate_abort,optimize_for_size".to_string()),
+        },
     },
-});
+    MinSizePanicMessage: {
+        name: "min_size_panic_message".to_string(),
+        cargo_profile: CargoProfile {
+            inherits: "release".to_string(),
+            opt_level: Some("z".to_string()),
+            lto: Some("fat".to_string()),
+            panic: None,
+            codegen_units: Some(1),
+            strip: Some(false),
+            rustflags: None,
+        },
+        cargo_cmd: CargoCmd {
+            build_std: Some("core".to_string()),
+            build_std_features: Some("optimize_for_size".to_string()),
+        },
+    },
+    MaxPerf: {
+        name: "max_perf".to_string(),
+        cargo_profile: CargoProfile {
+            inherits: "release".to_string(),
+            opt_level: Some("3".to_string()),
+            lto: Some("thin".to_string()),
+            panic: None,
+            codegen_units: Some(1),
+            strip: Some(true),
+            rustflags: None,
+        },
+        cargo_cmd: CargoCmd {
+            build_std: Some("core".to_string()),
+            build_std_features: None,
+        },
+    },
+);

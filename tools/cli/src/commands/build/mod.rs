@@ -4,8 +4,8 @@ mod profile;
 
 use anyhow::Context as _;
 use colored::Colorize as _;
-use config::{BuildConfig, BuildMcu, BuildProfile};
-use profile::PROFILE_CONFIG_TOML;
+use config::{BuildConfig, BuildMcu};
+use profile::{BuildProfileList, PROFILE_CONFIG_TOML};
 use std::{io::Write as _, path::PathBuf};
 
 use crate::utils::{xprintln, METADATA};
@@ -27,7 +27,7 @@ pub struct BuildCommand {
     /// If not specified, `min-size` will be used.
     /// Overrides value in `rktk.build.json`
     #[arg(long, short, value_enum, verbatim_doc_comment)]
-    pub profile: Option<BuildProfile>,
+    pub profile: Option<BuildProfileList>,
 
     /// Deploy the binary to the specified path
     /// If this is specified, `--no-uf2` will be ignored.
@@ -104,7 +104,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         );
     };
 
-    let profile = if let Some(profile) = args.profile {
+    let profile_name = if let Some(profile) = args.profile {
         profile
     } else if let Some(Some(profile)) = keyboard_build_config.as_ref().map(|c| c.profile) {
         profile
@@ -112,18 +112,14 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         xprintln!(
             "Neither config or command line args doesn't specify profile. Using `min-size` profile."
         );
-        BuildProfile::MinSize
+        BuildProfileList::MinSize
     };
 
     let mcu_config = match mcu {
         BuildMcu::Rp2040 => mcu::MCU_CONFIG_RP2040,
         BuildMcu::Nrf52840 => mcu::MCU_CONFIG_NRF52840,
     };
-    let profile = match profile {
-        BuildProfile::MinSize => &profile::PROFILE_MIN_SIZE,
-        BuildProfile::MaxPerf => &profile::PROFILE_MAX_PERF,
-    };
-
+    let profile = profile_name.get_profile();
     let config_toml_file_path = write_profile_config_toml(metadata.target_directory.as_std_path())?;
 
     let mut cmd_args = vec![

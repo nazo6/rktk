@@ -7,11 +7,7 @@
 //!
 //! Note that this module depends on .uninit section, which is handled by cortex_m_rt.
 
-use core::{
-    fmt::Write,
-    mem::MaybeUninit,
-    ptr::{read_volatile, write_volatile},
-};
+use core::{fmt::Write, mem::MaybeUninit, ptr::write_volatile};
 
 pub struct PanicMessage {
     magic: u32,
@@ -29,32 +25,33 @@ impl Write for PanicMessage {
 
 #[link_section = ".uninit.PANICINFO"]
 static mut PANIC_INFO: MaybeUninit<PanicMessage> = MaybeUninit::uninit();
-const PANIC_INFO_MAGIC: [u8; 4] = [0x54, 0x41, 0x43, 0x4B];
+const PANIC_INFO_MAGIC: u32 = 0x54_41_43_4B;
 
 pub fn save_panic_info(info: &core::panic::PanicInfo) {
     let mut panic_info = PanicMessage {
-        magic: u32::from_le_bytes(PANIC_INFO_MAGIC),
+        magic: PANIC_INFO_MAGIC,
         data: heapless::Vec::new(),
     };
     write!(panic_info, "{}", info).ok();
 
     unsafe {
-        write_volatile(PANIC_INFO.as_mut_ptr(), panic_info);
+        write_volatile(&raw mut PANIC_INFO, MaybeUninit::new(panic_info));
     }
 }
 
 fn read_panic_message() -> Option<PanicMessage> {
     unsafe {
-        let panic_info = read_volatile(PANIC_INFO.as_ptr());
-        if panic_info.magic == u32::from_le_bytes(PANIC_INFO_MAGIC) {
+        let info = core::ptr::read(&raw const PANIC_INFO);
+        let info = info.assume_init();
+        if info.magic == PANIC_INFO_MAGIC {
             write_volatile(
-                PANIC_INFO.as_mut_ptr(),
-                PanicMessage {
+                &raw mut PANIC_INFO,
+                MaybeUninit::new(PanicMessage {
                     magic: 0,
                     data: heapless::Vec::new(),
-                },
+                }),
             );
-            Some(panic_info)
+            Some(info)
         } else {
             None
         }
