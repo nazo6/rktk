@@ -1,15 +1,6 @@
 [profile.release]
 lto = true
 
-[profile.size-opt]
-inherits = "release"
-opt-level = "z"
-lto = true
-panic = "abort"
-rustflags = ["-Zlocation-detail=none"]
-# strip = true
-codegen-units = 1
-
 [alias]
 rktk = "run -p rktk-cli --"
 
