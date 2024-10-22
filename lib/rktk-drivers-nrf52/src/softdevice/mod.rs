@@ -4,6 +4,7 @@ use core::mem;
 
 use nrf_softdevice::{raw, Softdevice};
 
+#[cfg(feature = "ble")]
 pub mod ble;
 pub mod flash;
 pub mod rand;

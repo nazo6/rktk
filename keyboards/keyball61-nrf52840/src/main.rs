@@ -20,20 +20,18 @@ use rktk::{
     task::Drivers,
 };
 use rktk_drivers_nrf52::{
-    backlight::ws2812_pwm::Ws2812Pwm,
-    display::ssd1306::create_ssd1306,
-    keyscan::duplex_matrix::create_duplex_matrix,
-    mouse::paw3395,
-    panic_utils,
-    softdevice::{ble::init_ble_server, flash::get_flash},
-    split::uart_half_duplex::UartHalfDuplexSplitDriver,
-    usb::UsbOpts,
+    backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
+    keyscan::duplex_matrix::create_duplex_matrix, mouse::paw3395, panic_utils,
+    softdevice::flash::get_flash, split::uart_half_duplex::UartHalfDuplexSplitDriver, usb::UsbOpts,
 };
 
 use keyball_common::*;
 
 use defmt_rtt as _;
 use nrf_softdevice as _;
+
+#[cfg(feature = "ble")]
+use rktk_drivers_nrf52::softdevice::ble::init_ble_server;
 
 #[cfg(not(feature = "ble"))]
 use rktk::interface::ble::DummyBleDriver;
@@ -137,6 +135,7 @@ async fn main(_spawner: Spawner) {
     let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
 
     let sd = rktk_drivers_nrf52::softdevice::init_sd("keyball61");
+    #[cfg(feature = "ble")]
     let (server, sd) = init_ble_server(sd).await;
     rktk_drivers_nrf52::softdevice::start_softdevice(sd).await;
 

@@ -177,14 +177,15 @@ impl<
     }
 
     async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
-        let mut hand = Hand::Right;
-        let left_detect_key = self.left_detect_key;
-        self.scan_with_cb(|e| {
-            if e.row == left_detect_key.0 as u8 && e.col == left_detect_key.1 as u8 && e.pressed {
-                hand = Hand::Left;
-            }
-        })
-        .await;
-        hand
+        if self
+            .scan()
+            .await
+            .iter()
+            .any(|e| e.row == self.left_detect_key.0 as u8 && e.col == self.left_detect_key.1 as u8)
+        {
+            Hand::Left
+        } else {
+            Hand::Right
+        }
     }
 }

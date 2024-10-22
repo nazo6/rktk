@@ -26,9 +26,6 @@ embassy-nrf = { workspace = true, features = [
   "nfc-pins-as-gpio",
 ] }
 nrf-softdevice = { workspace = true, features = [
-  "ble-peripheral",
-  "ble-gatt-server",
-  "ble-sec",
   "s140",
   # TODO: make this rust-analyzer only
   "nrf52840",
@@ -48,3 +45,8 @@ defmt = { workspace = true }
 usbd-hid = { workspace = true }
 
 [features]
+ble = [
+  "nrf-softdevice/ble-peripheral",
+  "nrf-softdevice/ble-gatt-server",
+  "nrf-softdevice/ble-sec",
+]
