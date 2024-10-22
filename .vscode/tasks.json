@@ -29,7 +29,7 @@
     {
       "label": "start rrp-client",
       "type": "shell",
-      "command": "cd rrp-web && pnpm dev"
+      "command": "cd tools/rrp-web && pnpm dev"
     },
     {
       "label": "clean",

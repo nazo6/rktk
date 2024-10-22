@@ -11,10 +11,10 @@ members = [
   "keyboards/dummy-kb",
   "keyboards/keyball61-rp2040",
   "keyboards/keyball61-nrf52840",
-  "rrp-web/rrp-client-web",
   "keyboards/keyball-common",
   "tools/cli",
   "tools/ra-check",
+  "tools/rrp-web/rrp-client-web",
 ]
 resolver = "2"
 
