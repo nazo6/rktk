@@ -20,6 +20,7 @@ pub struct CargoProfile {
     pub codegen_units: Option<u32>,
     pub strip: Option<bool>,
     pub rustflags: Option<Vec<String>>,
+    pub debug: Option<bool>,
 }
 
 fn serialize_opt_level<S: serde::Serializer>(
@@ -100,6 +101,7 @@ gen_profile!(
             codegen_units: Some(1),
             strip: Some(false),
             rustflags: Some(vec!["-Zlocation-detail=none".to_string()]),
+            debug: Some(true),
         },
         cargo_cmd: CargoCmd {
             build_std: Some("core,panic_abort".to_string()),
@@ -116,6 +118,7 @@ gen_profile!(
             codegen_units: Some(1),
             strip: Some(false),
             rustflags: None,
+            debug: Some(false),
         },
         cargo_cmd: CargoCmd {
             build_std: Some("core".to_string()),
@@ -132,6 +135,7 @@ gen_profile!(
             codegen_units: Some(1),
             strip: Some(true),
             rustflags: None,
+            debug: Some(false),
         },
         cargo_cmd: CargoCmd {
             build_std: Some("core".to_string()),
