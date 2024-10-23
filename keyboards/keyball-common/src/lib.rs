@@ -8,7 +8,7 @@ pub use keymap::KEY_CONFIG;
 use rktk_drivers_common::{keyscan::duplex_matrix::ScanDir, mouse::paw3395, usb};
 
 pub const PAW3395_CONFIG: paw3395::config::Config = paw3395::config::Config {
-    mode: paw3395::config::LP_MODE,
+    mode: paw3395::config::HP_MODE,
     lift_cutoff: paw3395::config::LiftCutoff::_2mm,
 };
 

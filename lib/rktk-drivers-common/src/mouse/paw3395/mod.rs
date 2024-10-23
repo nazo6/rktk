@@ -12,7 +12,7 @@ use error::Paw3395Error;
 use registers as reg;
 use rktk::interface::{mouse::MouseDriver, DriverBuilder};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct BurstData {
     pub op_mode: u8,
     pub lift_stat: bool,
@@ -55,9 +55,11 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Paw3395Builder<'d
             _marker: core::marker::PhantomData,
             spi: self.spi,
             cs_pin: self.cs_pin,
+            timer: embassy_time::Instant::now(),
+            config: self.config,
         };
 
-        driver.power_up(self.config).await?;
+        driver.power_up().await?;
 
         Ok(driver)
     }
@@ -67,6 +69,8 @@ pub struct Paw3395<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
     _marker: core::marker::PhantomData<&'d ()>,
     spi: S,
     cs_pin: OP,
+    timer: embassy_time::Instant,
+    config: config::Config,
 }
 
 impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Paw3395<'d, S, OP> {
@@ -136,6 +140,16 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
             min_raw_data: buf[9],
             shutter: (buf[11] as u16) << 8 | (buf[10] as u16),
         };
+
+        if self.timer.elapsed().as_millis() > 2000 {
+            if !self.check_signature().await.unwrap_or(false) {
+                rktk::log::info!("Mouse error. Resetting.");
+                self.shutdown().await?;
+                self.power_up().await?;
+            }
+
+            self.timer = embassy_time::Instant::now();
+        }
 
         Ok(data)
     }
@@ -226,10 +240,13 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         Ok(ret)
     }
 
-    async fn power_up(
-        &mut self,
-        config: config::Config,
-    ) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
+    async fn shutdown(&mut self) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
+        self.write(reg::SHUTDOWN, 0xB6).await?;
+        Timer::after_millis(5).await;
+        Ok(())
+    }
+
+    async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
         self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
         Timer::after_micros(50).await;
         self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
@@ -272,10 +289,10 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         Timer::after_micros(100).await;
 
         // set mode
-        for (addr, data) in config.mode.commands.iter() {
+        for (addr, data) in self.config.mode.commands.iter() {
             self.write(*addr, *data).await?;
         }
-        if let Some(c) = config.mode._0x40 {
+        if let Some(c) = self.config.mode._0x40 {
             let mut _0x40 = self.read(0x40).await?;
             _0x40 |= c;
             self.write(0x40, _0x40).await?;
@@ -285,7 +302,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         self.write(0x7F, 0x0C).await?;
         let lift_config = self.read(0x4E).await?;
         self.write(0x7F, 0x00).await?;
-        let lift_config = lift_config | config.lift_cutoff as u8;
+        let lift_config = lift_config | self.config.lift_cutoff as u8;
         self.write(0x7F, 0x0C).await?;
         self.write(0x4E, lift_config).await?;
         self.write(0x7F, 0x00).await?;

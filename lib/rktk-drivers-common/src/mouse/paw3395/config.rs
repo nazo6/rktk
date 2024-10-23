@@ -124,6 +124,7 @@ pub const CORDED_GAMING_MODE: Mode = Mode {
     _0x40: None,
 };
 
+#[derive(Clone, Copy)]
 pub enum LiftCutoff {
     _1mm = 0b00,
     _2mm = 0b10,

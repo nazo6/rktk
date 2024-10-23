@@ -66,10 +66,7 @@ async fn main(_spawner: Spawner) {
         p.DMA_CH0,
         p.DMA_CH1,
         p.PIN_21,
-        paw3395::config::Config {
-            mode: paw3395::config::LP_MODE,
-            lift_cutoff: paw3395::config::LiftCutoff::_2mm,
-        },
+        PAW3395_CONFIG,
     );
 
     let keyscan = create_duplex_matrix::<'_, 5, 4, 5, 7>(
