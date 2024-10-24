@@ -1,3 +1,5 @@
+use std::process::ExitCode;
+
 use utils::xprintln;
 
 mod commands;
@@ -20,7 +22,7 @@ pub enum Commands {
     Internal(commands::internal::InternalCommands),
 }
 
-fn main() {
+fn main() -> ExitCode {
     let args = Cli::parse();
     let res = match args.command {
         Commands::Build(build_args) => commands::build::start(build_args),
@@ -32,9 +34,11 @@ fn main() {
     match res {
         Ok(_) => {
             xprintln!("{}", "SUCCESS".green());
+            ExitCode::from(0)
         }
         Err(err) => {
             xprintln!("{} {}", " ERROR ".on_red(), format!("{:?}", err).red());
+            ExitCode::from(1)
         }
     }
 }
