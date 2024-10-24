@@ -29,6 +29,7 @@ nrf-softdevice = { workspace = true, features = [
   "s140",
   # TODO: make this rust-analyzer only
   "nrf52840",
+  "ble-peripheral",
 ] }
 embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
@@ -45,8 +46,4 @@ defmt = { workspace = true }
 usbd-hid = { workspace = true }
 
 [features]
-ble = [
-  "nrf-softdevice/ble-peripheral",
-  "nrf-softdevice/ble-gatt-server",
-  "nrf-softdevice/ble-sec",
-]
+ble = ["nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
