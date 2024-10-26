@@ -197,7 +197,7 @@ pub async fn start<
 
                 let mut mouse_move: (i8, i8) = (0, 0);
 
-                let (mut events, _) = join(keyscan.scan(), async {
+                let (events, _) = join(keyscan.scan(), async {
                     if let Some(mouse) = &mut mouse {
                         match mouse.read().await {
                             Ok((x, y)) => {
@@ -213,10 +213,12 @@ pub async fn start<
                 })
                 .await;
 
-                events
-                    .iter_mut()
+                let mut events = events
+                    .into_iter()
                     .filter(|ev| !debounce.should_ignore_event(ev, start))
-                    .for_each(|ev| split_to_entire(ev, hand));
+                    .collect::<heapless::Vec<_, 32>>();
+
+                events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
 
                 receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
 
