@@ -19,7 +19,7 @@ use rktk::{
     interface::{debounce::EagerDebounceDriver, double_tap::DummyDoubleTapResetDriver},
     task::Drivers,
 };
-use rktk_drivers_nrf52::{
+use rktk_drivers_nrf::{
     backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
     keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360, panic_utils,
     softdevice::flash::get_flash, split::uart_half_duplex::UartHalfDuplexSplitDriver, usb::UsbOpts,
@@ -31,16 +31,16 @@ use defmt_rtt as _;
 use nrf_softdevice as _;
 
 #[cfg(feature = "ble")]
-use rktk_drivers_nrf52::softdevice::ble::init_ble_server;
+use rktk_drivers_nrf::softdevice::ble::init_ble_server;
 
 #[cfg(not(feature = "ble"))]
 use rktk::interface::ble::DummyBleDriver;
 #[cfg(not(feature = "usb"))]
 use rktk::interface::usb::DummyUsbDriverBuilder;
 #[cfg(feature = "ble")]
-use rktk_drivers_nrf52::softdevice::ble::NrfBleDriver;
+use rktk_drivers_nrf::softdevice::ble::NrfBleDriver;
 #[cfg(feature = "usb")]
-use rktk_drivers_nrf52::usb::new_usb;
+use rktk_drivers_nrf::usb::new_usb;
 
 use embassy_nrf::{bind_interrupts, peripherals::USBD};
 
@@ -126,17 +126,17 @@ async fn main(_spawner: Spawner) {
 
     let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
 
-    let sd = rktk_drivers_nrf52::softdevice::init_sd("keyball61");
+    let sd = rktk_drivers_nrf::softdevice::init_sd("keyball61");
     #[cfg(feature = "ble")]
     let (server, sd) = init_ble_server(sd).await;
-    rktk_drivers_nrf52::softdevice::start_softdevice(sd).await;
+    rktk_drivers_nrf::softdevice::start_softdevice(sd).await;
 
     embassy_time::Timer::after_millis(50).await;
 
     // let rand = rktk_drivers_nrf52::softdevice::rand::SdRand::new(sd);
 
     let (flash, cache) = get_flash(sd);
-    let storage = rktk_drivers_nrf52::softdevice::flash::create_storage_driver(flash, &cache);
+    let storage = rktk_drivers_nrf::softdevice::flash::create_storage_driver(flash, &cache);
 
     let ble = {
         #[cfg(feature = "ble")]

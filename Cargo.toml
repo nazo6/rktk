@@ -4,8 +4,8 @@ cargo-features = ["profile-rustflags"]
 members = [
   "lib/rktk",
   "lib/rktk-drivers-common",
-  "lib/rktk-drivers-nrf52",
-  "lib/rktk-drivers-rp2040",
+  "lib/rktk-drivers-nrf",
+  "lib/rktk-drivers-rp",
   "lib/rktk-keymanager",
   "lib/rktk-rrp",
   "keyboards/dummy-kb",
@@ -27,8 +27,8 @@ repository = "https://github.com/nazo6/rktk"
 
 [workspace.dependencies]
 rktk-drivers-common = { path = "lib/rktk-drivers-common", version = "0.1.0" }
-rktk-drivers-nrf52 = { path = "lib/rktk-drivers-nrf52", version = "0.1.0" }
-rktk-drivers-rp2040 = { path = "lib/rktk-drivers-rp2040", version = "0.1.0" }
+rktk-drivers-nrf = { path = "lib/rktk-drivers-nrf", version = "0.1.0" }
+rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.1.0" }
 rktk = { path = "lib/rktk", version = "0.1.0" }
 rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.1.0" }
 rktk-rrp = { path = "lib/rktk-rrp", version = "0.1.0" }

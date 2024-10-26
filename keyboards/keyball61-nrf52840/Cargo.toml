@@ -7,7 +7,7 @@ edition = "2021"
 forced-target = "thumbv7em-none-eabihf"
 
 [dependencies]
-rktk-drivers-nrf52 = { workspace = true }
+rktk-drivers-nrf = { workspace = true }
 rktk = { workspace = true }
 
 embassy-executor = { workspace = true, features = [
@@ -49,5 +49,5 @@ keyball-common = { path = "../keyball-common" }
 [features]
 usb = []
 # Enables ble driver. If this feature is enabled, this side is always master.
-ble = ["rktk-drivers-nrf52/ble"]
+ble = ["rktk-drivers-nrf/ble"]
 default = ["ble", "usb"]

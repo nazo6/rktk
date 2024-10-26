@@ -1,8 +1,8 @@
 cargo-features = ["per-package-target"]
 
 [package]
-name = "rktk-drivers-nrf52"
-description = "rktk drivers for nrf52"
+name = "rktk-drivers-nrf"
+description = "rktk drivers for nrf chip"
 forced-target = "thumbv7em-none-eabihf"
 version.workspace = true
 license.workspace = true
@@ -19,18 +19,8 @@ embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-embassy-nrf = { workspace = true, features = [
-  "gpiote",
-  "time-driver-rtc1",
-  "nrf52840",
-  "nfc-pins-as-gpio",
-] }
-nrf-softdevice = { workspace = true, features = [
-  "s140",
-  # TODO: make this rust-analyzer only
-  "nrf52840",
-  "ble-peripheral",
-] }
+embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
+nrf-softdevice = { workspace = true, features = ["ble-peripheral"] }
 embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
 
@@ -46,4 +36,7 @@ defmt = { workspace = true }
 usbd-hid = { workspace = true }
 
 [features]
+default = ["nrf52840", "softdevice-s140"]
+nrf52840 = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
+softdevice-s140 = ["nrf-softdevice/s140"]
 ble = ["nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]

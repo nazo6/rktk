@@ -1,6 +1,6 @@
 [package]
-name = "rktk-drivers-rp2040"
-description = "rktk drivers for RP2040"
+name = "rktk-drivers-rp"
+description = "rktk drivers for RP chip"
 version.workspace = true
 license.workspace = true
 edition.workspace = true

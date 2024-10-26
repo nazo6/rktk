@@ -16,7 +16,7 @@ use rktk::{
     interface::{ble::DummyBleDriver, debounce::NoopDebounceDriver},
     task::Drivers,
 };
-use rktk_drivers_rp2040::{
+use rktk_drivers_rp::{
     backlight::ws2812_pio::Ws2812Pio,
     display::ssd1306::create_ssd1306,
     double_tap::DoubleTapResetRp,
@@ -108,7 +108,7 @@ async fn main(_spawner: Spawner) {
     // NOTE: needed for some macro thing. maybe this can be avoided.
     #[allow(clippy::needless_late_init)]
     let storage;
-    rktk_drivers_rp2040::init_storage!(storage, p.FLASH, p.DMA_CH3, { 4 * 1024 * 1024 });
+    rktk_drivers_rp::init_storage!(storage, p.FLASH, p.DMA_CH3, { 4 * 1024 * 1024 });
 
     let drivers = Drivers {
         keyscan,
