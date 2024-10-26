@@ -21,7 +21,7 @@ use rktk::{
 };
 use rktk_drivers_nrf52::{
     backlight::ws2812_pwm::Ws2812Pwm, display::ssd1306::create_ssd1306,
-    keyscan::duplex_matrix::create_duplex_matrix, mouse::paw3395, panic_utils,
+    keyscan::duplex_matrix::create_duplex_matrix, mouse::pmw3360, panic_utils,
     softdevice::flash::get_flash, split::uart_half_duplex::UartHalfDuplexSplitDriver, usb::UsbOpts,
 };
 
@@ -94,15 +94,7 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let ball = paw3395::create_paw3395(
-        p.SPI2,
-        Irqs,
-        p.P1_13,
-        p.P1_11,
-        p.P0_10,
-        p.P0_09,
-        PAW3395_CONFIG,
-    );
+    let ball = pmw3360::create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09);
 
     let keyscan = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
@@ -185,7 +177,7 @@ async fn main(_spawner: Spawner) {
         storage: Some(storage),
         ble,
         // debounce: rktk::interface::debounce::NoopDebounceDriver,
-        debounce: EagerDebounceDriver::new(embassy_time::Duration::from_millis(10)),
+        debounce: EagerDebounceDriver::new(embassy_time::Duration::from_millis(20)),
     };
 
     rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;
