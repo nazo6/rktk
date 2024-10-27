@@ -20,3 +20,13 @@ pub trait DriverBuilder {
     type Error: core::fmt::Debug;
     async fn build(self) -> Result<Self::Output, Self::Error>;
 }
+
+pub trait DriverBuilderWithTask {
+    type Driver;
+    type Error: core::fmt::Debug;
+    async fn build(self) -> Result<(Self::Driver, impl BackgroundTask), Self::Error>;
+}
+
+pub trait BackgroundTask {
+    async fn run(self);
+}

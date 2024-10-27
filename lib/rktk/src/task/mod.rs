@@ -13,7 +13,7 @@ use crate::{
         backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver,
         display::DisplayDriver, double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver,
         mouse::MouseDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
-        DriverBuilder,
+        BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
     },
     KeyConfig,
 };
@@ -28,32 +28,29 @@ pub(crate) mod main_loop;
 /// Only the `key_scanner` and `usb` drivers are required.
 /// For other drivers, if the value is None, it will be handled appropriately.
 pub struct Drivers<
-    // required drivers
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
-    Split: SplitDriver,
-    // builder drivers
-    MouseBuilder: DriverBuilder<Output = Mouse>,
-    DisplayBuilder: DriverBuilder<Output = Display>,
-    UsbBuilder: DriverBuilder<Output = Usb>,
-    // optional drivers
-    Backlight: BacklightDriver,
     Ble: BleDriver,
+    Usb: UsbDriver,
+    Split: SplitDriver,
+    Backlight: BacklightDriver,
     DoubleTapReset: DoubleTapResetDriver,
     Storage: StorageDriver,
-    // optional drivers of builder
     Mouse: MouseDriver,
     Display: DisplayDriver,
-    Usb: UsbDriver,
+    MouseBuilder: DriverBuilder<Output = Mouse>,
+    DisplayBuilder: DriverBuilder<Output = Display>,
+    UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
+    BleBuilder: DriverBuilderWithTask<Driver = Ble>,
 > {
     pub double_tap_reset: Option<DoubleTapReset>,
     pub keyscan: KeyScan,
     pub debounce: Debounce,
     pub split: Split,
     pub backlight: Option<Backlight>,
-    pub ble: Option<Ble>,
     pub storage: Option<Storage>,
 
+    pub ble_builder: Option<BleBuilder>,
     pub usb_builder: Option<UsbBuilder>,
     pub mouse_builder: Option<MouseBuilder>,
     pub display_builder: Option<DisplayBuilder>,
@@ -64,34 +61,36 @@ pub struct Drivers<
 pub async fn start<
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
-    Split: SplitDriver,
-    MouseBuilder: DriverBuilder<Output = Mouse>,
-    DisplayBuilder: DriverBuilder<Output = Display>,
-    UsbBuilder: DriverBuilder<Output = Usb>,
-    Backlight: BacklightDriver,
     Ble: BleDriver,
+    Usb: UsbDriver,
+    Split: SplitDriver,
+    Backlight: BacklightDriver,
     DoubleTapReset: DoubleTapResetDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
     Display: DisplayDriver,
-    Usb: UsbDriver,
+    MouseBuilder: DriverBuilder<Output = Mouse>,
+    DisplayBuilder: DriverBuilder<Output = Display>,
+    UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
+    BleBuilder: DriverBuilderWithTask<Driver = Ble>,
     MainHooks: crate::hooks::MainHooks,
     BacklightHooks: crate::hooks::BacklightHooks,
 >(
     mut drivers: Drivers<
         KeyScan,
         Debounce,
-        Split,
-        MouseBuilder,
-        DisplayBuilder,
-        UsbBuilder,
-        Backlight,
         Ble,
+        Usb,
+        Split,
+        Backlight,
         DoubleTapReset,
         Storage,
         Mouse,
         Display,
-        Usb,
+        MouseBuilder,
+        DisplayBuilder,
+        UsbBuilder,
+        BleBuilder,
     >,
     key_config: KeyConfig,
     hooks: Hooks<MainHooks, BacklightHooks>,
@@ -104,7 +103,7 @@ pub async fn start<
     log::info!(
         "RKTK Starting... (backlight: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
         drivers.backlight.is_some(),
-        drivers.ble.is_some(),
+        drivers.ble_builder.is_some(),
         drivers.usb_builder.is_some(),
         drivers.storage.is_some(),
         drivers.mouse_builder.is_some(),
@@ -140,18 +139,22 @@ pub async fn start<
 
             crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
-            match (drivers.ble, drivers.usb_builder) {
-                (Some(ble), _) => {
-                    main_loop::start(
-                        Some(&ble),
-                        drivers.keyscan,
-                        drivers.debounce,
-                        mouse,
-                        drivers.storage,
-                        drivers.split,
-                        drivers.backlight,
-                        key_config,
-                        hooks,
+            match (drivers.ble_builder, drivers.usb_builder) {
+                (Some(ble_builder), _) => {
+                    let (ble, ble_task) = ble_builder.build().await.expect("Failed to build ble");
+                    join(
+                        main_loop::start(
+                            Some(&ble),
+                            drivers.keyscan,
+                            drivers.debounce,
+                            mouse,
+                            drivers.storage,
+                            drivers.split,
+                            drivers.backlight,
+                            key_config,
+                            hooks,
+                        ),
+                        ble_task.run(),
                     )
                     .await;
                 }
@@ -162,22 +165,29 @@ pub async fn start<
                     )
                     .await
                     {
-                        Either::First(Ok(usb)) => Some(usb),
+                        Either::First(Ok(res)) => (Some(res.0), Some(res.1)),
                         Either::First(_) => {
                             panic!("Failed to build USB");
                         }
-                        Either::Second(_) => None,
+                        Either::Second(_) => (None, None),
                     };
-                    main_loop::start(
-                        usb.as_ref(),
-                        drivers.keyscan,
-                        drivers.debounce,
-                        mouse,
-                        drivers.storage,
-                        drivers.split,
-                        drivers.backlight,
-                        key_config,
-                        hooks,
+                    join(
+                        main_loop::start(
+                            usb.0.as_ref(),
+                            drivers.keyscan,
+                            drivers.debounce,
+                            mouse,
+                            drivers.storage,
+                            drivers.split,
+                            drivers.backlight,
+                            key_config,
+                            hooks,
+                        ),
+                        async {
+                            if let Some(task) = usb.1 {
+                                task.run().await;
+                            }
+                        },
                     )
                     .await;
                 }

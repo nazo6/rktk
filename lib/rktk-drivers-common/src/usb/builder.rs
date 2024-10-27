@@ -3,7 +3,7 @@ use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 
 use embassy_usb::Builder;
-use rktk::interface::DriverBuilder;
+use rktk::interface::{DriverBuilder, DriverBuilderWithTask};
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
@@ -19,6 +19,15 @@ macro_rules! singleton {
         static STATIC_CELL: ::static_cell::StaticCell<$type> = ::static_cell::StaticCell::new();
         STATIC_CELL.init($val)
     }};
+}
+
+pub struct CommonUsbDriverBuilderWithTask<D: Driver<'static>> {
+    builder: Builder<'static, D>,
+    keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
+    mouse_hid: HidWriter<'static, D, 8>,
+    media_key_hid: HidWriter<'static, D, 8>,
+    wakeup_signal: &'static RemoteWakeupSignal,
+    rrp_serial: CdcAcmClass<'static, D>,
 }
 
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
@@ -100,28 +109,25 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
     }
 }
 
-impl<D: Driver<'static> + 'static> DriverBuilder for CommonUsbDriverBuilder<D> {
-    type Output = CommonUsbDriver;
+impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuilder<D> {
+    type Driver = CommonUsbDriver;
 
     type Error = embassy_executor::SpawnError;
 
-    // should be called with timeout
-    async fn build(mut self) -> Result<Self::Output, Self::Error> {
+    async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
         let usb = self.builder.build();
-
-        let ex = embassy_executor::Spawner::for_current_executor().await;
-        ex.spawn(start_usb(usb, self.wakeup_signal))?;
-
-        self.keyboard_hid.ready().await;
-
-        ex.spawn(hid_kb(self.keyboard_hid))?;
-        ex.spawn(hid_mkb(self.media_key_hid))?;
-        ex.spawn(hid_mouse(self.mouse_hid))?;
-        let (r, w) = self.rrp_serial.split();
-        ex.spawn(rrp(r, w))?;
-
-        Ok(Self::Output {
-            wakeup_signal: self.wakeup_signal,
-        })
+        Ok((
+            CommonUsbDriver {
+                wakeup_signal: self.wakeup_signal,
+            },
+            UsbBackgroundTask {
+                device: usb,
+                signal: self.wakeup_signal,
+                keyboard_hid: self.keyboard_hid,
+                media_key_hid: self.media_key_hid,
+                mouse_hid: self.mouse_hid,
+                serial: self.rrp_serial,
+            },
+        ))
     }
 }

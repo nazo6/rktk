@@ -36,7 +36,7 @@ defmt = { workspace = true }
 usbd-hid = { workspace = true }
 
 [features]
-default = ["nrf52840", "softdevice-s140"]
+default = ["nrf52840", "softdevice-s140", "ble"]
 nrf52840 = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
 softdevice-s140 = ["nrf-softdevice/s140"]
 ble = ["nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]

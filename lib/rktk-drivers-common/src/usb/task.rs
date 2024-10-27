@@ -1,10 +1,10 @@
-use embassy_futures::join::join;
+use embassy_futures::join::{join, join3};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, pipe::Pipe};
-use embassy_usb::class::cdc_acm;
+use embassy_usb::class::cdc_acm::CdcAcmClass;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
-use embassy_usb::driver::{Driver, EndpointError};
+use embassy_usb::driver::Driver;
 use embassy_usb::UsbDevice;
-use usbd_hid::descriptor::AsInputReport;
+use rktk::interface::BackgroundTask;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::RemoteWakeupSignal;
@@ -17,36 +17,27 @@ pub static HID_MEDIA_KEYBOARD_CHANNEL: Channel<CriticalSectionRawMutex, MediaKey
 pub static RRP_SEND_PIPE: Pipe<CriticalSectionRawMutex, 128> = Pipe::new();
 pub static RRP_RECV_PIPE: Pipe<CriticalSectionRawMutex, 128> = Pipe::new();
 
-// -----------------
-// --- USB task  ---
-// -----------------
-
-// HACK: embassy task function cannot use generics but impl trait is allowed.
-// So, as a workaround, we define a trait and implement it for the struct.
-//
-// FIXME: This workaround works if embassy-executor's `nightly` feature is disabled. If it is enabled, compilation fails.
-trait UsbDeviceTrait {
-    async fn run_until_suspend(&mut self);
-    async fn wait_resume(&mut self);
-    async fn remote_wakeup(&mut self) -> Result<(), embassy_usb::RemoteWakeupError>;
+pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
+    pub device: UsbDevice<'d, D>,
+    pub signal: &'static RemoteWakeupSignal,
+    pub keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
+    pub media_key_hid: HidWriter<'d, D, 8>,
+    pub mouse_hid: HidWriter<'d, D, 8>,
+    pub serial: CdcAcmClass<'d, D>,
 }
 
-impl<'d, D: Driver<'d>> UsbDeviceTrait for UsbDevice<'d, D> {
-    async fn run_until_suspend(&mut self) {
-        self.run_until_suspend().await;
-    }
-    async fn wait_resume(&mut self) {
-        self.wait_resume().await;
-    }
-    async fn remote_wakeup(&mut self) -> Result<(), embassy_usb::RemoteWakeupError> {
-        self.remote_wakeup().await
+impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
+    async fn run(self) {
+        join3(
+            usb(self.device, self.signal),
+            hid(self.keyboard_hid, self.media_key_hid, self.mouse_hid),
+            rrp(self.serial),
+        )
+        .await;
     }
 }
-#[embassy_executor::task]
-pub async fn start_usb(
-    mut device: impl UsbDeviceTrait + 'static,
-    signal: &'static RemoteWakeupSignal,
-) {
+
+async fn usb<'d, D: Driver<'d>>(mut device: UsbDevice<'d, D>, signal: &'static RemoteWakeupSignal) {
     loop {
         device.run_until_suspend().await;
         match embassy_futures::select::select(device.wait_resume(), signal.wait()).await {
@@ -60,74 +51,36 @@ pub async fn start_usb(
     }
 }
 
-// -----------------
-// --- hid task  ---
-// -----------------
-
-trait HidWriterTrait {
-    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError>;
-}
-impl<'d, D: Driver<'d>, const M: usize, const N: usize> HidWriterTrait
-    for HidReaderWriter<'d, D, M, N>
-{
-    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError> {
-        self.write_serialize(r).await
-    }
-}
-impl<'d, D: Driver<'d>, const N: usize> HidWriterTrait for HidWriter<'d, D, N> {
-    async fn write_serialize<IR: AsInputReport>(&mut self, r: &IR) -> Result<(), EndpointError> {
-        self.write_serialize(r).await
-    }
-}
-
-#[embassy_executor::task]
-pub async fn hid_kb(mut device: impl HidWriterTrait + 'static) {
-    loop {
-        let report = HID_KEYBOARD_CHANNEL.receive().await;
-        let _ = device.write_serialize(&report).await;
-    }
-}
-#[embassy_executor::task]
-pub async fn hid_mkb(mut device: impl HidWriterTrait + 'static) {
-    loop {
-        let report = HID_MEDIA_KEYBOARD_CHANNEL.receive().await;
-        let _ = device.write_serialize(&report).await;
-    }
-}
-#[embassy_executor::task]
-pub async fn hid_mouse(mut device: impl HidWriterTrait + 'static) {
-    loop {
-        let report = HID_MOUSE_CHANNEL.receive().await;
-        let _ = device.write_serialize(&report).await;
-    }
+pub async fn hid<'d, D: Driver<'d>>(
+    mut keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
+    mut media_key_hid: HidWriter<'d, D, 8>,
+    mut mouse_hid: HidWriter<'d, D, 8>,
+) {
+    join3(
+        async move {
+            loop {
+                let report = HID_KEYBOARD_CHANNEL.receive().await;
+                let _ = keyboard_hid.write_serialize(&report).await;
+            }
+        },
+        async move {
+            loop {
+                let report = HID_MEDIA_KEYBOARD_CHANNEL.receive().await;
+                let _ = media_key_hid.write_serialize(&report).await;
+            }
+        },
+        async move {
+            loop {
+                let report = HID_MOUSE_CHANNEL.receive().await;
+                let _ = mouse_hid.write_serialize(&report).await;
+            }
+        },
+    )
+    .await;
 }
 
-// -----------------
-// --- rrp task  ---
-// -----------------
-trait SerialWriter {
-    async fn write_packet(&mut self, data: &[u8]) -> Result<(), EndpointError>;
-}
-impl<'d, D: Driver<'d>> SerialWriter for cdc_acm::Sender<'d, D> {
-    async fn write_packet(&mut self, data: &[u8]) -> Result<(), EndpointError> {
-        self.write_packet(data).await
-    }
-}
-trait SerialReader {
-    async fn read_packet(&mut self, data: &mut [u8]) -> Result<usize, EndpointError>;
-    async fn wait_connection(&mut self);
-}
-impl<'d, D: Driver<'d>> SerialReader for cdc_acm::Receiver<'d, D> {
-    async fn read_packet(&mut self, data: &mut [u8]) -> Result<usize, EndpointError> {
-        self.read_packet(data).await
-    }
-    async fn wait_connection(&mut self) {
-        self.wait_connection().await
-    }
-}
-
-#[embassy_executor::task]
-pub async fn rrp(mut writer: impl SerialWriter + 'static, mut reader: impl SerialReader + 'static) {
+pub async fn rrp<'d, D: Driver<'d>>(serial: CdcAcmClass<'d, D>) {
+    let (mut writer, mut reader) = serial.split();
     reader.wait_connection().await;
     join(
         async {

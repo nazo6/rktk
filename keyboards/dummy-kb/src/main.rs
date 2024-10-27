@@ -11,7 +11,7 @@ use keyball_common::KEY_CONFIG;
 use rktk::{
     hooks::create_empty_hooks,
     interface::{
-        backlight::DummyBacklightDriver, ble::DummyBleDriver, debounce::NoopDebounceDriver,
+        backlight::DummyBacklightDriver, ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver,
         display::DummyDisplayDriverBuilder, double_tap::DummyDoubleTapResetDriver,
         keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder, split::DummySplitDriver,
         storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
@@ -31,7 +31,7 @@ async fn main(_spawner: Spawner) {
         display_builder: Option::<DummyDisplayDriverBuilder>::None,
         split: DummySplitDriver,
         backlight: Option::<DummyBacklightDriver>::None,
-        ble: Option::<DummyBleDriver>::None,
+        ble_builder: Option::<DummyBleDriverBuilder>::None,
         storage: Option::<DummyStorageDriver>::None,
         debounce: NoopDebounceDriver,
     };

@@ -31,16 +31,25 @@ use defmt_rtt as _;
 use nrf_softdevice as _;
 
 #[cfg(feature = "ble")]
-use rktk_drivers_nrf::softdevice::ble::init_ble_server;
+mod ble {
+    pub use rktk_drivers_nrf::softdevice::ble::init_ble_server;
+    pub use rktk_drivers_nrf::softdevice::ble::NrfBleDriverBuilder;
+}
 
 #[cfg(not(feature = "ble"))]
-use rktk::interface::ble::DummyBleDriver;
-#[cfg(not(feature = "usb"))]
-use rktk::interface::usb::DummyUsbDriverBuilder;
-#[cfg(feature = "ble")]
-use rktk_drivers_nrf::softdevice::ble::NrfBleDriver;
+mod no_ble {
+    pub use rktk::interface::ble::DummyBleDriver;
+}
+
 #[cfg(feature = "usb")]
-use rktk_drivers_nrf::usb::new_usb;
+mod usb {
+    pub use rktk_drivers_nrf::usb::new_usb;
+}
+
+#[cfg(not(feature = "usb"))]
+mod no_usb {
+    pub use rktk::interface::usb::DummyUsbDriverBuilder;
+}
 
 use embassy_nrf::{bind_interrupts, peripherals::USBD};
 
@@ -128,7 +137,7 @@ async fn main(_spawner: Spawner) {
 
     let sd = rktk_drivers_nrf::softdevice::init_sd("keyball61");
     #[cfg(feature = "ble")]
-    let (server, sd) = init_ble_server(sd).await;
+    let (server, sd) = ble::init_ble_server(sd).await;
     rktk_drivers_nrf::softdevice::start_softdevice(sd).await;
 
     embassy_time::Timer::after_millis(50).await;
@@ -138,12 +147,12 @@ async fn main(_spawner: Spawner) {
     let (flash, cache) = get_flash(sd);
     let storage = rktk_drivers_nrf::softdevice::flash::create_storage_driver(flash, &cache);
 
-    let ble = {
+    let ble_builder = {
         #[cfg(feature = "ble")]
-        let ble = Some(NrfBleDriver::new(sd, server, "keyball61", flash).await);
+        let ble = Some(ble::NrfBleDriverBuilder::new(sd, server, "keyball61", flash).await);
 
         #[cfg(not(feature = "ble"))]
-        let ble = Option::<DummyBleDriver>::None;
+        let ble = Option::<no_ble::DummyBleDriverBuilder>::None;
 
         ble
     };
@@ -163,11 +172,11 @@ async fn main(_spawner: Spawner) {
                     kb_poll_interval: 5,
                     driver,
                 };
-                Some(new_usb(opts))
+                Some(usb::new_usb(opts))
             };
 
             #[cfg(not(feature = "usb"))]
-            let usb = Option::<DummyUsbDriverBuilder>::None;
+            let usb = Option::<no_usb::DummyUsbDriverBuilder>::None;
 
             usb
         },
@@ -175,7 +184,7 @@ async fn main(_spawner: Spawner) {
         split,
         backlight: Some(backlight),
         storage: Some(storage),
-        ble,
+        ble_builder,
         // debounce: rktk::interface::debounce::NoopDebounceDriver,
         debounce: EagerDebounceDriver::new(embassy_time::Duration::from_millis(20)),
     };

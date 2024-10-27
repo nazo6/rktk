@@ -13,7 +13,7 @@ use embassy_rp::{
 
 use rktk::{
     hooks::create_empty_hooks,
-    interface::{ble::DummyBleDriver, debounce::NoopDebounceDriver},
+    interface::{ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver},
     task::Drivers,
 };
 use rktk_drivers_rp::{
@@ -118,7 +118,7 @@ async fn main(_spawner: Spawner) {
         display_builder: Some(display),
         split,
         backlight: Some(backlight),
-        ble: Option::<DummyBleDriver>::None,
+        ble_builder: Option::<DummyBleDriverBuilder>::None,
         storage: Some(storage),
         debounce: NoopDebounceDriver,
     };

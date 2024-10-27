@@ -1,4 +1,4 @@
-use super::{error::RktkError, reporter::ReporterDriver, DriverBuilder};
+use super::{error::RktkError, reporter::ReporterDriver, BackgroundTask, DriverBuilderWithTask};
 
 pub trait UsbDriver: ReporterDriver {
     async fn vbus_detect(&self) -> Result<bool, RktkError> {
@@ -11,12 +11,20 @@ impl ReporterDriver for DummyUsbDriver {}
 impl UsbDriver for DummyUsbDriver {}
 
 pub enum DummyUsbDriverBuilder {}
-impl DriverBuilder for DummyUsbDriverBuilder {
-    type Output = DummyUsbDriver;
+impl DriverBuilderWithTask for DummyUsbDriverBuilder {
+    type Driver = DummyUsbDriver;
 
     type Error = ();
 
-    async fn build(self) -> Result<Self::Output, Self::Error> {
-        unimplemented!()
+    #[allow(refining_impl_trait)]
+    async fn build(self) -> Result<(Self::Driver, DummyUsbTask), Self::Error> {
+        unreachable!()
+    }
+}
+
+pub enum DummyUsbTask {}
+impl BackgroundTask for DummyUsbTask {
+    async fn run(self) {
+        unreachable!()
     }
 }
