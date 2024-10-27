@@ -1,21 +1,26 @@
-# rktk
+<h1 align="center">rktk</h1>
+<p align="center">Rust Keyboard Toolkit</p>
 
-Rust keybord toolkit.
+rktk is a keyboard firmware framework written in Rust.
 
-Currently, the firmware is for the Keyball61, but by separating the core
-functionality from the driver, the core functionality is architecture- and
-hardware-independent and can be easily extended.
+Initially, it was a firmware for the
+[keyball](https://github.com/Yowkees/keyball), but a driver system was
+introduced to make it easy to extend to various keyboards.
 
-Our current goal is to port it to the NRF52840 chip and connect it via
-bluetooth.
+Currently, it supports nRF52840 and RP2040, and although there are bugs and
+performance issues (especially related to split keyboards), it can be used as a
+decent keyboard.
+
+This firmware consists of two parts: the core functionality implemented in the
+`rktk` crate and the driver that actually interacts with the hardware. This
+makes it easy to extend.
 
 ## Features
 
 - ✅ : Working
 - 🟡 : WIP, partly implemented.
-- 🔴 : WIP, not working yet.
-- ❌ : Only planned. Not implemented yet.
-- Empty: Not planned/Not needed.
+- 🔴 : Planned.
+- \- : Not planned/Not needed.
 
 ### Core features
 
@@ -31,60 +36,39 @@ bluetooth.
 | Backlight LED      | 🟡     |
 | USB                | ✅     |
 | Bluetooth          | 🟡     |
-| Remapper support   | ❌     |
+| Remapper support   | 🟡     |
 | Double-tap reset   | ✅     |
 
 ### Drivers
 
-#### Key scanner
-
-| Driver                | RP2040 | NRF52840 |
-| --------------------- | ------ | -------- |
-| Duplex-Matrix Scanner | ✅     | ✅       |
-
-#### Mouse
-
-| Driver  | RP2040 | NRF52840 |
-| ------- | ------ | -------- |
-| PMW3360 | ✅     | ✅       |
-
-#### Display
-
-| Driver  | RP2040 | NRF52840 |
-| ------- | ------ | -------- |
-| SSD1306 | ✅     | ✅       |
-
-#### Split
-
-| Driver                         | RP2040 | NRF52840 |
-| ------------------------------ | ------ | -------- |
-| Single wire Half-duplex (PIO)  | ✅     |          |
-| Single wire Half-duplex (UART) |        | 🟡       |
-
-#### Backlight
-
-| Driver       | RP2040 | NRF52840 |
-| ------------ | ------ | -------- |
-| WS2812 (PIO) | ✅     |          |
-| WS2812 (PWM) |        | 🟡       |
-
-#### USB
-
-| RP2040 | NRF52840 |
-| ------ | -------- |
-| ✅     | ✅       |
-
-#### Bluetooth
-
-| Driver         | RP2040 | NRF52840 |
-| -------------- | ------ | -------- |
-| NRF Softdevice |        | 🟡       |
-
-#### Double tap reset
-
-| RP2040 | NRF52840 |
-| ------ | -------- |
-| ✅     |          |
+| Driver                     | Common | RP2040    | NRF52840  |
+| -------------------------- | ------ | --------- | --------- |
+| **Key scanner**            |        |           |           |
+| Matrix                     | 🔴     |           |           |
+| Matrix with shift register | 🔴     |           |           |
+| (Japanese) Duplex-Matrix   | ✅     | ✅        | ✅        |
+| &nbsp;                     |        |           |           |
+| **Mouse**                  |        |           |           |
+| PMW3360                    | ✅     | ✅        | ✅        |
+| PAW3395                    | ✅     | ✅        | ✅        |
+| &nbsp;                     |        |           |           |
+| **Host communication**     |        |           |           |
+| USB                        | ✅     | ✅        | ✅        |
+| Bluetooth                  |        |           | ✅        |
+| &nbsp;                     |        |           |           |
+| **Display**                |        |           |           |
+| SSD1306                    | ✅     | ✅        | ✅        |
+| &nbsp;                     |        |           |           |
+| **Split**                  |        |           |           |
+| Half-duplex single wire    | -      | ✅ (PIO)  | ✅ (UART) |
+| Full-duplex dual wire      | -      | 🔴 (UART) | 🔴 (UART) |
+| Bluetooth                  | -      | -         | 🔴        |
+| &nbsp;                     |        |           |           |
+| **Backlight**              |        |           |           |
+| WS2812                     | -      | ✅ (PIO)  | ✅ (PWM)  |
+| &nbsp;                     |        |           |           |
+| **Double-tap reset**       |        |           |           |
+| Double-tap reset           | -      | ✅        | -         |
 
 ## Development
 
