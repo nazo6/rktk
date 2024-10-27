@@ -114,8 +114,10 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
 
     type Error = embassy_executor::SpawnError;
 
-    async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
+    #[allow(refining_impl_trait)]
+    async fn build(mut self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
         let usb = self.builder.build();
+        self.keyboard_hid.ready().await;
         Ok((
             CommonUsbDriver {
                 wakeup_signal: self.wakeup_signal,
