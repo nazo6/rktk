@@ -38,7 +38,7 @@ mod ble {
 
 #[cfg(not(feature = "ble"))]
 mod no_ble {
-    pub use rktk::interface::ble::DummyBleDriver;
+    pub use rktk::interface::ble::DummyBleDriverBuilder;
 }
 
 #[cfg(feature = "usb")]
