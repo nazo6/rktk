@@ -7,7 +7,7 @@ use embassy_usb::UsbDevice;
 use rktk::interface::BackgroundTask;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use super::RemoteWakeupSignal;
+use super::{ReadySignal, RemoteWakeupSignal};
 
 pub static HID_KEYBOARD_CHANNEL: Channel<CriticalSectionRawMutex, KeyboardReport, 8> =
     Channel::new();
@@ -20,6 +20,7 @@ pub static RRP_RECV_PIPE: Pipe<CriticalSectionRawMutex, 128> = Pipe::new();
 pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub device: UsbDevice<'d, D>,
     pub signal: &'static RemoteWakeupSignal,
+    pub ready_signal: &'static ReadySignal,
     pub keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
     pub media_key_hid: HidWriter<'d, D, 8>,
     pub mouse_hid: HidWriter<'d, D, 8>,
@@ -30,7 +31,12 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
     async fn run(self) {
         join3(
             usb(self.device, self.signal),
-            hid(self.keyboard_hid, self.media_key_hid, self.mouse_hid),
+            hid(
+                self.keyboard_hid,
+                self.media_key_hid,
+                self.mouse_hid,
+                self.ready_signal,
+            ),
             rrp(self.serial),
         )
         .await;
@@ -55,7 +61,11 @@ pub async fn hid<'d, D: Driver<'d>>(
     mut keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
     mut media_key_hid: HidWriter<'d, D, 8>,
     mut mouse_hid: HidWriter<'d, D, 8>,
+    ready_signal: &'static ReadySignal,
 ) {
+    keyboard_hid.ready().await;
+    ready_signal.signal(());
+
     join3(
         async move {
             loop {

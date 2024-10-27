@@ -2,6 +2,7 @@ use super::error::RktkError;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 pub trait ReporterDriver {
+    async fn wait_ready(&self) {}
     fn try_send_keyboard_report(&self, _report: KeyboardReport) -> Result<(), RktkError> {
         Err(RktkError::NotSupported)
     }

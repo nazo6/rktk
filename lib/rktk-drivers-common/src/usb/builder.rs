@@ -3,7 +3,7 @@ use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 
 use embassy_usb::Builder;
-use rktk::interface::{DriverBuilder, DriverBuilderWithTask};
+use rktk::interface::DriverBuilderWithTask;
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
@@ -11,7 +11,7 @@ use usbd_hid::descriptor::{
 use crate::usb::handler::{UsbDeviceHandler, UsbRequestHandler};
 
 use super::driver::CommonUsbDriver;
-use super::task::*;
+use super::{task::*, ReadySignal};
 use super::{RemoteWakeupSignal, UsbOpts};
 
 macro_rules! singleton {
@@ -21,27 +21,20 @@ macro_rules! singleton {
     }};
 }
 
-pub struct CommonUsbDriverBuilderWithTask<D: Driver<'static>> {
-    builder: Builder<'static, D>,
-    keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
-    mouse_hid: HidWriter<'static, D, 8>,
-    media_key_hid: HidWriter<'static, D, 8>,
-    wakeup_signal: &'static RemoteWakeupSignal,
-    rrp_serial: CdcAcmClass<'static, D>,
-}
-
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,
     keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
     mouse_hid: HidWriter<'static, D, 8>,
     media_key_hid: HidWriter<'static, D, 8>,
     wakeup_signal: &'static RemoteWakeupSignal,
+    ready_signal: &'static ReadySignal,
     rrp_serial: CdcAcmClass<'static, D>,
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
     pub fn new(mut opts: UsbOpts<D>) -> Self {
         let wakeup_signal = singleton!(RemoteWakeupSignal::new(), RemoteWakeupSignal);
+        let ready_signal = singleton!(ReadySignal::new(), ReadySignal);
 
         // Required for windows compatibility.
         // https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/kconfig/CONFIG_CDC_ACM_IAD.html#help
@@ -105,6 +98,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             media_key_hid,
             rrp_serial,
             wakeup_signal,
+            ready_signal,
         }
     }
 }
@@ -115,16 +109,17 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
     type Error = embassy_executor::SpawnError;
 
     #[allow(refining_impl_trait)]
-    async fn build(mut self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
+    async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
         let usb = self.builder.build();
-        self.keyboard_hid.ready().await;
         Ok((
             CommonUsbDriver {
                 wakeup_signal: self.wakeup_signal,
+                ready_signal: self.ready_signal,
             },
             UsbBackgroundTask {
                 device: usb,
                 signal: self.wakeup_signal,
+                ready_signal: self.ready_signal,
                 keyboard_hid: self.keyboard_hid,
                 media_key_hid: self.media_key_hid,
                 mouse_hid: self.mouse_hid,

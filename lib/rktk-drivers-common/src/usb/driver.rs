@@ -3,15 +3,20 @@ use super::{
         HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL, HID_MOUSE_CHANNEL, RRP_RECV_PIPE,
         RRP_SEND_PIPE,
     },
-    RemoteWakeupSignal,
+    ReadySignal, RemoteWakeupSignal,
 };
 use rktk::interface::{reporter::ReporterDriver, usb::UsbDriver};
 
 pub struct CommonUsbDriver {
     pub(super) wakeup_signal: &'static RemoteWakeupSignal,
+    pub(super) ready_signal: &'static ReadySignal,
 }
 
 impl ReporterDriver for CommonUsbDriver {
+    async fn wait_ready(&self) {
+        self.ready_signal.wait().await;
+    }
+
     fn try_send_keyboard_report(
         &self,
         _report: usbd_hid::descriptor::KeyboardReport,

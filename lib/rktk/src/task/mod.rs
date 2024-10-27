@@ -159,35 +159,39 @@ pub async fn start<
                     .await;
                 }
                 (_, Some(usb_builder)) => {
-                    let usb = match select(
-                        usb_builder.build(),
-                        Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
-                    )
-                    .await
-                    {
-                        Either::First(Ok(res)) => (Some(res.0), Some(res.1)),
-                        Either::First(_) => {
-                            panic!("Failed to build USB");
-                        }
-                        Either::Second(_) => (None, None),
+                    let Ok((usb, usb_task)) = usb_builder.build().await else {
+                        panic!("Failed to build USB");
                     };
+
                     join(
-                        main_loop::start(
-                            usb.0.as_ref(),
-                            drivers.keyscan,
-                            drivers.debounce,
-                            mouse,
-                            drivers.storage,
-                            drivers.split,
-                            drivers.backlight,
-                            key_config,
-                            hooks,
-                        ),
                         async {
-                            if let Some(task) = usb.1 {
-                                task.run().await;
-                            }
+                            let usb = match select(
+                                usb.wait_ready(),
+                                Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
+                            )
+                            .await
+                            {
+                                Either::First(_) => Some(usb),
+                                Either::Second(_) => {
+                                    // usb initialize timed out. this is slave side.
+                                    None
+                                }
+                            };
+
+                            main_loop::start(
+                                usb.as_ref(),
+                                drivers.keyscan,
+                                drivers.debounce,
+                                mouse,
+                                drivers.storage,
+                                drivers.split,
+                                drivers.backlight,
+                                key_config,
+                                hooks,
+                            )
+                            .await;
                         },
+                        usb_task.run(),
                     )
                     .await;
                 }

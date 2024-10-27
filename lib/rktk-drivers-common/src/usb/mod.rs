@@ -10,6 +10,7 @@ mod handler;
 mod task;
 
 type RemoteWakeupSignal = embassy_sync::signal::Signal<CriticalSectionRawMutex, ()>;
+type ReadySignal = embassy_sync::signal::Signal<CriticalSectionRawMutex, ()>;
 static SUSPENDED: AtomicBool = AtomicBool::new(false);
 
 pub use builder::CommonUsbDriverBuilder;
