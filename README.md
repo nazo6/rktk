@@ -20,32 +20,60 @@ makes it easy to extend.
 - ✅ : Working
 - 🟡 : WIP, partly implemented.
 - 🔴 : Planned.
-- \- : Not planned/Not needed.
+- ❌ : Not planned.
+- (blank): Not needed.
 
 ### Core features
 
-| Feature            | Status |
-| ------------------ | ------ |
-| Keyscan            | ✅     |
-| Media key support  | ✅     |
-| Mouse              | ✅     |
-| Layer system       | 🟡     |
-| Split keyboard     | ✅     |
-| Non-Split keyboard | 🟡     |
-| Display            | 🟡     |
-| Backlight LED      | 🟡     |
-| USB                | ✅     |
-| Bluetooth          | 🟡     |
-| Remapper support   | 🟡     |
-| Double-tap reset   | ✅     |
+| Feature                                  | Status |
+| ---------------------------------------- | ------ |
+| Keyscan                                  | ✅     |
+| Mouse                                    | ✅     |
+| Advanced key mapping system (layer etc.) | 🟡     |
+| Split keyboard                           | ✅     |
+| Non-Split keyboard                       | 🟡     |
+| Display                                  | 🟡     |
+| Backlight                                | 🟡     |
+| USB                                      | ✅     |
+| Bluetooth                                | 🟡     |
+| Remapper support (rrp-web)               | 🟡     |
+| Double-tap reset                         | ✅     |
+
+#### Key mapping features
+
+Key mapping features is implemented in `rktk-keymanager` and this crate does not
+depend on rktk or embassy. Keymap is defined as normal two-dimensional array.
+See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
+
+| Feature name           | Status |                                                         |
+| ---------------------- | ------ | ------------------------------------------------------- |
+| &nbsp;                 |        |                                                         |
+| **Key action**         |        |                                                         |
+| Mod-Tap                | ✅     | Unlike QMK, any keycode can be specified as modifier.   |
+| Tap-Hold               | 🟡     | Currently, this behaves like `HOLD_ON_OTHER_KEY_PRESS`. |
+| Tap Dance              | ✅     |                                                         |
+| Oneshot key            | ✅     |                                                         |
+| &nbsp;                 |        |                                                         |
+| **KeyCode**            |        |                                                         |
+| Normal key             | ✅     |                                                         |
+| Modifier key           | ✅     |                                                         |
+| Media key              | ✅     |                                                         |
+| Mouse key              | ✅     |                                                         |
+| Mouse scroll momentary | ✅     |                                                         |
+| Layer momentary (MO)   | ✅     |                                                         |
+| Layer toggle (TG)      | ✅     |                                                         |
 
 ### Drivers
+
+- "Common" means that the driver is implemented in `rktk-drivers-common`.
+  Drivers implemented in `rktk-drivers-common` use embassy traits, so they can
+  be easily ported to various platforms.
 
 | Driver                     | Common | RP2040    | NRF52840  |
 | -------------------------- | ------ | --------- | --------- |
 | **Key scanner**            |        |           |           |
-| Matrix                     | 🔴     |           |           |
-| Matrix with shift register | 🔴     |           |           |
+| Matrix                     | 🔴     | 🔴        | 🔴        |
+| Matrix with shift register | 🔴     | 🔴        | 🔴        |
 | (Japanese) Duplex-Matrix   | ✅     | ✅        | ✅        |
 | &nbsp;                     |        |           |           |
 | **Mouse**                  |        |           |           |
@@ -54,21 +82,20 @@ makes it easy to extend.
 | &nbsp;                     |        |           |           |
 | **Host communication**     |        |           |           |
 | USB                        | ✅     | ✅        | ✅        |
-| Bluetooth                  |        |           | ✅        |
+| Bluetooth                  | ❌     | ❌        | ✅        |
 | &nbsp;                     |        |           |           |
 | **Display**                |        |           |           |
 | SSD1306                    | ✅     | ✅        | ✅        |
 | &nbsp;                     |        |           |           |
 | **Split**                  |        |           |           |
-| Half-duplex single wire    | -      | ✅ (PIO)  | ✅ (UART) |
-| Full-duplex dual wire      | -      | 🔴 (UART) | 🔴 (UART) |
-| Bluetooth                  | -      | -         | 🔴        |
+| Half-duplex single wire    | ❌     | ✅ (PIO)  | ✅ (UART) |
+| Full-duplex dual wire      | ❌     | 🔴 (UART) | 🔴 (UART) |
+| Bluetooth                  | ❌     | ❌        | 🔴        |
 | &nbsp;                     |        |           |           |
 | **Backlight**              |        |           |           |
-| WS2812                     | -      | ✅ (PIO)  | ✅ (PWM)  |
+| WS2812                     |        | ✅ (PIO)  | ✅ (PWM)  |
 | &nbsp;                     |        |           |           |
-| **Double-tap reset**       |        |           |           |
-| Double-tap reset           | -      | ✅        | -         |
+| **Double-tap reset**       |        | ✅        |           |
 
 ## Development
 
@@ -85,41 +112,24 @@ You need to install some tools to generate firmware.
   nRF52840
 - `wasm-pack`: Required to build rrp-web
 
-## MSRV
+### MSRV
 
 rktk actually doesn't depends on nightly feature of _rustc_, but uses nightly
 cargo features like `per-package-target`. So, it requires nightly toolchain.
 
-## Architecture
+### Creating new keyboard
 
-There are `rktk`, `rktk-drivers-common`, `rktk-drivers-{rp2040,nrf52}` and a
-crate for each keyboard.
+See [keyball61-rp2040](./keyboards/keyball61-rp2040) and
+[keyball61-nrf52840](./keyboards/keyball61-nrf52840) for example.
 
-The `rktk` crate is completely hardware independent and provides the core
-functionality of the keyboard.
+As normal matrix keyscan driver is not implemented yet, it is not possible to
+create a new keyboard without implementing a new driver.
 
-The `rktk-drivers-common` uses the abstraction of embedded-hal and
-embedded-hal-async to provide the basis for drivers that can be used universally
-on a variety of chips. This makes porting drivers to various chips very easy.
+## Credits & Acknowledgements
 
-The `rktk-drivers-*` crate provides drivers for each chip. Most drivers are
-wrappings of `rktk-drivers-common`, but some are proprietary implementations,
-such as `ws2812-pio`.
-
-Each keyboard crate can then create a driver for the appropriate chip and pass
-it to `rktk::task::start` to configure the actual working keyboard firmware. The
-only keyboard that currently works is `keyball61-rp2040`, but it is not too
-difficult to create your own keyboard by referring to the
-`keyboards/keyball61-rp2040` directory.
-
-## Credits
-
-- [rumcake](https://github.com/Univa/rumcake) (rp2040 double-tap-to-bootloader
-  driver)
-- [uf2](https://github.com/microsoft/uf2) (uf2conv.py, uf2families.json)
-- ARM GNU Toolchain (arm-none-eabi-objcopy)
-- [rust-dilemma](https://github.com/simmsb/rusty-dilemma/blob/5ffe8f5d2b6b0d534a4309edc737364cd96f44f1/firmware/src/interboard/onewire.rs)
-  and
-  [qmk](https://github.com/qmk/qmk_firmware/blob/master/platforms/chibios/drivers/vendor/RP/RP2040/serial_vendor.c)
-  for pio half-duplex
-- [rmk](https://github.com/HaoboGu/rmk) for bluetooth implemention
+- [rumcake](https://github.com/Univa/rumcake): RP2040 double-tap-reset driver
+- [uf2](https://github.com/microsoft/uf2): uf2conv.py, uf2families.json
+- [rust-dilemma](https://github.com/simmsb/rusty-dilemma): RP2040 Half-duplex
+  communication
+- [qmk](https://github.com/qmk/qmk_firmware): RP2040 Half-duplex communication
+- [rmk](https://github.com/HaoboGu/rmk): bluetooth implemention
