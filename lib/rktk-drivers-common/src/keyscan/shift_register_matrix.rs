@@ -1,13 +1,13 @@
 use super::pressed::Pressed;
 use embedded_hal::digital::{InputPin, OutputPin};
-use embedded_hal_async::spi::SpiBus;
+use embedded_hal_async::spi::SpiDevice;
 use rktk::{
     interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
 };
 
 pub struct ShiftRegisterMatrix<
-    S: SpiBus,
+    S: SpiDevice,
     OP: OutputPin,
     IP: InputPin,
     const OUTPUT_PIN_COUNT: usize,
@@ -24,7 +24,7 @@ pub struct ShiftRegisterMatrix<
 }
 
 impl<
-        S: SpiBus,
+        S: SpiDevice,
         OP: OutputPin,
         IP: InputPin,
         const OUTPUT_PIN_COUNT: usize,
@@ -87,7 +87,7 @@ impl<
 }
 
 impl<
-        S: SpiBus,
+        S: SpiDevice,
         OP: OutputPin,
         IP: InputPin,
         const ROW_PIN_COUNT: usize,

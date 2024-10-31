@@ -6,8 +6,8 @@ mod srom_liftoff;
 mod srom_tracking;
 
 use embassy_time::Timer;
-use embedded_hal::digital::OutputPin;
-use embedded_hal_async::spi::SpiBus;
+use embedded_hal::{digital::OutputPin, spi::Operation};
+use embedded_hal_async::spi::SpiDevice;
 use error::Pmw3360Error;
 use registers as reg;
 use rktk::interface::{mouse::MouseDriver, DriverBuilder};
@@ -25,32 +25,29 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Pmw3360Builder<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
+pub struct Pmw3360Builder<'d, S: SpiDevice + 'd> {
     spi: S,
-    cs_pin: OP,
     _marker: core::marker::PhantomData<&'d ()>,
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360Builder<'d, S, OP> {
-    pub fn new(spi: S, cs_pin: OP) -> Self {
+impl<'d, S: SpiDevice + 'd> Pmw3360Builder<'d, S> {
+    pub fn new(spi: S) -> Self {
         Self {
             spi,
-            cs_pin,
             _marker: core::marker::PhantomData,
         }
     }
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Pmw3360Builder<'d, S, OP> {
-    type Output = Pmw3360<'d, S, OP>;
+impl<'d, S: SpiDevice + 'd> DriverBuilder for Pmw3360Builder<'d, S> {
+    type Output = Pmw3360<'d, S>;
 
-    type Error = Pmw3360Error<S::Error, OP::Error>;
+    type Error = Pmw3360Error<S::Error>;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Pmw3360 {
             _marker: core::marker::PhantomData,
             spi: self.spi,
-            cs_pin: self.cs_pin,
             rw_flag: false,
         };
 
@@ -60,16 +57,15 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Pmw3360Builder<'d
     }
 }
 
-pub struct Pmw3360<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
+pub struct Pmw3360<'d, S: SpiDevice + 'd> {
     _marker: core::marker::PhantomData<&'d ()>,
     spi: S,
-    cs_pin: OP,
     // reset_pin: RESET,
     // rw_flag is set if any writes or reads were performed
     rw_flag: bool,
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> {
+impl<'d, S: SpiDevice + 'd> MouseDriver for Pmw3360<'d, S> {
     async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
         self.burst_read()
             .await
@@ -89,8 +85,8 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Pmw3360<'d, S, OP> 
     }
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
-    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S::Error, OP::Error>> {
+impl<'d, S: SpiDevice + 'd> Pmw3360<'d, S> {
+    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S::Error>> {
         // Write any value to Motion_burst register
         // if any write occured before
         if self.rw_flag {
@@ -147,7 +143,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(data)
     }
 
-    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
+    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S::Error>> {
         let val: u16;
         if cpi < 100 {
             val = 0
@@ -165,7 +161,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok((val + 1) * 100)
     }
 
-    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S::Error, OP::Error>> {
+    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
         let srom = self.read(reg::SROM_ID).await.unwrap_or(0);
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INVERSE_PRODUCT_ID).await.unwrap_or(0);
@@ -175,7 +171,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
     }
 
     #[allow(dead_code)]
-    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error<S::Error, OP::Error>> {
+    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
         self.write(reg::SROM_ENABLE, 0x15).await?;
         Timer::after_micros(10000).await;
 
@@ -185,29 +181,18 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(u == 0xBE && l == 0xEF)
     }
 
-    async fn write(
-        &mut self,
-        address: u8,
-        data: u8,
-    ) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
-        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
-        // tNCS-SCLK
-        Timer::after_micros(1).await;
-
-        // send adress of the register, with MSBit = 1 to indicate it's a write
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S::Error>> {
         self.spi
-            .transfer_in_place(&mut [address | 0x80])
+            .transaction(&mut [
+                // tNCS-SCLK
+                Operation::DelayNs(1 * 1000),
+                // send adress of the register, with MSBit = 1 to indicate it's a write and send data
+                Operation::TransferInPlace(&mut [address | 0x80, data]),
+                // tSCLK-NCS (write)
+                Operation::DelayNs(35 * 1000),
+            ])
             .await
             .map_err(Pmw3360Error::Spi)?;
-        // send data
-        self.spi
-            .transfer_in_place(&mut [data])
-            .await
-            .map_err(Pmw3360Error::Spi)?;
-
-        // tSCLK-NCS (write)
-        Timer::after_micros(35).await;
-        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
 
         // tSWW/tSWR minus tSCLK-NCS (write)
         Timer::after_micros(145).await;
@@ -217,7 +202,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(())
     }
 
-    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S::Error, OP::Error>> {
+    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S::Error>> {
         self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
         // tNCS-SCLK
         Timer::after_micros(1).await;
@@ -249,7 +234,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(ret)
     }
 
-    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S::Error, OP::Error>> {
+    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
         // sensor reset not active
         // self.reset_pin.set_high().ok();
 
@@ -285,7 +270,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         Ok(is_valid_signature)
     }
 
-    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
+    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
         let is_valid_signature = self.power_up_inner().await?;
         if is_valid_signature {
             Ok(())
@@ -294,7 +279,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Pmw3360<'d, S, OP> {
         }
     }
 
-    async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S::Error, OP::Error>> {
+    async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
         // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
         self.write(reg::CONFIG_2, 0x00).await?;
 

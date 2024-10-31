@@ -6,8 +6,7 @@ mod power_up;
 mod registers;
 
 use embassy_time::Timer;
-use embedded_hal::digital::OutputPin;
-use embedded_hal_async::spi::SpiBus;
+use embedded_hal_async::spi::SpiDevice;
 use error::Paw3395Error;
 use registers as reg;
 use rktk::interface::{mouse::MouseDriver, DriverBuilder};
@@ -27,34 +26,31 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Paw3395Builder<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
+pub struct Paw3395Builder<'d, S: SpiDevice + 'd> {
     spi: S,
-    cs_pin: OP,
     config: config::Config,
     _marker: core::marker::PhantomData<&'d ()>,
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395Builder<'d, S, OP> {
-    pub fn new(spi: S, cs_pin: OP, config: config::Config) -> Self {
+impl<'d, S: SpiDevice + 'd> Paw3395Builder<'d, S> {
+    pub fn new(spi: S, config: config::Config) -> Self {
         Self {
             spi,
-            cs_pin,
             config,
             _marker: core::marker::PhantomData,
         }
     }
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Paw3395Builder<'d, S, OP> {
-    type Output = Paw3395<'d, S, OP>;
+impl<'d, S: SpiDevice + 'd> DriverBuilder for Paw3395Builder<'d, S> {
+    type Output = Paw3395<'d, S>;
 
-    type Error = Paw3395Error<S::Error, OP::Error>;
+    type Error = Paw3395Error<S::Error>;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Paw3395 {
             _marker: core::marker::PhantomData,
             spi: self.spi,
-            cs_pin: self.cs_pin,
             timer: embassy_time::Instant::now(),
             config: self.config,
         };
@@ -65,15 +61,14 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> DriverBuilder for Paw3395Builder<'d
     }
 }
 
-pub struct Paw3395<'d, S: SpiBus + 'd, OP: OutputPin + 'd> {
+pub struct Paw3395<'d, S: SpiDevice + 'd> {
     _marker: core::marker::PhantomData<&'d ()>,
     spi: S,
-    cs_pin: OP,
     timer: embassy_time::Instant,
     config: config::Config,
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Paw3395<'d, S, OP> {
+impl<'d, S: SpiDevice + 'd> MouseDriver for Paw3395<'d, S> {
     async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
         self.burst_read()
             .await
@@ -93,12 +88,10 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> MouseDriver for Paw3395<'d, S, OP> 
     }
 }
 
-impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
-    pub async fn burst_read(&mut self) -> Result<BurstData, Paw3395Error<S::Error, OP::Error>> {
-        self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
-
-        // tNCS-SCLK
-        Timer::after_micros(2).await;
+impl<'d, S: SpiDevice + 'd> Paw3395<'d, S> {
+    pub async fn burst_read(&mut self) -> Result<BurstData, Paw3395Error<S::Error>> {
+        // NOTE: tNCS-SCLK is handled by SpiDevice
+        // Timer::after_micros(2).await;
 
         self.spi
             .transfer_in_place(&mut [reg::MOTION_BURST])
@@ -117,9 +110,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
                 Err(_) => return Err(Paw3395Error::General("Failed to read burst data")),
             }
         }
-
-        // Raise NCS
-        self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
 
         // NOTE: Same as tSRAD_MOTBR. temporary disabled.
         //
@@ -154,7 +144,7 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         Ok(data)
     }
 
-    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
+    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Paw3395Error<S::Error>> {
         let resolution = (cpi / 50) - 1;
         let resolution_low = resolution as u8;
         let resolution_high = (resolution >> 8) as u8;
@@ -175,19 +165,14 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         Ok((resolution_x + 1) * 50)
     }
 
-    pub async fn check_signature(&mut self) -> Result<bool, Paw3395Error<S::Error, OP::Error>> {
+    pub async fn check_signature(&mut self) -> Result<bool, Paw3395Error<S::Error>> {
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INV_PRODUCT_ID).await.unwrap_or(0);
 
         Ok(pid == 0x51 && ipid == 0xAE)
     }
 
-    async fn write(
-        &mut self,
-        address: u8,
-        data: u8,
-    ) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
-        self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Paw3395Error<S::Error>> {
         // tNCS-SCLK
         Timer::after_micros(1).await;
 
@@ -202,7 +187,6 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
 
         // tSCLK-NCS (write)
         Timer::after_micros(35).await;
-        self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
 
         // tSWW/tSWR minus tSCLK-NCS (write)
         Timer::after_micros(145).await;
@@ -210,10 +194,9 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         Ok(())
     }
 
-    async fn read(&mut self, address: u8) -> Result<u8, Paw3395Error<S::Error, OP::Error>> {
-        self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
-        // tNCS-SCLK
-        Timer::after_micros(1).await;
+    async fn read(&mut self, address: u8) -> Result<u8, Paw3395Error<S::Error>> {
+        // NOTE: tNCS-SCLK is handled by SpiDevice
+        // Timer::after_micros(1).await;
 
         // send adress of the register, with MSBit = 0 to indicate it's a read
         self.spi
@@ -230,9 +213,8 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
             ret = *buf.first().unwrap();
         }
 
-        // tSCLK-NCS (read)
-        Timer::after_micros(1).await;
-        self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
+        // NOTE: tSCLK-NCS is handled by SpiDevice
+        // Timer::after_micros(1).await;
 
         //  tSRW/tSRR minus tSCLK-NCS
         Timer::after_micros(20).await;
@@ -240,16 +222,17 @@ impl<'d, S: SpiBus + 'd, OP: OutputPin + 'd> Paw3395<'d, S, OP> {
         Ok(ret)
     }
 
-    async fn shutdown(&mut self) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
+    async fn shutdown(&mut self) -> Result<(), Paw3395Error<S::Error>> {
         self.write(reg::SHUTDOWN, 0xB6).await?;
         Timer::after_millis(5).await;
         Ok(())
     }
 
-    async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error, OP::Error>> {
-        self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
-        Timer::after_micros(50).await;
-        self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
+    async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error>> {
+        // self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
+        // Timer::after_micros(50).await;
+        // self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
+
         Timer::after_micros(50).await;
 
         self.write(reg::POWER_UP_RESET, 0x5A).await?;
