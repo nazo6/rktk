@@ -2165,6 +2165,7 @@ dependencies = [
  "bitvec",
  "defmt",
  "display-interface",
+ "embassy-embedded-hal",
  "embassy-executor",
  "embassy-futures",
  "embassy-nrf",

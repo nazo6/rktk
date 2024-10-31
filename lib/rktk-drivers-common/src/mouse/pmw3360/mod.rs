@@ -6,11 +6,15 @@ mod srom_liftoff;
 mod srom_tracking;
 
 use embassy_time::Timer;
-use embedded_hal::{digital::OutputPin, spi::Operation};
-use embedded_hal_async::spi::SpiDevice;
+use embedded_hal_async::spi::{Operation, SpiDevice};
 use error::Pmw3360Error;
 use registers as reg;
 use rktk::interface::{mouse::MouseDriver, DriverBuilder};
+
+mod timing {
+    /// NCS To SCLK Active
+    pub const NCS_SCLK: u32 = 120;
+}
 
 #[derive(Default)]
 pub struct BurstData {
@@ -25,30 +29,25 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Pmw3360Builder<'d, S: SpiDevice + 'd> {
+pub struct Pmw3360Builder<S: SpiDevice> {
     spi: S,
-    _marker: core::marker::PhantomData<&'d ()>,
 }
 
-impl<'d, S: SpiDevice + 'd> Pmw3360Builder<'d, S> {
+impl<S: SpiDevice> Pmw3360Builder<S> {
     pub fn new(spi: S) -> Self {
-        Self {
-            spi,
-            _marker: core::marker::PhantomData,
-        }
+        Self { spi }
     }
 }
 
-impl<'d, S: SpiDevice + 'd> DriverBuilder for Pmw3360Builder<'d, S> {
-    type Output = Pmw3360<'d, S>;
+impl<S: SpiDevice> DriverBuilder for Pmw3360Builder<S> {
+    type Output = Pmw3360<S>;
 
     type Error = Pmw3360Error<S::Error>;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Pmw3360 {
-            _marker: core::marker::PhantomData,
             spi: self.spi,
-            rw_flag: false,
+            in_burst_mode: false,
         };
 
         driver.power_up().await?;
@@ -57,15 +56,12 @@ impl<'d, S: SpiDevice + 'd> DriverBuilder for Pmw3360Builder<'d, S> {
     }
 }
 
-pub struct Pmw3360<'d, S: SpiDevice + 'd> {
-    _marker: core::marker::PhantomData<&'d ()>,
+pub struct Pmw3360<S: SpiDevice> {
     spi: S,
-    // reset_pin: RESET,
-    // rw_flag is set if any writes or reads were performed
-    rw_flag: bool,
+    in_burst_mode: bool,
 }
 
-impl<'d, S: SpiDevice + 'd> MouseDriver for Pmw3360<'d, S> {
+impl<S: SpiDevice> MouseDriver for Pmw3360<S> {
     async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
         self.burst_read()
             .await
@@ -85,59 +81,83 @@ impl<'d, S: SpiDevice + 'd> MouseDriver for Pmw3360<'d, S> {
     }
 }
 
-impl<'d, S: SpiDevice + 'd> Pmw3360<'d, S> {
-    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S::Error>> {
-        // Write any value to Motion_burst register
-        // if any write occured before
-        if self.rw_flag {
-            self.write(reg::MOTION_BURST, 0x00).await?;
-            self.rw_flag = false;
-        }
-
-        // Lower NCS
-        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
-        // Send Motion_burst address
+impl<S: SpiDevice> Pmw3360<S> {
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S::Error>> {
+        self.in_burst_mode = false;
         self.spi
-            .transfer_in_place(&mut [reg::MOTION_BURST])
+            .transaction(&mut [
+                Operation::DelayNs(timing::NCS_SCLK),
+                // send adress of the register, with MSBit = 1 to indicate it's a write and send data
+                Operation::TransferInPlace(&mut [address | 0x80, data]),
+                // tSCLK-NCS (write)
+                Operation::DelayNs(35 * 1000),
+            ])
             .await
             .map_err(Pmw3360Error::Spi)?;
 
-        // NOTE: The datasheet says to wait for 35us here, but it seems to work without it.
-        // It seems that embassy_time is not good at waiting for such small values,
-        // and simply turning off Timer reduces the processing time of this function from maxium 3 ms to almost 0.
+        // tSWW/tSWR minus tSCLK-NCS (write)
+        Timer::after_micros(145).await;
 
-        // tSRAD_MOTBR
-        // Timer::after_micros(35).await;
+        Ok(())
+    }
 
-        // Read the 12 bytes of burst data
-        let mut buf = [0u8; 12];
-        for b in buf.iter_mut() {
-            let t_buf = &mut [0x00];
-            match self.spi.transfer_in_place(t_buf).await {
-                Ok(()) => *b = *t_buf.first().unwrap(),
-                Err(_) => *b = 0,
-            }
+    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S::Error>> {
+        self.in_burst_mode = false;
+        let mut buf = [0x00];
+        self.spi
+            .transaction(&mut [
+                Operation::DelayNs(timing::NCS_SCLK),
+                // send adress of the register, with MSBit = 0 to indicate it's a read
+                Operation::Write(&[address & 0x7f]),
+                // tSRAD
+                Operation::DelayNs(160 * 1000),
+                // read the data
+                Operation::Read(&mut buf),
+                // tSCLK-NCS (read)
+                Operation::DelayNs(120),
+            ])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
+
+        //  tSRW/tSRR
+        Timer::after_micros(20).await;
+
+        Ok(buf[0])
+    }
+
+    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S::Error>> {
+        if !self.in_burst_mode {
+            self.write(reg::MOTION_BURST, 0x00).await?;
+            self.in_burst_mode = true;
         }
 
-        // Raise NCS
-        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
+        let mut data = [0u8; 12];
 
-        // NOTE: Same as tSRAD_MOTBR. temporary disabled.
-        //
+        self.spi
+            .transaction(&mut [
+                Operation::DelayNs(timing::NCS_SCLK),
+                Operation::Write(&[reg::MOTION_BURST]),
+                // tSRAD-MOTBR
+                Operation::DelayNs(35 * 1000),
+                Operation::Read(&mut data),
+            ])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
+
         // tBEXIT
-        // Timer::after_micros(1).await;
+        Timer::after_micros(1).await;
 
         //combine the register values
         let data = BurstData {
-            motion: (buf[0] & 0x80) != 0,
-            on_surface: (buf[0] & 0x08) == 0,
-            dx: (buf[3] as i16) << 8 | (buf[2] as i16),
-            dy: (buf[5] as i16) << 8 | (buf[4] as i16),
-            surface_quality: buf[6],
-            raw_data_sum: buf[7],
-            max_raw_data: buf[8],
-            min_raw_data: buf[9],
-            shutter: (buf[11] as u16) << 8 | (buf[10] as u16),
+            motion: (data[0] & 0x80) != 0,
+            on_surface: (data[0] & 0x08) == 0,
+            dx: (data[3] as i16) << 8 | (data[2] as i16),
+            dy: (data[5] as i16) << 8 | (data[4] as i16),
+            surface_quality: data[6],
+            raw_data_sum: data[7],
+            max_raw_data: data[8],
+            min_raw_data: data[9],
+            shutter: (data[11] as u16) << 8 | (data[10] as u16),
         };
 
         Ok(data)
@@ -167,7 +187,7 @@ impl<'d, S: SpiDevice + 'd> Pmw3360<'d, S> {
         let ipid = self.read(reg::INVERSE_PRODUCT_ID).await.unwrap_or(0);
 
         // signature for SROM 0x04
-        Ok(srom == 0x04 && pid == 0x42 && ipid == 0xBD)
+        Ok(srom == 0x00 && pid == 0x42 && ipid == 0xBD)
     }
 
     #[allow(dead_code)]
@@ -181,83 +201,37 @@ impl<'d, S: SpiDevice + 'd> Pmw3360<'d, S> {
         Ok(u == 0xBE && l == 0xEF)
     }
 
-    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S::Error>> {
-        self.spi
-            .transaction(&mut [
-                // tNCS-SCLK
-                Operation::DelayNs(1 * 1000),
-                // send adress of the register, with MSBit = 1 to indicate it's a write and send data
-                Operation::TransferInPlace(&mut [address | 0x80, data]),
-                // tSCLK-NCS (write)
-                Operation::DelayNs(35 * 1000),
-            ])
-            .await
-            .map_err(Pmw3360Error::Spi)?;
-
-        // tSWW/tSWR minus tSCLK-NCS (write)
-        Timer::after_micros(145).await;
-
-        self.rw_flag = true;
-
-        Ok(())
-    }
-
-    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S::Error>> {
-        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
-        // tNCS-SCLK
-        Timer::after_micros(1).await;
-
-        // send adress of the register, with MSBit = 0 to indicate it's a read
-        self.spi
-            .transfer_in_place(&mut [address & 0x7f])
-            .await
-            .map_err(Pmw3360Error::Spi)?;
-
-        // tSRAD
-        Timer::after_micros(160).await;
-
-        let mut ret = 0;
-        let mut buf = [0x00];
-        if (self.spi.transfer_in_place(&mut buf).await).is_ok() {
-            ret = *buf.first().unwrap();
+    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
+        let is_valid_signature = self.power_up_inner().await?;
+        if is_valid_signature {
+            Ok(())
+        } else {
+            Err(Pmw3360Error::InvalidSignature)
         }
-
-        // tSCLK-NCS (read)
-        Timer::after_micros(1).await;
-        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
-
-        //  tSRW/tSRR minus tSCLK-NCS
-        Timer::after_micros(20).await;
-
-        self.rw_flag = true;
-
-        Ok(ret)
     }
 
     async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
-        // sensor reset not active
-        // self.reset_pin.set_high().ok();
-
-        // reset the spi bus on the sensor
-        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
-        Timer::after_micros(50).await;
-        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
-        Timer::after_micros(50).await;
+        // reset spi port
+        self.spi
+            .transaction(&mut [])
+            .await
+            .map_err(Pmw3360Error::Spi)?;
 
         // Write to reset register
         self.write(reg::POWER_UP_RESET, 0x5A).await?;
-        // 100 ms delay
-        Timer::after_micros(100).await;
 
-        // read registers 0x02 to 0x06 (and discard the data)
+        // Wait at least 50ms
+        Timer::after_millis(100).await;
+
+        // read registers 0x02 to 0x06
         self.read(reg::MOTION).await?;
         self.read(reg::DELTA_X_L).await?;
         self.read(reg::DELTA_X_H).await?;
         self.read(reg::DELTA_Y_L).await?;
         self.read(reg::DELTA_Y_H).await?;
 
-        // upload the firmware
-        self.upload_fw().await?;
+        // perform SROM download
+        // self.srom_download().await?;
 
         let is_valid_signature = self.check_signature().await.unwrap_or(false);
 
@@ -270,50 +244,28 @@ impl<'d, S: SpiDevice + 'd> Pmw3360<'d, S> {
         Ok(is_valid_signature)
     }
 
-    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
-        let is_valid_signature = self.power_up_inner().await?;
-        if is_valid_signature {
-            Ok(())
-        } else {
-            Err(Pmw3360Error::InvalidSignature)
-        }
-    }
-
-    async fn upload_fw(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
-        // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
-        self.write(reg::CONFIG_2, 0x00).await?;
-
-        // write 0x1d in SROM_enable reg for initializing
-        self.write(reg::SROM_ENABLE, 0x1d).await?;
-
-        // wait for 10 ms
-        Timer::after_micros(10000).await;
-
-        // write 0x18 to SROM_enable to start SROM download
-        self.write(reg::SROM_ENABLE, 0x18).await?;
-
-        // lower NCS
-        self.cs_pin.set_low().map_err(Pmw3360Error::Gpio)?;
-
-        // first byte is address
-        self.spi
-            .transfer_in_place(&mut [reg::SROM_LOAD_BURST | 0x80])
-            .await
-            .map_err(Pmw3360Error::Spi)?;
-        Timer::after_micros(15).await;
-
-        // send the rest of the firmware
-        for element in srom_tracking::FW.iter() {
-            self.spi
-                .transfer_in_place(&mut [*element])
-                .await
-                .map_err(Pmw3360Error::Spi)?;
-            Timer::after_micros(15).await;
-        }
-
-        Timer::after_micros(2).await;
-        self.cs_pin.set_high().map_err(Pmw3360Error::Gpio)?;
-        Timer::after_micros(200).await;
-        Ok(())
-    }
+    // TODO: To implement srom download, access to cs pin is needed.
+    //
+    // async fn srom_download(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
+    //     // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
+    //     self.write(reg::CONFIG_2, 0x00).await?;
+    //
+    //     // write 0x1d in SROM_enable reg for initializing
+    //     self.write(reg::SROM_ENABLE, 0x1d).await?;
+    //
+    //     // wait for 10 ms
+    //     Timer::after_micros(10000).await;
+    //
+    //     // Write 0x18 to SROM_Enable register again to start SROM Download
+    //     self.write(reg::SROM_ENABLE, 0x18).await?;
+    //
+    //     self.spi
+    //         .transaction(&mut srom_tracking::FW_OPS)
+    //         .await
+    //         .map_err(Pmw3360Error::Spi)?;
+    //
+    //     Timer::after_micros(185).await;
+    //
+    //     Ok(())
+    // }
 }
