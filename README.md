@@ -73,7 +73,7 @@ See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
 | -------------------------- | ------ | --------- | --------- |
 | **Key scanner**            |        |           |           |
 | Matrix                     | 🔴     | 🔴        | 🔴        |
-| Matrix with shift register | 🔴     | 🔴        | 🔴        |
+| Matrix with shift register | 🟡     | 🔴        | 🟡        |
 | (Japanese) Duplex-Matrix   | ✅     | ✅        | ✅        |
 | &nbsp;                     |        |           |           |
 | **Mouse**                  |        |           |           |

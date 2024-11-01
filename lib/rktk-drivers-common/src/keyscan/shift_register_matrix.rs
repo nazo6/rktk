@@ -1,14 +1,16 @@
 use super::pressed::Pressed;
-use embedded_hal::digital::{InputPin, OutputPin};
+use embedded_hal::{digital::InputPin, spi::Operation};
 use embedded_hal_async::spi::SpiDevice;
 use rktk::{
     interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
 };
 
+/// A matrix scanner using spi-like shift register such as 74HC595.
+///
+/// NOTE: Currently, chained shift register is not supported and OUTPUT_PIN_COUNT must be number of 1 to 8.
 pub struct ShiftRegisterMatrix<
     S: SpiDevice,
-    OP: OutputPin,
     IP: InputPin,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
@@ -16,8 +18,7 @@ pub struct ShiftRegisterMatrix<
     const ROWS: usize,
 > {
     row_shift_register: S,
-    shift_register_cs: OP,
-    cols: [IP; INPUT_PIN_COUNT],
+    input_pins: [IP; INPUT_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
     left_detect_key: (usize, usize),
     map_key: fn(usize, usize) -> Option<(usize, usize)>,
@@ -25,34 +26,31 @@ pub struct ShiftRegisterMatrix<
 
 impl<
         S: SpiDevice,
-        OP: OutputPin,
         IP: InputPin,
         const OUTPUT_PIN_COUNT: usize,
         const INPUT_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > ShiftRegisterMatrix<S, OP, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    > ShiftRegisterMatrix<S, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
     /// Detect the hand and initialize the scanner.
     ///
     /// # Arguments
     /// - `row_shift_register`: SPI bus for the shift register.
-    /// - `shift_register_cs`: CS pin for the shift register.
     /// - `cols`: Column pins of the matrix. These pins should be pulled up.
     /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
-    /// - `translate_key_position`: Function to translate key position from pin number and scan direction to key
-    ///    (scan direction, row, col) -> Option<(row, col)>
+    /// - `map_key`: Function to map key position from pin number. This function must return
+    ///    position within specified `COLS` and `ROWS`.
+    ///    Signature: (row, col) -> Option<(row, col)>
     pub fn new(
         row_shift_register: S,
-        shift_register_cs: OP,
-        cols: [IP; INPUT_PIN_COUNT],
+        input_pins: [IP; INPUT_PIN_COUNT],
         left_detect_key: (usize, usize),
         map_key: fn(usize, usize) -> Option<(usize, usize)>,
     ) -> Self {
         Self {
             row_shift_register,
-            shift_register_cs,
-            cols,
+            input_pins,
             left_detect_key,
             pressed: Pressed::new(),
             map_key,
@@ -60,19 +58,17 @@ impl<
     }
 
     async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
-        for row_idx in 0..OUTPUT_PIN_COUNT {
-            let _ = self.shift_register_cs.set_low();
+        for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self
                 .row_shift_register
-                .transfer_in_place(&mut [1 << row_idx])
+                .transaction(&mut [Operation::Write(&[1 << output_idx])])
                 .await;
-            let _ = self.shift_register_cs.set_high();
 
-            for (col_idx, col_pin) in self.cols.iter_mut().enumerate() {
-                if let Some((row, col)) = (self.map_key)(row_idx, col_idx) {
+            for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
+                if let Some((row, col)) = (self.map_key)(output_idx, input_idx) {
                     if let Some(change) =
                         self.pressed
-                            .set_pressed(col_pin.is_high().unwrap(), row, col)
+                            .set_pressed(input_pin.is_high().unwrap(), row, col)
                     {
                         cb(KeyChangeEvent {
                             row: row as u8,
@@ -88,13 +84,12 @@ impl<
 
 impl<
         S: SpiDevice,
-        OP: OutputPin,
         IP: InputPin,
         const ROW_PIN_COUNT: usize,
         const COL_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > KeyscanDriver for ShiftRegisterMatrix<S, OP, IP, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    > KeyscanDriver for ShiftRegisterMatrix<S, IP, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32> {
         let mut events = heapless::Vec::new();
