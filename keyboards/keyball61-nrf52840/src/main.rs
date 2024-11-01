@@ -103,18 +103,13 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let spi_config = {
-        use embassy_nrf::spim::{Config, Frequency, Phase, Polarity};
-
-        let mut config = Config::default();
-        config.frequency = Frequency::M8;
-        config.mode.polarity = Polarity::IdleHigh;
-        config.mode.phase = Phase::CaptureOnSecondTransition;
-        config
-    };
-
     let ball_spi = Mutex::<NoopRawMutex, _>::new(embassy_nrf::spim::Spim::new(
-        p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, spi_config,
+        p.SPI2,
+        Irqs,
+        p.P1_13,
+        p.P1_11,
+        p.P0_10,
+        pmw3360::recommended_pmw3360_config(),
     ));
     let ball = pmw3360::create_pmw3360(&ball_spi, p.P0_09);
 

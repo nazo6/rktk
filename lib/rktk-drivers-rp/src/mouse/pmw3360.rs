@@ -1,7 +1,7 @@
 use embassy_embedded_hal::shared_bus::asynch::spi::SpiDevice;
 use embassy_rp::{
     gpio::{Output, Pin},
-    spi::{Async, Instance, Spi},
+    spi::{self, Async, Instance, Spi},
     Peripheral,
 };
 use embassy_sync::{blocking_mutex::raw::RawMutex, mutex::Mutex};
@@ -26,4 +26,13 @@ pub fn create_pmw3360<
     let device = SpiDevice::new(shared_spi, ncs);
 
     Pmw3360Builder::new(device)
+}
+
+pub fn recommended_spi_config() -> spi::Config {
+    let mut spi_config = spi::Config::default();
+    spi_config.frequency = 7_000_000;
+    spi_config.polarity = spi::Polarity::IdleHigh;
+    spi_config.phase = spi::Phase::CaptureOnSecondTransition;
+
+    spi_config
 }
