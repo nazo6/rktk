@@ -6,10 +6,21 @@ mod power_up;
 mod registers;
 
 use embassy_time::Timer;
+use embedded_hal::spi::Operation;
 use embedded_hal_async::spi::SpiDevice;
 use error::Paw3395Error;
 use registers as reg;
 use rktk::interface::{mouse::MouseDriver, DriverBuilder};
+
+mod timing {
+    pub const NCS_SCLK: u32 = 120;
+    pub const SCLK_NCS_READ: u32 = 120;
+    pub const SCLK_NCS_WRITE: u32 = 1000;
+    pub const SRAD: u32 = 2 * 1000;
+    pub const SWW_R: u32 = 5 * 1000;
+    pub const SRW_R: u32 = 2 * 1000;
+    pub const BEXIT: u32 = 500;
+}
 
 #[derive(Default, Debug)]
 pub struct BurstData {
@@ -26,30 +37,24 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Paw3395Builder<'d, S: SpiDevice + 'd> {
+pub struct Paw3395Builder<S: SpiDevice> {
     spi: S,
     config: config::Config,
-    _marker: core::marker::PhantomData<&'d ()>,
 }
 
-impl<'d, S: SpiDevice + 'd> Paw3395Builder<'d, S> {
+impl<S: SpiDevice> Paw3395Builder<S> {
     pub fn new(spi: S, config: config::Config) -> Self {
-        Self {
-            spi,
-            config,
-            _marker: core::marker::PhantomData,
-        }
+        Self { spi, config }
     }
 }
 
-impl<'d, S: SpiDevice + 'd> DriverBuilder for Paw3395Builder<'d, S> {
-    type Output = Paw3395<'d, S>;
+impl<S: SpiDevice> DriverBuilder for Paw3395Builder<S> {
+    type Output = Paw3395<S>;
 
     type Error = Paw3395Error<S::Error>;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Paw3395 {
-            _marker: core::marker::PhantomData,
             spi: self.spi,
             timer: embassy_time::Instant::now(),
             config: self.config,
@@ -61,14 +66,13 @@ impl<'d, S: SpiDevice + 'd> DriverBuilder for Paw3395Builder<'d, S> {
     }
 }
 
-pub struct Paw3395<'d, S: SpiDevice + 'd> {
-    _marker: core::marker::PhantomData<&'d ()>,
+pub struct Paw3395<S: SpiDevice> {
     spi: S,
     timer: embassy_time::Instant,
     config: config::Config,
 }
 
-impl<'d, S: SpiDevice + 'd> MouseDriver for Paw3395<'d, S> {
+impl<S: SpiDevice> MouseDriver for Paw3395<S> {
     async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
         self.burst_read()
             .await
@@ -78,7 +82,7 @@ impl<'d, S: SpiDevice + 'd> MouseDriver for Paw3395<'d, S> {
 
     async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::interface::error::RktkError> {
         self.set_cpi(cpi).await.map_err(|_| {
-            rktk::interface::error::RktkError::GeneralError("Failed to set cpi to PAW3395")
+            rktk::interface::error::RktkError::GeneralError("Failed to set cpi of PAW3395")
         })?;
         Ok(())
     }
@@ -88,33 +92,55 @@ impl<'d, S: SpiDevice + 'd> MouseDriver for Paw3395<'d, S> {
     }
 }
 
-impl<'d, S: SpiDevice + 'd> Paw3395<'d, S> {
-    pub async fn burst_read(&mut self) -> Result<BurstData, Paw3395Error<S::Error>> {
-        // NOTE: tNCS-SCLK is handled by SpiDevice
-        // Timer::after_micros(2).await;
-
+impl<S: SpiDevice> Paw3395<S> {
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Paw3395Error<S::Error>> {
         self.spi
-            .transfer_in_place(&mut [reg::MOTION_BURST])
+            .transaction(&mut [
+                Operation::DelayNs(timing::NCS_SCLK),
+                Operation::Write(&[address | 0x80, data]),
+                Operation::DelayNs(timing::SCLK_NCS_WRITE),
+            ])
             .await
             .map_err(Paw3395Error::Spi)?;
 
-        // tSRAD
-        Timer::after_micros(2).await;
+        Timer::after_nanos((timing::SWW_R - timing::SCLK_NCS_WRITE) as u64).await;
 
-        // Read the 12 bytes of burst data
+        Ok(())
+    }
+
+    async fn read(&mut self, address: u8) -> Result<u8, Paw3395Error<S::Error>> {
+        let mut buf = [0x00];
+        self.spi
+            .transaction(&mut [
+                Operation::DelayNs(timing::NCS_SCLK),
+                // send adress of the register, with MSBit = 0 to indicate it's a read
+                Operation::Write(&[address & 0x7f]),
+                Operation::DelayNs(timing::SRAD),
+                Operation::Read(&mut buf),
+                Operation::DelayNs(timing::SCLK_NCS_READ),
+            ])
+            .await
+            .map_err(Paw3395Error::Spi)?;
+
+        //  tSRW/tSRR minus tSCLK-NCS
+        Timer::after_nanos((timing::SRW_R - timing::SCLK_NCS_WRITE) as u64).await;
+
+        Ok(buf[0])
+    }
+
+    pub async fn burst_read(&mut self) -> Result<BurstData, Paw3395Error<S::Error>> {
         let mut buf = [0u8; 12];
-        for b in buf.iter_mut() {
-            let t_buf = &mut [0x00];
-            match self.spi.transfer_in_place(t_buf).await {
-                Ok(()) => *b = *t_buf.first().unwrap(),
-                Err(_) => return Err(Paw3395Error::General("Failed to read burst data")),
-            }
-        }
+        self.spi
+            .transaction(&mut [
+                Operation::DelayNs(timing::NCS_SCLK),
+                Operation::Write(&[reg::MOTION_BURST]),
+                Operation::DelayNs(timing::SRAD),
+                Operation::Read(&mut buf),
+            ])
+            .await
+            .map_err(Paw3395Error::Spi)?;
 
-        // NOTE: Same as tSRAD_MOTBR. temporary disabled.
-        //
-        // tBEXIT
-        Timer::after_micros(1).await;
+        Timer::after_nanos(timing::BEXIT as u64).await;
 
         //combine the register values
         let data = BurstData {
@@ -130,16 +156,6 @@ impl<'d, S: SpiDevice + 'd> Paw3395<'d, S> {
             min_raw_data: buf[9],
             shutter: (buf[11] as u16) << 8 | (buf[10] as u16),
         };
-
-        if self.timer.elapsed().as_millis() > 2000 {
-            if !self.check_signature().await.unwrap_or(false) {
-                rktk::log::info!("Mouse error. Resetting.");
-                self.shutdown().await?;
-                self.power_up().await?;
-            }
-
-            self.timer = embassy_time::Instant::now();
-        }
 
         Ok(data)
     }
@@ -172,56 +188,6 @@ impl<'d, S: SpiDevice + 'd> Paw3395<'d, S> {
         Ok(pid == 0x51 && ipid == 0xAE)
     }
 
-    async fn write(&mut self, address: u8, data: u8) -> Result<(), Paw3395Error<S::Error>> {
-        // tNCS-SCLK
-        Timer::after_micros(1).await;
-
-        self.spi
-            .transfer_in_place(&mut [address | 0x80])
-            .await
-            .map_err(Paw3395Error::Spi)?;
-        self.spi
-            .transfer_in_place(&mut [data])
-            .await
-            .map_err(Paw3395Error::Spi)?;
-
-        // tSCLK-NCS (write)
-        Timer::after_micros(35).await;
-
-        // tSWW/tSWR minus tSCLK-NCS (write)
-        Timer::after_micros(145).await;
-
-        Ok(())
-    }
-
-    async fn read(&mut self, address: u8) -> Result<u8, Paw3395Error<S::Error>> {
-        // NOTE: tNCS-SCLK is handled by SpiDevice
-        // Timer::after_micros(1).await;
-
-        // send adress of the register, with MSBit = 0 to indicate it's a read
-        self.spi
-            .transfer_in_place(&mut [address & 0x7f])
-            .await
-            .map_err(Paw3395Error::Spi)?;
-
-        // tSRAD
-        Timer::after_micros(160).await;
-
-        let mut ret = 0;
-        let mut buf = [0x00];
-        if (self.spi.transfer_in_place(&mut buf).await).is_ok() {
-            ret = *buf.first().unwrap();
-        }
-
-        // NOTE: tSCLK-NCS is handled by SpiDevice
-        // Timer::after_micros(1).await;
-
-        //  tSRW/tSRR minus tSCLK-NCS
-        Timer::after_micros(20).await;
-
-        Ok(ret)
-    }
-
     async fn shutdown(&mut self) -> Result<(), Paw3395Error<S::Error>> {
         self.write(reg::SHUTDOWN, 0xB6).await?;
         Timer::after_millis(5).await;
@@ -229,10 +195,6 @@ impl<'d, S: SpiDevice + 'd> Paw3395<'d, S> {
     }
 
     async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error>> {
-        // self.cs_pin.set_high().map_err(Paw3395Error::Gpio)?;
-        // Timer::after_micros(50).await;
-        // self.cs_pin.set_low().map_err(Paw3395Error::Gpio)?;
-
         Timer::after_micros(50).await;
 
         self.write(reg::POWER_UP_RESET, 0x5A).await?;

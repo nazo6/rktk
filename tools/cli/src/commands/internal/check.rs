@@ -26,10 +26,15 @@ pub fn start(name: String) -> anyhow::Result<()> {
             let now = std::time::Instant::now();
 
             let res = cmd!("cargo", "clippy").dir(crate_path).run();
+            let is_err = res.is_err();
 
             let elapsed = now.elapsed();
 
             results.push((crate_path, package, res, elapsed));
+
+            if is_err {
+                break;
+            }
         }
 
         let mut failed = Vec::new();

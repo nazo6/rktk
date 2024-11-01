@@ -10,24 +10,31 @@ repository.workspace = true
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
+
+embedded-storage-async = { workspace = true }
+
+embassy-embedded-hal = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-static_cell = { workspace = true }
 embassy-rp = { workspace = true, features = [
   "defmt",
   "unstable-pac",
   "time-driver",
   "critical-section-impl",
 ] }
+
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }
-fixed = { workspace = true }
-fixed-macro = { workspace = true }
+
 smart-leds = { workspace = true }
+rand_core = { workspace = true }
+
 pio-proc = "0.2.2"
 pio = "0.2.1"
-rand_core = { workspace = true }
-embedded-storage-async = { workspace = true }
+
+fixed = { workspace = true }
+fixed-macro = { workspace = true }
+static_cell = { workspace = true }

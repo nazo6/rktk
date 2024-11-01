@@ -11,6 +11,7 @@ use embassy_rp::{
     pio::Pio,
 };
 
+use embassy_sync::{blocking_mutex::raw::NoopRawMutex, mutex::Mutex};
 use rktk::{
     hooks::create_empty_hooks,
     interface::{ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver},
@@ -58,16 +59,16 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let ball = paw3395::create_paw3395(
+    let ball_spi = Mutex::<NoopRawMutex, _>::new(embassy_rp::spi::Spi::new(
         p.SPI0,
         p.PIN_22,
         p.PIN_23,
         p.PIN_20,
         p.DMA_CH0,
         p.DMA_CH1,
-        p.PIN_21,
-        PAW3395_CONFIG,
-    );
+        paw3395::recommended_spi_config(),
+    ));
+    let ball = paw3395::create_paw3395(&ball_spi, p.PIN_21, PAW3395_CONFIG);
 
     let keyscan = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [

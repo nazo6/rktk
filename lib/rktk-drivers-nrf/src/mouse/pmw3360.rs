@@ -17,10 +17,6 @@ pub fn create_pmw3360<
     shared_spi: &'a Mutex<M, Spim<'d, T>>,
     ncs: CS,
 ) -> Pmw3360Builder<SpiDevice<'a, M, Spim<'d, T>, Output<'d>>> {
-    // let mut config = Config::default();
-    // config.frequency = Frequency::M8;
-    // config.mode.polarity = Polarity::IdleHigh;
-    // config.mode.phase = Phase::CaptureOnSecondTransition;
     let ncs = Output::new(ncs, Level::High, OutputDrive::Standard);
 
     let device = SpiDevice::new(shared_spi, ncs);
