@@ -61,11 +61,16 @@ impl<
         for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self
                 .row_shift_register
-                .transaction(&mut [Operation::Write(&[1 << output_idx])])
+                .transaction(&mut [
+                    Operation::DelayNs(1000),
+                    Operation::Write(&[1 << output_idx]),
+                ])
                 .await;
 
+            embassy_time::Timer::after_nanos(100).await;
+
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
-                if let Some((row, col)) = (self.map_key)(output_idx, input_idx) {
+                if let Some((row, col)) = (self.map_key)(input_idx, output_idx) {
                     if let Some(change) =
                         self.pressed
                             .set_pressed(input_pin.is_high().unwrap(), row, col)
