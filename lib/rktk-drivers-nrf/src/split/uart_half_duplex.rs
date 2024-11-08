@@ -153,6 +153,9 @@ impl<
             .await
             .map_err(|_| rktk::interface::error::RktkError::GeneralError("flush error"))?;
         drop(tx);
+
+        embassy_time::Timer::after_micros(50).await;
+
         Ok(())
     }
 }

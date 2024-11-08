@@ -1,28 +1,28 @@
+use embassy_embedded_hal::shared_bus::asynch::spi::SpiDevice;
 use embassy_nrf::{
     gpio::{Level, Output, OutputDrive, Pin},
-    interrupt::typelevel::Binding,
-    spim::{Config as SpiConfig, Frequency, Instance, InterruptHandler, Spim},
-    spis::{Phase, Polarity},
+    spim::{self, Instance, Spim},
     Peripheral,
 };
-pub use rktk_drivers_common::mouse::paw3395::config;
-use rktk_drivers_common::mouse::paw3395::Paw3395Builder;
+use embassy_sync::{blocking_mutex::raw::RawMutex, mutex::Mutex};
+use rktk_drivers_common::mouse::paw3395::{config::Config, Paw3395Builder};
 
-pub fn create_paw3395<'d, T: Instance + 'd>(
-    spim: impl Peripheral<P = T> + 'd,
-    _irq: impl Binding<T::Interrupt, InterruptHandler<T>> + 'd,
-    sck: impl Peripheral<P = impl Pin + 'd> + 'd,
-    miso: impl Peripheral<P = impl Pin + 'd> + 'd,
-    mosi: impl Peripheral<P = impl Pin + 'd> + 'd,
-    ncs: impl Peripheral<P = impl Pin> + 'd,
-    config: config::Config,
-) -> Paw3395Builder<'d, Spim<'d, T>, Output<'d>> {
-    let mut spi_config = SpiConfig::default();
-    spi_config.frequency = Frequency::M2;
-    spi_config.mode.polarity = Polarity::IdleHigh;
-    spi_config.mode.phase = Phase::CaptureOnSecondTransition;
+pub fn create_paw3395<'d, M: RawMutex, T: Instance + 'd, CS: Peripheral<P = impl Pin> + 'd>(
+    shared_spi: &'d Mutex<M, Spim<'d, T>>,
+    ncs: CS,
+    config: Config,
+) -> Paw3395Builder<SpiDevice<'d, M, Spim<'d, T>, Output<'d>>> {
     let ncs = Output::new(ncs, Level::High, OutputDrive::Standard);
 
-    let spi = Spim::new(spim, _irq, sck, miso, mosi, spi_config);
-    Paw3395Builder::new(spi, ncs, config)
+    let device = SpiDevice::new(shared_spi, ncs);
+
+    Paw3395Builder::new(device, config)
+}
+
+pub fn recommended_paw3395_config() -> spim::Config {
+    let mut config = spim::Config::default();
+    config.frequency = spim::Frequency::M8;
+    config.mode.polarity = spim::Polarity::IdleHigh;
+    config.mode.phase = spim::Phase::CaptureOnSecondTransition;
+    config
 }

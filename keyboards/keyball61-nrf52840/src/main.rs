@@ -11,6 +11,7 @@ use embassy_nrf::{
     ppi::Group,
     usb::vbus_detect::SoftwareVbusDetect,
 };
+use embassy_sync::{blocking_mutex::raw::NoopRawMutex, mutex::Mutex};
 use once_cell::sync::OnceCell;
 
 use rktk::{
@@ -102,7 +103,15 @@ async fn main(_spawner: Spawner) {
         cortex_m::asm::udf()
     };
 
-    let ball = pmw3360::create_pmw3360(p.SPI2, Irqs, p.P1_13, p.P1_11, p.P0_10, p.P0_09);
+    let ball_spi = Mutex::<NoopRawMutex, _>::new(embassy_nrf::spim::Spim::new(
+        p.SPI2,
+        Irqs,
+        p.P1_13,
+        p.P1_11,
+        p.P0_10,
+        pmw3360::recommended_pmw3360_config(),
+    ));
+    let ball = pmw3360::create_pmw3360(&ball_spi, p.P0_09);
 
     let keyscan = create_duplex_matrix::<'_, 5, 4, 5, 7>(
         [
