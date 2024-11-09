@@ -88,7 +88,7 @@ fn handle_led(
         2 => BacklightCommand::Start(BacklightMode::SolidColor(1, 0, 0)),
         3 => BacklightCommand::Start(BacklightMode::SolidColor(0, 1, 0)),
         4 => BacklightCommand::Start(BacklightMode::SolidColor(1, 1, 0)),
-        _ => BacklightCommand::Start(BacklightMode::SolidColor(0, 0, 0)),
+        _ => BacklightCommand::Reset,
     };
 
     if let Some(latest_led) = &latest_led {
