@@ -12,7 +12,7 @@ mod prelude {
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::state::config::{
-        KeyResolverConfig, MouseConfig, TapDanceConfig, MAX_TAP_DANCE_REPEAT_COUNT,
+        KeyResolverConfig, MouseConfig, Output, TapDanceConfig, MAX_TAP_DANCE_REPEAT_COUNT,
     };
     pub(super) use crate::{
         keycode::*,
@@ -32,7 +32,7 @@ mod prelude {
         mouse_report: None,
         media_keyboard_report: None,
         highest_layer: 0,
-        transparent_report: TransparentReport::new(),
+        transparent_report: TransparentReport::new(Output::Usb),
     };
     pub const EMPTY_REPORT: StateReport = StateReport {
         keyboard_report: Some(KeyboardReport {
@@ -49,7 +49,7 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: Some(MediaKeyboardReport { usage_id: 0 }),
-        transparent_report: TransparentReport::new(),
+        transparent_report: TransparentReport::new(Output::Usb),
         highest_layer: 0,
     };
     pub const KEYBOARD_ONLY_REPORT: StateReport = StateReport {
@@ -61,7 +61,7 @@ mod prelude {
         }),
         mouse_report: None,
         media_keyboard_report: None,
-        transparent_report: TransparentReport::new(),
+        transparent_report: TransparentReport::new(Output::Usb),
         highest_layer: 0,
     };
     pub const MOUSE_ONLY_REPORT: StateReport = StateReport {
@@ -74,7 +74,7 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: None,
-        transparent_report: TransparentReport::new(),
+        transparent_report: TransparentReport::new(Output::Usb),
         highest_layer: 0,
     };
 
@@ -141,6 +141,7 @@ mod prelude {
                     tap_dance_threshold: 100,
                     tap_dance,
                 },
+                initial_output: Output::Usb,
             },
         )
     }
