@@ -1,7 +1,7 @@
 use embassy_futures::join::join;
 use embassy_time::Timer;
 use rktk_keymanager::state::{
-    config::{KeyResolverConfig, MouseConfig, StateConfig},
+    config::{KeyResolverConfig, MouseConfig, Output, StateConfig},
     KeyChangeEvent, State, StateReport,
 };
 
@@ -13,12 +13,14 @@ use crate::{
     hooks::MainHooks,
     interface::{
         backlight::{BacklightCommand, BacklightMode},
+        ble::BleDriver,
         debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster},
         storage::StorageDriver,
+        usb::UsbDriver,
     },
     task::backlight::BACKLIGHT_CTRL,
     utils::ThreadModeMutex,
@@ -107,13 +109,15 @@ pub async fn start<
     KS: KeyscanDriver,
     DB: DebounceDriver,
     M: MouseDriver,
-    R: ReporterDriver,
+    Ble: BleDriver,
+    Usb: UsbDriver,
     S: StorageDriver,
     MH: MainHooks,
 >(
     m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
-    reporter: &'a R,
+    ble: Option<Ble>,
+    usb: Option<Usb>,
     mut keyscan: KS,
     mut debounce: DB,
     storage: Option<S>,
@@ -175,13 +179,18 @@ pub async fn start<
             tap_dance_threshold: RKTK_CONFIG.default_tap_dance_threshold,
             tap_dance: key_config.tap_dance.clone(),
         },
+        initial_output: if usb.is_some() {
+            Output::Usb
+        } else {
+            Output::Ble
+        },
     });
 
     let state = ThreadModeMutex::new(State::new(keymap, state_config));
 
     log::info!("Master side task start");
 
-    hook.on_master_init(&mut keyscan, mouse.as_mut(), reporter, &m2s_tx)
+    hook.on_master_init(&mut keyscan, mouse.as_mut(), &m2s_tx)
         .await;
 
     let mut latest_led: Option<BacklightCommand> = None;
@@ -230,23 +239,6 @@ pub async fn start<
 
                 crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
-                if let Some(report) = state_report.keyboard_report {
-                    if let Err(e) = reporter.try_send_keyboard_report(report) {
-                        log::warn!("Failed to send keyboard report: {:?}", e);
-                    }
-                    let _ = reporter.wakeup();
-                }
-                if let Some(report) = state_report.mouse_report {
-                    crate::utils::display_state!(MouseMove, (report.x, report.y));
-                    if let Err(e) = reporter.try_send_mouse_report(report) {
-                        log::warn!("Failed to send mouse report: {:?}", e);
-                    }
-                }
-                if let Some(report) = state_report.media_keyboard_report {
-                    if let Err(e) = reporter.try_send_media_keyboard_report(report) {
-                        log::warn!("Failed to send media keyboard report: {:?}", e);
-                    }
-                }
                 if state_report.transparent_report.flash_clear {
                     if let Some(ref storage) = config_storage {
                         match storage.storage.format().await {
@@ -264,6 +256,21 @@ pub async fn start<
 
                 handle_led(&state_report, m2s_tx, &mut latest_led);
 
+                match state_report.transparent_report.output {
+                    Output::Usb => {
+                        crate::utils::display_state!(Output, Output::Usb);
+                        if let Some(usb) = &usb {
+                            send_report(usb, state_report);
+                        }
+                    }
+                    Output::Ble => {
+                        crate::utils::display_state!(Output, Output::Ble);
+                        if let Some(ble) = &ble {
+                            send_report(ble, state_report);
+                        }
+                    }
+                }
+
                 let took = start.elapsed();
 
                 if took < SCAN_INTERVAL_KEYBOARD {
@@ -276,9 +283,31 @@ pub async fn start<
                 state: &state,
                 storage: config_storage.as_ref(),
             };
-            let et = rrp_server::EndpointTransportImpl(reporter);
-            server.handle(&et).await;
+            if let Some(usb) = &usb {
+                let et = rrp_server::EndpointTransportImpl(usb);
+                server.handle(&et).await;
+            }
         },
     )
     .await;
+}
+
+fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) {
+    if let Some(report) = state_report.keyboard_report {
+        if let Err(e) = reporter.try_send_keyboard_report(report) {
+            log::warn!("Failed to send keyboard report: {:?}", e);
+        }
+        let _ = reporter.wakeup();
+    }
+    if let Some(report) = state_report.mouse_report {
+        crate::utils::display_state!(MouseMove, (report.x, report.y));
+        if let Err(e) = reporter.try_send_mouse_report(report) {
+            log::warn!("Failed to send mouse report: {:?}", e);
+        }
+    }
+    if let Some(report) = state_report.media_keyboard_report {
+        if let Err(e) = reporter.try_send_media_keyboard_report(report) {
+            log::warn!("Failed to send media keyboard report: {:?}", e);
+        }
+    }
 }

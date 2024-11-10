@@ -44,6 +44,7 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
     mouse: manager::mouse::MouseState,
     keyboard: manager::keyboard::KeyboardState,
     media_keyboard: manager::media_keyboard::MediaKeyboardState,
+    transparent: manager::transparent::TransparentState,
 
     config: StateConfig,
 }
@@ -60,6 +61,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             mouse: manager::mouse::MouseState::new(config.mouse),
             keyboard: manager::keyboard::KeyboardState::new(),
             media_keyboard: manager::media_keyboard::MediaKeyboardState::new(),
+            transparent: manager::transparent::TransparentState::new(config.initial_output),
         }
     }
 
@@ -88,7 +90,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             mls.process_event(&mut self.mouse, &kc, event);
             kls.process_event(&mut cls, &kc, event);
             mkls.process_event(&kc);
-            tls.process_event(&kc, event);
+            tls.process_event(&mut self.transparent, &kc, event);
         }
 
         let highest_layer = self.cs.highest_layer();
@@ -98,7 +100,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
             keyboard_report: kls.report(&cls, &mut self.keyboard),
             mouse_report: mls.report(&mut self.mouse),
             media_keyboard_report: mkls.report(&mut self.media_keyboard),
-            transparent_report: tls.report(),
+            transparent_report: tls.report(&mut self.transparent),
             highest_layer: highest_layer as u8,
         }
     }

@@ -2,6 +2,7 @@ use core::fmt::Write as _;
 
 use embassy_futures::select::{select, Either};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
+use rktk_keymanager::state::config::Output;
 
 use crate::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder};
 
@@ -11,6 +12,7 @@ pub enum DisplayMessage {
     Master(Option<bool>),
     MouseAvailable(bool),
     MouseMove((i8, i8)),
+    Output(Output),
     HighestLayer(u8),
     Hand(Option<Hand>),
 }
@@ -46,6 +48,8 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
                 DisplayMessage::Message(msg) => {
                     let _ = display.print_message(msg).await;
                 }
+
+                // (1,1) to (4,1): status
                 DisplayMessage::Master(master) => {
                     let _ = display
                         .update_text(
@@ -63,16 +67,6 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
                         .update_text(if mouse { "m" } else { "x" }, D::calculate_point(2, 1))
                         .await;
                 }
-                DisplayMessage::MouseMove((x, y)) => {
-                    let mut str = heapless::String::<12>::new();
-                    write!(str, "[{:3},{:3}]", x, y).unwrap();
-                    let _ = display.update_text(&str, D::calculate_point(8, 1)).await;
-                }
-                DisplayMessage::HighestLayer(layer) => {
-                    let mut str = heapless::String::<2>::new();
-                    write!(str, "{:1}", layer).unwrap();
-                    let _ = display.update_text(&str, D::calculate_point(5, 1)).await;
-                }
                 DisplayMessage::Hand(hand) => {
                     let _ = display
                         .update_text(
@@ -84,6 +78,27 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
                             D::calculate_point(3, 1),
                         )
                         .await;
+                }
+                DisplayMessage::Output(output) => {
+                    let text = match output {
+                        Output::Usb => "U",
+                        Output::Ble => "B",
+                    };
+                    let _ = display.update_text(text, D::calculate_point(4, 1)).await;
+                }
+
+                // (6,1): highest layer
+                DisplayMessage::HighestLayer(layer) => {
+                    let mut str = heapless::String::<2>::new();
+                    write!(str, "{:1}", layer).unwrap();
+                    let _ = display.update_text(&str, D::calculate_point(6, 1)).await;
+                }
+
+                // (8,1): mouse position
+                DisplayMessage::MouseMove((x, y)) => {
+                    let mut str = heapless::String::<12>::new();
+                    write!(str, "[{:3},{:3}]", x, y).unwrap();
+                    let _ = display.update_text(&str, D::calculate_point(8, 1)).await;
                 }
             },
             Either::Second(str) => {

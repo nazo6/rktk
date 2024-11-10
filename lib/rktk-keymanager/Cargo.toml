@@ -32,7 +32,6 @@ usbd-hid = { workspace = true }
 
 
 [features]
-default = ["serde"]
 # Enables state management.
 state = ["dep:usbd-hid"]
 # Enables serialization.

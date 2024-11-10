@@ -4,7 +4,7 @@ use crate::interface::{
     backlight::{BacklightCommand, BacklightDriver},
     keyscan::{Hand, KeyscanDriver},
     mouse::MouseDriver,
-    reporter::ReporterDriver,
+    // reporter::ReporterDriver,
     storage::StorageDriver,
 };
 pub use crate::task::main_loop::{M2sTx, S2mTx};
@@ -20,7 +20,7 @@ pub trait MainHooks {
         _hand: Hand,
         _key_scanner: &mut impl KeyscanDriver,
         _mouse: Option<&mut impl MouseDriver>,
-        _reporter: Option<&impl ReporterDriver>,
+        // _reporter: Option<&impl ReporterDriver>,
         _storage: Option<&mut impl StorageDriver>,
     ) {
     }
@@ -28,7 +28,7 @@ pub trait MainHooks {
         &mut self,
         _key_scanner: &mut impl KeyscanDriver,
         _mouse: Option<&mut impl MouseDriver>,
-        _reporter: &impl ReporterDriver,
+        // _reporter: &impl ReporterDriver,
         _to_slave: &M2sTx<'_>,
     ) {
     }

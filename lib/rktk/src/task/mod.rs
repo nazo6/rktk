@@ -1,7 +1,7 @@
 //! Program entrypoint.
 
 use embassy_futures::{
-    join::join,
+    join::{join, join3},
     select::{select, Either},
 };
 use embassy_time::{Duration, Timer};
@@ -139,66 +139,48 @@ pub async fn start<
 
             crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
-            match (drivers.ble_builder, drivers.usb_builder) {
-                (Some(ble_builder), _) => {
-                    let (ble, ble_task) = ble_builder.build().await.expect("Failed to build ble");
-                    join(
-                        main_loop::start(
-                            Some(&ble),
-                            drivers.keyscan,
-                            drivers.debounce,
-                            mouse,
-                            drivers.storage,
-                            drivers.split,
-                            drivers.backlight,
-                            key_config,
-                            hooks,
-                        ),
-                        ble_task.run(),
+            let (ble, ble_task) = if let Some(ble_builder) = drivers.ble_builder {
+                let (ble, ble_task) = ble_builder.build().await.expect("Failed to build ble");
+                (Some(ble), Some(ble_task))
+            } else {
+                (None, None)
+            };
+
+            let (usb, usb_task) = if let Some(usb_builder) = drivers.usb_builder {
+                let (usb, usb_task) = usb_builder.build().await.expect("Failed to build usb");
+                (Some(usb), Some(usb_task))
+            } else {
+                (None, None)
+            };
+
+            join3(
+                async {
+                    if let Some(usb_task) = usb_task {
+                        usb_task.run().await
+                    }
+                },
+                async {
+                    if let Some(ble_task) = ble_task {
+                        ble_task.run().await
+                    }
+                },
+                async {
+                    main_loop::start(
+                        ble,
+                        usb,
+                        drivers.keyscan,
+                        drivers.debounce,
+                        mouse,
+                        drivers.storage,
+                        drivers.split,
+                        drivers.backlight,
+                        key_config,
+                        hooks,
                     )
                     .await;
-                }
-                (_, Some(usb_builder)) => {
-                    let Ok((usb, usb_task)) = usb_builder.build().await else {
-                        panic!("Failed to build USB");
-                    };
-
-                    join(
-                        async {
-                            let usb = match select(
-                                usb.wait_ready(),
-                                Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
-                            )
-                            .await
-                            {
-                                Either::First(_) => Some(usb),
-                                Either::Second(_) => {
-                                    // usb initialize timed out. this is slave side.
-                                    None
-                                }
-                            };
-
-                            main_loop::start(
-                                usb.as_ref(),
-                                drivers.keyscan,
-                                drivers.debounce,
-                                mouse,
-                                drivers.storage,
-                                drivers.split,
-                                drivers.backlight,
-                                key_config,
-                                hooks,
-                            )
-                            .await;
-                        },
-                        usb_task.run(),
-                    )
-                    .await;
-                }
-                (None, None) => {
-                    panic!("No USB or BLE driver is provided");
-                }
-            }
+                },
+            )
+            .await;
         },
     )
     .await;

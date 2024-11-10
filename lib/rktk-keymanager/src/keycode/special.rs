@@ -8,4 +8,6 @@ use crate::macros::{common_derive, with_consts};
 pub enum Special {
     MoScrl,
     FlashClear,
+    OutputBle,
+    OutputUsb,
 }

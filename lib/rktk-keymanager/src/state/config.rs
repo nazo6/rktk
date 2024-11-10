@@ -4,9 +4,17 @@ use macro_rules_attribute::apply;
 use crate::keycode::KeyCode;
 
 #[apply(common_derive)]
+#[derive(Copy)]
+pub enum Output {
+    Usb,
+    Ble,
+}
+
+#[apply(common_derive)]
 pub struct StateConfig {
     pub mouse: MouseConfig,
     pub key_resolver: KeyResolverConfig,
+    pub initial_output: Output,
 }
 
 #[apply(common_derive)]

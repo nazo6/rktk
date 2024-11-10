@@ -2,20 +2,26 @@ use crate::{
     config::static_config::{KEYBOARD, RKTK_CONFIG},
     interface::{
         backlight::BacklightDriver,
+        ble::BleDriver,
         debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
         storage::StorageDriver,
+        usb::UsbDriver,
     },
     KeyConfig,
 };
-use embassy_futures::join::join;
+use embassy_futures::{
+    join::join,
+    select::{select, Either},
+};
 use embassy_sync::{
     blocking_mutex::raw::CriticalSectionRawMutex,
     channel::{Channel, Receiver, Sender},
 };
+use embassy_time::{Duration, Timer};
 
 mod master;
 mod slave;
@@ -43,12 +49,14 @@ pub async fn start<
     M: MouseDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
-    R: ReporterDriver,
+    Ble: BleDriver,
+    Usb: UsbDriver,
     S: StorageDriver,
     MainHooks: crate::hooks::MainHooks,
     BacklightHooks: crate::hooks::BacklightHooks,
 >(
-    reporter: Option<&R>,
+    ble: Option<Ble>,
+    usb: Option<Usb>,
     mut keyscan: KS,
     debounce: DB,
     mut mouse: Option<M>,
@@ -85,18 +93,32 @@ pub async fn start<
         async {
             let _ = split.init().await;
 
+            let usb_available = if let Some(usb) = &usb {
+                match select(
+                    usb.wait_ready(),
+                    Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
+                )
+                .await
+                {
+                    Either::First(_) => true,
+                    Either::Second(_) => false,
+                }
+            } else {
+                false
+            };
+
+            let is_master = usb_available || ble.is_some();
+
             hooks
                 .main
                 .on_init(
                     hand,
                     &mut keyscan,
                     mouse.as_mut(),
-                    reporter,
+                    // reporter,
                     storage.as_mut(),
                 )
                 .await;
-
-            let is_master = reporter.is_some();
 
             crate::utils::display_state!(Master, Some(is_master));
 
@@ -108,11 +130,11 @@ pub async fn start<
             let m2s_tx = m2s_chan.sender();
             let m2s_rx = m2s_chan.receiver();
 
-            if let Some(reporter) = reporter {
+            if is_master {
                 join(
                     split_handler::start(split, s2m_tx, m2s_rx, is_master),
                     master::start(
-                        m2s_tx, s2m_rx, reporter, keyscan, debounce, storage, mouse, key_config,
+                        m2s_tx, s2m_rx, ble, usb, keyscan, debounce, storage, mouse, key_config,
                         hand, hooks.main,
                     ),
                 )
