@@ -50,15 +50,16 @@ impl BackgroundTask for SoftdeviceBleTask {
         let bonder = super::bonder::init_bonder();
 
         loop {
+            rktk::print!("Advertising");
+
             let mut cnt = 0;
             let conn = loop {
                 match peripheral::advertise_pairable(self.sd, adv, &config, bonder).await {
                     Ok(conn) => break conn,
                     Err(peripheral::AdvertiseError::Timeout) => {
-                        rktk::print!("Timeout");
                         cnt += 1;
                         if cnt > 10 {
-                            panic!("Failed to pair (10 tries)");
+                            rktk::print!("Failed to pair (10 tries)");
                         }
                     }
                     Err(e) => {
@@ -68,7 +69,7 @@ impl BackgroundTask for SoftdeviceBleTask {
                 }
             };
 
-            rktk::print!("Paired: {:X?}", conn.peer_address().bytes);
+            rktk::print!("Connected: {:X?}", conn.peer_address().bytes);
 
             select(
                 async {
