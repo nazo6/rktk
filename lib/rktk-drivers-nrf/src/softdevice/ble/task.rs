@@ -18,7 +18,7 @@ pub struct SoftdeviceBleTask {
     pub sd: &'static Softdevice,
     pub server: Server,
     pub name: &'static str,
-    pub db: &'static SharedFlash,
+    pub flash: &'static SharedFlash,
 }
 
 impl BackgroundTask for SoftdeviceBleTask {
@@ -47,7 +47,7 @@ impl BackgroundTask for SoftdeviceBleTask {
             scan_data: &SCAN_DATA,
         };
 
-        let bonder = super::bonder::init_bonder();
+        let bonder = super::bonder::init_bonder(self.flash).await;
 
         loop {
             rktk::print!("Advertising");
@@ -69,7 +69,7 @@ impl BackgroundTask for SoftdeviceBleTask {
                 }
             };
 
-            rktk::print!("Connected: {:X?}", conn.peer_address().bytes);
+            // rktk::print!("Connected: {:X?}", conn.peer_address().bytes);
 
             select(
                 async {

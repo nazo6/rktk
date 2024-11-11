@@ -24,7 +24,9 @@ pub fn get_flash(
     )
 }
 
+// 4kb * 160 = 640kb
 const FLASH_START: u32 = 4096 * 160;
+// 4kb * 3 = 12kb
 const FLASH_END: u32 = FLASH_START + 4096 * 3;
 
 pub fn create_storage_driver<'a>(

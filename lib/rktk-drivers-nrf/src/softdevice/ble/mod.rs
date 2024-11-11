@@ -68,7 +68,7 @@ impl DriverBuilderWithTask for NrfBleDriverBuilder {
                 sd: self.sd,
                 server: self.server,
                 name: self.name,
-                db: self.flash,
+                flash: self.flash,
             },
         ))
     }

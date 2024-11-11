@@ -23,10 +23,14 @@ embassy-futures = { workspace = true }
 embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
 nrf-softdevice = { workspace = true, features = ["ble-peripheral"] }
 embedded-io-async = { workspace = true }
+
 embedded-storage-async = { workspace = true }
+sequential-storage = { workspace = true }
 
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }
+
+postcard = { workspace = true }
 
 static_cell = { workspace = true }
 heapless = { workspace = true }
