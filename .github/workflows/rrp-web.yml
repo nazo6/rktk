@@ -4,13 +4,13 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'rrp-web/**'
+      - 'tools/rrp-web/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rrp-web.yml'
   pull_request:
     paths:
-      - 'rrp-web/**'
+      - 'tools/rrp-web/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rrp-web.yml'
@@ -33,7 +33,7 @@ jobs:
         tools: "wasm-pack"
     
     - name: Build rust library
-      run: cd rrp-web/rrp-client-web && wasm-pack build --release
+      run: cd tools/rrp-web/rrp-client-web && wasm-pack build --release
 
     - uses: pnpm/action-setup@v4
       name: Setup pnpm
@@ -46,13 +46,13 @@ jobs:
       with:
         node-version: 20
         cache: 'pnpm'
-        cache-dependency-path: rrp-web/pnpm-lock.yaml
+        cache-dependency-path: tools/rrp-web/pnpm-lock.yaml
 
     - name: pnpm install
-      run: cd rrp-web && pnpm install
+      run: cd tools/rrp-web && pnpm install
 
     - name: Type check rrp-web and build
-      run: cd rrp-web && pnpm tsc --noEmit && pnpm build
+      run: cd tools/rrp-web && pnpm tsc --noEmit && pnpm build
 
     - name: Deploy
       uses: cloudflare/wrangler-action@v3
@@ -60,4 +60,4 @@ jobs:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         command: pages deploy ./dist --project-name=rrpc
-        workingDirectory: "rrp-web"
+        workingDirectory: "tools/rrp-web"
