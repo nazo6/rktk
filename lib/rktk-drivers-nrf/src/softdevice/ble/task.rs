@@ -79,7 +79,10 @@ impl BackgroundTask for SoftdeviceBleTask {
                 async {
                     loop {
                         let report = REPORT_CHAN.receive().await;
-                        let _ = self.server.hid.send_report(&conn, report);
+                        if let Err(e) = self.server.hid.send_report(&conn, report) {
+                            rktk::print!("{:?}", e);
+                            // rktk::log::error!("BLE hid failed: {:?}", e);
+                        };
                     }
                 },
             )

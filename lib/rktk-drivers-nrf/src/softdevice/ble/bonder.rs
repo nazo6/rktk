@@ -31,18 +31,26 @@ impl SecurityHandler for Bonder {
 
     fn on_bonded(
         &self,
-        _conn: &Connection,
+        conn: &Connection,
         master_id: MasterId,
         enc: EncryptionInfo,
         peer_id: IdentityKey,
     ) {
+        rktk::log::info!("On bonded");
+
         let mut devices = self.devices.borrow_mut();
 
+        let mut sys_attrs = heapless::Vec::new();
+        let capacity = sys_attrs.capacity();
+        sys_attrs.resize(capacity, 0).unwrap();
+        let len = get_sys_attrs(conn, &mut sys_attrs).unwrap() as u16;
+        sys_attrs.truncate(usize::from(len));
+
         let device_data = DeviceData {
-            peer_addr: Some(peer_id.addr),
+            peer_id,
             master_id,
             encryption_info: enc,
-            sys_attrs: None,
+            sys_attrs: Some(sys_attrs),
         };
 
         if let Err(data) = devices.push(device_data) {
@@ -56,23 +64,33 @@ impl SecurityHandler for Bonder {
     }
 
     fn get_key(&self, conn: &Connection, master_id: MasterId) -> Option<EncryptionInfo> {
+        rktk::log::info!("Get key");
+
         let mut data = self.devices.borrow_mut();
 
-        let Some(device) = data.iter_mut().find(|d| d.master_id == master_id) else {
+        let Some(device) = data
+            .iter_mut()
+            .find(|d| d.peer_id.is_match(conn.peer_address()))
+        else {
             rktk::log::info!("No peer data: {:?}", master_id.ediv);
             return None;
         };
 
-        device.peer_addr = Some(conn.peer_address());
+        rktk::log::info!("Found peer data: {:?}", master_id.ediv);
 
         Some(device.encryption_info)
     }
 
+    // Receive sys_attrs and save them
     fn save_sys_attrs(&self, conn: &Connection) {
-        let mut devices = self.devices.borrow_mut();
-        let peer_addr = conn.peer_address();
+        rktk::log::info!("Save sys_attrs");
 
-        if let Some(device) = devices.iter_mut().find(|d| d.peer_addr == Some(peer_addr)) {
+        let mut devices = self.devices.borrow_mut();
+
+        if let Some(device) = devices
+            .iter_mut()
+            .find(|d| d.peer_id.is_match(conn.peer_address()))
+        {
             if device.sys_attrs.is_none() {
                 device.sys_attrs = Some(heapless::Vec::new())
             }
@@ -83,20 +101,26 @@ impl SecurityHandler for Bonder {
             sys_attrs.truncate(usize::from(len));
 
             BOND_SAVE.signal(devices.clone());
+        } else {
+            rktk::log::warn!("Failed to save sys_attrs",);
         }
     }
 
     fn load_sys_attrs(&self, conn: &Connection) {
+        rktk::log::info!("Load sys_attrs");
+
         let devices = self.devices.borrow();
-        let peer_addr = conn.peer_address();
 
         let _res = match devices
             .iter()
-            .find(|d| d.peer_addr == Some(peer_addr))
+            .find(|d| d.peer_id.is_match(conn.peer_address()))
             .map(|d| &d.sys_attrs)
         {
             Some(Some(sys_attrs)) => set_sys_attrs(conn, Some(sys_attrs.as_slice())),
-            _ => set_sys_attrs(conn, None),
+            _ => {
+                rktk::log::warn!("No sys_attrs");
+                set_sys_attrs(conn, None)
+            }
         };
     }
 }

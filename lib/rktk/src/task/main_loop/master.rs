@@ -180,7 +180,7 @@ pub async fn start<
             tap_dance: key_config.tap_dance.clone(),
         },
         initial_output: if usb.is_some() {
-            Output::Usb
+            Output::Ble
         } else {
             Output::Ble
         },
