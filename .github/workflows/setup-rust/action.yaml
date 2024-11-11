@@ -9,9 +9,6 @@ inputs:
   target:
     description: 'rustup target to install'
     required: true
-  tools:
-    description: 'tools to install'
-    required: true
 
 runs:
   using: "composite"

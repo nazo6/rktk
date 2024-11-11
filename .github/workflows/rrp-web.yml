@@ -30,7 +30,10 @@ jobs:
       with:
         components: "rust-src"
         target: "wasm32-unknown-unknown"
-        tools: "wasm-pack"
+
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: wasm-pack
     
     - name: Build rust library
       run: cd tools/rrp-web/rrp-client-web && wasm-pack build --release

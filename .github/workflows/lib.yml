@@ -48,7 +48,6 @@ jobs:
       with:
         components: "rust-src"
         target: ""
-        tools: "cargo-make"
 
     - uses: r7kamura/rust-problem-matchers@v1
 
