@@ -1,28 +1,23 @@
 use core::cell::RefCell;
 
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, signal::Signal};
-use embedded_storage_async::nor_flash::{NorFlash as _, ReadNorFlash};
 use nrf_softdevice::ble::{
-    // gatt_server::{get_sys_attrs, set_sys_attrs},
+    gatt_server::{get_sys_attrs, set_sys_attrs},
     security::{IoCapabilities, SecurityHandler},
-    Connection,
-    EncryptionInfo,
-    IdentityKey,
-    MasterId,
+    Connection, EncryptionInfo, IdentityKey, MasterId,
 };
-
-// 4kb * 200 = 800kb point
-const BOND_FLASH_ADDR: u32 = 4096 * 200;
-// (10 + 17) * 8 + map overhead < 512
-const BOND_FLASH_SIZE: usize = 512;
-
-type BondMap = heapless::FnvIndexMap<[u8; 10], [u8; 17], 8>;
+use storage::{bonder_save_task, BOND_SAVE};
 
 use crate::softdevice::flash::SharedFlash;
 
+mod storage;
+mod types;
+
+use types::*;
+
+const MAX_PEER_COUNT: usize = 8;
+
 pub struct Bonder {
-    bond_info: RefCell<BondMap>,
-    // sys_attrs: RefCell<heapless::Vec<u8, 62>>,
+    devices: RefCell<Devices>,
 }
 
 impl SecurityHandler for Bonder {
@@ -39,27 +34,70 @@ impl SecurityHandler for Bonder {
         _conn: &Connection,
         master_id: MasterId,
         enc: EncryptionInfo,
-        _peer_id: IdentityKey,
+        peer_id: IdentityKey,
     ) {
-        let mut bond_info = self.bond_info.borrow_mut();
-        let key = master_id_to_key(master_id);
-        let value = encryption_info_to_value(enc);
-        if let Err((k, v)) = bond_info.insert(key, value) {
-            let key = *bond_info.first().unwrap().0;
-            bond_info.remove(&key);
-            let _ = bond_info.insert(k, v);
-        };
-        BOND_SAVE_CHAN.signal(bond_info.clone());
+        let mut devices = self.devices.borrow_mut();
 
-        rktk::print!("Bonded (idx: {})", bond_info.iter().count());
+        let device_data = DeviceData {
+            peer_addr: Some(peer_id.addr),
+            master_id,
+            encryption_info: enc,
+            sys_attrs: None,
+        };
+
+        if let Err(data) = devices.push(device_data) {
+            devices.remove(0);
+            devices.push(data).unwrap();
+        }
+
+        rktk::log::info!("Bonded: {:?}", master_id.ediv);
+
+        BOND_SAVE.signal(devices.clone());
     }
 
-    fn get_key(&self, _conn: &Connection, master_id: MasterId) -> Option<EncryptionInfo> {
-        self.bond_info
-            .borrow()
-            .get(&master_id_to_key(master_id))
-            .copied()
-            .map(encryption_info_from_value)
+    fn get_key(&self, conn: &Connection, master_id: MasterId) -> Option<EncryptionInfo> {
+        let mut data = self.devices.borrow_mut();
+
+        let Some(device) = data.iter_mut().find(|d| d.master_id == master_id) else {
+            rktk::log::info!("No peer data: {:?}", master_id.ediv);
+            return None;
+        };
+
+        device.peer_addr = Some(conn.peer_address());
+
+        Some(device.encryption_info)
+    }
+
+    fn save_sys_attrs(&self, conn: &Connection) {
+        let mut devices = self.devices.borrow_mut();
+        let peer_addr = conn.peer_address();
+
+        if let Some(device) = devices.iter_mut().find(|d| d.peer_addr == Some(peer_addr)) {
+            if device.sys_attrs.is_none() {
+                device.sys_attrs = Some(heapless::Vec::new())
+            }
+            let sys_attrs = device.sys_attrs.as_mut().unwrap();
+            let capacity = sys_attrs.capacity();
+            sys_attrs.resize(capacity, 0).unwrap();
+            let len = get_sys_attrs(conn, sys_attrs).unwrap() as u16;
+            sys_attrs.truncate(usize::from(len));
+
+            BOND_SAVE.signal(devices.clone());
+        }
+    }
+
+    fn load_sys_attrs(&self, conn: &Connection) {
+        let devices = self.devices.borrow();
+        let peer_addr = conn.peer_address();
+
+        let _res = match devices
+            .iter()
+            .find(|d| d.peer_addr == Some(peer_addr))
+            .map(|d| &d.sys_attrs)
+        {
+            Some(Some(sys_attrs)) => set_sys_attrs(conn, Some(sys_attrs.as_slice())),
+            _ => set_sys_attrs(conn, None),
+        };
     }
 }
 
@@ -70,68 +108,11 @@ pub async fn init_bonder(flash: &'static SharedFlash) -> &'static Bonder {
         .await
         .must_spawn(bonder_save_task(flash));
 
-    let mut buf = [0; BOND_FLASH_SIZE];
-    flash
-        .lock()
-        .await
-        .read(BOND_FLASH_ADDR, &mut buf)
-        .await
-        .expect("Failed to read bond info");
+    let bond_map = storage::read_bond_map(flash).await.unwrap_or_default();
 
-    let bond_info: BondMap = postcard::from_bytes(&buf).unwrap_or(BondMap::new());
-
-    rktk::print!("Loaded {} bond info", bond_info.iter().count());
+    rktk::log::info!("Loaded {} bond info", bond_map.iter().count());
 
     SEC.init(Bonder {
-        // sys_attrs: Default::default(),
-        bond_info: RefCell::new(bond_info),
+        devices: RefCell::new(bond_map),
     })
-}
-
-static BOND_SAVE_CHAN: Signal<CriticalSectionRawMutex, BondMap> = Signal::new();
-
-#[embassy_executor::task]
-async fn bonder_save_task(flash: &'static SharedFlash) {
-    loop {
-        let data = BOND_SAVE_CHAN.wait().await;
-        let mut flash = flash.lock().await;
-        let mut buf = [0; BOND_FLASH_SIZE];
-        let Ok(res) = postcard::to_slice(&data, &mut buf) else {
-            continue;
-        };
-        let len = res.len();
-
-        match flash.write(BOND_FLASH_ADDR, &buf).await {
-            Ok(_) => {
-                rktk::print!("Bond info saved ({} bytes)", len);
-            }
-            Err(e) => {
-                rktk::print!("Failed to save bond info: {:?}", e);
-            }
-        }
-    }
-}
-
-fn master_id_to_key(master_id: MasterId) -> [u8; 10] {
-    let mut key = [0; 10];
-    key[..8].copy_from_slice(&master_id.rand);
-    key[8] = master_id.ediv as u8;
-    key[9] = (master_id.ediv >> 8) as u8;
-
-    key
-}
-
-fn encryption_info_to_value(enc: EncryptionInfo) -> [u8; 17] {
-    let mut value = [0; 17];
-    value[..16].copy_from_slice(&enc.ltk);
-    value[16] = enc.flags;
-
-    value
-}
-
-fn encryption_info_from_value(value: [u8; 17]) -> EncryptionInfo {
-    let mut enc = EncryptionInfo::default();
-    enc.ltk.copy_from_slice(&value[..16]);
-    enc.flags = value[16];
-    enc
 }

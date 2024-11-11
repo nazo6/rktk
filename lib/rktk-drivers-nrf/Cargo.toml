@@ -30,7 +30,10 @@ sequential-storage = { workspace = true }
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }
 
+serde = { workspace = true }
+serde_with = { workspace = true }
 postcard = { workspace = true }
+hash32 = "0.2.1"
 
 static_cell = { workspace = true }
 heapless = { workspace = true }
