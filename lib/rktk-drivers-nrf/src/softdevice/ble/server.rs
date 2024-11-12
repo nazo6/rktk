@@ -19,7 +19,10 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(sd: &mut Softdevice, serial_number: &'static str) -> Result<Self, RegisterError> {
+    pub fn new(
+        sd: &mut Softdevice,
+        device_information: DeviceInformation,
+    ) -> Result<Self, RegisterError> {
         let dis = DeviceInformationService::new(
             sd,
             &PnPID {
@@ -28,12 +31,7 @@ impl Server {
                 product_id: 0xBEEF,
                 product_version: 0x0000,
             },
-            DeviceInformation {
-                manufacturer_name: Some("Embassy"),
-                model_number: Some("M1234"),
-                serial_number: Some(serial_number),
-                ..Default::default()
-            },
+            device_information,
         )?;
 
         let bas = BatteryService::new(sd)?;

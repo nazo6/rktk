@@ -144,8 +144,19 @@ async fn main(_spawner: Spawner) {
     let backlight = Ws2812Pwm::new(p.PWM0, p.P0_06);
 
     let sd = rktk_drivers_nrf::softdevice::init_sd("keyball61");
+
     #[cfg(feature = "ble")]
-    let (server, sd) = ble::init_ble_server(sd).await;
+    let server = ble::init_ble_server(
+        sd,
+        rktk_drivers_nrf::softdevice::ble::DeviceInformation {
+            manufacturer_name: Some("nazo6"),
+            model_number: Some("100"),
+            serial_number: Some("100"),
+            ..Default::default()
+        },
+    )
+    .await;
+
     rktk_drivers_nrf::softdevice::start_softdevice(sd).await;
 
     embassy_time::Timer::after_millis(50).await;
