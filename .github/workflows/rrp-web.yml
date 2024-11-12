@@ -8,12 +8,14 @@ on:
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rrp-web.yml'
+      - '.github/workflows/setup-rust/action.yaml'
   pull_request:
     paths:
       - 'tools/rrp-web/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rrp-web.yml'
+      - '.github/workflows/setup-rust/action.yaml'
 
 env:
   CARGO_TERM_COLOR: always

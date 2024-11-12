@@ -5,12 +5,14 @@ on:
     branches: ["master"]
     paths:
       - '.github/workflows/lib.yml'
+      - '.github/workflows/setup-rust/action.yaml'
       - '**.toml'
       - '**.rs'
       - '**.lock'
   pull_request:
     paths:
       - '.github/workflows/lib.yml'
+      - '.github/workflows/setup-rust/action.yaml'
       - '**.toml'
       - '**.rs'
       - '**.lock'
