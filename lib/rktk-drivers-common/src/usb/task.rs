@@ -1,10 +1,11 @@
 use embassy_futures::join::{join, join3};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, pipe::Pipe};
-use embassy_usb::class::cdc_acm::CdcAcmClass;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
 use embassy_usb::UsbDevice;
 use rktk::interface::BackgroundTask;
+use rktk_rrp_hid::report::RrpReport;
+use rktk_rrp_hid::RRP_HID_BUFFER_SIZE;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{ReadySignal, RemoteWakeupSignal};
@@ -24,7 +25,7 @@ pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
     pub media_key_hid: HidWriter<'d, D, 8>,
     pub mouse_hid: HidWriter<'d, D, 8>,
-    pub serial: CdcAcmClass<'d, D>,
+    pub rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
 }
 
 impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
@@ -37,7 +38,7 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
                 self.mouse_hid,
                 self.ready_signal,
             ),
-            rrp(self.serial),
+            rrp(self.rrp_hid),
         )
         .await;
     }
@@ -89,24 +90,41 @@ pub async fn hid<'d, D: Driver<'d>>(
     .await;
 }
 
-pub async fn rrp<'d, D: Driver<'d>>(serial: CdcAcmClass<'d, D>) {
-    let (mut writer, mut reader) = serial.split();
-    reader.wait_connection().await;
+pub async fn rrp<'d, D: Driver<'d>>(
+    rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
+) {
+    let (mut reader, mut writer) = rrp_hid.split();
+    reader.ready().await;
     join(
         async {
             loop {
-                let mut buf = [0u8; 64];
-                let Ok(to_recv_bytes) = reader.read_packet(&mut buf).await else {
+                let mut buf = [0u8; RRP_HID_BUFFER_SIZE];
+                let Ok(to_recv_bytes) = reader.read(&mut buf).await else {
                     continue;
                 };
-                RRP_RECV_PIPE.write_all(&buf[..to_recv_bytes]).await;
+                if to_recv_bytes != 32 {
+                    panic!("One read should give one report. Maybe packet size is enough?");
+                }
+
+                rktk::print!("Received report: {:?}", &buf[..to_recv_bytes]);
+
+                let len = buf[0] as usize;
+                RRP_RECV_PIPE.write_all(&buf[1..=len]).await;
             }
         },
         async {
             loop {
-                let mut buf = [0u8; 64];
-                let to_send_bytes = RRP_SEND_PIPE.read(&mut buf).await;
-                let _ = writer.write_packet(&buf[..to_send_bytes]).await;
+                let mut data = [0u8; RRP_HID_BUFFER_SIZE];
+                let to_send_bytes = RRP_SEND_PIPE.read(&mut data[1..]).await;
+                data[0] = to_send_bytes as u8;
+                let _ = writer
+                    .write_serialize(&RrpReport {
+                        input_data: data,
+                        output_data: [0; 32],
+                    })
+                    .await;
+
+                rktk::print!("Sent report: {:?}", &data);
             }
         },
     )

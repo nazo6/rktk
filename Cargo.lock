@@ -1154,11 +1154,15 @@ version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fa08315bb612088cc391249efdc3bc77536f16c91f6cf495e6fbe85b20a4a81"
 dependencies = [
+ "futures-channel",
  "futures-core",
+ "futures-io",
  "futures-sink",
  "futures-task",
+ "memchr",
  "pin-project-lite",
  "pin-utils",
+ "slab",
 ]
 
 [[package]]
@@ -2153,6 +2157,7 @@ dependencies = [
  "embedded-storage-async",
  "heapless 0.7.17",
  "rktk",
+ "rktk-rrp-hid",
  "sequential-storage",
  "ssd1306",
  "static_cell",
@@ -2250,6 +2255,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "rktk-rrp-hid"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "usbd-hid",
+]
+
+[[package]]
 name = "rp-pac"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2280,9 +2293,12 @@ dependencies = [
  "log",
  "rktk-keymanager",
  "rktk-rrp",
+ "rktk-rrp-hid",
  "serde",
  "serde-wasm-bindgen",
+ "ssmarshal",
  "tsify-next",
+ "usbd-hid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -2495,6 +2511,15 @@ name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
+
+[[package]]
+name = "slab"
+version = "0.4.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f92a496fb766b417c996b9c5e57daf2f7ad3b0bebe1ccfca4856390e3d3bb67"
+dependencies = [
+ "autocfg",
+]
 
 [[package]]
 name = "smallvec"

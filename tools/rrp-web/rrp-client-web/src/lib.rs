@@ -4,7 +4,7 @@ use futures::StreamExt;
 use log::info;
 use rktk_rrp::endpoints::*;
 use wasm_bindgen::prelude::*;
-use web_sys::SerialPort;
+use web_sys::HidDevice;
 
 mod client;
 
@@ -21,7 +21,7 @@ pub struct Client {
     // Because RRP does not have an ordering control mechanism like TCP, so the order in which data is sent and received is very important.
     // When multiple commands are called from JS at the same time, sending data from one request in the middle of another request will cause communication problems.
     // For this reason, Mutex is used for exclusion control so that only one command can be called at a time.
-    serial_client: Mutex<client::SerialClient>,
+    serial_client: Mutex<client::HidTransportClient>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, tsify_next::Tsify)]
@@ -42,11 +42,9 @@ pub struct VecLogEntry(pub Vec<LogEntry>);
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
-    pub fn new(serial_port: SerialPort) -> Self {
+    pub fn new(device: HidDevice) -> Self {
         Client {
-            serial_client: Mutex::new(client::SerialClient {
-                stream: serial_port,
-            }),
+            serial_client: Mutex::new(client::HidTransportClient::new(device)),
         }
     }
 

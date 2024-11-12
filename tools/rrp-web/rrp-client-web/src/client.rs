@@ -1,93 +1,94 @@
+use std::pin::pin;
+
+use async_lock::Mutex;
 use futures::future::select;
+use futures::StreamExt as _;
 use gloo_timers::future::TimeoutFuture;
 use rktk_rrp::endpoint_client;
+use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{js_sys, SerialPort};
+use web_sys::HidDevice;
+use web_sys::HidInputReportEvent;
 
-pub struct SerialClient {
-    pub(crate) stream: SerialPort,
+pub struct HidTransportClient {
+    device: HidDevice,
+    input_report_receiver: Mutex<futures::channel::mpsc::UnboundedReceiver<[u8; 32]>>,
+    // _cb: Closure<dyn FnMut(HidInputReportEvent)>,
 }
 
-impl SerialClient {
-    async fn send_all(&self, buf: &[u8]) -> Result<(), anyhow::Error> {
-        let writer = self
-            .stream
-            .writable()
-            .get_writer()
-            .map_err(|e| anyhow::anyhow!("Failed to get writer: {:?}", e))?;
-        let r: Result<(), anyhow::Error> = async {
-            JsFuture::from(writer.ready())
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to wait writer for ready: {:?}", e))?;
-            JsFuture::from(writer.write_with_chunk(&buf.to_owned().into()))
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to write: {:?}", e))?;
-            JsFuture::from(writer.ready())
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to wait writer for ready: {:?}", e))?;
-            Ok(())
+impl Drop for HidTransportClient {
+    fn drop(&mut self) {
+        self.device.set_oninputreport(None);
+    }
+}
+
+impl HidTransportClient {
+    pub fn new(device: HidDevice) -> Self {
+        let (input_report_sender, input_report_receiver) = futures::channel::mpsc::unbounded();
+
+        let cb = Closure::wrap(Box::new(move |e: HidInputReportEvent| {
+            log::info!("Received input report");
+            let data = e.data();
+            let mut buf = [0u8; 32];
+            for i in 0..32 {
+                buf[i] = data.get_uint8(i);
+            }
+            input_report_sender.unbounded_send(buf);
+        }) as Box<dyn FnMut(_)>);
+
+        device.set_oninputreport(Some(cb.as_ref().unchecked_ref()));
+
+        cb.forget();
+
+        Self {
+            device,
+            input_report_receiver: Mutex::new(input_report_receiver),
+            // _cb: cb,
         }
-        .await;
+    }
 
-        writer.release_lock();
+    async fn send_all(&self, buf: &[u8]) -> Result<(), anyhow::Error> {
+        for chunk in buf.chunks(31) {
+            let mut output_data = vec![chunk.len() as u8];
+            output_data.extend_from_slice(chunk);
+            output_data.resize(32, 0);
 
-        r?;
+            JsFuture::from(
+                self.device
+                    .send_report_with_u8_slice(0, &mut output_data)
+                    .map_err(|e| anyhow::anyhow!("Failed to send report: {:?}", e))?,
+            )
+            .await
+            .map_err(|e| anyhow::anyhow!("Failed to send report: {:?}", e))?;
 
+            log::info!("Sent report: {:?}", output_data);
+        }
         Ok(())
     }
+
     async fn read_until_zero(&self, buf: &mut Vec<u8>) -> Result<(), anyhow::Error> {
-        let reader_options = web_sys::ReadableStreamGetReaderOptions::new();
-        reader_options.set_mode(web_sys::ReadableStreamReaderMode::Byob);
-        let reader = self
-            .stream
-            .readable()
-            .get_reader_with_options(&reader_options)
-            .dyn_into::<web_sys::ReadableStreamByobReader>()
-            .expect("Invalid readable stream");
-
-        let res = match select(
-            std::pin::pin!(async {
+        log::info!("read start");
+        select(
+            pin!(async {
+                let mut input_report_receiver = self.input_report_receiver.lock().await;
                 loop {
-                    let typed_array = web_sys::js_sys::Uint8Array::new(&JsValue::from(1));
-                    let promise = reader.read_with_array_buffer_view(&typed_array);
-                    let obj = JsFuture::from(promise)
-                        .await
-                        .map_err(|e| anyhow::anyhow!("Failed to read data: {:?}", e))?;
-
-                    let done = js_sys::Reflect::get(&obj, &JsValue::from("done"))
-                        .expect("Failed to get done property of data")
-                        .as_bool()
-                        .unwrap_or(false);
-                    if done {
-                        Err(anyhow::anyhow!("EOF"))?;
-                    } else {
-                        let array = js_sys::Reflect::get(&obj, &JsValue::from("value"))
-                            .expect("Failed to get value property of data")
-                            .dyn_into::<js_sys::Uint8Array>()
-                            .expect("Expected Uint8Array");
-
-                        let val = array.get_index(0);
-                        buf.push(val);
-                        if val == 0 {
+                    if let Some(report) = input_report_receiver.next().await {
+                        let len = report[0] as usize;
+                        let data = &report[1..=len];
+                        log::info!("Received report: {:?}", data);
+                        buf.extend_from_slice(data);
+                        if data.last() == Some(&0) {
                             break;
                         }
                     }
                 }
-                Result::<(), anyhow::Error>::Ok(())
             }),
             TimeoutFuture::new(500),
         )
-        .await
-        {
-            futures::future::Either::Left((res, _)) => res,
-            futures::future::Either::Right(_) => Err(anyhow::anyhow!("Timeout")),
-        };
+        .await;
 
-        reader.release_lock();
-
-        res?;
+        self.device.set_oninputreport(None);
 
         Ok(())
     }

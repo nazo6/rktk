@@ -1,9 +1,10 @@
-use embassy_usb::class::cdc_acm::CdcAcmClass;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 
 use embassy_usb::Builder;
 use rktk::interface::DriverBuilderWithTask;
+use rktk_rrp_hid::report::RrpReport;
+use rktk_rrp_hid::RRP_HID_BUFFER_SIZE;
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
@@ -28,7 +29,7 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     media_key_hid: HidWriter<'static, D, 8>,
     wakeup_signal: &'static RemoteWakeupSignal,
     ready_signal: &'static ReadySignal,
-    rrp_serial: CdcAcmClass<'static, D>,
+    rrp_hid: HidReaderWriter<'static, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
@@ -82,21 +83,26 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             HidWriter::<_, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
 
-        let rrp_serial = CdcAcmClass::new(
-            &mut builder,
-            singleton!(
-                embassy_usb::class::cdc_acm::State::new(),
-                embassy_usb::class::cdc_acm::State
-            ),
-            64,
-        );
+        let rrp_hid = {
+            let config = embassy_usb::class::hid::Config {
+                report_descriptor: RrpReport::desc(),
+                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
+                poll_ms: 1,
+                max_packet_size: 64,
+            };
+            HidReaderWriter::<_, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>::new(
+                &mut builder,
+                singleton!(State::new(), State),
+                config,
+            )
+        };
 
         Self {
             builder,
             keyboard_hid,
             mouse_hid,
             media_key_hid,
-            rrp_serial,
+            rrp_hid,
             wakeup_signal,
             ready_signal,
         }
@@ -123,7 +129,7 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
                 keyboard_hid: self.keyboard_hid,
                 media_key_hid: self.media_key_hid,
                 mouse_hid: self.mouse_hid,
-                serial: self.rrp_serial,
+                rrp_hid: self.rrp_hid,
             },
         ))
     }

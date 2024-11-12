@@ -36,10 +36,10 @@ export function Home({ connection }: { connection: Connection }) {
         { intent: "warning" },
       );
     };
-    connection.port.addEventListener("disconnect", handler);
+    connection.device.addEventListener("disconnect", handler);
 
     return () => {
-      connection.port.removeEventListener("disconnect", handler);
+      connection.device.removeEventListener("disconnect", handler);
     };
   }, []);
 

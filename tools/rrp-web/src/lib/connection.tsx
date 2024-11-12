@@ -10,7 +10,7 @@ import { Client, KeyboardInfo } from "rrp-client-web";
 
 export type Connection = {
   keyboard: KeyboardInfo;
-  port: SerialPort;
+  device: HIDDevice;
   client: Client;
 };
 
@@ -25,7 +25,7 @@ export function useDisconnect() {
   return useMutation({
     mutationFn: async (_notify: boolean = true) => {
       if (connection) {
-        await connection.port.close();
+        await connection.device.close();
         setConnection(null);
       } else {
         throw new Error("No connection to disconnect");
@@ -72,20 +72,30 @@ export function useConnect() {
 
   return useMutation({
     mutationFn: async () => {
-      const port = await navigator.serial.requestPort();
-      await port.open({ baudRate: 500000 });
-      const client = new Client(port);
+      const devices = await navigator.hid.requestDevice({
+        filters: [{
+          usagePage: 0xFF70,
+          usage: 0x71,
+        }],
+      });
+      console.log(devices);
+      if (devices.length === 0) {
+        throw new Error("No devices found");
+      }
+      const device = devices[0];
+      await device.open();
+      const client = new Client(device);
       try {
         const kb = await client.get_keyboard_info();
         setConnection({
           client,
-          port,
+          device,
           keyboard: kb,
         });
         return kb;
       } catch (e) {
         try {
-          await port.close();
+          await device.close();
         } catch (e2) {
           throw e + "\n" + e2;
         }
@@ -104,6 +114,7 @@ export function useConnect() {
     },
     onError: (e) => {
       disconnect.mutate(false);
+      console.error(e);
       dispatchToast(
         <Toast>
           <ToastTitle>
