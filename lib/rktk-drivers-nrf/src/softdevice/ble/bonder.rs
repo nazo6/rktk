@@ -36,8 +36,6 @@ impl SecurityHandler for Bonder {
         enc: EncryptionInfo,
         peer_id: IdentityKey,
     ) {
-        rktk::log::info!("On bonded");
-
         let mut devices = self.devices.borrow_mut();
 
         let mut sys_attrs = heapless::Vec::new();
@@ -64,27 +62,29 @@ impl SecurityHandler for Bonder {
     }
 
     fn get_key(&self, conn: &Connection, master_id: MasterId) -> Option<EncryptionInfo> {
-        rktk::log::info!("Get key");
+        let encryption_info = {
+            let mut data = self.devices.borrow_mut();
 
-        let mut data = self.devices.borrow_mut();
+            let Some(device) = data.iter_mut().find(|d| d.master_id == master_id) else {
+                rktk::log::info!("Key not found: {:?}", master_id);
+                return None;
+            };
 
-        let Some(device) = data
-            .iter_mut()
-            .find(|d| d.peer_id.is_match(conn.peer_address()))
-        else {
-            rktk::log::info!("No peer data: {:?}", master_id.ediv);
-            return None;
+            rktk::log::debug!("Got key: {:?}", master_id);
+
+            device.encryption_info
         };
 
-        rktk::log::info!("Found peer data: {:?}", master_id.ediv);
+        // NOTE: Without this, the BleGattsSysAttrMissing error occurs.
+        // I thought this is called automatically, but it seems not.
+        // ref: https://github.com/embassy-rs/nrf-softdevice/issues/256
+        self.load_sys_attrs(conn);
 
-        Some(device.encryption_info)
+        Some(encryption_info)
     }
 
     // Receive sys_attrs and save them
     fn save_sys_attrs(&self, conn: &Connection) {
-        rktk::log::info!("Save sys_attrs");
-
         let mut devices = self.devices.borrow_mut();
 
         if let Some(device) = devices
@@ -95,20 +95,17 @@ impl SecurityHandler for Bonder {
                 device.sys_attrs = Some(heapless::Vec::new())
             }
             let sys_attrs = device.sys_attrs.as_mut().unwrap();
-            let capacity = sys_attrs.capacity();
-            sys_attrs.resize(capacity, 0).unwrap();
+            sys_attrs.resize(sys_attrs.capacity(), 0).unwrap();
             let len = get_sys_attrs(conn, sys_attrs).unwrap() as u16;
             sys_attrs.truncate(usize::from(len));
 
             BOND_SAVE.signal(devices.clone());
         } else {
-            rktk::log::warn!("Failed to save sys_attrs",);
+            rktk::log::warn!("Failed to save sys_attrs");
         }
     }
 
     fn load_sys_attrs(&self, conn: &Connection) {
-        rktk::log::info!("Load sys_attrs");
-
         let devices = self.devices.borrow();
 
         let _res = match devices
@@ -118,7 +115,7 @@ impl SecurityHandler for Bonder {
         {
             Some(Some(sys_attrs)) => set_sys_attrs(conn, Some(sys_attrs.as_slice())),
             _ => {
-                rktk::log::warn!("No sys_attrs");
+                rktk::log::warn!("No sys_attrs to load");
                 set_sys_attrs(conn, None)
             }
         };
