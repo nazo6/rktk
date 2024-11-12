@@ -116,7 +116,7 @@ pub async fn start<
 >(
     m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
-    ble: Option<Ble>,
+    mut ble: Option<Ble>,
     usb: Option<Usb>,
     mut keyscan: KS,
     mut debounce: DB,
@@ -180,7 +180,7 @@ pub async fn start<
             tap_dance: key_config.tap_dance.clone(),
         },
         initial_output: if usb.is_some() {
-            Output::Ble
+            Output::Usb
         } else {
             Output::Ble
         },
@@ -251,6 +251,12 @@ pub async fn start<
                                 crate::print!("Failed to format storage: {:?}", e)
                             }
                         }
+                    }
+                }
+
+                if state_report.transparent_report.ble_bond_clear {
+                    if let Some(ble) = &mut ble {
+                        ble.clear_bond_data().await;
                     }
                 }
 

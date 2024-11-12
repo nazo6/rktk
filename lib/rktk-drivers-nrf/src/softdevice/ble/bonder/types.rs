@@ -53,7 +53,7 @@ pub struct IdentityKeyDef {
     pub addr: Address,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct DeviceData {
     #[serde(with = "IdentityKeyDef")]
     pub peer_id: IdentityKey,

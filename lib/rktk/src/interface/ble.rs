@@ -1,6 +1,8 @@
 use super::{reporter::ReporterDriver, BackgroundTask, DriverBuilderWithTask};
 
-pub trait BleDriver: ReporterDriver {}
+pub trait BleDriver: ReporterDriver {
+    async fn clear_bond_data(&mut self) {}
+}
 
 pub enum DummyBleDriver {}
 impl ReporterDriver for DummyBleDriver {}

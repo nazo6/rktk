@@ -14,6 +14,7 @@ use crate::softdevice::flash::SharedFlash;
 mod storage;
 mod types;
 
+pub use storage::{BondFlashCommand, BOND_FLASH};
 use types::*;
 
 const MAX_PEER_COUNT: usize = 8;

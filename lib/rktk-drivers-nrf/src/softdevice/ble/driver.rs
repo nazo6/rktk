@@ -1,7 +1,7 @@
 use rktk::interface::{ble::BleDriver, error::RktkError, reporter::ReporterDriver};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use super::{HidReport, REPORT_CHAN};
+use super::{bonder::BOND_FLASH, HidReport, REPORT_CHAN};
 
 pub struct NrfBleDriver {}
 
@@ -27,4 +27,8 @@ impl ReporterDriver for NrfBleDriver {
         Ok(())
     }
 }
-impl BleDriver for NrfBleDriver {}
+impl BleDriver for NrfBleDriver {
+    async fn clear_bond_data(&mut self) {
+        BOND_FLASH.signal(super::bonder::BondFlashCommand::Clear);
+    }
+}

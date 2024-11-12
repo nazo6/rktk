@@ -10,4 +10,5 @@ pub enum Special {
     FlashClear,
     OutputBle,
     OutputUsb,
+    BleBondClear,
 }
