@@ -1,5 +1,5 @@
 use async_lock::Mutex;
-use futures::{stream::StreamExt as _, StreamExt};
+use futures::StreamExt;
 
 use log::info;
 use rktk_rrp::endpoints::*;
