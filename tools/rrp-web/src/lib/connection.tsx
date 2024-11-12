@@ -83,15 +83,18 @@ export function useConnect() {
         throw new Error("No devices found");
       }
       const device = devices[0];
-      await device.open();
       const client = new Client(device);
+      await device.open();
       try {
         const kb = await client.get_keyboard_info();
-        setConnection({
-          client,
-          device,
-          keyboard: kb,
-        });
+        console.log(kb);
+        const layout = await client.get_layout_json();
+        console.log(layout);
+        // setConnection({
+        //   client,
+        //   device,
+        //   keyboard: kb,
+        // });
         return kb;
       } catch (e) {
         try {

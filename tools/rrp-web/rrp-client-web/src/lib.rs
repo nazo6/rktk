@@ -79,8 +79,13 @@ impl Client {
             .map_err(|e| format!("{:?}", e))?;
 
         let res = stream.collect::<Vec<_>>().await;
+
+        log::info!("get_layout_json: {:?}", &res);
+
         let string =
             String::from_utf8(res.into_iter().flatten().collect()).map_err(|e| e.to_string())?;
+
+        log::info!("get_layout_json: {:?}", &string);
         Ok(string)
     }
 

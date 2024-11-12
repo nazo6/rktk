@@ -14,7 +14,7 @@ use web_sys::HidInputReportEvent;
 pub struct HidTransportClient {
     device: HidDevice,
     input_report_receiver: Mutex<futures::channel::mpsc::UnboundedReceiver<[u8; 32]>>,
-    // _cb: Closure<dyn FnMut(HidInputReportEvent)>,
+    _cb: Closure<dyn FnMut(HidInputReportEvent)>,
 }
 
 impl Drop for HidTransportClient {
@@ -28,23 +28,23 @@ impl HidTransportClient {
         let (input_report_sender, input_report_receiver) = futures::channel::mpsc::unbounded();
 
         let cb = Closure::wrap(Box::new(move |e: HidInputReportEvent| {
-            log::info!("Received input report");
             let data = e.data();
             let mut buf = [0u8; 32];
             for i in 0..32 {
                 buf[i] = data.get_uint8(i);
             }
-            input_report_sender.unbounded_send(buf);
+
+            log::info!("Report: {:X?}", buf);
+
+            input_report_sender.unbounded_send(buf).unwrap();
         }) as Box<dyn FnMut(_)>);
 
         device.set_oninputreport(Some(cb.as_ref().unchecked_ref()));
 
-        cb.forget();
-
         Self {
             device,
             input_report_receiver: Mutex::new(input_report_receiver),
-            // _cb: cb,
+            _cb: cb,
         }
     }
 
@@ -61,34 +61,24 @@ impl HidTransportClient {
             )
             .await
             .map_err(|e| anyhow::anyhow!("Failed to send report: {:?}", e))?;
-
-            log::info!("Sent report: {:?}", output_data);
         }
         Ok(())
     }
 
     async fn read_until_zero(&self, buf: &mut Vec<u8>) -> Result<(), anyhow::Error> {
-        log::info!("read start");
-        select(
-            pin!(async {
-                let mut input_report_receiver = self.input_report_receiver.lock().await;
-                loop {
-                    if let Some(report) = input_report_receiver.next().await {
-                        let len = report[0] as usize;
-                        let data = &report[1..=len];
-                        log::info!("Received report: {:?}", data);
-                        buf.extend_from_slice(data);
-                        if data.last() == Some(&0) {
-                            break;
-                        }
-                    }
-                }
-            }),
-            TimeoutFuture::new(500),
-        )
-        .await;
+        let mut input_report_receiver = self.input_report_receiver.lock().await;
+        loop {
+            if let Some(report) = input_report_receiver.next().await {
+                let len = report[0] as usize;
+                let data = &report[1..=len];
 
-        self.device.set_oninputreport(None);
+                buf.extend_from_slice(data);
+                if data.last() == Some(&0) {
+                    log::info!("Ended with: {:X?}", buf);
+                    break;
+                }
+            }
+        }
 
         Ok(())
     }
