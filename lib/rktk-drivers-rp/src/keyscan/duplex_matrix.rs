@@ -7,7 +7,7 @@ use rktk_drivers_common::keyscan::{
 
 struct FlexWrap<'a>(Flex<'a>);
 
-impl<'a> FlexPin for FlexWrap<'a> {
+impl FlexPin for FlexWrap<'_> {
     fn set_as_input(&mut self) {
         self.0.set_as_input();
     }

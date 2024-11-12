@@ -12,7 +12,7 @@ struct FlexWrap<'a> {
     drive: OutputDrive,
 }
 
-impl<'a> FlexPin for FlexWrap<'a> {
+impl FlexPin for FlexWrap<'_> {
     fn set_as_input(&mut self) {
         #[allow(clippy::needless_match)]
         let pull = match self.pull {

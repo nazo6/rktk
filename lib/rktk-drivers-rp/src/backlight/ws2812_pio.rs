@@ -84,7 +84,7 @@ impl<'a, I: Instance> Ws2812Pio<'a, I> {
     }
 }
 
-impl<'a, I: Instance> BacklightDriver for Ws2812Pio<'a, I> {
+impl<I: Instance> BacklightDriver for Ws2812Pio<'_, I> {
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) {
         // Precompute the word bytes from the colors
         let mut words = [0u32; N];

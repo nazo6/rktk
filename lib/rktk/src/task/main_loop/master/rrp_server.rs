@@ -14,7 +14,7 @@ use crate::{
 
 pub struct EndpointTransportImpl<'a, R: ReporterDriver>(pub &'a R);
 
-impl<'a, R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'a, R> {
+impl<R: ReporterDriver> EndpointTransport for EndpointTransportImpl<'_, R> {
     type Error = RktkError;
     async fn read_until_zero(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         let mut reader = [0];
@@ -59,7 +59,7 @@ pub struct Server<'a, S: StorageDriver> {
     pub state: &'a ThreadModeMutex<ConfiguredState>,
     pub storage: Option<&'a StorageConfigManager<S>>,
 }
-impl<'a, S: StorageDriver> Server<'a, S> {
+impl<S: StorageDriver> Server<'_, S> {
     endpoint_server!(
         get_keyboard_info normal normal => get_info
         get_layout_json normal stream => get_layout_json

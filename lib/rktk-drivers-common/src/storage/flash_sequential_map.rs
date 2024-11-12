@@ -26,8 +26,8 @@ impl<E: Debug> From<sequential_storage::Error<E>> for Error<E> {
     }
 }
 
-impl<'a, F: NorFlash + ReadNorFlash + MultiwriteNorFlash> StorageDriver
-    for FlashSequentialMapStorage<'a, F>
+impl<F: NorFlash + ReadNorFlash + MultiwriteNorFlash> StorageDriver
+    for FlashSequentialMapStorage<'_, F>
 {
     type Error = Error<F::Error>;
 

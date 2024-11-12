@@ -23,6 +23,14 @@ mod prelude {
         Duration::from_millis(ms)
     }
 
+    pub const fn default_transparent_report() -> TransparentReport {
+        TransparentReport {
+            flash_clear: false,
+            ble_bond_clear: false,
+            output: Output::Usb,
+        }
+    }
+
     pub const ROWS: usize = 5;
     pub const COLS: usize = 14;
     pub const LAYER_COUNT: usize = 5;
@@ -32,7 +40,7 @@ mod prelude {
         mouse_report: None,
         media_keyboard_report: None,
         highest_layer: 0,
-        transparent_report: TransparentReport::new(),
+        transparent_report: default_transparent_report(),
     };
     pub const EMPTY_REPORT: StateReport = StateReport {
         keyboard_report: Some(KeyboardReport {
@@ -49,7 +57,7 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: Some(MediaKeyboardReport { usage_id: 0 }),
-        transparent_report: TransparentReport::new(),
+        transparent_report: default_transparent_report(),
         highest_layer: 0,
     };
     pub const KEYBOARD_ONLY_REPORT: StateReport = StateReport {
@@ -61,7 +69,7 @@ mod prelude {
         }),
         mouse_report: None,
         media_keyboard_report: None,
-        transparent_report: TransparentReport::new(),
+        transparent_report: default_transparent_report(),
         highest_layer: 0,
     };
     pub const MOUSE_ONLY_REPORT: StateReport = StateReport {
@@ -74,7 +82,7 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: None,
-        transparent_report: TransparentReport::new(),
+        transparent_report: default_transparent_report(),
         highest_layer: 0,
     };
 

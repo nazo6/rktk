@@ -6,7 +6,6 @@ use crate::{
         debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
-        reporter::ReporterDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
         storage::StorageDriver,
         usb::UsbDriver,
@@ -43,7 +42,6 @@ pub type M2sTx<'a> =
 
 #[allow(clippy::too_many_arguments)]
 pub async fn start<
-    'a,
     KS: KeyscanDriver,
     DB: DebounceDriver,
     M: MouseDriver,

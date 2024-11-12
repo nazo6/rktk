@@ -143,7 +143,7 @@ impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
     }
 }
 
-impl<'a, I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'a, I> {
+impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
     async fn init(&mut self) -> Result<(), RktkError> {
         self.enter_rx().await;
         Ok(())

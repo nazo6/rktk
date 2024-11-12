@@ -1,10 +1,7 @@
 //! Program entrypoint.
 
-use embassy_futures::{
-    join::{join, join3},
-    select::{select, Either},
-};
-use embassy_time::{Duration, Timer};
+use embassy_futures::join::{join, join3};
+use embassy_time::Duration;
 
 use crate::{
     config::static_config::RKTK_CONFIG,
@@ -58,6 +55,7 @@ pub struct Drivers<
 
 /// Receives the [`Drivers`] and executes the main process of the keyboard.
 /// This function must not be called more than once.
+#[allow(clippy::type_complexity)]
 pub async fn start<
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
