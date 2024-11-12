@@ -1,3 +1,5 @@
+//! Bonder (security handler). Heavily inspired by rmk's implemention (https://github.com/HaoboGu/rmk/blob/main/rmk/src/ble/nrf/bonder.rs)
+
 use core::cell::RefCell;
 
 use nrf_softdevice::ble::{
@@ -37,6 +39,8 @@ impl SecurityHandler for Bonder {
         peer_id: IdentityKey,
     ) {
         let mut devices = self.devices.borrow_mut();
+
+        devices.retain(|d| !(d.peer_id.is_match(peer_id.addr)));
 
         let mut sys_attrs = heapless::Vec::new();
         let capacity = sys_attrs.capacity();
@@ -91,15 +95,19 @@ impl SecurityHandler for Bonder {
             .iter_mut()
             .find(|d| d.peer_id.is_match(conn.peer_address()))
         {
-            if device.sys_attrs.is_none() {
-                device.sys_attrs = Some(heapless::Vec::new())
-            }
-            let sys_attrs = device.sys_attrs.as_mut().unwrap();
+            let mut sys_attrs = heapless::Vec::new();
             sys_attrs.resize(sys_attrs.capacity(), 0).unwrap();
-            let len = get_sys_attrs(conn, sys_attrs).unwrap() as u16;
+            let len = get_sys_attrs(conn, &mut sys_attrs).unwrap() as u16;
             sys_attrs.truncate(usize::from(len));
 
-            BOND_SAVE.signal(devices.clone());
+            // NOTE: Without this, cannot reconnect on windows
+            // ref: https://github.com/embassy-rs/nrf-softdevice/issues/256
+            if len > 0 {
+                device.sys_attrs = Some(sys_attrs);
+                BOND_SAVE.signal(devices.clone());
+            } else {
+                rktk::log::info!("Got empty sys_attrs. skipping save.");
+            }
         } else {
             rktk::log::warn!("Failed to save sys_attrs");
         }

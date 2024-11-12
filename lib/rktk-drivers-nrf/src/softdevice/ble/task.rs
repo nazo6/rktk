@@ -74,14 +74,13 @@ impl BackgroundTask for SoftdeviceBleTask {
             select(
                 async {
                     let e = gatt_server::run(&conn, &self.server, |_| {}).await;
-                    rktk::print!("{:?}", e);
+                    rktk::log::info!("Server exited: {:?}", e);
                 },
                 async {
                     loop {
                         let report = REPORT_CHAN.receive().await;
                         if let Err(e) = self.server.hid.send_report(&conn, report) {
-                            rktk::print!("{:?}", e);
-                            // rktk::log::error!("BLE hid failed: {:?}", e);
+                            rktk::log::warn!("BLE hid failed: {:?}", e);
                         };
                     }
                 },
