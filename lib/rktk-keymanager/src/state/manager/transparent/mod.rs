@@ -27,17 +27,22 @@ impl TransparentState {
         TransparentReport {
             flash_clear: local_state.flash_clear,
             output: self.output,
+            ble_bond_clear: local_state.ble_bond_clear,
         }
     }
 }
 
 pub struct TransparentLocalState {
     flash_clear: bool,
+    ble_bond_clear: bool,
 }
 
 impl TransparentLocalState {
     pub const fn new() -> Self {
-        Self { flash_clear: false }
+        Self {
+            flash_clear: false,
+            ble_bond_clear: false,
+        }
     }
 
     pub fn process_event(
@@ -55,6 +60,9 @@ impl TransparentLocalState {
             }
             (EventType::Pressed, KeyCode::Special(Special::OutputUsb)) => {
                 global_state.output = Output::Usb;
+            }
+            (EventType::Pressed, KeyCode::Special(Special::BleBondClear)) => {
+                self.ble_bond_clear = true;
             }
             _ => {}
         };

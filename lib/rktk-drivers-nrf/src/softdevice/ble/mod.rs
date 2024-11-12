@@ -3,6 +3,7 @@ use nrf_softdevice::{raw, Softdevice};
 
 use rktk::interface::DriverBuilderWithTask;
 use server::Server;
+pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::flash::SharedFlash;
@@ -23,12 +24,12 @@ pub enum HidReport {
 
 static REPORT_CHAN: Channel<CriticalSectionRawMutex, HidReport, 8> = Channel::new();
 
-pub async fn init_ble_server(sd: &'static mut Softdevice) -> (Server, &'static mut Softdevice) {
+pub async fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> Server {
     unsafe {
         raw::sd_ble_gap_appearance_set(raw::BLE_APPEARANCE_HID_KEYBOARD as u16);
     }
 
-    (server::Server::new(sd, "12345678").unwrap(), sd)
+    server::Server::new(sd, device_info).unwrap()
 }
 
 pub struct NrfBleDriverBuilder {
@@ -68,7 +69,7 @@ impl DriverBuilderWithTask for NrfBleDriverBuilder {
                 sd: self.sd,
                 server: self.server,
                 name: self.name,
-                db: self.flash,
+                flash: self.flash,
             },
         ))
     }

@@ -18,7 +18,7 @@ pub struct SoftdeviceBleTask {
     pub sd: &'static Softdevice,
     pub server: Server,
     pub name: &'static str,
-    pub db: &'static SharedFlash,
+    pub flash: &'static SharedFlash,
 }
 
 impl BackgroundTask for SoftdeviceBleTask {
@@ -47,7 +47,7 @@ impl BackgroundTask for SoftdeviceBleTask {
             scan_data: &SCAN_DATA,
         };
 
-        let bonder = super::bonder::init_bonder();
+        let bonder = super::bonder::init_bonder(self.flash).await;
 
         loop {
             rktk::print!("Advertising");
@@ -69,17 +69,19 @@ impl BackgroundTask for SoftdeviceBleTask {
                 }
             };
 
-            rktk::print!("Connected: {:X?}", conn.peer_address().bytes);
+            // rktk::print!("Connected: {:X?}", conn.peer_address().bytes);
 
             select(
                 async {
                     let e = gatt_server::run(&conn, &self.server, |_| {}).await;
-                    rktk::print!("{:?}", e);
+                    rktk::log::info!("Server exited: {:?}", e);
                 },
                 async {
                     loop {
                         let report = REPORT_CHAN.receive().await;
-                        let _ = self.server.hid.send_report(&conn, report);
+                        if let Err(e) = self.server.hid.send_report(&conn, report) {
+                            rktk::log::warn!("BLE hid failed: {:?}", e);
+                        };
                     }
                 },
             )
