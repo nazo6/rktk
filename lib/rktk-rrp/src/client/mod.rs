@@ -9,6 +9,12 @@ pub struct Client<RT: ClientReadTransport, WT: ClientWriteTransport> {
     pub(crate) writer: WT,
 }
 
+impl<RT: ClientReadTransport, WT: ClientWriteTransport> Client<RT, WT> {
+    pub fn new(reader: RT, writer: WT) -> Self {
+        Self { reader, writer }
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum ClientError {
     #[error(transparent)]
