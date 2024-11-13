@@ -27,6 +27,9 @@ tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 
 
+[dev-dependencies]
+futures = { workspace = true, features = ["executor"] }
+
 [features]
 default = []
 

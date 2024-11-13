@@ -1,6 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub mod _client;
+#[cfg(all(not(feature = "client"), not(feature = "server")))]
+compile_error!("At least, one of the `client` or `server` features should be enabled");
+
 #[cfg(feature = "client")]
 pub mod client;
 pub mod endpoints;
@@ -41,3 +43,6 @@ mod macro_space {
         9: stream_test(stream: ()) -> stream: ();
     );
 }
+
+#[cfg(test)]
+mod tests;

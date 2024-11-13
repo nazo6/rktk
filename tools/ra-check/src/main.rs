@@ -23,6 +23,7 @@ fn main() -> anyhow::Result<()> {
         "cargo",
         "clippy",
         "--message-format=json",
+        "--all-targets",
         "--features",
         "_check"
     )

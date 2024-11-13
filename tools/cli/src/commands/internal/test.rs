@@ -3,7 +3,9 @@ use duct::cmd;
 
 use crate::utils::{xprintln, METADATA};
 
-pub const TEST_WHITELIST: &[&str] = &["rktk-keymanager"];
+pub const TEST_WHITELIST: &[&str] = &["rktk-keymanager", "rktk-rrp"];
+
+const TEST_ARGS: &[&str] = &["test", "--features", "_check"];
 
 pub fn start(name: String) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
@@ -29,7 +31,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
 
             let now = std::time::Instant::now();
 
-            let res = cmd!("cargo", "test").dir(crate_path).run();
+            let res = cmd("cargo", TEST_ARGS).dir(crate_path).run();
 
             let elapsed = now.elapsed();
 
@@ -82,7 +84,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         }
 
         xprintln!("Testing crate `{}` ({})", package.name, dir);
-        cmd!("cargo", "test")
+        cmd("cargo", TEST_ARGS)
             .dir(dir)
             .run()
             .with_context(|| format!("Failed to run test for crate: {}", dir))?;
