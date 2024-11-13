@@ -19,9 +19,15 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    duct::cmd!("cargo", "clippy", "--message-format=json")
-        .dir(path)
-        .run()?;
+    duct::cmd!(
+        "cargo",
+        "clippy",
+        "--message-format=json",
+        "--features",
+        "_check"
+    )
+    .dir(path)
+    .run()?;
 
     Ok(())
 }

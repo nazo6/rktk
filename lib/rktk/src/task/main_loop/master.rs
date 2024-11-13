@@ -286,9 +286,10 @@ pub async fn start<
         },
         async {
             if let Some(usb) = &usb {
-                let mut server = rktk_rrp::next::server::Server::<_, _, 1024>::new(
-                    rrp_server::n::ServerTransport::new(usb),
-                    rrp_server::n::Handlers {
+                let mut server = rktk_rrp::server::Server::<_, _, _, 1024>::new(
+                    rrp_server::ServerTransport::new(usb),
+                    rrp_server::ServerTransport::new(usb),
+                    rrp_server::Handlers {
                         state: &state,
                         storage: config_storage.as_ref(),
                     },

@@ -38,3 +38,6 @@ pio = "0.2.1"
 fixed = { workspace = true }
 fixed-macro = { workspace = true }
 static_cell = { workspace = true }
+
+[features]
+_check = []
