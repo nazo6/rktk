@@ -42,7 +42,7 @@ pub(crate) async fn recv_request_header<T: ServerReadTransport>(
 pub(crate) async fn recv_request_body<T: ServerReadTransport, R: DeserializeOwned>(
     tp: &mut T,
     buf: &mut [u8],
-) -> Result<(R, Indicator), ReceiveError<T>> {
+) -> Result<(Result<R, postcard::Error>, Indicator), ReceiveError<T>> {
     let mut request_size = [0u8; 4];
     tp.read_exact(&mut request_size)
         .await
@@ -54,8 +54,7 @@ pub(crate) async fn recv_request_body<T: ServerReadTransport, R: DeserializeOwne
         .await
         .map_err(ReceiveError::ReadExact)?;
 
-    let deserialized = postcard::from_bytes::<R>(&buf[0..request_size as usize])
-        .map_err(ReceiveError::Deserialization)?;
+    let deserialized = postcard::from_bytes::<R>(&buf[0..request_size as usize]);
 
     let indicator = recv_indicator(tp).await?;
 
@@ -73,7 +72,7 @@ pub(crate) fn recv_stream_request<'a, 't: 'a, T: ServerReadTransport, R: Deseria
                 return None;
             }
 
-            let Ok((res, indicator)) = recv_request_body(tp, buf).await else {
+            let Ok((Ok(res), indicator)) = recv_request_body(tp, buf).await else {
                 return None;
             };
 

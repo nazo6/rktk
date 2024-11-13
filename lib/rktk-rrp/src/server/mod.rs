@@ -35,7 +35,7 @@ impl<
         }
     }
 
-    async fn process_request(&mut self) -> Result<(), ServerTransportError<RT, WT, H>> {
+    async fn process_request(&mut self) -> Result<(), ServerTransportError<RT, WT>> {
         let endpoint_id = recv_request_header(&mut self.reader)
             .await
             .map_err(ServerTransportError::RecvError)?;
@@ -69,20 +69,26 @@ macro_rules! generate_server_handlers {
                 const BUF_SIZE: usize,
             > Server<RT, WT, H, BUF_SIZE>
         {
-            pub(crate) async fn handle(&mut self, header: RequestHeader) -> Result<(), ServerTransportError<RT, WT, H>> {
+            pub(crate) async fn handle(&mut self, header: RequestHeader) -> Result<(), ServerTransportError<RT, WT>> {
                 match header.endpoint_id {
                     $(
                         $endpoint_id => {
                             let mut buf = [0u8; BUF_SIZE];
                             let req = generate_server_handlers!(@recv_req $req_kind, $endpoint_name, &mut self.reader, self.handlers, &mut buf);
-                            let res = self.handlers.$endpoint_name(req).await.map_err(ServerTransportError::HandlerError)?;
-                            send_response_header(&mut self.writer, header.request_id).await?;
-                            generate_server_handlers!(@send_res $res_kind, res, &mut self.writer);
+                            let Ok(req) = req else {
+                                send_error_response::<_, BUF_SIZE>(&mut self.writer, 0, "Deserialize failed").await.map_err(ServerTransportError::SendError)?;
+                                return Ok(());
+                            };
+                            let Ok(res) = self.handlers.$endpoint_name(req).await else {
+                                return Ok(());
+                            };
+                            send_response_header(&mut self.writer, header.request_id, 0).await?;
+                            generate_server_handlers!(@send_res $res_kind, res, &mut self.writer)?;
 
                         }
                     )*
                     _ => {
-                        return Err(ServerTransportError::InvalidEndpoint(header.endpoint_id));
+                        send_error_response::<_, BUF_SIZE>(&mut self.writer, header.request_id, "Invalid enpoint").await?;
                     }
                 }
 
@@ -95,14 +101,14 @@ macro_rules! generate_server_handlers {
         recv_request_body($tp, $buf).await.map(|(req, _)| req)?
     }};
     (@recv_req stream, $endpoint_name:ident, $tp:expr, $handlers:expr, $buf:expr) => {{
-        recv_stream_request($tp, $buf)
+        Result::<_, postcard::Error>::Ok(recv_stream_request($tp, $buf))
     }};
 
     (@send_res normal, $res:expr, $tp:expr) => {{
-        send_response_body::<_, _, BUF_SIZE>($tp, &$res, false).await?
+        send_response_body::<_, _, BUF_SIZE>($tp, &$res, false).await
     }};
     (@send_res stream, $res:expr, $tp:expr) => {{
-        send_stream_response::<_, _, BUF_SIZE>($tp, $res).await?
+        send_stream_response::<_, _, BUF_SIZE>($tp, $res).await
     }};
 }
 pub(crate) use generate_server_handlers;

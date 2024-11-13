@@ -4,32 +4,26 @@ use serde::Serialize;
 
 use crate::shared::Indicator;
 
-use super::ClientWriteTransport;
+use super::{ClientWriteTransport, SendError};
 
 pub(crate) async fn send_request_header<T: ClientWriteTransport>(
     tp: &mut T,
     request_id: u8,
     endpoint_id: u8,
-) -> Result<(), &'static str> {
+) -> Result<(), SendError> {
     tp.write_all(&[Indicator::Start as u8, request_id, endpoint_id])
-        .await
-        .map_err(|_| "Failed to send request header")?;
+        .await?;
 
     Ok(())
 }
 
-pub(crate) async fn send_request_body<
-    T: ClientWriteTransport,
-    S: Serialize,
-    const BUF_SIZE: usize,
->(
+pub(crate) async fn send_request_body<T: ClientWriteTransport, S: Serialize>(
     tp: &mut T,
     data: &S,
     continues: bool,
-) -> Result<(), &'static str> {
-    let mut buf = [0u8; BUF_SIZE];
-    let serialized =
-        postcard::to_slice(data, &mut buf).map_err(|_| "Failed to serialize request")?;
+) -> Result<(), SendError> {
+    let mut buf = Vec::new();
+    let serialized = postcard::to_slice(data, &mut buf)?;
 
     tp.write_all(&(serialized.len() as u32).to_le_bytes())
         .await
@@ -39,9 +33,7 @@ pub(crate) async fn send_request_body<
         .expect("Failed to send request body");
 
     if continues {
-        tp.write_all(&[Indicator::StreamContinues as u8])
-            .await
-            .map_err(|_| "Failed to send continues indicator")?;
+        tp.write_all(&[Indicator::StreamContinues as u8]).await?;
     } else {
         tp.write_all(&[Indicator::End as u8])
             .await
@@ -51,29 +43,20 @@ pub(crate) async fn send_request_body<
     Ok(())
 }
 
-pub(crate) async fn send_stream_request<
-    T: ClientWriteTransport,
-    S: Serialize,
-    const BUF_SIZE: usize,
->(
+pub(crate) async fn send_stream_request<T: ClientWriteTransport, S: Serialize>(
     tp: &mut T,
-    stream: impl futures::stream::Stream<Item = Result<S, &'static str>>,
-) -> Result<(), &'static str> {
-    let mut buf = [0u8; BUF_SIZE];
+    stream: impl futures::stream::Stream<Item = S>,
+) -> Result<(), SendError> {
+    let mut buf = Vec::new();
     let mut stream = core::pin::pin!(stream);
 
     while let Some(data) = stream.next().await {
-        let serialized =
-            postcard::to_slice(&data, &mut buf).map_err(|_| "Failed to serialize request")?;
+        let serialized = postcard::to_slice(&data, &mut buf)?;
 
-        if (send_request_body::<_, _, BUF_SIZE>(tp, &serialized, true).await).is_err() {
-            return Err("Failed to send request body");
-        }
+        send_request_body(tp, &serialized, true).await?;
     }
 
-    tp.write_all(&[Indicator::End as u8])
-        .await
-        .map_err(|_| "Failed to send end indicator")?;
+    tp.write_all(&[Indicator::End as u8]).await?;
 
     Ok(())
 }
