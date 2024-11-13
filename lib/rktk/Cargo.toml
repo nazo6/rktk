@@ -12,6 +12,7 @@ build = "build/main.rs"
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
+embedded-io-async = { workspace = true }
 
 usbd-hid = { workspace = true }
 

@@ -18,6 +18,8 @@ macro_rules_attribute = { workspace = true }
 specta = { workspace = true, optional = true, features = ["derive"] }
 tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
+embedded-io-async = { workspace = true }
+log = { workspace = true }
 
 [features]
 server = []
