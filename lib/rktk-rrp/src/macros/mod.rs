@@ -1,4 +1,6 @@
+#[cfg(feature = "client")]
 mod client;
+#[cfg(feature = "server")]
 mod server;
 
 macro_rules! generate_impls {
@@ -19,7 +21,7 @@ macro_rules! generate_impls {
     };
 }
 
-#[cfg(not(test))]
+// #[cfg(not(test))]
 generate_impls!(
     0: get_keyboard_info(normal) -> normal;
     1: get_layout_json(normal) -> stream;
@@ -31,10 +33,10 @@ generate_impls!(
     7: get_log(normal) -> stream;
 );
 
-#[cfg(test)]
-generate_impls!(
-    0: test_normal_normal(normal) -> normal;
-    1: test_stream_normal(stream) -> normal;
-    2: test_normal_stream(normal) -> stream;
-    3: test_stream_stream(stream) -> stream;
-);
+// #[cfg(test)]
+// generate_impls!(
+//     0: test_normal_normal(normal) -> normal;
+//     1: test_stream_normal(stream) -> normal;
+//     2: test_normal_stream(normal) -> stream;
+//     3: test_stream_stream(stream) -> stream;
+// );

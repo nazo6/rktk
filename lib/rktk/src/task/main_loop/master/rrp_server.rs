@@ -1,7 +1,12 @@
-use embedded_io_async::ErrorKind;
+use core::fmt::Display;
+
 use futures::{Stream, StreamExt as _};
 use rktk_keymanager::state::State;
-use rktk_rrp::{endpoints::*, server::ServerHandlers, ReadTransport, WriteTransport};
+use rktk_rrp::{
+    endpoints::*,
+    server::ServerHandlers,
+    transport::{error::ReceiveError, ReadTransport, WriteTransport},
+};
 
 use crate::{
     config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
@@ -20,7 +25,7 @@ pub struct Handlers<'a, S: StorageDriver> {
     pub state: &'a ThreadModeMutex<ConfiguredState>,
     pub storage: Option<&'a StorageConfigManager<S>>,
 }
-impl<S: StorageDriver> ServerHandlers for Handlers<'_, S> {
+impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Handlers<'_, S> {
     type Error = &'static str;
 
     async fn get_keyboard_info(
@@ -70,7 +75,7 @@ impl<S: StorageDriver> ServerHandlers for Handlers<'_, S> {
 
     async fn set_keymaps(
         &mut self,
-        req: impl Stream<Item = set_keymaps::Request>,
+        req: impl Stream<Item = Result<set_keymaps::Request, ReceiveError<RE>>>,
     ) -> Result<set_keymaps::Response, Self::Error> {
         let mut req = core::pin::pin!(req);
 
@@ -79,7 +84,7 @@ impl<S: StorageDriver> ServerHandlers for Handlers<'_, S> {
             (state.get_keymap().clone(), state.get_config().clone())
         };
 
-        while let Some(key) = req.next().await {
+        while let Some(Ok(key)) = req.next().await {
             keymap[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
             if let Some(storage) = self.storage {
                 if let Err(_e) = storage
@@ -123,7 +128,6 @@ impl<S: StorageDriver> ServerHandlers for Handlers<'_, S> {
     ) -> Result<impl Stream<Item = get_log::Response>, Self::Error> {
         Ok(futures::stream::iter(core::iter::from_fn(|| {
             if let Ok(chunk) = crate::task::logger::LOG_CHANNEL.try_receive() {
-                crate::print!("{:?}", chunk);
                 Some(chunk)
             } else {
                 None
@@ -146,7 +150,7 @@ impl<'a, R: ReporterDriver> ServerTransport<'a, R> {
     }
 }
 
-impl<R: ReporterDriver> ReadTransport for ServerTransport<'_, R> {
+impl<R: ReporterDriver, const BUF_SIZE: usize> ReadTransport<BUF_SIZE> for ServerTransport<'_, R> {
     type Error = &'static str;
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
@@ -156,7 +160,7 @@ impl<R: ReporterDriver> ReadTransport for ServerTransport<'_, R> {
             .map_err(|_| "Read failed")
     }
 }
-impl<R: ReporterDriver> WriteTransport for ServerTransport<'_, R> {
+impl<R: ReporterDriver, const BUF_SIZE: usize> WriteTransport<BUF_SIZE> for ServerTransport<'_, R> {
     type Error = &'static str;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {

@@ -1,6 +1,6 @@
 use futures::StreamExt as _;
-use rktk_rrp::ReadTransport;
-use rktk_rrp::WriteTransport;
+use rktk_rrp::transport::ReadTransport;
+use rktk_rrp::transport::WriteTransport;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::HidDevice;
@@ -44,7 +44,7 @@ impl HidReader {
     }
 }
 
-impl ReadTransport for HidReader {
+impl<const BUF_SIZE: usize> ReadTransport<BUF_SIZE> for HidReader {
     type Error = String;
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
@@ -72,7 +72,7 @@ impl HidWriter {
     }
 }
 
-impl WriteTransport for HidWriter {
+impl<const BUF_SIZE: usize> WriteTransport<BUF_SIZE> for HidWriter {
     type Error = String;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {

@@ -2,6 +2,28 @@ use macro_rules_attribute::{apply, attribute_alias};
 pub use rktk_keymanager;
 use rktk_keymanager::keycode::KeyAction;
 
+#[cfg(test)]
+mod test_endpoints {
+    pub mod test_normal_normal {
+        pub type Request = String;
+        pub type Response = String;
+    }
+    pub mod test_stream_normal {
+        pub type Request = String;
+        pub type Response = Vec<String>;
+    }
+    pub mod test_normal_stream {
+        pub type Request = Vec<String>;
+        pub type Response = String;
+    }
+    pub mod test_stream_stream {
+        pub type Request = String;
+        pub type Response = String;
+    }
+}
+#[cfg(test)]
+pub use test_endpoints::*;
+
 attribute_alias! {
     #[apply(common_derive)] =
         #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
@@ -108,25 +130,3 @@ pub mod get_log {
     pub type Request = ();
     pub type Response = LogChunk;
 }
-
-#[cfg(test)]
-mod test_endpoints {
-    pub mod test_normal_normal {
-        pub type Request = String;
-        pub type Response = String;
-    }
-    pub mod test_stream_normal {
-        pub type Request = String;
-        pub type Response = Vec<String>;
-    }
-    pub mod test_normal_stream {
-        pub type Request = Vec<String>;
-        pub type Response = String;
-    }
-    pub mod test_stream_stream {
-        pub type Request = String;
-        pub type Response = String;
-    }
-}
-#[cfg(test)]
-pub use test_endpoints::*;

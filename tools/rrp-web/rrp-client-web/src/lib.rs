@@ -18,7 +18,7 @@ pub fn main() {
 
 #[wasm_bindgen]
 pub struct Client {
-    client: Mutex<rktk_rrp::client::Client<HidReader, HidWriter>>,
+    client: Mutex<rktk_rrp::client::Client<HidReader, HidWriter, 1024>>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, tsify_next::Tsify)]
@@ -66,7 +66,10 @@ impl Client {
             .await
             .map_err(|e| format!("{:?}", e))?;
         Ok(VecGetKeymapsStreamResponse(
-            stream.collect::<Vec<_>>().await,
+            stream
+                .filter_map(|i| async { i.ok() })
+                .collect::<Vec<_>>()
+                .await,
         ))
     }
 
@@ -77,11 +80,21 @@ impl Client {
             .get_layout_json(())
             .await
             .map_err(|e| format!("{:?}", e))?;
+        let mut stream = core::pin::pin!(stream);
 
-        let res = stream.collect::<Vec<_>>().await;
+        let mut chunks = vec![];
+        while let Some(res) = stream.next().await {
+            match res {
+                Ok(chunk) => {
+                    chunks.extend_from_slice(&chunk);
+                }
+                Err(e) => {
+                    return Err(format!("{:?}", e));
+                }
+            }
+        }
 
-        let string =
-            String::from_utf8(res.into_iter().flatten().collect()).map_err(|e| e.to_string())?;
+        let string = String::from_utf8(chunks).map_err(|e| e.to_string())?;
 
         Ok(string)
     }
@@ -132,7 +145,7 @@ impl Client {
         let mut logs = Vec::new();
         let mut log = LogEntry::default();
         let mut log_bytes = Vec::new();
-        while let Some(chunk) = stream.next().await {
+        while let Some(Ok(chunk)) = stream.next().await {
             log::info!("chunk {:?}", chunk);
             match chunk {
                 get_log::LogChunk::Start { time, level, line } => {

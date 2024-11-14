@@ -95,19 +95,5 @@ macro_rules! generate_server_handlers {
             }
         }
     };
-
-    (@recv_req normal, $endpoint_name:ident, $tp:expr, $handlers:expr, $buf:expr) => {{
-        recv_request_body($tp, $buf).await.map(|(req, _)| req)?
-    }};
-    (@recv_req stream, $endpoint_name:ident, $tp:expr, $handlers:expr, $buf:expr) => {{
-        Result::<_, postcard::Error>::Ok(recv_stream_request($tp, $buf))
-    }};
-
-    (@send_res normal, $res:expr, $tp:expr) => {{
-        send_single_response_body::<_, _, BUF_SIZE>($tp, &$res).await
-    }};
-    (@send_res stream, $res:expr, $tp:expr) => {{
-        send_stream_response_body::<_, _, BUF_SIZE>($tp, $res).await
-    }};
 }
 pub(crate) use generate_server_handlers;

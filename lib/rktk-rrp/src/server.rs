@@ -1,4 +1,4 @@
-use crate::macros::server_generated::ServerHandlers;
+pub use crate::macros::server_generated::ServerHandlers;
 use crate::transport::read::ReadTransportExt as _;
 use crate::transport::*;
 
