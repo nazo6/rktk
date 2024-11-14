@@ -48,7 +48,6 @@ pub(crate) async fn send_stream_request_body<T: AsyncWrite + Unpin, S: Serialize
 ) -> Result<(), SendError> {
     let mut stream = core::pin::pin!(stream);
 
-    let mut buf = [0u8; 1024];
     let mut first = true;
     while let Some(data) = stream.next().await {
         if !first {
@@ -56,9 +55,7 @@ pub(crate) async fn send_stream_request_body<T: AsyncWrite + Unpin, S: Serialize
         }
         first = false;
 
-        let serialized = postcard::to_slice(&data, &mut buf)?;
-
-        send_request_body(tp, &serialized).await?;
+        send_request_body(tp, &data).await?;
     }
 
     tp.write_all(&[Indicator::End as u8]).await?;

@@ -83,8 +83,6 @@ pub(crate) fn recv_stream_request<'a, 't: 'a, T: ServerReadTransport, R: Deseria
                 stream_finished = true;
             }
 
-            dbg!(indicator);
-
             Some((res, (tp, buf, stream_finished)))
         },
     )

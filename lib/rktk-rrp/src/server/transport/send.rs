@@ -24,13 +24,12 @@ pub(crate) async fn send_error_response<T: ServerWriteTransport, const BUF_SIZE:
     body: &str,
 ) -> Result<(), SendError<T::Error>> {
     send_response_header(tp, request_id, 1).await?;
-    send_response_body::<_, _, BUF_SIZE>(tp, &body, false).await
+    send_single_response_body::<_, _, BUF_SIZE>(tp, &body).await
 }
 
 pub async fn send_response_body<T: ServerWriteTransport, S: Serialize, const BUF_SIZE: usize>(
     tp: &mut T,
     data: &S,
-    continues: bool,
 ) -> Result<(), SendError<T::Error>> {
     let mut buf = [0u8; BUF_SIZE];
     let serialized = postcard::to_slice(data, &mut buf).map_err(SendError::Serialization)?;
@@ -52,7 +51,7 @@ pub(crate) async fn send_single_response_body<
     tp: &mut T,
     data: &S,
 ) -> Result<(), SendError<T::Error>> {
-    send_response_body::<_, _, BUF_SIZE>(tp, data, false).await?;
+    send_response_body::<_, _, BUF_SIZE>(tp, data).await?;
     tp.write_all(&[Indicator::End as u8])
         .await
         .map_err(SendError::Write)?;
@@ -67,14 +66,18 @@ pub(crate) async fn send_stream_response_body<
     tp: &mut T,
     stream: impl futures::stream::Stream<Item = S>,
 ) -> Result<(), SendError<T::Error>> {
-    let mut buf = [0u8; BUF_SIZE];
-    dbg!(buf.len());
     let mut stream = core::pin::pin!(stream);
 
+    let mut first = true;
     while let Some(data) = stream.next().await {
-        let serialized = postcard::to_slice(&data, &mut buf).map_err(SendError::Serialization)?;
+        if !first {
+            tp.write_all(&[Indicator::StreamContinues as u8])
+                .await
+                .map_err(SendError::Write)?;
+        }
+        first = false;
 
-        send_response_body::<_, _, BUF_SIZE>(tp, &serialized, true).await?;
+        send_response_body::<_, _, BUF_SIZE>(tp, &data).await?;
     }
 
     tp.write_all(&[Indicator::End as u8])
