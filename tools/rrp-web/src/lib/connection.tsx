@@ -78,7 +78,6 @@ export function useConnect() {
           usage: 0x71,
         }],
       });
-      console.log(devices);
       if (devices.length === 0) {
         throw new Error("No devices found");
       }
@@ -87,7 +86,6 @@ export function useConnect() {
       await device.open();
       try {
         const kb = await client.get_keyboard_info();
-        console.log(kb);
         setConnection({
           client,
           device,

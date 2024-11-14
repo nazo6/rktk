@@ -20,7 +20,6 @@ export function LogViewerPage(props: { connection: Connection }) {
     queryKey: ["getLog"],
     queryFn: async () => {
       const data = await props.connection.client.get_log();
-      console.log(data);
       return data.map((log) => {
         const date = new Date(deviceTimeToRealTime!(log.time));
         const time = `${String(date.getHours()).padStart(2, "0")}:${

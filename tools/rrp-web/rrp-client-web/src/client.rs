@@ -57,7 +57,6 @@ impl<const BUF_SIZE: usize> ReadTransport<BUF_SIZE> for HidReader {
                 return Err("Read failed".to_string());
             }
         }
-        log::info!("read {:X?}", buf);
         Ok(i)
     }
 }
@@ -77,8 +76,6 @@ impl<const BUF_SIZE: usize> WriteTransport<BUF_SIZE> for HidWriter {
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
         for chunk in buf.chunks(31) {
-            log::info!("write {:X?}", chunk);
-
             let mut data = vec![chunk.len() as u8];
             data.extend_from_slice(chunk);
             data.resize(32, 0);

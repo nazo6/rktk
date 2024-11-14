@@ -146,7 +146,6 @@ impl Client {
         let mut log = LogEntry::default();
         let mut log_bytes = Vec::new();
         while let Some(Ok(chunk)) = stream.next().await {
-            log::info!("chunk {:?}", chunk);
             match chunk {
                 get_log::LogChunk::Start { time, level, line } => {
                     log.time = time;
