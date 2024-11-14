@@ -10,19 +10,24 @@ repository.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-rktk-rrp = { workspace = true, features = ["tsify"] }
+rktk-rrp = { workspace = true, features = ["tsify", "client"] }
 rktk-keymanager = { workspace = true }
 
 wasm-bindgen = { workspace = true }
 web-sys = { version = "0.3.70", features = [
-  "SerialPort",
-  "WritableStream",
-  "ReadableStream",
-  "WritableStreamDefaultWriter",
-  "ReadableStreamDefaultReader",
-  "ReadableStreamGetReaderOptions",
-  "ReadableStreamReaderMode",
-  "ReadableStreamByobReader",
+  "Hid",
+  "HidCollectionInfo",
+  "HidConnectionEvent",
+  "HidConnectionEventInit",
+  "HidDevice",
+  "HidDeviceFilter",
+  "HidDeviceRequestOptions",
+  "HidInputReportEvent",
+  "HidInputReportEventInit",
+  "HidReportInfo",
+  "HidReportItem",
+  "HiddenPluginEventInit",
+  "HidUnitSystem",
 ] }
 wasm-bindgen-futures = "0.4.43"
 console_log = "1.0.0"
@@ -32,8 +37,13 @@ serde-wasm-bindgen = "0.6.5"
 
 anyhow = "1.0.86"
 log = { workspace = true }
-futures = { workspace = true }
+futures = { workspace = true, features = ["std"] }
 async-lock = "3.4.0"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
 
 tsify-next = { workspace = true }
+usbd-hid = "0.8.2"
+ssmarshal = "1.0.0"
+
+[features]
+_check = []

@@ -31,3 +31,6 @@ embedded-graphics = { workspace = true }
 
 heapless = { workspace = true }
 static_cell = { workspace = true }
+
+[features]
+_check = []

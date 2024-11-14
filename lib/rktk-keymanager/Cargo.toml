@@ -43,3 +43,5 @@ std = []
 # Enables type export by specta.
 specta = ["std", "dep:specta", "postcard"]
 tsify = ["std", "dep:tsify-next", "dep:wasm-bindgen", "postcard"]
+
+_check = ["state"]

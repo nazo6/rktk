@@ -6,5 +6,6 @@
     "ra-check",
     "--",
     "$saved_file"
-  ]
+  ],
+  "rust-analyzer.cargo.features": ["_check"]
 }

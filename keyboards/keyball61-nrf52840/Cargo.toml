@@ -51,3 +51,4 @@ usb = []
 # Enables ble driver. If this feature is enabled, this side is always master.
 ble = ["rktk-drivers-nrf/ble"]
 default = ["ble", "usb"]
+_check = []

@@ -3,6 +3,8 @@ use duct::cmd;
 
 use crate::utils::{xprintln, METADATA};
 
+const CHECK_ARGS: &[&str] = &["clippy", "--features", "_check"];
+
 pub fn start(name: String) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
         anyhow::bail!("No metadata found. Are you running this command from a workspace?");
@@ -25,7 +27,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
 
             let now = std::time::Instant::now();
 
-            let res = cmd!("cargo", "clippy").dir(crate_path).run();
+            let res = cmd("cargo", CHECK_ARGS).dir(crate_path).run();
             let is_err = res.is_err();
 
             let elapsed = now.elapsed();
@@ -79,7 +81,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         let dir = package.manifest_path.parent().context("no parent dir")?;
 
         xprintln!("Checking crate `{}` ({})", package.name, dir);
-        cmd!("cargo", "clippy")
+        cmd("cargo", CHECK_ARGS)
             .dir(dir)
             .run()
             .with_context(|| format!("Failed to run clippy for crate: {}", dir))?;

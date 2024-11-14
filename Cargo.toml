@@ -83,6 +83,7 @@ postcard = "1.0.8"
 paste = "1.0.15"
 macro_rules_attribute = "0.2.0"
 rand_core = "0.6.4"
+thiserror = { version = "2.0.3", default-features = false }
 
 specta = { version = "2.0.0-rc.20" }
 tsify-next = { version = "0.5.4", features = ["js"] }

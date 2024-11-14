@@ -9,3 +9,6 @@ repository.workspace = true
 [dependencies]
 duct = { workspace = true }
 anyhow = { workspace = true }
+
+[features]
+_check = []

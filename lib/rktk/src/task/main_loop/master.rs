@@ -285,13 +285,16 @@ pub async fn start<
             }
         },
         async {
-            let mut server = rrp_server::Server {
-                state: &state,
-                storage: config_storage.as_ref(),
-            };
             if let Some(usb) = &usb {
-                let et = rrp_server::EndpointTransportImpl(usb);
-                server.handle(&et).await;
+                let mut server = rktk_rrp::server::Server::<_, _, _, 512>::new(
+                    rrp_server::ServerTransport::new(usb),
+                    rrp_server::ServerTransport::new(usb),
+                    rrp_server::Handlers {
+                        state: &state,
+                        storage: config_storage.as_ref(),
+                    },
+                );
+                server.start().await;
             }
         },
     )

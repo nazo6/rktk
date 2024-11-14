@@ -12,6 +12,7 @@ build = "build/main.rs"
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
+embedded-io-async = { workspace = true }
 
 usbd-hid = { workspace = true }
 
@@ -49,3 +50,6 @@ serde_json = { workspace = true }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(no_build)'] }
+
+[features]
+_check = []

@@ -7,27 +7,38 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
+futures = { workspace = true }
 rktk-keymanager = { workspace = true, features = ["postcard"] }
 postcard = { workspace = true, features = ["experimental-derive"] }
-heapless = { workspace = true }
-futures = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-serde_with = { workspace = true, features = ["macros"] }
-macro_rules_attribute = { workspace = true }
 
+serde = { workspace = true, features = ["derive"] }
+serde_with = { workspace = true }
+macro_rules_attribute = { workspace = true }
+log = { workspace = true }
+thiserror = { workspace = true }
+
+# server deps
+heapless = { workspace = true, optional = true }
+embedded-io-async = { workspace = true, optional = true }
+
+# client deps
 specta = { workspace = true, optional = true, features = ["derive"] }
 tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 
-[features]
-server = []
+[dev-dependencies]
+tokio = { version = "1.41.1", features = ["full"] }
+async-compat = "0.2.4"
 
-std = ["postcard/use-std"]
+[features]
+default = []
+
+server = ["dep:heapless", "dep:embedded-io-async"]
 client = ["std"]
-specta = ["client", "dep:specta", "rktk-keymanager/specta"]
-tsify = [
-  "client",
-  "dep:tsify-next",
-  "dep:wasm-bindgen",
-  "rktk-keymanager/tsify",
-]
+
+std = ["postcard/use-std", "futures/std"]
+
+specta = ["dep:specta", "rktk-keymanager/specta"]
+tsify = ["dep:tsify-next", "dep:wasm-bindgen", "rktk-keymanager/tsify"]
+
+_check = ["server", "client"]

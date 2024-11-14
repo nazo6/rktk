@@ -1,9 +1,32 @@
 use macro_rules_attribute::{apply, attribute_alias};
+pub use rktk_keymanager;
 use rktk_keymanager::keycode::KeyAction;
+
+#[cfg(test)]
+mod test_endpoints {
+    pub mod test_normal_normal {
+        pub type Request = String;
+        pub type Response = String;
+    }
+    pub mod test_stream_normal {
+        pub type Request = String;
+        pub type Response = Vec<String>;
+    }
+    pub mod test_normal_stream {
+        pub type Request = Vec<String>;
+        pub type Response = String;
+    }
+    pub mod test_stream_stream {
+        pub type Request = String;
+        pub type Response = String;
+    }
+}
+#[cfg(test)]
+pub use test_endpoints::*;
 
 attribute_alias! {
     #[apply(common_derive)] =
-        #[derive(serde::Serialize, serde::Deserialize, Debug)]
+        #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
         #[cfg_attr(feature = "specta", derive(specta::Type))]
         #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
         #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]
@@ -45,17 +68,17 @@ pub mod get_layout_json {
     pub type Request = ();
     /// 64 bytes stream of JSON layout data
     #[cfg(not(feature = "std"))]
-    pub type StreamResponse = heapless::Vec<u8, 64>;
+    pub type Response = heapless::Vec<u8, 64>;
     #[cfg(feature = "std")]
-    pub type StreamResponse = Vec<u8>;
+    pub type Response = Vec<u8>;
 }
 
 pub mod get_keymaps {
     pub type Request = ();
-    pub type StreamResponse = super::KeyActionLoc;
+    pub type Response = super::KeyActionLoc;
 }
 pub mod set_keymaps {
-    pub type StreamRequest = super::KeyActionLoc;
+    pub type Request = super::KeyActionLoc;
     pub type Response = ();
 }
 
@@ -105,5 +128,5 @@ pub mod get_log {
     }
 
     pub type Request = ();
-    pub type StreamResponse = LogChunk;
+    pub type Response = LogChunk;
 }

@@ -1,105 +1,91 @@
-use futures::future::select;
-use gloo_timers::future::TimeoutFuture;
-use rktk_rrp::endpoint_client;
+use futures::StreamExt as _;
+use rktk_rrp::transport::ReadTransport;
+use rktk_rrp::transport::WriteTransport;
+use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{js_sys, SerialPort};
+use web_sys::HidDevice;
+use web_sys::HidInputReportEvent;
 
-pub struct SerialClient {
-    pub(crate) stream: SerialPort,
+pub struct HidReader {
+    device: HidDevice,
+    pipe_recv: futures::channel::mpsc::UnboundedReceiver<u8>,
+    _cb: Closure<dyn FnMut(HidInputReportEvent)>,
 }
 
-impl SerialClient {
-    async fn send_all(&self, buf: &[u8]) -> Result<(), anyhow::Error> {
-        let writer = self
-            .stream
-            .writable()
-            .get_writer()
-            .map_err(|e| anyhow::anyhow!("Failed to get writer: {:?}", e))?;
-        let r: Result<(), anyhow::Error> = async {
-            JsFuture::from(writer.ready())
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to wait writer for ready: {:?}", e))?;
-            JsFuture::from(writer.write_with_chunk(&buf.to_owned().into()))
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to write: {:?}", e))?;
-            JsFuture::from(writer.ready())
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to wait writer for ready: {:?}", e))?;
-            Ok(())
+impl Drop for HidReader {
+    fn drop(&mut self) {
+        self.device.set_oninputreport(None);
+    }
+}
+
+impl HidReader {
+    pub fn new(device: HidDevice) -> Self {
+        let (pipe_send, pipe_recv) = futures::channel::mpsc::unbounded();
+
+        let cb = Closure::wrap(Box::new(move |e: HidInputReportEvent| {
+            let data = e.data();
+            let mut buf = [0u8; 32];
+            for (i, byte) in buf.iter_mut().enumerate() {
+                *byte = data.get_uint8(i);
+            }
+            let size = buf[0] as usize;
+            for i in 0..size {
+                pipe_send.unbounded_send(buf[i + 1]).unwrap();
+            }
+        }) as Box<dyn FnMut(_)>);
+
+        device.set_oninputreport(Some(cb.as_ref().unchecked_ref()));
+
+        Self {
+            device,
+            pipe_recv,
+            _cb: cb,
         }
-        .await;
-
-        writer.release_lock();
-
-        r?;
-
-        Ok(())
     }
-    async fn read_until_zero(&self, buf: &mut Vec<u8>) -> Result<(), anyhow::Error> {
-        let reader_options = web_sys::ReadableStreamGetReaderOptions::new();
-        reader_options.set_mode(web_sys::ReadableStreamReaderMode::Byob);
-        let reader = self
-            .stream
-            .readable()
-            .get_reader_with_options(&reader_options)
-            .dyn_into::<web_sys::ReadableStreamByobReader>()
-            .expect("Invalid readable stream");
+}
 
-        let res = match select(
-            std::pin::pin!(async {
-                loop {
-                    let typed_array = web_sys::js_sys::Uint8Array::new(&JsValue::from(1));
-                    let promise = reader.read_with_array_buffer_view(&typed_array);
-                    let obj = JsFuture::from(promise)
-                        .await
-                        .map_err(|e| anyhow::anyhow!("Failed to read data: {:?}", e))?;
+impl<const BUF_SIZE: usize> ReadTransport<BUF_SIZE> for HidReader {
+    type Error = String;
 
-                    let done = js_sys::Reflect::get(&obj, &JsValue::from("done"))
-                        .expect("Failed to get done property of data")
-                        .as_bool()
-                        .unwrap_or(false);
-                    if done {
-                        Err(anyhow::anyhow!("EOF"))?;
-                    } else {
-                        let array = js_sys::Reflect::get(&obj, &JsValue::from("value"))
-                            .expect("Failed to get value property of data")
-                            .dyn_into::<js_sys::Uint8Array>()
-                            .expect("Expected Uint8Array");
-
-                        let val = array.get_index(0);
-                        buf.push(val);
-                        if val == 0 {
-                            break;
-                        }
-                    }
-                }
-                Result::<(), anyhow::Error>::Ok(())
-            }),
-            TimeoutFuture::new(500),
-        )
-        .await
-        {
-            futures::future::Either::Left((res, _)) => res,
-            futures::future::Either::Right(_) => Err(anyhow::anyhow!("Timeout")),
-        };
-
-        reader.release_lock();
-
-        res?;
-
-        Ok(())
+    async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+        let mut i = 0;
+        while i < buf.len() {
+            if let Some(data) = self.pipe_recv.next().await {
+                buf[i] = data;
+                i += 1;
+            } else {
+                return Err("Read failed".to_string());
+            }
+        }
+        Ok(i)
     }
+}
 
-    endpoint_client!(
-        get_keyboard_info normal normal
-        get_keymaps normal stream
-        get_layout_json normal stream
-        set_keymaps stream normal
-        get_keymap_config normal normal
-        set_keymap_config normal normal
-        get_log normal stream
-        get_now normal normal
-    );
+pub struct HidWriter {
+    device: HidDevice,
+}
+
+impl HidWriter {
+    pub fn new(device: HidDevice) -> Self {
+        Self { device }
+    }
+}
+
+impl<const BUF_SIZE: usize> WriteTransport<BUF_SIZE> for HidWriter {
+    type Error = String;
+
+    async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+        for chunk in buf.chunks(31) {
+            let mut data = vec![chunk.len() as u8];
+            data.extend_from_slice(chunk);
+            data.resize(32, 0);
+            wasm_bindgen_futures::JsFuture::from(
+                self.device.send_report_with_u8_slice(0, &mut data).unwrap(),
+            )
+            .await
+            .map_err(|e| format!("{:?}", e))?;
+        }
+
+        Ok(buf.len())
+    }
 }
