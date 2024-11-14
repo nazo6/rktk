@@ -7,5 +7,6 @@
     "--",
     "$saved_file"
   ],
-  "rust-analyzer.cargo.features": ["_check"]
+  "rust-analyzer.cargo.features": ["_check"],
+  "rust-analyzer.cargo.allTargets": false
 }

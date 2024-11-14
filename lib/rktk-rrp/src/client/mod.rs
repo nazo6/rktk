@@ -1,44 +1,44 @@
 //! rrp client. uses std.
 
-use futures::{AsyncRead, AsyncWrite};
+use core::fmt::Display;
 
 pub(crate) mod transport;
 
 /// Client to make requests to the rrp server.
-pub struct Client<RT: AsyncRead + Unpin, WT: AsyncWrite + Unpin> {
+pub struct Client<RT: ReadTransport + Unpin, WT: WriteTransport + Unpin> {
     pub(crate) reader: RT,
     pub(crate) writer: WT,
 }
 
-impl<RT: AsyncRead + Unpin, WT: AsyncWrite + Unpin> Client<RT, WT> {
+impl<RT: ReadTransport + Unpin, WT: WriteTransport + Unpin> Client<RT, WT> {
     pub fn new(reader: RT, writer: WT) -> Self {
         Self { reader, writer }
     }
 }
 
 #[derive(Debug, thiserror::Error)]
-pub enum ClientError {
+pub enum ClientError<RE: Display, WE: Display> {
     #[error(transparent)]
-    Transport(#[from] transport::ClientTransportError),
+    Transport(#[from] TransportError<RE, WE>),
     #[error("failed: status={status}, message={message}")]
     Failed { status: u8, message: String },
 }
 
 macro_rules! generate_client {
     ($($endpoint_id:tt: $endpoint_name:ident($req_kind:tt: $req_type:ty) -> $res_kind:tt: $res_type:ty;)*) => {
-        use crate::client::transport::{recv::*, send::*};
         use crate::client::*;
-        use futures::io::{AsyncRead, AsyncWrite};
+        use crate::client::transport::{recv::*, send::*};
+        use crate::shared::transport::*;
 
-        impl<RT: AsyncRead + Unpin, WT: AsyncWrite + Unpin> Client<RT, WT> {
+        impl<RT: ReadTransport + Unpin, WT: WriteTransport + Unpin> Client<RT, WT> {
             $(
-                pub async fn $endpoint_name(&mut self, req: generate_client!(@gen_type $req_kind: $req_type)) -> Result<generate_client!(@gen_type $res_kind: $res_type), ClientError> {
-                    send_request_header(&mut self.writer, 0, $endpoint_id).await.map_err(|e| transport::ClientTransportError::SendError(e))?;
-                    generate_client!(@send_request $req_kind, self.writer, req).map_err(|e| transport::ClientTransportError::SendError(e))?;
+                pub async fn $endpoint_name(&mut self, req: generate_client!(@gen_type $req_kind: $req_type)) -> Result<generate_client!(@gen_type $res_kind: $res_type), ClientError<RT::Error, WT::Error>> {
+                    send_request_header(&mut self.writer, 0, $endpoint_id).await.map_err(TransportError::SendError)?;
+                    generate_client!(@send_request $req_kind, self.writer, req).map_err(TransportError::SendError)?;
 
-                    let res_header = recv_response_header(&mut self.reader).await.map_err(|e| transport::ClientTransportError::RecvError(e))?;
+                    let res_header = recv_response_header(&mut self.reader).await.map_err(TransportError::RecvError)?;
                     if res_header.status_code != 0 {
-                        let (message, _ ) = recv_request_body::<_, String>(&mut self.reader).await.map_err(|e| transport::ClientTransportError::RecvError(e))?;
+                        let (message, _ ) = recv_request_body::<_, String>(&mut self.reader).await.map_err(TransportError::RecvError)?;
                         return Err(ClientError::Failed { status: res_header.status_code, message });
                     }
 
@@ -46,7 +46,7 @@ macro_rules! generate_client {
 
                     Ok(res)
                 }
-            )*
+)*
         }
     };
 
@@ -58,7 +58,7 @@ macro_rules! generate_client {
     };
 
     (@recv_response normal, $reader:expr, $res_type:ty) => {
-        recv_request_body::<_, $res_type>(&mut $reader).await.map_err(|e| transport::ClientTransportError::RecvError(e))?.0
+        recv_request_body::<_, $res_type>(&mut $reader).await.map_err(TransportError::RecvError)?.0
     };
     (@recv_response stream, $reader:expr, $res_type:ty) => {
         recv_stream_request(&mut $reader)
@@ -68,3 +68,5 @@ macro_rules! generate_client {
     (@gen_type stream: $ty:ty) => { impl futures::stream::Stream<Item = $ty> + '_ };
 }
 pub(crate) use generate_client;
+
+use crate::shared::transport::{ReadTransport, TransportError, WriteTransport};

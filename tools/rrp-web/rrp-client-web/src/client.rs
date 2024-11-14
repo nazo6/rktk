@@ -1,31 +1,26 @@
-use std::pin::pin;
-
-use async_lock::Mutex;
-use futures::future::select;
 use futures::StreamExt as _;
-use gloo_timers::future::TimeoutFuture;
-use rktk_rrp::endpoint_client;
+use rktk_rrp::ReadTransport;
+use rktk_rrp::WriteTransport;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
 use web_sys::HidDevice;
 use web_sys::HidInputReportEvent;
 
-pub struct HidTransportClient {
+pub struct HidReader {
     device: HidDevice,
-    input_report_receiver: Mutex<futures::channel::mpsc::UnboundedReceiver<[u8; 32]>>,
+    pipe_recv: futures::channel::mpsc::UnboundedReceiver<u8>,
     _cb: Closure<dyn FnMut(HidInputReportEvent)>,
 }
 
-impl Drop for HidTransportClient {
+impl Drop for HidReader {
     fn drop(&mut self) {
         self.device.set_oninputreport(None);
     }
 }
 
-impl HidTransportClient {
+impl HidReader {
     pub fn new(device: HidDevice) -> Self {
-        let (input_report_sender, input_report_receiver) = futures::channel::mpsc::unbounded();
+        let (pipe_send, pipe_recv) = futures::channel::mpsc::unbounded();
 
         let cb = Closure::wrap(Box::new(move |e: HidInputReportEvent| {
             let data = e.data();
@@ -33,64 +28,60 @@ impl HidTransportClient {
             for i in 0..32 {
                 buf[i] = data.get_uint8(i);
             }
-
-            log::info!("Report: {:X?}", buf);
-
-            input_report_sender.unbounded_send(buf).unwrap();
+            let size = buf[0] as usize;
+            for i in 0..size {
+                pipe_send.unbounded_send(buf[i + 1]).unwrap();
+            }
         }) as Box<dyn FnMut(_)>);
 
         device.set_oninputreport(Some(cb.as_ref().unchecked_ref()));
 
         Self {
             device,
-            input_report_receiver: Mutex::new(input_report_receiver),
+            pipe_recv,
             _cb: cb,
         }
     }
+}
 
-    async fn send_all(&self, buf: &[u8]) -> Result<(), anyhow::Error> {
-        for chunk in buf.chunks(31) {
-            let mut output_data = vec![chunk.len() as u8];
-            output_data.extend_from_slice(chunk);
-            output_data.resize(32, 0);
+impl ReadTransport for HidReader {
+    type Error = String;
 
-            JsFuture::from(
-                self.device
-                    .send_report_with_u8_slice(0, &mut output_data)
-                    .map_err(|e| anyhow::anyhow!("Failed to send report: {:?}", e))?,
-            )
-            .await
-            .map_err(|e| anyhow::anyhow!("Failed to send report: {:?}", e))?;
-        }
-        Ok(())
-    }
-
-    async fn read_until_zero(&self, buf: &mut Vec<u8>) -> Result<(), anyhow::Error> {
-        let mut input_report_receiver = self.input_report_receiver.lock().await;
-        loop {
-            if let Some(report) = input_report_receiver.next().await {
-                let len = report[0] as usize;
-                let data = &report[1..=len];
-
-                buf.extend_from_slice(data);
-                if data.last() == Some(&0) {
-                    log::info!("Ended with: {:X?}", buf);
-                    break;
-                }
+    async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+        let mut i = 0;
+        while i < buf.len() {
+            if let Some(data) = self.pipe_recv.next().await {
+                buf[i] = data;
+                i += 1;
+            } else {
+                return Err("Read failed".to_string());
             }
         }
-
-        Ok(())
+        Ok(i)
     }
+}
 
-    endpoint_client!(
-        get_keyboard_info normal normal
-        get_keymaps normal stream
-        get_layout_json normal stream
-        set_keymaps stream normal
-        get_keymap_config normal normal
-        set_keymap_config normal normal
-        get_log normal stream
-        get_now normal normal
-    );
+pub struct HidWriter {
+    device: HidDevice,
+}
+
+impl HidWriter {
+    pub fn new(device: HidDevice) -> Self {
+        Self { device }
+    }
+}
+
+impl WriteTransport for HidWriter {
+    type Error = String;
+
+    async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+        let mut buf = buf.to_vec();
+        wasm_bindgen_futures::JsFuture::from(
+            self.device.send_report_with_u8_slice(0, &mut buf).unwrap(),
+        )
+        .await
+        .map_err(|e| format!("{:?}", e))?;
+
+        Ok(buf.len())
+    }
 }

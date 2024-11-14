@@ -1,17 +1,14 @@
 use futures::Stream;
 use serde::de::DeserializeOwned;
 
-use crate::shared::Indicator;
+use crate::shared::{
+    transport::{error::ReceiveError, ReadTransport},
+    Indicator,
+};
 
-use super::{ReceiveError, ServerReadTransport};
-
-async fn recv_indicator<T: ServerReadTransport>(
-    tp: &mut T,
-) -> Result<Indicator, ReceiveError<T::Error>> {
+async fn recv_indicator<T: ReadTransport>(tp: &mut T) -> Result<Indicator, ReceiveError<T::Error>> {
     let mut buf = [0u8; 1];
-    tp.read_exact(&mut buf)
-        .await
-        .map_err(ReceiveError::ReadExact)?;
+    tp.read_exact(&mut buf).await.map_err(ReceiveError::Read)?;
     buf[0]
         .try_into()
         .map_err(|_| ReceiveError::FrameError("Invalid indicator"))
@@ -23,7 +20,7 @@ pub(crate) struct RequestHeader {
     pub endpoint_id: u8,
 }
 
-pub(crate) async fn recv_request_header<T: ServerReadTransport>(
+pub(crate) async fn recv_request_header<T: ReadTransport>(
     tp: &mut T,
 ) -> Result<RequestHeader, ReceiveError<T::Error>> {
     if recv_indicator(tp).await? != Indicator::Start {
@@ -34,7 +31,7 @@ pub(crate) async fn recv_request_header<T: ServerReadTransport>(
 
     tp.read_exact(&mut request_header)
         .await
-        .map_err(ReceiveError::ReadExact)?;
+        .map_err(ReceiveError::Read)?;
 
     Ok(RequestHeader {
         request_id: request_header[0],
@@ -42,20 +39,20 @@ pub(crate) async fn recv_request_header<T: ServerReadTransport>(
     })
 }
 
-pub(crate) async fn recv_request_body<T: ServerReadTransport, R: DeserializeOwned>(
+pub(crate) async fn recv_request_body<T: ReadTransport, R: DeserializeOwned>(
     tp: &mut T,
     buf: &mut [u8],
 ) -> Result<(Result<R, postcard::Error>, Indicator), ReceiveError<T::Error>> {
     let mut request_size = [0u8; 4];
     tp.read_exact(&mut request_size)
         .await
-        .map_err(ReceiveError::ReadExact)?;
+        .map_err(ReceiveError::Read)?;
 
     let request_size = u32::from_le_bytes(request_size);
 
     tp.read_exact(&mut buf[0..request_size as usize])
         .await
-        .map_err(ReceiveError::ReadExact)?;
+        .map_err(ReceiveError::Read)?;
 
     let deserialized = postcard::from_bytes::<R>(&buf[0..request_size as usize]);
 
@@ -64,7 +61,7 @@ pub(crate) async fn recv_request_body<T: ServerReadTransport, R: DeserializeOwne
     Ok((deserialized, indicator))
 }
 
-pub(crate) fn recv_stream_request<'a, 't: 'a, T: ServerReadTransport, R: DeserializeOwned>(
+pub(crate) fn recv_stream_request<'a, 't: 'a, T: ReadTransport, R: DeserializeOwned>(
     tp: &'t mut T,
     buf: &'a mut [u8],
 ) -> impl Stream<Item = R> + 'a {

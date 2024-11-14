@@ -1,11 +1,12 @@
 use futures::stream::StreamExt as _;
 use serde::Serialize;
 
-use crate::shared::Indicator;
+use crate::shared::{
+    transport::{error::SendError, WriteTransport},
+    Indicator,
+};
 
-use super::{SendError, ServerWriteTransport};
-
-pub(crate) async fn send_response_header<T: ServerWriteTransport>(
+pub(crate) async fn send_response_header<T: WriteTransport>(
     tp: &mut T,
     request_id: u8,
     status_code: u8,
@@ -18,7 +19,7 @@ pub(crate) async fn send_response_header<T: ServerWriteTransport>(
 }
 
 /// Send error; this is a convenience function to send a response with a status code of 1.
-pub(crate) async fn send_error_response<T: ServerWriteTransport, const BUF_SIZE: usize>(
+pub(crate) async fn send_error_response<T: WriteTransport, const BUF_SIZE: usize>(
     tp: &mut T,
     request_id: u8,
     body: &str,
@@ -27,7 +28,7 @@ pub(crate) async fn send_error_response<T: ServerWriteTransport, const BUF_SIZE:
     send_single_response_body::<_, _, BUF_SIZE>(tp, &body).await
 }
 
-pub async fn send_response_body<T: ServerWriteTransport, S: Serialize, const BUF_SIZE: usize>(
+pub async fn send_response_body<T: WriteTransport, S: Serialize, const BUF_SIZE: usize>(
     tp: &mut T,
     data: &S,
 ) -> Result<(), SendError<T::Error>> {
@@ -44,7 +45,7 @@ pub async fn send_response_body<T: ServerWriteTransport, S: Serialize, const BUF
 }
 
 pub(crate) async fn send_single_response_body<
-    T: ServerWriteTransport,
+    T: WriteTransport,
     S: Serialize,
     const BUF_SIZE: usize,
 >(
@@ -59,7 +60,7 @@ pub(crate) async fn send_single_response_body<
 }
 
 pub(crate) async fn send_stream_response_body<
-    T: ServerWriteTransport,
+    T: WriteTransport,
     S: Serialize,
     const BUF_SIZE: usize,
 >(

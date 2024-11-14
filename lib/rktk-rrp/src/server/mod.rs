@@ -1,25 +1,17 @@
 pub use crate::macro_space::server::*;
-use transport::{recv::*, ServerReadTransport, ServerTransportError, ServerWriteTransport};
+use crate::shared::transport::{error::TransportError, ReadTransport, WriteTransport};
+use transport::recv::*;
 
 pub mod transport;
 
-pub struct Server<
-    RT: ServerReadTransport,
-    WT: ServerWriteTransport,
-    H: ServerHandlers,
-    const BUF_SIZE: usize,
-> {
+pub struct Server<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers, const BUF_SIZE: usize> {
     pub(crate) reader: RT,
     pub(crate) writer: WT,
     pub(crate) handlers: H,
 }
 
-impl<
-        RT: ServerReadTransport,
-        WT: ServerWriteTransport,
-        H: ServerHandlers,
-        const BUF_SIZE: usize,
-    > Server<RT, WT, H, BUF_SIZE>
+impl<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers, const BUF_SIZE: usize>
+    Server<RT, WT, H, BUF_SIZE>
 {
     pub fn new(reader: RT, writer: WT, handlers: H) -> Self {
         Self {
@@ -35,10 +27,10 @@ impl<
         }
     }
 
-    async fn process_request(&mut self) -> Result<(), ServerTransportError<RT::Error, WT::Error>> {
+    async fn process_request(&mut self) -> Result<(), TransportError<RT::Error, WT::Error>> {
         let endpoint_id = recv_request_header(&mut self.reader)
             .await
-            .map_err(ServerTransportError::RecvError)?;
+            .map_err(TransportError::RecvError)?;
 
         self.handle(endpoint_id).await?;
 
@@ -50,7 +42,8 @@ macro_rules! generate_server_handlers {
     ($($endpoint_id:tt: $endpoint_name:ident($req_kind:tt: $req_type:ty) -> $res_kind:tt: $res_type:ty;)*) => {
         use crate::macro_space::gen_type;
         use crate::server::*;
-        use crate::server::transport::{recv::*, send::*, *};
+        use crate::server::transport::{recv::*, send::*};
+        use crate::shared::transport::*;
         use core::fmt::Display;
 
         #[allow(async_fn_in_trait)]
@@ -63,13 +56,13 @@ macro_rules! generate_server_handlers {
 
 
         impl<
-                RT: ServerReadTransport,
-                WT: ServerWriteTransport,
+                RT: ReadTransport,
+                WT: WriteTransport,
                 H: ServerHandlers,
                 const BUF_SIZE: usize,
             > Server<RT, WT, H, BUF_SIZE>
         {
-            pub(crate) async fn handle(&mut self, header: RequestHeader) -> Result<(), ServerTransportError<RT::Error, WT::Error>> {
+            pub(crate) async fn handle(&mut self, header: RequestHeader) -> Result<(), TransportError<RT::Error, WT::Error>> {
                 match header.endpoint_id {
                     $(
                         $endpoint_id => {
@@ -77,7 +70,7 @@ macro_rules! generate_server_handlers {
                             let req = generate_server_handlers!(@recv_req $req_kind, $endpoint_name, &mut self.reader, self.handlers, &mut buf);
 
                             let Ok(req) = req else {
-                                send_error_response::<_, BUF_SIZE>(&mut self.writer, 0, "Deserialize failed").await.map_err(ServerTransportError::SendError)?;
+                                send_error_response::<_, BUF_SIZE>(&mut self.writer, 0, "Deserialize failed").await.map_err(TransportError::SendError)?;
                                 return Ok(());
                             };
                             let Ok(res) = self.handlers.$endpoint_name(req).await else {
