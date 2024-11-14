@@ -5,7 +5,9 @@ use crate::shared::Indicator;
 
 use super::{ReceiveError, ServerReadTransport};
 
-async fn recv_indicator<T: ServerReadTransport>(tp: &mut T) -> Result<Indicator, ReceiveError<T>> {
+async fn recv_indicator<T: ServerReadTransport>(
+    tp: &mut T,
+) -> Result<Indicator, ReceiveError<T::Error>> {
     let mut buf = [0u8; 1];
     tp.read_exact(&mut buf)
         .await
@@ -15,6 +17,7 @@ async fn recv_indicator<T: ServerReadTransport>(tp: &mut T) -> Result<Indicator,
         .map_err(|_| ReceiveError::FrameError("Invalid indicator"))
 }
 
+#[derive(Debug)]
 pub(crate) struct RequestHeader {
     pub request_id: u8,
     pub endpoint_id: u8,
@@ -22,7 +25,7 @@ pub(crate) struct RequestHeader {
 
 pub(crate) async fn recv_request_header<T: ServerReadTransport>(
     tp: &mut T,
-) -> Result<RequestHeader, ReceiveError<T>> {
+) -> Result<RequestHeader, ReceiveError<T::Error>> {
     if recv_indicator(tp).await? != Indicator::Start {
         return Err(ReceiveError::FrameError("Invalid start signal"));
     }
@@ -42,7 +45,7 @@ pub(crate) async fn recv_request_header<T: ServerReadTransport>(
 pub(crate) async fn recv_request_body<T: ServerReadTransport, R: DeserializeOwned>(
     tp: &mut T,
     buf: &mut [u8],
-) -> Result<(Result<R, postcard::Error>, Indicator), ReceiveError<T>> {
+) -> Result<(Result<R, postcard::Error>, Indicator), ReceiveError<T::Error>> {
     let mut request_size = [0u8; 4];
     tp.read_exact(&mut request_size)
         .await
@@ -79,6 +82,8 @@ pub(crate) fn recv_stream_request<'a, 't: 'a, T: ServerReadTransport, R: Deseria
             if indicator == Indicator::End {
                 stream_finished = true;
             }
+
+            dbg!(indicator);
 
             Some((res, (tp, buf, stream_finished)))
         },

@@ -26,9 +26,10 @@ specta = { workspace = true, optional = true, features = ["derive"] }
 tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 
-
 [dev-dependencies]
 tokio = { version = "1.41.1", features = ["full"] }
+async-compat = "0.2.4"
+backtrace-on-stack-overflow = "0.3.0"
 
 [features]
 default = []

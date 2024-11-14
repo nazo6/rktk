@@ -1,12 +1,12 @@
 use futures::io::AsyncReadExt as _;
-use futures::Stream;
+use futures::{AsyncRead, Stream};
 use serde::de::DeserializeOwned;
 
 use crate::shared::Indicator;
 
-use super::{ClientReadTransport, ReceiveError};
+use super::ReceiveError;
 
-async fn recv_indicator<T: ClientReadTransport>(tp: &mut T) -> Result<Indicator, ReceiveError> {
+async fn recv_indicator<T: AsyncRead + Unpin>(tp: &mut T) -> Result<Indicator, ReceiveError> {
     let mut buf = [0u8; 1];
     tp.read_exact(&mut buf).await?;
     buf[0]
@@ -19,7 +19,7 @@ pub(crate) struct ResponseHeader {
     pub status_code: u8,
 }
 
-pub(crate) async fn recv_response_header<T: ClientReadTransport>(
+pub(crate) async fn recv_response_header<T: AsyncRead + Unpin>(
     tp: &mut T,
 ) -> Result<ResponseHeader, ReceiveError> {
     if recv_indicator(tp).await? != Indicator::Start {
@@ -36,7 +36,7 @@ pub(crate) async fn recv_response_header<T: ClientReadTransport>(
     })
 }
 
-pub(crate) async fn recv_request_body<T: ClientReadTransport, R: DeserializeOwned>(
+pub(crate) async fn recv_request_body<T: AsyncRead + Unpin, R: DeserializeOwned>(
     tp: &mut T,
     buf: &mut [u8],
 ) -> Result<(R, Indicator), ReceiveError> {
@@ -53,7 +53,7 @@ pub(crate) async fn recv_request_body<T: ClientReadTransport, R: DeserializeOwne
     Ok((deserialized, indicator))
 }
 
-pub(crate) fn recv_stream_request<'a, 't: 'a, T: ClientReadTransport, R: DeserializeOwned>(
+pub(crate) fn recv_stream_request<'a, 't: 'a, T: AsyncRead + Unpin, R: DeserializeOwned>(
     tp: &'t mut T,
 ) -> impl Stream<Item = R> + 'a {
     futures::stream::unfold(

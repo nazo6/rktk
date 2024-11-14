@@ -1,9 +1,10 @@
 use macro_rules_attribute::{apply, attribute_alias};
+pub use rktk_keymanager;
 use rktk_keymanager::keycode::KeyAction;
 
 attribute_alias! {
     #[apply(common_derive)] =
-        #[derive(serde::Serialize, serde::Deserialize, Debug)]
+        #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
         #[cfg_attr(feature = "specta", derive(specta::Type))]
         #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
         #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]

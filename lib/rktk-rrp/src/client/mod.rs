@@ -1,15 +1,16 @@
 //! rrp client. uses std.
 
+use futures::{AsyncRead, AsyncWrite};
+
 pub(crate) mod transport;
-use transport::{ClientReadTransport, ClientWriteTransport};
 
 /// Client to make requests to the rrp server.
-pub struct Client<RT: ClientReadTransport, WT: ClientWriteTransport> {
+pub struct Client<RT: AsyncRead + Unpin, WT: AsyncWrite + Unpin> {
     pub(crate) reader: RT,
     pub(crate) writer: WT,
 }
 
-impl<RT: ClientReadTransport, WT: ClientWriteTransport> Client<RT, WT> {
+impl<RT: AsyncRead + Unpin, WT: AsyncWrite + Unpin> Client<RT, WT> {
     pub fn new(reader: RT, writer: WT) -> Self {
         Self { reader, writer }
     }
@@ -25,10 +26,11 @@ pub enum ClientError {
 
 macro_rules! generate_client {
     ($($endpoint_id:tt: $endpoint_name:ident($req_kind:tt: $req_type:ty) -> $res_kind:tt: $res_type:ty;)*) => {
-        use crate::client::transport::{recv::*, send::*, *};
+        use crate::client::transport::{recv::*, send::*};
         use crate::client::*;
+        use futures::io::{AsyncRead, AsyncWrite};
 
-        impl<RT: ClientReadTransport, WT: ClientWriteTransport> Client<RT, WT> {
+        impl<RT: AsyncRead + Unpin, WT: AsyncWrite + Unpin> Client<RT, WT> {
             $(
                 pub async fn $endpoint_name(&mut self, req: generate_client!(@gen_type $req_kind: $req_type)) -> Result<generate_client!(@gen_type $res_kind: $res_type), ClientError> {
                     send_request_header(&mut self.writer, 0, $endpoint_id).await.map_err(|e| transport::ClientTransportError::SendError(e))?;
@@ -49,10 +51,10 @@ macro_rules! generate_client {
     };
 
     (@send_request normal, $writer:expr, $req:expr) => {
-        send_request_body(&mut $writer, &$req, false).await
+        send_single_request_body(&mut $writer, &$req).await
     };
     (@send_request stream, $writer:expr, $req:expr) => {
-        send_stream_request(&mut $writer, $req).await
+        send_stream_request_body(&mut $writer, $req).await
     };
 
     (@recv_response normal, $reader:expr, $res_type:ty) => {

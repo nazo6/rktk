@@ -35,12 +35,21 @@ mod macro_space {
         };
     }
 
+    #[cfg(not(test))]
     generate_impls!(
-        0: get_keyboard_info(normal: ()) -> normal: crate::endpoints::KeyActionLoc;
-        1: get_layout_json(normal: ()) -> stream: crate::endpoints::get_layout_json::StreamResponse;
+        1: get_keyboard_info(normal: ()) -> normal: crate::endpoints::get_keyboard_info::Response;
+        2: get_layout_json(normal: ()) -> stream: crate::endpoints::get_layout_json::StreamResponse;
         // 2: get_keymaps(normal: ()) -> stream: crate::endpoints::get_keymaps::StreamResponse;
         // 3: set_keymaps(stream: crate::endpoints::set_keymaps::StreamRequest) -> normal: ();
         9: stream_test(stream: ()) -> stream: ();
+    );
+
+    #[cfg(test)]
+    generate_impls!(
+        0: test_normal_normal(normal: String) -> normal: String;
+        1: test_stream_normal(stream: String) -> normal: Vec<String>;
+        2: test_normal_stream(normal: String) -> stream: String;
+        3: test_stream_stream(stream: String) -> stream: String;
     );
 }
 
