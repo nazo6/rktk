@@ -57,6 +57,7 @@ impl ReadTransport for HidReader {
                 return Err("Read failed".to_string());
             }
         }
+        log::info!("read {:X?}", buf);
         Ok(i)
     }
 }
@@ -75,12 +76,18 @@ impl WriteTransport for HidWriter {
     type Error = String;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        let mut buf = buf.to_vec();
-        wasm_bindgen_futures::JsFuture::from(
-            self.device.send_report_with_u8_slice(0, &mut buf).unwrap(),
-        )
-        .await
-        .map_err(|e| format!("{:?}", e))?;
+        for chunk in buf.chunks(31) {
+            log::info!("write {:X?}", chunk);
+
+            let mut data = vec![chunk.len() as u8];
+            data.extend_from_slice(chunk);
+            data.resize(32, 0);
+            wasm_bindgen_futures::JsFuture::from(
+                self.device.send_report_with_u8_slice(0, &mut data).unwrap(),
+            )
+            .await
+            .map_err(|e| format!("{:?}", e))?;
+        }
 
         Ok(buf.len())
     }

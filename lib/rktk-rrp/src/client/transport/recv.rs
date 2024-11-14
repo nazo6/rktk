@@ -72,14 +72,18 @@ pub(crate) fn recv_stream_request<'a, 't: 'a, T: ReadTransport + Unpin, R: Deser
             return None;
         }
 
-        let Ok((res, indicator)) = recv_request_body(tp).await else {
-            return None;
-        };
+        match recv_request_body(tp).await {
+            Ok((req, indicator)) => {
+                if indicator == Indicator::End {
+                    stream_finished = true;
+                }
 
-        if indicator == Indicator::End {
-            stream_finished = true;
+                Some((req, (tp, stream_finished)))
+            }
+            Err(e) => {
+                log::error!("recv_stream_request: {}", e);
+                None
+            }
         }
-
-        Some((res, (tp, stream_finished)))
     })
 }

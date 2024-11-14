@@ -106,10 +106,12 @@ pub async fn rrp<'d, D: Driver<'d>>(
                     panic!("One read should give one report. Maybe packet size is enough?");
                 }
 
-                rktk::print!("Received report: {:?}", &buf[..to_recv_bytes]);
-
                 let len = buf[0] as usize;
-                RRP_RECV_PIPE.write_all(&buf[1..=len]).await;
+                if len > 0 && len < 32 {
+                    RRP_RECV_PIPE.write_all(&buf[1..=len]).await;
+                } else {
+                    rktk::print!("Invalid report: {:?}", &buf);
+                }
             }
         },
         async {
@@ -123,8 +125,6 @@ pub async fn rrp<'d, D: Driver<'d>>(
                         output_data: [0; 32],
                     })
                     .await;
-
-                rktk::print!("Sent report: {:?}", &data);
             }
         },
     )

@@ -81,6 +81,8 @@ pub(crate) async fn send_stream_response_body<
         send_response_body::<_, _, BUF_SIZE>(tp, &data).await?;
     }
 
+    dbg!("a");
+
     tp.write_all(&[Indicator::End as u8])
         .await
         .map_err(SendError::Write)?;

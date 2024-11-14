@@ -1,6 +1,6 @@
 use core::pin::pin;
 
-use futures::{future::select, StreamExt as _};
+use futures::{future::select, StreamExt};
 use test_server::Handlers;
 use tokio::io::duplex;
 
@@ -38,7 +38,7 @@ macro_rules! execute_test {
 #[tokio::test]
 async fn test_normal_normal() {
     let test = |reader, writer| async move {
-        let mut client = Client::new(reader, writer);
+        let mut client = Client::<_, _, 1024>::new(reader, writer);
         let req = "ping".to_string();
         let res = client.test_normal_normal(req.clone()).await.unwrap();
         assert_eq!(req, res);
@@ -49,7 +49,7 @@ async fn test_normal_normal() {
 #[tokio::test]
 async fn test_stream_normal() {
     let test = |reader, writer| async move {
-        let mut client = Client::new(reader, writer);
+        let mut client = Client::<_, _, 1024>::new(reader, writer);
         let req = vec!["".to_string(), "a".to_string(), "abc".to_string()];
         let res = client
             .test_stream_normal(futures::stream::iter(req.clone()))
@@ -63,12 +63,31 @@ async fn test_stream_normal() {
 #[tokio::test]
 async fn test_normal_stream() {
     let test = |reader, writer| async move {
-        let mut client = Client::new(reader, writer);
+        let mut client = Client::<_, _, 1024>::new(reader, writer);
         let req = vec!["a".to_string(), "bbb".to_string(), "ccc".to_string()];
         let res: Vec<String> = client
             .test_normal_stream(req.clone())
             .await
             .unwrap()
+            .filter_map(|x| async { x.ok() })
+            .collect()
+            .await;
+
+        assert_eq!(req, res);
+    };
+    execute_test!(Handlers, test);
+}
+
+#[tokio::test]
+async fn test_normal_stream_len_0() {
+    let test = |reader, writer| async move {
+        let mut client = Client::<_, _, 1024>::new(reader, writer);
+        let req = vec![];
+        let res: Vec<String> = client
+            .test_normal_stream(req.clone())
+            .await
+            .unwrap()
+            .filter_map(|x| async { x.ok() })
             .collect()
             .await;
 
@@ -80,7 +99,7 @@ async fn test_normal_stream() {
 #[tokio::test]
 async fn test_stream_stream() {
     let test = |reader, writer| async move {
-        let mut client = Client::new(reader, writer);
+        let mut client = Client::<_, _, 1024>::new(reader, writer);
         let req = vec!["a".to_string(), "bbb".to_string(), "ccc".to_string()];
         let res_stream = client
             .test_stream_stream(futures::stream::iter(req.clone()))
@@ -89,7 +108,7 @@ async fn test_stream_stream() {
         let mut res_stream = pin!(res_stream);
 
         let mut i = 0;
-        while let Some(res) = res_stream.next().await {
+        while let Some(Ok(res)) = res_stream.next().await {
             assert_eq!(req[i], res);
             i += 1;
         }

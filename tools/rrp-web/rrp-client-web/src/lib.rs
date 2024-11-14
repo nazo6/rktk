@@ -80,12 +80,9 @@ impl Client {
 
         let res = stream.collect::<Vec<_>>().await;
 
-        log::info!("get_layout_json: {:?}", &res);
-
         let string =
             String::from_utf8(res.into_iter().flatten().collect()).map_err(|e| e.to_string())?;
 
-        log::info!("get_layout_json: {:?}", &string);
         Ok(string)
     }
 
@@ -136,6 +133,7 @@ impl Client {
         let mut log = LogEntry::default();
         let mut log_bytes = Vec::new();
         while let Some(chunk) = stream.next().await {
+            log::info!("chunk {:?}", chunk);
             match chunk {
                 get_log::LogChunk::Start { time, level, line } => {
                     log.time = time;

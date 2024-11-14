@@ -88,13 +88,11 @@ export function useConnect() {
       try {
         const kb = await client.get_keyboard_info();
         console.log(kb);
-        const layout = await client.get_layout_json();
-        console.log(layout);
-        // setConnection({
-        //   client,
-        //   device,
-        //   keyboard: kb,
-        // });
+        setConnection({
+          client,
+          device,
+          keyboard: kb,
+        });
         return kb;
       } catch (e) {
         try {

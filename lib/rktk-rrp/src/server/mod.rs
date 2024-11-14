@@ -1,17 +1,24 @@
-pub use crate::macro_space::server::*;
-use crate::shared::transport::{error::TransportError, ReadTransport, WriteTransport};
-use transport::recv::*;
+use crate::macros::server_generated::ServerHandlers;
+use crate::transport::read::ReadTransportExt as _;
+use crate::transport::*;
 
-pub mod transport;
-
-pub struct Server<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers, const BUF_SIZE: usize> {
+pub struct Server<
+    RT: ReadTransport<BUF_SIZE>,
+    WT: WriteTransport<BUF_SIZE>,
+    H: ServerHandlers<RT::Error, WT::Error>,
+    const BUF_SIZE: usize,
+> {
     pub(crate) reader: RT,
     pub(crate) writer: WT,
     pub(crate) handlers: H,
 }
 
-impl<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers, const BUF_SIZE: usize>
-    Server<RT, WT, H, BUF_SIZE>
+impl<
+        RT: ReadTransport<BUF_SIZE>,
+        WT: WriteTransport<BUF_SIZE>,
+        H: ServerHandlers<RT::Error, WT::Error>,
+        const BUF_SIZE: usize,
+    > Server<RT, WT, H, BUF_SIZE>
 {
     pub fn new(reader: RT, writer: WT, handlers: H) -> Self {
         Self {
@@ -28,81 +35,10 @@ impl<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers, const BUF_SIZE: u
     }
 
     async fn process_request(&mut self) -> Result<(), TransportError<RT::Error, WT::Error>> {
-        let endpoint_id = recv_request_header(&mut self.reader)
-            .await
-            .map_err(TransportError::RecvError)?;
+        let req_header = self.reader.recv_request_header().await?;
 
-        self.handle(endpoint_id).await?;
+        self.handle(req_header).await?;
 
         Ok(())
     }
 }
-
-macro_rules! generate_server_handlers {
-    ($($endpoint_id:tt: $endpoint_name:ident($req_kind:tt: $req_type:ty) -> $res_kind:tt: $res_type:ty;)*) => {
-        use crate::macro_space::gen_type;
-        use crate::server::*;
-        use crate::server::transport::{recv::*, send::*};
-        use crate::shared::transport::*;
-        use core::fmt::Display;
-
-        #[allow(async_fn_in_trait)]
-        pub trait ServerHandlers {
-            type Error: Display;
-            $(
-                async fn $endpoint_name(&mut self, req: gen_type!($req_kind: $req_type)) -> Result<gen_type!($res_kind: $res_type), Self::Error>;
-            )*
-        }
-
-
-        impl<
-                RT: ReadTransport,
-                WT: WriteTransport,
-                H: ServerHandlers,
-                const BUF_SIZE: usize,
-            > Server<RT, WT, H, BUF_SIZE>
-        {
-            pub(crate) async fn handle(&mut self, header: RequestHeader) -> Result<(), TransportError<RT::Error, WT::Error>> {
-                match header.endpoint_id {
-                    $(
-                        $endpoint_id => {
-                            let mut buf = [0u8; BUF_SIZE];
-                            let req = generate_server_handlers!(@recv_req $req_kind, $endpoint_name, &mut self.reader, self.handlers, &mut buf);
-
-                            let Ok(req) = req else {
-                                send_error_response::<_, BUF_SIZE>(&mut self.writer, 0, "Deserialize failed").await.map_err(TransportError::SendError)?;
-                                return Ok(());
-                            };
-                            let Ok(res) = self.handlers.$endpoint_name(req).await else {
-                                return Ok(());
-                            };
-                            send_response_header(&mut self.writer, header.request_id, 0).await?;
-                            generate_server_handlers!(@send_res $res_kind, res, &mut self.writer)?;
-
-                        }
-                    )*
-                    _ => {
-                        send_error_response::<_, BUF_SIZE>(&mut self.writer, header.request_id, "Invalid enpoint").await?;
-                    }
-                }
-
-                Ok(())
-            }
-        }
-    };
-
-    (@recv_req normal, $endpoint_name:ident, $tp:expr, $handlers:expr, $buf:expr) => {{
-        recv_request_body($tp, $buf).await.map(|(req, _)| req)?
-    }};
-    (@recv_req stream, $endpoint_name:ident, $tp:expr, $handlers:expr, $buf:expr) => {{
-        Result::<_, postcard::Error>::Ok(recv_stream_request($tp, $buf))
-    }};
-
-    (@send_res normal, $res:expr, $tp:expr) => {{
-        send_single_response_body::<_, _, BUF_SIZE>($tp, &$res).await
-    }};
-    (@send_res stream, $res:expr, $tp:expr) => {{
-        send_stream_response_body::<_, _, BUF_SIZE>($tp, $res).await
-    }};
-}
-pub(crate) use generate_server_handlers;
