@@ -48,7 +48,7 @@ mod macro_space {
     generate_impls!(
         0: test_normal_normal(normal: String) -> normal: String;
         1: test_stream_normal(stream: String) -> normal: Vec<String>;
-        2: test_normal_stream(normal: String) -> stream: String;
+        2: test_normal_stream(normal: Vec<String>) -> stream: String;
         3: test_stream_stream(stream: String) -> stream: String;
     );
 }

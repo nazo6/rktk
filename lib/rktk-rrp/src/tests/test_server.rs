@@ -43,26 +43,21 @@ pub mod handler {
         type Error = &'static str;
 
         async fn test_normal_normal(&mut self, req: String) -> Result<String, Self::Error> {
-            Ok(format!("req: {}", req))
+            Ok(req)
         }
 
         async fn test_stream_normal(
             &mut self,
             req: impl Stream<Item = String>,
         ) -> Result<Vec<String>, Self::Error> {
-            Ok(req
-                .collect::<Vec<String>>()
-                .await
-                .into_iter()
-                .map(|e| format!("req: {}", e))
-                .collect())
+            Ok(req.collect::<Vec<String>>().await)
         }
 
         async fn test_normal_stream(
             &mut self,
-            req: String,
+            req: Vec<String>,
         ) -> Result<impl Stream<Item = String>, Self::Error> {
-            Ok(stream::iter(vec![req.clone(), req.clone(), req.clone()]))
+            Ok(stream::iter(req))
         }
 
         async fn test_stream_stream(

@@ -38,13 +38,13 @@ pub(crate) async fn recv_response_header<T: AsyncRead + Unpin>(
 
 pub(crate) async fn recv_request_body<T: AsyncRead + Unpin, R: DeserializeOwned>(
     tp: &mut T,
-    buf: &mut [u8],
 ) -> Result<(R, Indicator), ReceiveError> {
     let mut request_size = [0u8; 4];
     tp.read_exact(&mut request_size).await?;
     let request_size = u32::from_le_bytes(request_size);
 
-    tp.read_exact(&mut buf[0..request_size as usize]).await?;
+    let mut buf = vec![0; request_size as usize];
+    tp.read_exact(&mut buf[..]).await?;
 
     let deserialized = postcard::from_bytes::<R>(&buf[0..request_size as usize])?;
 
@@ -53,25 +53,24 @@ pub(crate) async fn recv_request_body<T: AsyncRead + Unpin, R: DeserializeOwned>
     Ok((deserialized, indicator))
 }
 
+// NOTE: What I actually want to do is unpin the stream here, but the stream returned by unfold cannot be unpinned, so the caller needs to use pin!.
+// Perhaps it can be implemented by writing the stream by hand?
 pub(crate) fn recv_stream_request<'a, 't: 'a, T: AsyncRead + Unpin, R: DeserializeOwned>(
     tp: &'t mut T,
 ) -> impl Stream<Item = R> + 'a {
-    futures::stream::unfold(
-        (tp, [0; 1024], false),
-        move |(tp, mut buf, mut stream_finished)| async move {
-            if stream_finished {
-                return None;
-            }
+    futures::stream::unfold((tp, false), move |(tp, mut stream_finished)| async move {
+        if stream_finished {
+            return None;
+        }
 
-            let Ok((res, indicator)) = recv_request_body(tp, &mut buf).await else {
-                return None;
-            };
+        let Ok((res, indicator)) = recv_request_body(tp).await else {
+            return None;
+        };
 
-            if indicator == Indicator::End {
-                stream_finished = true;
-            }
+        if indicator == Indicator::End {
+            stream_finished = true;
+        }
 
-            Some((res, (tp, buf, stream_finished)))
-        },
-    )
+        Some((res, (tp, stream_finished)))
+    })
 }

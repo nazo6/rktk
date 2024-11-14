@@ -38,7 +38,7 @@ macro_rules! generate_client {
 
                     let res_header = recv_response_header(&mut self.reader).await.map_err(|e| transport::ClientTransportError::RecvError(e))?;
                     if res_header.status_code != 0 {
-                        let (message, _ ) = recv_request_body::<_, String>(&mut self.reader, &mut [0u8; 1024]).await.map_err(|e| transport::ClientTransportError::RecvError(e))?;
+                        let (message, _ ) = recv_request_body::<_, String>(&mut self.reader).await.map_err(|e| transport::ClientTransportError::RecvError(e))?;
                         return Err(ClientError::Failed { status: res_header.status_code, message });
                     }
 
@@ -58,7 +58,7 @@ macro_rules! generate_client {
     };
 
     (@recv_response normal, $reader:expr, $res_type:ty) => {
-        recv_request_body::<_, $res_type>(&mut $reader, &mut [0u8; 1024]).await.map_err(|e| transport::ClientTransportError::RecvError(e))?.0
+        recv_request_body::<_, $res_type>(&mut $reader).await.map_err(|e| transport::ClientTransportError::RecvError(e))?.0
     };
     (@recv_response stream, $reader:expr, $res_type:ty) => {
         recv_stream_request(&mut $reader)

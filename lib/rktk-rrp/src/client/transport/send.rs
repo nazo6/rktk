@@ -21,12 +21,11 @@ async fn send_request_body<T: AsyncWrite + Unpin, S: Serialize>(
     tp: &mut T,
     data: &S,
 ) -> Result<(), SendError> {
-    let mut buf = [0u8; 1024];
-    let serialized = postcard::to_slice(data, &mut buf)?;
+    let serialized = postcard::to_stdvec(data)?;
 
     tp.write_all(&(serialized.len() as u32).to_le_bytes())
         .await?;
-    tp.write_all(serialized).await?;
+    tp.write_all(&serialized).await?;
 
     Ok(())
 }
