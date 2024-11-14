@@ -1,3 +1,5 @@
+pub const RRP_HID_BUFFER_SIZE: usize = 32;
+
 use usbd_hid::descriptor::generator_prelude::*;
 
 #[gen_hid_descriptor(

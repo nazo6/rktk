@@ -12,7 +12,6 @@ crate-type = ["cdylib"]
 [dependencies]
 rktk-rrp = { workspace = true, features = ["tsify", "client"] }
 rktk-keymanager = { workspace = true }
-rktk-rrp-hid = { workspace = true }
 
 wasm-bindgen = { workspace = true }
 web-sys = { version = "0.3.70", features = [

@@ -1,6 +1,5 @@
 use embassy_futures::join::join;
 use embassy_time::Timer;
-use itertools::cons_tuples;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, Output, StateConfig},
     KeyChangeEvent, State, StateReport,
@@ -199,7 +198,6 @@ pub async fn start<
     join(
         async {
             let mut prev_time = embassy_time::Instant::now();
-            let mut count = 0;
 
             loop {
                 let start = embassy_time::Instant::now();
@@ -284,12 +282,6 @@ pub async fn start<
                 if took < SCAN_INTERVAL_KEYBOARD {
                     Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
                 }
-
-                if count == 100 {
-                    count = 0;
-                    log::info!("Master task running");
-                }
-                count += 1;
             }
         },
         async {

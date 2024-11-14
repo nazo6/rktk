@@ -9,7 +9,6 @@ repository.workspace = true
 
 [dependencies]
 rktk = { workspace = true }
-rktk-rrp-hid = { workspace = true }
 
 embassy-executor = { workspace = true }
 embedded-hal-async = { workspace = true }

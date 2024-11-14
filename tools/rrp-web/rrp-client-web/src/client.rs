@@ -25,8 +25,8 @@ impl HidReader {
         let cb = Closure::wrap(Box::new(move |e: HidInputReportEvent| {
             let data = e.data();
             let mut buf = [0u8; 32];
-            for i in 0..32 {
-                buf[i] = data.get_uint8(i);
+            for (i, byte) in buf.iter_mut().enumerate() {
+                *byte = data.get_uint8(i);
             }
             let size = buf[0] as usize;
             for i in 0..size {

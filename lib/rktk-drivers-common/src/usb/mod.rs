@@ -7,6 +7,7 @@ use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 mod builder;
 mod driver;
 mod handler;
+mod rrp;
 mod task;
 
 type RemoteWakeupSignal = embassy_sync::signal::Signal<CriticalSectionRawMutex, ()>;

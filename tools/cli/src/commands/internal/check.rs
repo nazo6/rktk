@@ -3,7 +3,7 @@ use duct::cmd;
 
 use crate::utils::{xprintln, METADATA};
 
-const CHECK_ARGS: &[&str] = &["clippy", "--features", "_check", "--all-targets"];
+const CHECK_ARGS: &[&str] = &["clippy", "--features", "_check"];
 
 pub fn start(name: String) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {

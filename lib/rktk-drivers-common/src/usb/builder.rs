@@ -1,10 +1,10 @@
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 
+use super::rrp::RrpReport;
+use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_usb::Builder;
 use rktk::interface::DriverBuilderWithTask;
-use rktk_rrp_hid::report::RrpReport;
-use rktk_rrp_hid::RRP_HID_BUFFER_SIZE;
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };

@@ -1,11 +1,11 @@
+use super::rrp::RrpReport;
+use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_futures::join::{join, join3};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, pipe::Pipe};
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
 use embassy_usb::UsbDevice;
 use rktk::interface::BackgroundTask;
-use rktk_rrp_hid::report::RrpReport;
-use rktk_rrp_hid::RRP_HID_BUFFER_SIZE;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{ReadySignal, RemoteWakeupSignal};

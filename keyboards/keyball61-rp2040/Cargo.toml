@@ -37,3 +37,6 @@ defmt-rtt = { workspace = true }
 ssd1306 = { workspace = true }
 
 keyball-common = { path = "../keyball-common" }
+
+[features]
+_check = []

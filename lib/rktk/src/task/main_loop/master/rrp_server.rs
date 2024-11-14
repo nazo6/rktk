@@ -55,7 +55,7 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
 
     async fn get_keymaps(
         &mut self,
-        req: (),
+        _req: (),
     ) -> Result<impl Stream<Item = get_keymaps::Response>, Self::Error> {
         let keymap = self.state.lock().await.get_keymap().clone();
         Ok(futures::stream::iter(

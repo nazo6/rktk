@@ -32,3 +32,6 @@ portable-atomic = { version = "1.6.0", features = [
 
 # to import example keymap
 keyball-common = { path = "../keyball-common" }
+
+[features]
+_check = []

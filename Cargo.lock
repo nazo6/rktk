@@ -2249,7 +2249,6 @@ dependencies = [
  "embedded-storage-async",
  "heapless 0.7.17",
  "rktk",
- "rktk-rrp-hid",
  "sequential-storage",
  "ssd1306",
  "static_cell",
@@ -2352,14 +2351,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rktk-rrp-hid"
-version = "0.1.0"
-dependencies = [
- "serde",
- "usbd-hid",
-]
-
-[[package]]
 name = "rp-pac"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2390,7 +2381,6 @@ dependencies = [
  "log",
  "rktk-keymanager",
  "rktk-rrp",
- "rktk-rrp-hid",
  "serde",
  "serde-wasm-bindgen",
  "ssmarshal",

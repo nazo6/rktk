@@ -30,7 +30,7 @@ futures = { workspace = true }
 
 
 rktk-keymanager = { workspace = true, features = ["state"] }
-rktk-rrp = { workspace = true, default-features = false, features = ["server"] }
+rktk-rrp = { workspace = true, features = ["server"] }
 postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",

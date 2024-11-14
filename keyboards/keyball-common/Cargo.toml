@@ -9,3 +9,6 @@ repository.workspace = true
 [dependencies]
 rktk-drivers-common = { workspace = true }
 rktk = { workspace = true }
+
+[features]
+_check = []
