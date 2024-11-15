@@ -35,8 +35,16 @@ generate_impls!(
 
 #[cfg(test)]
 generate_impls!(
-    0: test_normal_normal(normal) -> normal;
-    1: test_stream_normal(stream) -> normal;
-    2: test_normal_stream(normal) -> stream;
-    3: test_stream_stream(stream) -> stream;
+    0: get_keyboard_info(normal) -> normal;
+    1: get_layout_json(normal) -> stream;
+    2: get_keymaps(normal) -> stream;
+    3: set_keymaps(stream) -> normal;
+    4: get_keymap_config(normal) -> normal;
+    5: set_keymap_config(normal) -> normal;
+    6: get_now(normal) -> normal;
+    7: get_log(normal) -> stream;
+    8: test_normal_normal(normal) -> normal;
+    9: test_stream_normal(stream) -> normal;
+    10: test_normal_stream(normal) -> stream;
+    11: test_stream_stream(stream) -> stream;
 );

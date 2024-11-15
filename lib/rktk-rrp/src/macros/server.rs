@@ -1,21 +1,29 @@
 macro_rules! gen_ep_sig {
     ($ep:ident, normal: $ty_req:ty, normal: $ty_res:ty) => {
-        async fn $ep(&mut self, req: $ty_req) -> Result<$ty_res, Self::Error>;
+        async fn $ep(&mut self, _req: $ty_req) -> Result<$ty_res, Self::Error> {
+            Err(Self::Error::default())
+        }
     };
     ($ep:ident, normal: $ty_req:ty, stream: $ty_res:ty) => {
-        async fn $ep(&mut self, req: $ty_req) -> Result<impl Stream<Item = $ty_res>, Self::Error>;
+        async fn $ep(&mut self, _req: $ty_req) -> Result<impl Stream<Item = $ty_res>, Self::Error> {
+            Result::<Empty<_>, _>::Err(Self::Error::default())
+        }
     };
     ($ep:ident, stream: $ty_req:ty, normal: $ty_res:ty) => {
         async fn $ep(
             &mut self,
-            req: impl Stream<Item = Result<$ty_req, ReceiveError<RE>>>,
-        ) -> Result<$ty_res, Self::Error>;
+            _req: impl Stream<Item = Result<$ty_req, ReceiveError<RE>>>,
+        ) -> Result<$ty_res, Self::Error> {
+            Err(Self::Error::default())
+        }
     };
     ($ep:ident, stream: $ty_req:ty, stream: $ty_res:ty) => {
         async fn $ep(
             &mut self,
-            req: impl Stream<Item = Result<$ty_req, ReceiveError<RE>>>,
-        ) -> Result<impl Stream<Item = $ty_res>, Self::Error>;
+            _req: impl Stream<Item = Result<$ty_req, ReceiveError<RE>>>,
+        ) -> Result<impl Stream<Item = $ty_res>, Self::Error> {
+            Result::<Empty<_>, _>::Err(Self::Error::default())
+        }
     };
 }
 pub(crate) use gen_ep_sig;
@@ -52,15 +60,17 @@ macro_rules! generate_server_handlers {
         use $crate::transport::write::WriteTransportExt as _;
 
         use futures::Stream;
+        use futures::stream::Empty;
 
         #[allow(async_fn_in_trait)]
         pub trait ServerHandlers<RE: Display, WE: Display> {
-            type Error: Display;
+            type Error: Display + Default;
             $(
                 gen_ep_sig!($endpoint_name, $req_kind: $req_type, $res_kind: $res_type);
             )*
         }
 
+        #[forbid(unreachable_patterns)]
         impl<
                 RT: ReadTransport<BUF_SIZE>,
                 WT: WriteTransport<BUF_SIZE>,
