@@ -5,13 +5,20 @@ use embassy_nrf::{
     Peripheral,
 };
 use embassy_sync::{blocking_mutex::raw::RawMutex, mutex::Mutex};
-use rktk_drivers_common::mouse::paw3395::{config::Config, Paw3395Builder};
+pub use rktk_drivers_common::mouse::paw3395::config;
+use rktk_drivers_common::mouse::paw3395::Paw3395Builder;
 
-pub fn create_paw3395<'d, M: RawMutex, T: Instance + 'd, CS: Peripheral<P = impl Pin> + 'd>(
-    shared_spi: &'d Mutex<M, Spim<'d, T>>,
+pub fn create_paw3395<
+    'a,
+    'd: 'a,
+    M: RawMutex,
+    T: Instance + 'd,
+    CS: Peripheral<P = impl Pin> + 'd,
+>(
+    shared_spi: &'a Mutex<M, Spim<'d, T>>,
     ncs: CS,
-    config: Config,
-) -> Paw3395Builder<SpiDevice<'d, M, Spim<'d, T>, Output<'d>>> {
+    config: config::Config,
+) -> Paw3395Builder<SpiDevice<'a, M, Spim<'d, T>, Output<'d>>> {
     let ncs = Output::new(ncs, Level::High, OutputDrive::Standard);
 
     let device = SpiDevice::new(shared_spi, ncs);
