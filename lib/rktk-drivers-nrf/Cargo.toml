@@ -38,7 +38,6 @@ heapless = { workspace = true }
 bitvec = { version = "1.0.1", default-features = false }
 ssmarshal = { version = "1.0.0", default-features = false }
 smart-leds = { workspace = true }
-defmt = { workspace = true }
 usbd-hid = { workspace = true }
 
 [features]

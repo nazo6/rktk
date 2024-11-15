@@ -27,7 +27,6 @@ use rktk_drivers_nrf::{
 
 use keyball_common::*;
 
-use defmt_rtt as _;
 use nrf_softdevice as _;
 
 #[cfg(feature = "ble")]

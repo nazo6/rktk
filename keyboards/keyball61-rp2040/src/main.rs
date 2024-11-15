@@ -30,8 +30,6 @@ use rktk_drivers_rp::{
 
 use keyball_common::*;
 
-use defmt_rtt as _;
-
 bind_interrupts!(pub struct Irqs {
     USBCTRL_IRQ => embassy_rp::usb::InterruptHandler<USB>;
     I2C1_IRQ => embassy_rp::i2c::InterruptHandler<I2C1>;

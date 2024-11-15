@@ -216,12 +216,6 @@ checksum = "2d7e60934ceec538daadb9d8432424ed043a904d8e0243f3c6446bce549a46ac"
 
 [[package]]
 name = "bitflags"
-version = "1.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
-
-[[package]]
-name = "bitflags"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
@@ -546,48 +540,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f578e8e2c440e7297e008bb5486a3a8a194775224bbc23729b0dbdfaeebf162e"
 
 [[package]]
-name = "defmt"
-version = "0.3.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a99dd22262668b887121d4672af5a64b238f026099f1a2a1b322066c9ecfe9e0"
-dependencies = [
- "bitflags 1.3.2",
- "defmt-macros",
-]
-
-[[package]]
-name = "defmt-macros"
-version = "0.3.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3a9f309eff1f79b3ebdf252954d90ae440599c26c2c553fe87a2d17195f2dcb"
-dependencies = [
- "defmt-parser",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn 2.0.87",
-]
-
-[[package]]
-name = "defmt-parser"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff4a5fefe330e8d7f31b16a318f9ce81000d8e35e69b93eae154d16d2278f70f"
-dependencies = [
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "defmt-rtt"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bab697b3dbbc1750b7c8b821aa6f6e7f2480b47a99bc057a2ed7b170ebef0c51"
-dependencies = [
- "critical-section",
- "defmt",
-]
-
-[[package]]
 name = "diff"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -670,7 +622,6 @@ version = "0.1.0"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
- "defmt-rtt",
  "embassy-executor",
  "embassy-rp",
  "keyball-common",
@@ -716,7 +667,6 @@ checksum = "f64f84599b0f4296b92a4b6ac2109bc02340094bda47b9766c5f9ec6a318ebf8"
 dependencies = [
  "cortex-m",
  "critical-section",
- "defmt",
  "document-features",
  "embassy-executor-macros",
  "embassy-time-driver",
@@ -749,7 +699,6 @@ checksum = "0ef3bac31ec146321248a169e9c7b5799f1e0b3829c7a9b324cb4600a7438f59"
 dependencies = [
  "cortex-m",
  "critical-section",
- "defmt",
  "num-traits",
 ]
 
@@ -776,7 +725,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5f41f2ef4df68d3066c62667a0027b194cf6294e58afe8e6c36b8feede1e4ac"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags",
  "cfg-if",
  "cortex-m",
  "cortex-m-rt",
@@ -821,7 +770,6 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "critical-section",
- "defmt",
  "document-features",
  "embassy-embedded-hal",
  "embassy-futures",
@@ -913,9 +861,6 @@ name = "embassy-usb-driver"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fc247028eae04174b6635104a35b1ed336aabef4654f5e87a8f32327d231970"
-dependencies = [
- "defmt",
-]
 
 [[package]]
 name = "embedded-graphics"
@@ -1440,7 +1385,6 @@ version = "0.1.0"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
- "defmt-rtt",
  "embassy-executor",
  "embassy-nrf",
  "embassy-sync",
@@ -1459,7 +1403,6 @@ version = "0.1.0"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
- "defmt-rtt",
  "embassy-executor",
  "embassy-rp",
  "embassy-sync",
@@ -1519,7 +1462,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags",
  "libc",
 ]
 
@@ -2079,7 +2022,7 @@ version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "679341d22c78c6c649893cbd6c3278dcbe9fc4faa62fea3a9296ae2b50c14625"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags",
  "memchr",
  "unicase",
 ]
@@ -2119,7 +2062,7 @@ version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b6dfecf2c74bce2466cabf93f6664d6998a69eb21e39f4207930065b27b771f"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags",
 ]
 
 [[package]]
@@ -2250,7 +2193,6 @@ name = "rktk-drivers-nrf"
 version = "0.1.0"
 dependencies = [
  "bitvec",
- "defmt",
  "display-interface",
  "embassy-embedded-hal",
  "embassy-executor",
@@ -2304,7 +2246,7 @@ dependencies = [
 name = "rktk-keymanager"
 version = "0.1.0"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags",
  "critical-section",
  "heapless 0.7.17",
  "macro_rules_attribute",
@@ -2411,7 +2353,7 @@ version = "0.38.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99e4ea3e1cdc4b559b8e5650f9c8e5998e3e5c1343b4eaf034565f32318d63c0"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags",
  "errno",
  "libc",
  "linux-raw-sys",

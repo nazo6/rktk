@@ -1,4 +1,3 @@
-use defmt::info;
 use nrf_softdevice::{
     ble::{
         gatt_server::{
@@ -67,7 +66,7 @@ impl BatteryService {
 
     pub fn on_write(&self, handle: u16, data: &[u8]) {
         if handle == self.cccd_handle && !data.is_empty() {
-            info!("battery notifications: {}", (data[0] & 0x01) != 0);
+            // rktk::log::info!("battery notifications: {}", (data[0] & 0x01) != 0);
         }
     }
 }

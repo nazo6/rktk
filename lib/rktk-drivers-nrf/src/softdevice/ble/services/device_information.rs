@@ -32,7 +32,7 @@ pub struct PnPID {
     pub product_version: u16,
 }
 
-#[derive(Debug, Default, defmt::Format)]
+#[derive(Debug, Default)]
 pub struct DeviceInformation {
     pub manufacturer_name: Option<&'static str>,
     pub model_number: Option<&'static str>,

@@ -5,7 +5,6 @@
 
 use core::panic::PanicInfo;
 
-use defmt_rtt as _;
 use embassy_executor::Spawner;
 use keyball_common::KEY_CONFIG;
 use rktk::{
