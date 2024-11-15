@@ -53,8 +53,8 @@ jobs:
     - name: pnpm install
       run: cd tools/rktk-client && pnpm install
 
-    - name: Type check rktk-client and build
-      run: cd tools/rktk-client && pnpm tsc --noEmit && pnpm build
+    - name: Type check and build
+      run: cd tools/rktk-client && pnpm build && pnpm tsc --noEmit
 
     - name: Deploy
       uses: cloudflare/wrangler-action@v3
