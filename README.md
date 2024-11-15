@@ -36,7 +36,7 @@ makes it easy to extend.
 | Backlight                                | 🟡     |
 | USB                                      | ✅     |
 | Bluetooth                                | 🟡     |
-| Remapper support (rrp-web)               | 🟡     |
+| Remapper support                         | 🟡     |
 | Double-tap reset                         | ✅     |
 
 #### Key mapping features
@@ -110,7 +110,7 @@ You need to install some tools to generate firmware.
   firmware for RP2040
 - `arm-none-eabi-objcopy` and `python3`: Required to generate uf2 firmware for
   nRF52840
-- `wasm-pack`: Required to build rrp-web
+- `wasm-pack`: Required to build rktk-client
 
 ### MSRV
 

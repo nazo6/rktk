@@ -1,4 +1,4 @@
-import { KeyAction, KeyCode } from "rrp-client-web";
+import { KeyAction, KeyCode } from "rktk-rrp-client-webhid";
 import {
   MEDIA_KEYS,
   MODIFIER_KEYS,

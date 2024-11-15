@@ -6,7 +6,7 @@ import {
   useToastController,
 } from "@fluentui/react-components";
 import { atom, useAtom, useSetAtom } from "jotai";
-import { Client, KeyboardInfo } from "rrp-client-web";
+import { Client, KeyboardInfo } from "rktk-rrp-client-webhid";
 
 export type Connection = {
   keyboard: KeyboardInfo;

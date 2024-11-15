@@ -1,7 +1,7 @@
 import { KeyData } from "./types";
 import { KeyActionSelector } from "@/components/KeyActionSelector/KeyActionSelector";
 import { Button } from "@fluentui/react-components";
-import { KeyAction } from "rrp-client-web";
+import { KeyAction } from "rktk-rrp-client-webhid";
 
 export function KeySelector(
   props: {

@@ -7,7 +7,7 @@ import {
   SPECIAL_KEYS,
 } from "../../lib/keys";
 import { KeySelector, LayerKeySelector } from "./KeySelector";
-import { KeyCode } from "rrp-client-web";
+import { KeyCode } from "rktk-rrp-client-webhid";
 
 export function KeyCodeSelector(props: {
   title?: string;

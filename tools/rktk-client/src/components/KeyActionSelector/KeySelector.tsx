@@ -1,5 +1,5 @@
 import { Input, Select } from "@fluentui/react-components";
-import { LayerOp } from "rrp-client-web";
+import { LayerOp } from "rktk-rrp-client-webhid";
 
 export function KeySelector<T>(
   props: {

@@ -1,13 +1,13 @@
 {
-  "name": "rrp-desktop",
+  "name": "rktk-client",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev:vite": "vite",
-    "dev:rust": "cd rrp-client-web && cargo watch -s \"wasm-pack build --debug\"",
+    "dev:rust": "cd ../../lib/rktk-rrp-client-webhid && cargo watch -s \"wasm-pack build --debug\"",
     "dev": "conc -c auto npm:dev:*",
-    "build": "cd rrp-client-web && wasm-pack build --release && cd .. && vite build",
+    "build": "cd ../../lib/rktk-rrp-client-webhid && wasm-pack build --release && cd ../../tools/rktk-client && vite build",
     "preview": "vite preview",
     "generate-pwa-assets": "pwa-assets-generator",
     "cf-deploy": "wrangler pages deploy ./dist --project-name rrpc"
@@ -26,7 +26,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.52.2",
-    "rrp-client-web": "link:rrp-client-web/pkg",
+    "rktk-rrp-client-webhid": "link:../../lib/rktk-rrp-client-webhid/pkg",
     "wrangler": "^3.72.2"
   },
   "devDependencies": {

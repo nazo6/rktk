@@ -1,4 +1,4 @@
-import { Key, Media, Special } from "rrp-client-web";
+import { Key, Media, Special } from "rktk-rrp-client-webhid";
 
 export const MODIFIER_KEYS: Map<number, string> = new Map([
   [0x01, "Ctrl(L)"],

@@ -1,5 +1,5 @@
 import { Input, Radio, RadioGroup } from "@fluentui/react-components";
-import { KeyAction, KeyCode } from "rrp-client-web";
+import { KeyAction, KeyCode } from "rktk-rrp-client-webhid";
 import { KeyCodeSelector } from "./KeyCodeSelector";
 
 export function KeyActionSelector(props: {

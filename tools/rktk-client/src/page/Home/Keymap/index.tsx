@@ -13,7 +13,7 @@ import {
 } from "@fluentui/react-components";
 import { Toolbar } from "./Toolbar";
 import { Connection } from "@/lib/connection";
-import { KeyActionLoc } from "rrp-client-web";
+import { KeyActionLoc } from "rktk-rrp-client-webhid";
 
 export function KeymapPage({ connection }: { connection: Connection }) {
   const { data: layout, error: layoutError } = useQuery({

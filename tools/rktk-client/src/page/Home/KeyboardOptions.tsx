@@ -16,7 +16,7 @@ import {
   Path,
   useForm,
 } from "react-hook-form";
-import { StateConfig } from "rrp-client-web";
+import { StateConfig } from "rktk-rrp-client-webhid";
 
 export function KeyboardOptionsPage(props: { connection: Connection }) {
   const { data: keymapConfig, error: fetchError } = useQuery({

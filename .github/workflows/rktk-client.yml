@@ -1,20 +1,20 @@
-name: rrp-web
+name: rktk-client
 
 on:
   push:
     branches: ["master"]
     paths:
-      - 'tools/rrp-web/**'
+      - 'tools/rktk-client/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
-      - '.github/workflows/rrp-web.yml'
+      - '.github/workflows/rktk-client.yml'
       - '.github/workflows/setup-rust/action.yaml'
   pull_request:
     paths:
-      - 'tools/rrp-web/**'
+      - 'tools/rktk-client/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
-      - '.github/workflows/rrp-web.yml'
+      - '.github/workflows/rktk-client.yml'
       - '.github/workflows/setup-rust/action.yaml'
 
 env:
@@ -36,9 +36,6 @@ jobs:
     - uses: taiki-e/install-action@v2
       with:
         tool: wasm-pack
-    
-    - name: Build rust library
-      run: cd tools/rrp-web/rrp-client-web && wasm-pack build --release
 
     - uses: pnpm/action-setup@v4
       name: Setup pnpm
@@ -51,13 +48,13 @@ jobs:
       with:
         node-version: 20
         cache: 'pnpm'
-        cache-dependency-path: tools/rrp-web/pnpm-lock.yaml
+        cache-dependency-path: tools/rktk-client/pnpm-lock.yaml
 
     - name: pnpm install
-      run: cd tools/rrp-web && pnpm install
+      run: cd tools/rktk-client && pnpm install
 
-    - name: Type check rrp-web and build
-      run: cd tools/rrp-web && pnpm tsc --noEmit && pnpm build
+    - name: Type check rktk-client and build
+      run: cd tools/rktk-client && pnpm tsc --noEmit && pnpm build
 
     - name: Deploy
       uses: cloudflare/wrangler-action@v3
@@ -65,4 +62,4 @@ jobs:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         command: pages deploy ./dist --project-name=rrpc
-        workingDirectory: "tools/rrp-web"
+        workingDirectory: "tools/rktk-client"

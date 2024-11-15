@@ -1,5 +1,5 @@
 [package]
-name = "rrp-client-web"
+name = "rktk-rrp-client-webhid"
 authors.workspace = true
 license.workspace = true
 version.workspace = true

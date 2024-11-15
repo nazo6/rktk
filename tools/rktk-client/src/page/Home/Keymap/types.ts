@@ -1,5 +1,5 @@
 import * as kle from "@ijprest/kle-serial";
-import { KeyAction } from "rrp-client-web";
+import { KeyAction } from "rktk-rrp-client-webhid";
 
 export type KeyData = {
   kleKey: kle.Key;
