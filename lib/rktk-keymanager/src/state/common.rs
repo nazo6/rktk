@@ -2,13 +2,20 @@ use crate::time::Instant;
 
 use crate::{keycode::KeyAction, Keymap};
 
-pub(super) struct CommonState<const LAYER: usize, const ROW: usize, const COL: usize> {
-    pub keymap: Keymap<LAYER, ROW, COL>,
+pub(super) struct CommonState<
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+> {
+    pub keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>,
     pub layer_active: [bool; LAYER],
 }
 
-impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, ROW, COL> {
-    pub fn new(keymap: Keymap<LAYER, ROW, COL>) -> Self {
+impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
+    CommonState<LAYER, ROW, COL, ENCODER_COUNT>
+{
+    pub fn new(keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>) -> Self {
         Self {
             keymap,
             layer_active: [false; LAYER],
@@ -26,7 +33,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> CommonState<LAYER, 
         }
 
         for layer in (0..=layer).rev() {
-            let ka = &self.keymap[layer].map[row as usize][col as usize];
+            let ka = &self.keymap.layers[layer].map[row as usize][col as usize];
             if let KeyAction::Inherit = ka {
                 continue;
             } else {

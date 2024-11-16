@@ -71,8 +71,8 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
 
     /// Give keycode and handle it if it is layer related key.
     /// returns true if it is layer related key.
-    pub fn handle_layer_kc<const LAYER: usize>(
-        common_state: &mut CommonState<LAYER, ROW, COL>,
+    pub fn handle_layer_kc<const LAYER: usize, const ENCODER_COUNT: usize>(
+        common_state: &mut CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
         kc: &KeyCode,
         event: EventType,
     ) -> bool {
@@ -97,17 +97,18 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         }
     }
 
-    pub fn resolve_key<const LAYER: usize>(
+    pub fn resolve_key<const LAYER: usize, const ENCODER_COUNT: usize>(
         &mut self,
-        cs: &mut CommonState<LAYER, ROW, COL>,
+        cs: &mut CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
         cls: &CommonLocalState,
-        events: &KeyStatusEvents,
+        key_events: &KeyStatusEvents,
+        encoder_events: &[(usize, super::EncoderDirection)],
     ) -> heapless::Vec<(EventType, KeyCode), { MAX_RESOLVED_KEY_COUNT as usize }> {
         use EventType::*;
 
         let mut resolved_keys = heapless::Vec::new();
 
-        if let Some(loc) = events.pressed.first() {
+        if let Some(loc) = key_events.pressed.first() {
             for osc in &mut self.oneshot {
                 if osc.active.is_none() {
                     osc.active = Some(*loc);
@@ -117,7 +118,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         }
         self.oneshot.retain(|osc| {
             if let Some(loc) = osc.active {
-                if events.released.contains(&loc) {
+                if key_events.released.contains(&loc) {
                     let _ = resolved_keys.push((Released, osc.key));
                     return false;
                 } else {
@@ -126,9 +127,6 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
             }
             true
         });
-
-        #[cfg(test)]
-        dbg!(&self.tap_dance[0]);
 
         for td in self.tap_dance.iter_mut() {
             if let Some(tds) = &mut td.state {
@@ -149,9 +147,9 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
 
         // If new key is pressed, all taphold keys in pressing state will be marked as force hold.
         // Same as QMK's HOLD_ON_OTHER_KEY_PRESS
-        let make_hold = !events.pressed.is_empty();
+        let make_hold = !key_events.pressed.is_empty();
 
-        for event in &events.pressing {
+        for event in &key_events.pressing {
             if let Some(key_state) = &self.key_state[event.row as usize][event.col as usize] {
                 match key_state.action {
                     KeyAction::Normal(kc) => {
@@ -200,7 +198,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
             }
         }
 
-        for event in &events.released {
+        for event in &key_events.released {
             if let Some(key_state) = &self.key_state[event.row as usize][event.col as usize] {
                 match key_state.action {
                     KeyAction::Normal(kc) => {
@@ -244,12 +242,22 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
             self.key_state[event.row as usize][event.col as usize] = None;
         }
 
+        for (encoder_id, encoder_dir) in encoder_events {
+            let key = match encoder_dir {
+                super::EncoderDirection::Clockwise => cs.keymap.encoder_keys[*encoder_id].1,
+                super::EncoderDirection::CounterClockwise => cs.keymap.encoder_keys[*encoder_id].0,
+            };
+
+            let _ = resolved_keys.push((Pressed, key));
+            let _ = resolved_keys.push((Released, key));
+        }
+
         // To determine layer for `pressed` keys, we have to apply the layer changed in above loop.
         // This is important to implement HOLD_ON_OTHER_KEY_PRESS and one shot layer.
         resolved_keys.retain(|(ev, kc)| !Self::handle_layer_kc(cs, kc, *ev));
 
         let highest_layer = cs.highest_layer();
-        for event in &events.pressed {
+        for event in &key_events.pressed {
             let Some(action) = cs.get_inherited_keyaction(event.row, event.col, highest_layer)
             else {
                 continue;
@@ -304,9 +312,6 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         }
 
         resolved_keys.retain(|(ev, kc)| !Self::handle_layer_kc(cs, kc, *ev));
-
-        #[cfg(test)]
-        dbg!(&resolved_keys);
 
         resolved_keys
     }

@@ -2,7 +2,10 @@
 
 #![allow(clippy::single_match)]
 
-use crate::time::{Duration, Instant};
+use crate::{
+    time::{Duration, Instant},
+    Keymap,
+};
 use config::{
     KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
     MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
@@ -10,7 +13,7 @@ use config::{
 use manager::transparent::TransparentReport;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use crate::{state::common::CommonLocalState, Layer};
+use crate::state::common::CommonLocalState;
 
 mod common;
 pub mod config;
@@ -34,13 +37,20 @@ pub struct KeyChangeEvent {
     pub pressed: bool,
 }
 
-pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
+#[derive(Debug)]
+pub enum EncoderDirection {
+    Clockwise,
+    CounterClockwise,
+}
+
+pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
+{
     now: Instant,
 
     key_resolver: key_resolver::KeyResolver<ROW, COL>,
     pressed: pressed::Pressed<COL, ROW>,
 
-    cs: common::CommonState<LAYER, ROW, COL>,
+    cs: common::CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
     mouse: manager::mouse::MouseState,
     keyboard: manager::keyboard::KeyboardState,
     media_keyboard: manager::media_keyboard::MediaKeyboardState,
@@ -49,8 +59,10 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize> {
     config: StateConfig,
 }
 
-impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, COL> {
-    pub fn new(layers: [Layer<ROW, COL>; LAYER], config: StateConfig) -> Self {
+impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
+    State<LAYER, ROW, COL, ENCODER_COUNT>
+{
+    pub fn new(layers: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
         Self {
             config: config.clone(),
             now: Instant::from_start(Duration::from_millis(0)),
@@ -71,6 +83,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
         &mut self,
         key_events: &mut [KeyChangeEvent],
         mouse_event: (i8, i8),
+        encoder_events: &[(usize, EncoderDirection)],
         since_last_update: Duration,
     ) -> StateReport {
         self.now = self.now + since_last_update;
@@ -83,9 +96,9 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
         let mut tls = manager::transparent::TransparentLocalState::new();
 
         let events_with_pressing = self.pressed.update_pressed(key_events);
-        for (event, kc) in self
-            .key_resolver
-            .resolve_key(&mut self.cs, &cls, &events_with_pressing)
+        for (event, kc) in
+            self.key_resolver
+                .resolve_key(&mut self.cs, &cls, &events_with_pressing, encoder_events)
         {
             mls.process_event(&mut self.mouse, &kc, event);
             kls.process_event(&mut cls, &kc, event);
@@ -105,7 +118,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize> State<LAYER, ROW, C
         }
     }
 
-    pub fn get_keymap(&self) -> &[Layer<ROW, COL>; LAYER] {
+    pub fn get_keymap(&self) -> &Keymap<LAYER, ROW, COL, ENCODER_COUNT> {
         &self.cs.keymap
     }
 

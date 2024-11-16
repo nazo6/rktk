@@ -4,7 +4,7 @@
 //! # rktk-keymanager
 //! A library for managing key state and keymaps for self-made keyboards.
 
-use keycode::KeyAction;
+use keycode::{KeyAction, KeyCode};
 
 pub mod keycode;
 mod macros;
@@ -43,7 +43,15 @@ impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
 }
 
 pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
-pub type Keymap<const LAYER: usize, const ROW: usize, const COL: usize> = [Layer<ROW, COL>; LAYER];
+pub struct Keymap<
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+> {
+    pub layers: [Layer<ROW, COL>; LAYER],
+    pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
+}
 
 pub mod time {
     use core::ops::{Add, Sub};

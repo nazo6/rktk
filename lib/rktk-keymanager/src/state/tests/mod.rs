@@ -1,5 +1,6 @@
 mod action;
 mod basic;
+mod encoder;
 mod keycode;
 mod keymap;
 
@@ -7,6 +8,7 @@ mod keymap;
 mod prelude {
     use crate::state::manager::transparent::TransparentReport;
     pub use crate::time::{Duration, Instant};
+    use crate::Keymap;
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
@@ -34,6 +36,7 @@ mod prelude {
     pub const ROWS: usize = 5;
     pub const COLS: usize = 14;
     pub const LAYER_COUNT: usize = 5;
+    pub const ENC_COUNT: usize = 1;
 
     pub const NONE_REPORT: StateReport = StateReport {
         keyboard_report: None,
@@ -103,6 +106,7 @@ mod prelude {
             $state.update(
                 &mut key_change!($($arg),*),
                 (0, 0),
+                &[],
                 $now
 )
         };
@@ -110,14 +114,15 @@ mod prelude {
             $state.update(
                 &mut [],
                 (0, 0),
+                &[],
                 $now
 )
         };
     }
 
     pub fn new_state(
-        keymap: [crate::Layer<ROWS, COLS>; LAYER_COUNT],
-    ) -> State<LAYER_COUNT, ROWS, COLS> {
+        keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT>,
+    ) -> State<LAYER_COUNT, ROWS, COLS, ENC_COUNT> {
         let mut tap_dance = [const { None }; MAX_TAP_DANCE_REPEAT_COUNT as usize];
         tap_dance[0] = Some(TapDanceConfig {
             tap: [

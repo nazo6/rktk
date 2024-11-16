@@ -89,14 +89,19 @@ impl MouseLocalState {
         }
     }
 
-    pub fn loop_end<const LAYER: usize, const ROW: usize, const COL: usize>(
+    pub fn loop_end<
+        const LAYER: usize,
+        const ROW: usize,
+        const COL: usize,
+        const ENCODER_COUNT: usize,
+    >(
         &mut self,
-        common_state: &mut CommonState<LAYER, ROW, COL>,
+        common_state: &mut CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
         common_local_state: &mut CommonLocalState,
         global_mouse_state: &mut MouseState,
         highest_layer: usize,
     ) {
-        if common_state.keymap[highest_layer].arrowmouse {
+        if common_state.keymap.layers[highest_layer].arrowmouse {
             global_mouse_state.arrowball_move.0 += self.mouse_event.0;
             global_mouse_state.arrowball_move.1 += self.mouse_event.1;
 
