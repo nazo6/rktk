@@ -43,6 +43,7 @@ impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
 }
 
 pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
+#[derive(Clone)]
 pub struct Keymap<
     const LAYER: usize,
     const ROW: usize,

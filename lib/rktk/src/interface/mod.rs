@@ -6,6 +6,7 @@ pub mod ble;
 pub mod debounce;
 pub mod display;
 pub mod double_tap;
+pub mod encoder;
 pub mod error;
 pub mod keyscan;
 pub mod mouse;

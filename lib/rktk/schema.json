@@ -43,6 +43,13 @@
           "format": "uint8",
           "minimum": 0.0
         },
+        "encoder_count": {
+          "description": "The number of encoder keys.",
+          "default": 0,
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0.0
+        },
         "layout": {
           "description": "The layout of the keyboard."
         },

@@ -8,9 +8,9 @@ use crate::{
     hooks::Hooks,
     interface::{
         backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver,
-        display::DisplayDriver, double_tap::DoubleTapResetDriver, keyscan::KeyscanDriver,
-        mouse::MouseDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
-        BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
+        display::DisplayDriver, double_tap::DoubleTapResetDriver, encoder::EncoderDriver,
+        keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, storage::StorageDriver,
+        usb::UsbDriver, BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
     },
     KeyConfig,
 };
@@ -27,6 +27,7 @@ pub(crate) mod main_loop;
 pub struct Drivers<
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
+    Encoder: EncoderDriver,
     Ble: BleDriver,
     Usb: UsbDriver,
     Split: SplitDriver,
@@ -43,6 +44,7 @@ pub struct Drivers<
     pub double_tap_reset: Option<DoubleTapReset>,
     pub keyscan: KeyScan,
     pub debounce: Debounce,
+    pub encoder: Option<Encoder>,
     pub split: Split,
     pub backlight: Option<Backlight>,
     pub storage: Option<Storage>,
@@ -59,6 +61,7 @@ pub struct Drivers<
 pub async fn start<
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
+    Encoder: EncoderDriver,
     Ble: BleDriver,
     Usb: UsbDriver,
     Split: SplitDriver,
@@ -77,6 +80,7 @@ pub async fn start<
     mut drivers: Drivers<
         KeyScan,
         Debounce,
+        Encoder,
         Ble,
         Usb,
         Split,
@@ -168,6 +172,7 @@ pub async fn start<
                         usb,
                         drivers.keyscan,
                         drivers.debounce,
+                        drivers.encoder,
                         mouse,
                         drivers.storage,
                         drivers.split,

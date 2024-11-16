@@ -62,6 +62,10 @@ pub struct Keyboard {
     /// The number of rows in the keyboard matrix.
     pub rows: u8,
 
+    /// The number of encoder keys.
+    #[cfg_attr(not(no_build), serde(default = "u8_default::<0>"))]
+    pub encoder_count: u8,
+
     /// Backlight led count for right side
     #[cfg_attr(not(no_build), serde(default = "usize_default::<0>"))]
     pub right_led_count: usize,

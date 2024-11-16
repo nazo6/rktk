@@ -12,8 +12,8 @@ use rktk::{
     interface::{
         backlight::DummyBacklightDriver, ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver,
         display::DummyDisplayDriverBuilder, double_tap::DummyDoubleTapResetDriver,
-        keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder, split::DummySplitDriver,
-        storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
+        encoder::DummyEncoderDriver, keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder,
+        split::DummySplitDriver, storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
     },
     task::Drivers,
 };
@@ -33,6 +33,7 @@ async fn main(_spawner: Spawner) {
         ble_builder: Option::<DummyBleDriverBuilder>::None,
         storage: Option::<DummyStorageDriver>::None,
         debounce: NoopDebounceDriver,
+        encoder: Option::<DummyEncoderDriver>::None,
     };
 
     rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;

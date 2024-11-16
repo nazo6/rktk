@@ -1,7 +1,10 @@
 use crate::time::{Duration, Instant};
 
-use super::config::{
-    TapDanceConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
+use super::{
+    config::{
+        TapDanceConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
+    },
+    EncoderDirection,
 };
 use crate::keycode::{layer::LayerOp, KeyAction, KeyCode};
 
@@ -102,7 +105,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         cs: &mut CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
         cls: &CommonLocalState,
         key_events: &KeyStatusEvents,
-        encoder_events: &[(usize, super::EncoderDirection)],
+        encoder_events: &[(u8, EncoderDirection)],
     ) -> heapless::Vec<(EventType, KeyCode), { MAX_RESOLVED_KEY_COUNT as usize }> {
         use EventType::*;
 
@@ -242,10 +245,10 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
             self.key_state[event.row as usize][event.col as usize] = None;
         }
 
-        for (encoder_id, encoder_dir) in encoder_events {
-            let key = match encoder_dir {
-                super::EncoderDirection::Clockwise => cs.keymap.encoder_keys[*encoder_id].1,
-                super::EncoderDirection::CounterClockwise => cs.keymap.encoder_keys[*encoder_id].0,
+        for (idx, dir) in encoder_events.iter() {
+            let key = match dir {
+                EncoderDirection::Clockwise => cs.keymap.encoder_keys[*idx as usize].1,
+                EncoderDirection::CounterClockwise => cs.keymap.encoder_keys[*idx as usize].0,
             };
 
             let _ = resolved_keys.push((Pressed, key));

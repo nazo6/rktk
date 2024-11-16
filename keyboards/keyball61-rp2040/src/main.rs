@@ -14,7 +14,9 @@ use embassy_rp::{
 use embassy_sync::{blocking_mutex::raw::NoopRawMutex, mutex::Mutex};
 use rktk::{
     hooks::create_empty_hooks,
-    interface::{ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver},
+    interface::{
+        ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver, encoder::DummyEncoderDriver,
+    },
     task::Drivers,
 };
 use rktk_drivers_rp::{
@@ -120,6 +122,7 @@ async fn main(_spawner: Spawner) {
         ble_builder: Option::<DummyBleDriverBuilder>::None,
         storage: Some(storage),
         debounce: NoopDebounceDriver,
+        encoder: Option::<DummyEncoderDriver>::None,
     };
 
     rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;

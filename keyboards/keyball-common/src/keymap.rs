@@ -1,10 +1,9 @@
-use rktk::config::static_config::CONFIG;
 use rktk::keymanager::keycode::*;
 use rktk::keymanager::keycode::{
     key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
 };
 use rktk::keymanager::state::config::TapDanceConfig;
-use rktk::{KeyConfig, Layer, LayerMap};
+use rktk::{KeyConfig, Keymap, Layer, LayerMap};
 
 const L2ENTER: KeyAction = KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
@@ -75,28 +74,31 @@ const L4: LayerMap = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
 ];
 
-pub const KEYMAP: [Layer; CONFIG.config.rktk.layer_count as usize] = [
-    Layer {
-        map: L0,
-        arrowmouse: false,
-    },
-    Layer {
-        map: L1,
-        arrowmouse: false,
-    },
-    Layer {
-        map: L2,
-        arrowmouse: false,
-    },
-    Layer {
-        map: L3,
-        arrowmouse: true,
-    },
-    Layer {
-        map: L4,
-        arrowmouse: true,
-    },
-];
+pub const KEYMAP: Keymap = Keymap {
+    encoder_keys: [],
+    layers: [
+        Layer {
+            map: L0,
+            arrowmouse: false,
+        },
+        Layer {
+            map: L1,
+            arrowmouse: false,
+        },
+        Layer {
+            map: L2,
+            arrowmouse: false,
+        },
+        Layer {
+            map: L3,
+            arrowmouse: true,
+        },
+        Layer {
+            map: L4,
+            arrowmouse: true,
+        },
+    ],
+};
 
 pub const KEY_CONFIG: KeyConfig = KeyConfig {
     keymap: KEYMAP,

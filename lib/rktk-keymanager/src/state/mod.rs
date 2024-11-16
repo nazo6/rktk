@@ -83,7 +83,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
         &mut self,
         key_events: &mut [KeyChangeEvent],
         mouse_event: (i8, i8),
-        encoder_events: &[(usize, EncoderDirection)],
+        encoder_events: &[(u8, EncoderDirection)],
         since_last_update: Duration,
     ) -> StateReport {
         self.now = self.now + since_last_update;

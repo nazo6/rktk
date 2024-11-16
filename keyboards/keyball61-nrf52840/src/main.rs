@@ -16,7 +16,10 @@ use once_cell::sync::OnceCell;
 
 use rktk::{
     hooks::create_empty_hooks,
-    interface::{debounce::EagerDebounceDriver, double_tap::DummyDoubleTapResetDriver},
+    interface::{
+        debounce::EagerDebounceDriver, double_tap::DummyDoubleTapResetDriver,
+        encoder::DummyEncoderDriver,
+    },
     task::Drivers,
 };
 use rktk_drivers_nrf::{
@@ -205,6 +208,7 @@ async fn main(_spawner: Spawner) {
         ble_builder,
         // debounce: rktk::interface::debounce::NoopDebounceDriver,
         debounce: EagerDebounceDriver::new(embassy_time::Duration::from_millis(20)),
+        encoder: Option::<DummyEncoderDriver>::None,
     };
 
     rktk::task::start(drivers, keymap::KEY_CONFIG, create_empty_hooks()).await;

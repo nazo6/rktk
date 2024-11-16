@@ -4,6 +4,7 @@ use crate::{
         backlight::BacklightDriver,
         ble::BleDriver,
         debounce::DebounceDriver,
+        encoder::EncoderDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster, SplitDriver},
@@ -44,6 +45,7 @@ pub type M2sTx<'a> =
 pub async fn start<
     KS: KeyscanDriver,
     DB: DebounceDriver,
+    EN: EncoderDriver,
     M: MouseDriver,
     SP: SplitDriver,
     BL: BacklightDriver,
@@ -57,6 +59,7 @@ pub async fn start<
     usb: Option<Usb>,
     mut keyscan: KS,
     debounce: DB,
+    encoder: Option<EN>,
     mut mouse: Option<M>,
     mut storage: Option<S>,
     mut split: SP,
@@ -132,8 +135,8 @@ pub async fn start<
                 join(
                     split_handler::start(split, s2m_tx, m2s_rx, is_master),
                     master::start(
-                        m2s_tx, s2m_rx, ble, usb, keyscan, debounce, storage, mouse, key_config,
-                        hand, hooks.main,
+                        m2s_tx, s2m_rx, ble, usb, keyscan, debounce, encoder, storage, mouse,
+                        key_config, hand, hooks.main,
                     ),
                 )
                 .await;

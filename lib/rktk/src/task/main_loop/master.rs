@@ -1,13 +1,18 @@
-use embassy_futures::join::join;
+use embassy_futures::{
+    join::join,
+    select::{select3, Either3},
+};
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Timer;
+use futures::future::join4;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, Output, StateConfig},
-    KeyChangeEvent, State, StateReport,
+    EncoderDirection, KeyChangeEvent, State, StateReport,
 };
 
 use crate::{
     config::{
-        static_config::{KEYBOARD, RKTK_CONFIG, SCAN_INTERVAL_KEYBOARD},
+        static_config::{KEYBOARD, RKTK_CONFIG, SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
         storage_config::StorageConfigManager,
     },
     hooks::MainHooks,
@@ -15,6 +20,7 @@ use crate::{
         backlight::{BacklightCommand, BacklightMode},
         ble::BleDriver,
         debounce::DebounceDriver,
+        encoder::EncoderDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         reporter::ReporterDriver,
@@ -31,6 +37,13 @@ use super::{M2sTx, S2mRx};
 
 mod rrp_server;
 
+type ConfiguredState = State<
+    { RKTK_CONFIG.layer_count as usize },
+    { KEYBOARD.rows as usize },
+    { KEYBOARD.cols as usize },
+    { KEYBOARD.encoder_count as usize },
+>;
+
 /// TODO: Currently, split index is changed like below.
 /// Splitted:
 /// 0 1 2 3 4   4 3 2 1 0
@@ -39,44 +52,9 @@ mod rrp_server;
 /// 0 1 2 3 4   5 6 7 8 9
 ///
 /// I'm not sure this is a common practice.
-fn split_to_entire(ev: &mut KeyChangeEvent, hand: Hand) {
+fn resolve_entire_key_pos(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
         ev.col = KEYBOARD.cols - 1 - ev.col;
-    }
-}
-
-fn receive_from_slave<const N: usize>(
-    slave_events: &mut heapless::Vec<KeyChangeEvent, N>,
-    mouse_move: &mut (i8, i8),
-    hand: Hand,
-    s2m_rx: S2mRx<'_>,
-) {
-    while let Ok(cmd_from_slave) = s2m_rx.try_receive() {
-        match cmd_from_slave {
-            SlaveToMaster::Pressed(row, col) => {
-                let mut ev = KeyChangeEvent {
-                    col,
-                    row,
-                    pressed: true,
-                };
-                split_to_entire(&mut ev, hand);
-                slave_events.push(ev).ok();
-            }
-            SlaveToMaster::Released(row, col) => {
-                let mut ev = KeyChangeEvent {
-                    col,
-                    row,
-                    pressed: false,
-                };
-                split_to_entire(&mut ev, hand);
-                slave_events.push(ev).ok();
-            }
-            SlaveToMaster::Mouse { x, y } => {
-                mouse_move.0 += x;
-                mouse_move.1 += y;
-            }
-            SlaveToMaster::Message(_) => {}
-        }
     }
 }
 
@@ -108,6 +86,7 @@ pub async fn start<
     'a,
     KS: KeyscanDriver,
     DB: DebounceDriver,
+    EN: EncoderDriver,
     M: MouseDriver,
     Ble: BleDriver,
     Usb: UsbDriver,
@@ -120,6 +99,7 @@ pub async fn start<
     usb: Option<Usb>,
     mut keyscan: KS,
     mut debounce: DB,
+    mut encoder: Option<EN>,
     storage: Option<S>,
     mut mouse: Option<M>,
     key_config: KeyConfig,
@@ -155,7 +135,7 @@ pub async fn start<
         let mut keymap = key_config.keymap;
         for l in 0..RKTK_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
-                keymap[l as usize] = layer;
+                keymap.layers[l as usize] = layer;
             }
         }
 
@@ -197,92 +177,200 @@ pub async fn start<
 
     join(
         async {
-            let mut prev_time = embassy_time::Instant::now();
+            let mouse_move_ch: Channel<CriticalSectionRawMutex, (i8, i8), 10> = Channel::new();
+            let mouse_move_ch_sender = mouse_move_ch.sender();
+            let mouse_move_ch_receiver = mouse_move_ch.receiver();
 
-            loop {
-                let start = embassy_time::Instant::now();
-                let since_last_update = start - prev_time;
-                prev_time = start;
+            let key_event_ch: Channel<CriticalSectionRawMutex, KeyChangeEvent, 10> = Channel::new();
+            let key_event_ch_sender = key_event_ch.sender();
+            let key_event_ch_receiver = key_event_ch.receiver();
 
-                let mut mouse_move: (i8, i8) = (0, 0);
+            let encoder_event_ch: Channel<CriticalSectionRawMutex, (u8, EncoderDirection), 10> =
+                Channel::new();
+            let encoder_event_ch_sender = encoder_event_ch.sender();
+            let encoder_event_ch_receiver = encoder_event_ch.receiver();
 
-                let (events, _) = join(keyscan.scan(), async {
-                    if let Some(mouse) = &mut mouse {
-                        match mouse.read().await {
-                            Ok((x, y)) => {
-                                mouse_move.0 += x;
-                                mouse_move.1 += y;
-                            }
-                            Err(e) => {
-                                log::warn!("Failed to read mouse: {:?}", e);
-                                crate::print!("{:?}", e);
-                            }
-                        }
-                    }
-                })
-                .await;
-
-                let mut events = events
-                    .into_iter()
-                    .filter(|ev| !debounce.should_ignore_event(ev, start))
-                    .collect::<heapless::Vec<_, 32>>();
-
-                events.iter_mut().for_each(|ev| split_to_entire(ev, hand));
-
-                receive_from_slave(&mut events, &mut mouse_move, hand.other(), s2m_rx);
-
-                let state_report =
-                    state
-                        .lock()
+            join(
+                async {
+                    let mut prev_report_time = embassy_time::Instant::now();
+                    loop {
+                        let state_report = match select3(
+                            mouse_move_ch_receiver.ready_to_receive(),
+                            key_event_ch_receiver.ready_to_receive(),
+                            encoder_event_ch_receiver.ready_to_receive(),
+                        )
                         .await
-                        .update(&mut events, mouse_move, since_last_update.into());
+                        {
+                            Either3::First(_) => {
+                                let mut mouse_move: (i8, i8) = (0, 0);
+                                while let Ok((x, y)) = mouse_move_ch_receiver.try_receive() {
+                                    mouse_move.0 += x;
+                                    mouse_move.1 += y;
+                                }
 
-                crate::utils::display_state!(HighestLayer, state_report.highest_layer);
-
-                if state_report.transparent_report.flash_clear {
-                    if let Some(ref storage) = config_storage {
-                        match storage.storage.format().await {
-                            Ok(_) => {
-                                log::info!("Storage formatted by report");
-                                crate::print!("Storage formatted")
+                                state.lock().await.update(
+                                    &mut [],
+                                    mouse_move,
+                                    &[],
+                                    (embassy_time::Instant::now() - prev_report_time).into(),
+                                )
                             }
-                            Err(e) => {
-                                log::error!("Failed to format storage: {:?}", e);
-                                crate::print!("Failed to format storage: {:?}", e)
+                            Either3::Second(_) => {
+                                let mut events = heapless::Vec::<_, 10>::new();
+                                while let Ok(ev) = key_event_ch_receiver.try_receive() {
+                                    events.push(ev).ok();
+                                }
+                                let state_report = state.lock().await.update(
+                                    &mut events,
+                                    (0, 0),
+                                    &[],
+                                    (embassy_time::Instant::now() - prev_report_time).into(),
+                                );
+
+                                crate::utils::display_state!(
+                                    HighestLayer,
+                                    state_report.highest_layer
+                                );
+
+                                if state_report.transparent_report.flash_clear {
+                                    if let Some(ref storage) = config_storage {
+                                        match storage.storage.format().await {
+                                            Ok(_) => {
+                                                log::info!("Storage formatted by report");
+                                                crate::print!("Storage formatted")
+                                            }
+                                            Err(e) => {
+                                                log::error!("Failed to format storage: {:?}", e);
+                                                crate::print!("Failed to format storage: {:?}", e)
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if state_report.transparent_report.ble_bond_clear {
+                                    if let Some(ble) = &mut ble {
+                                        ble.clear_bond_data().await;
+                                    }
+                                }
+
+                                state_report
+                            }
+                            Either3::Third(_) => {
+                                let (id, dir) = encoder_event_ch_receiver.receive().await;
+                                state.lock().await.update(
+                                    &mut [],
+                                    (0, 0),
+                                    &[(id, dir)],
+                                    (embassy_time::Instant::now() - prev_report_time).into(),
+                                )
+                            }
+                        };
+
+                        handle_led(&state_report, m2s_tx, &mut latest_led);
+
+                        match state_report.transparent_report.output {
+                            Output::Usb => {
+                                crate::utils::display_state!(Output, Output::Usb);
+                                if let Some(usb) = &usb {
+                                    send_report(usb, state_report);
+                                }
+                            }
+                            Output::Ble => {
+                                crate::utils::display_state!(Output, Output::Ble);
+                                if let Some(ble) = &ble {
+                                    send_report(ble, state_report);
+                                }
                             }
                         }
+
+                        prev_report_time = embassy_time::Instant::now();
                     }
-                }
-
-                if state_report.transparent_report.ble_bond_clear {
-                    if let Some(ble) = &mut ble {
-                        ble.clear_bond_data().await;
-                    }
-                }
-
-                handle_led(&state_report, m2s_tx, &mut latest_led);
-
-                match state_report.transparent_report.output {
-                    Output::Usb => {
-                        crate::utils::display_state!(Output, Output::Usb);
-                        if let Some(usb) = &usb {
-                            send_report(usb, state_report);
+                },
+                join4(
+                    // slave
+                    async {
+                        loop {
+                            s2m_rx.ready_to_receive().await;
+                            while let Ok(cmd_from_slave) = s2m_rx.try_receive() {
+                                match cmd_from_slave {
+                                    SlaveToMaster::Pressed(row, col) => {
+                                        let mut ev = KeyChangeEvent {
+                                            col,
+                                            row,
+                                            pressed: true,
+                                        };
+                                        resolve_entire_key_pos(&mut ev, hand);
+                                        key_event_ch_sender.send(ev).await;
+                                    }
+                                    SlaveToMaster::Released(row, col) => {
+                                        let mut ev = KeyChangeEvent {
+                                            col,
+                                            row,
+                                            pressed: false,
+                                        };
+                                        resolve_entire_key_pos(&mut ev, hand);
+                                        key_event_ch_sender.send(ev).await;
+                                    }
+                                    SlaveToMaster::Mouse { x, y } => {
+                                        mouse_move_ch_sender.send((x, y)).await;
+                                    }
+                                    SlaveToMaster::Message(_) => {}
+                                }
+                            }
                         }
-                    }
-                    Output::Ble => {
-                        crate::utils::display_state!(Output, Output::Ble);
-                        if let Some(ble) = &ble {
-                            send_report(ble, state_report);
+                    },
+                    // key
+                    async {
+                        loop {
+                            Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+                            let mut events = keyscan
+                                .scan()
+                                .await
+                                .into_iter()
+                                .filter(|ev| {
+                                    !debounce.should_ignore_event(ev, embassy_time::Instant::now())
+                                })
+                                .collect::<heapless::Vec<_, 32>>();
+                            events
+                                .iter_mut()
+                                .for_each(|ev| resolve_entire_key_pos(ev, hand));
+                            for ev in events {
+                                key_event_ch_sender.send(ev).await;
+                            }
                         }
-                    }
-                }
+                    },
+                    // mouse
+                    async {
+                        loop {
+                            Timer::after(SCAN_INTERVAL_MOUSE).await;
 
-                let took = start.elapsed();
-
-                if took < SCAN_INTERVAL_KEYBOARD {
-                    Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
-                }
-            }
+                            let mut mouse_move: (i8, i8) = (0, 0);
+                            if let Some(mouse) = &mut mouse {
+                                match mouse.read().await {
+                                    Ok((x, y)) => {
+                                        mouse_move.0 += x;
+                                        mouse_move.1 += y;
+                                    }
+                                    Err(e) => {
+                                        log::warn!("Failed to read mouse: {:?}", e);
+                                        crate::print!("{:?}", e);
+                                    }
+                                }
+                            }
+                            mouse_move_ch_sender.send(mouse_move).await;
+                        }
+                    },
+                    async {
+                        if let Some(encoder) = &mut encoder {
+                            loop {
+                                let (id, dir) = encoder.read_wait().await;
+                                encoder_event_ch_sender.send((id, dir)).await;
+                            }
+                        }
+                    },
+                ),
+            )
+            .await;
         },
         async {
             if let Some(usb) = &usb {
