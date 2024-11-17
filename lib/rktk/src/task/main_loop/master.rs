@@ -4,7 +4,6 @@ use embassy_futures::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Timer;
-use futures::future::join4;
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, Output, StateConfig},
     EncoderDirection, KeyChangeEvent, State, StateReport,
@@ -220,40 +219,12 @@ pub async fn start<
                                 while let Ok(ev) = key_event_ch_receiver.try_receive() {
                                     events.push(ev).ok();
                                 }
-                                let state_report = state.lock().await.update(
+                                state.lock().await.update(
                                     &mut events,
                                     (0, 0),
                                     &[],
                                     (embassy_time::Instant::now() - prev_report_time).into(),
-                                );
-
-                                crate::utils::display_state!(
-                                    HighestLayer,
-                                    state_report.highest_layer
-                                );
-
-                                if state_report.transparent_report.flash_clear {
-                                    if let Some(ref storage) = config_storage {
-                                        match storage.storage.format().await {
-                                            Ok(_) => {
-                                                log::info!("Storage formatted by report");
-                                                crate::print!("Storage formatted")
-                                            }
-                                            Err(e) => {
-                                                log::error!("Failed to format storage: {:?}", e);
-                                                crate::print!("Failed to format storage: {:?}", e)
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if state_report.transparent_report.ble_bond_clear {
-                                    if let Some(ble) = &mut ble {
-                                        ble.clear_bond_data().await;
-                                    }
-                                }
-
-                                state_report
+                                )
                             }
                             Either3::Third(_) => {
                                 let (id, dir) = encoder_event_ch_receiver.receive().await;
@@ -267,6 +238,29 @@ pub async fn start<
                         };
 
                         handle_led(&state_report, m2s_tx, &mut latest_led);
+
+                        crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+
+                        if state_report.transparent_report.flash_clear {
+                            if let Some(ref storage) = config_storage {
+                                match storage.storage.format().await {
+                                    Ok(_) => {
+                                        log::info!("Storage formatted by report");
+                                        crate::print!("Storage formatted")
+                                    }
+                                    Err(e) => {
+                                        log::error!("Failed to format storage: {:?}", e);
+                                        crate::print!("Failed to format storage: {:?}", e)
+                                    }
+                                }
+                            }
+                        }
+
+                        if state_report.transparent_report.ble_bond_clear {
+                            if let Some(ble) = &mut ble {
+                                ble.clear_bond_data().await;
+                            }
+                        }
 
                         match state_report.transparent_report.output {
                             Output::Usb => {
