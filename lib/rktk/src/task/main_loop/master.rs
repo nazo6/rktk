@@ -1,5 +1,5 @@
 use embassy_futures::{
-    join::join,
+    join::{join, join5},
     select::{select3, Either3},
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
@@ -286,7 +286,7 @@ pub async fn start<
                         prev_report_time = embassy_time::Instant::now();
                     }
                 },
-                join4(
+                join5(
                     // slave
                     async {
                         loop {
@@ -335,16 +335,17 @@ pub async fn start<
                                 .iter_mut()
                                 .for_each(|ev| resolve_entire_key_pos(ev, hand));
                             for ev in events {
-                                key_event_ch_sender.send(ev).await;
+                                let _ = key_event_ch_sender.try_send(ev);
                             }
                         }
                     },
                     // mouse
                     async {
+                        let mut empty_sent = false;
                         loop {
                             Timer::after(SCAN_INTERVAL_MOUSE).await;
 
-                            let mut mouse_move: (i8, i8) = (0, 0);
+                            let mut mouse_move = (0, 0);
                             if let Some(mouse) = &mut mouse {
                                 match mouse.read().await {
                                     Ok((x, y)) => {
@@ -357,15 +358,28 @@ pub async fn start<
                                     }
                                 }
                             }
-                            mouse_move_ch_sender.send(mouse_move).await;
+
+                            if mouse_move == (0, 0) && empty_sent {
+                                continue;
+                            } else {
+                                let _ = mouse_move_ch_sender.try_send(mouse_move);
+                                empty_sent = mouse_move == (0, 0);
+                            }
                         }
                     },
                     async {
                         if let Some(encoder) = &mut encoder {
                             loop {
                                 let (id, dir) = encoder.read_wait().await;
-                                encoder_event_ch_sender.send((id, dir)).await;
+                                let _ = encoder_event_ch_sender.try_send((id, dir));
                             }
+                        }
+                    },
+                    async {
+                        // this is dummy task to make time-dependent things work
+                        loop {
+                            Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+                            let _ = mouse_move_ch_sender.try_send((0, 0));
                         }
                     },
                 ),
