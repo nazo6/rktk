@@ -27,7 +27,6 @@ wasm-bindgen = { workspace = true, optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.41.1", features = ["full"] }
-async-compat = "0.2.4"
 
 [features]
 default = []
