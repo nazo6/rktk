@@ -2255,7 +2255,6 @@ dependencies = [
  "pretty_assertions",
  "serde",
  "serde_with",
- "specta",
  "tsify-next",
  "usbd-hid",
  "wasm-bindgen",
@@ -2275,7 +2274,6 @@ dependencies = [
  "rktk-keymanager",
  "serde",
  "serde_with",
- "specta",
  "thiserror 2.0.3",
  "tokio",
  "tsify-next",
@@ -2587,28 +2585,6 @@ checksum = "ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"
 dependencies = [
  "libc",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "specta"
-version = "2.0.0-rc.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ccbb212565d2dc177bc15ecb7b039d66c4490da892436a4eee5b394d620c9bc"
-dependencies = [
- "specta-macros",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "specta-macros"
-version = "2.0.0-rc.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68999d29816965eb9e5201f60aec02a76512139811661a7e8e653abc810b8f72"
-dependencies = [
- "Inflector",
- "proc-macro2",
- "quote",
- "syn 2.0.87",
 ]
 
 [[package]]

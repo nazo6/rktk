@@ -22,7 +22,6 @@ heapless = { workspace = true, optional = true }
 embedded-io-async = { workspace = true, optional = true }
 
 # client deps
-specta = { workspace = true, optional = true, features = ["derive"] }
 tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 
@@ -38,7 +37,6 @@ client = ["std"]
 
 std = ["postcard/use-std", "futures/std"]
 
-specta = ["dep:specta", "rktk-keymanager/specta"]
 tsify = ["dep:tsify-next", "dep:wasm-bindgen", "rktk-keymanager/tsify"]
 
 _check = ["server", "client"]

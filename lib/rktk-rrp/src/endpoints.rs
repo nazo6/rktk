@@ -27,7 +27,6 @@ pub use test_endpoints::*;
 attribute_alias! {
     #[apply(common_derive)] =
         #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
-        #[cfg_attr(feature = "specta", derive(specta::Type))]
         #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
         #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]
         #[cfg_attr(

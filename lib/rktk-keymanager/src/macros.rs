@@ -45,7 +45,6 @@ attribute_alias! {
             feature = "postcard",
             derive(postcard::experimental::max_size::MaxSize)
         )]
-        #[cfg_attr(feature = "specta", derive(specta::Type))]
         #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
         #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]
         #[derive(PartialEq, Eq, Clone, Debug)]
