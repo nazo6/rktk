@@ -8,7 +8,7 @@ repository.workspace = true
 
 [dependencies]
 bitflags = { version = "2.6.0" }
-heapless = { workspace = true }
+heapless = { workspace = true, optional = true }
 usbd-hid = { workspace = true, optional = true }
 
 paste = { workspace = true }
@@ -30,6 +30,11 @@ usbd-hid = { workspace = true }
 
 
 [features]
+default = ["heapless"]
+
+alloc = []
+heapless = ["dep:heapless"]
+
 # Enables state management.
 state = ["dep:usbd-hid"]
 # Enables serialization.
@@ -41,4 +46,4 @@ std = []
 # Enables type export by specta.
 tsify = ["std", "dep:tsify-next", "dep:wasm-bindgen", "postcard"]
 
-_check = ["state"]
+_check = ["state", "alloc"]

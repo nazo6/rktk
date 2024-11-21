@@ -107,13 +107,13 @@ impl MouseLocalState {
 
             let mut reset = true;
             if global_mouse_state.arrowball_move.1 > 50 {
-                common_local_state.keycodes.push(Key::Right as u8).ok();
+                let _ = common_local_state.keycodes.push(Key::Right as u8);
             } else if global_mouse_state.arrowball_move.1 < -50 {
-                common_local_state.keycodes.push(Key::Left as u8).ok();
+                let _ = common_local_state.keycodes.push(Key::Left as u8);
             } else if global_mouse_state.arrowball_move.0 > 50 {
-                common_local_state.keycodes.push(Key::Down as u8).ok();
+                let _ = common_local_state.keycodes.push(Key::Down as u8);
             } else if global_mouse_state.arrowball_move.0 < -50 {
-                common_local_state.keycodes.push(Key::Up as u8).ok();
+                let _ = common_local_state.keycodes.push(Key::Up as u8);
             } else {
                 reset = false;
             }

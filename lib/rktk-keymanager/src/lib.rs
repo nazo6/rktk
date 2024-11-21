@@ -3,6 +3,14 @@
 
 //! # rktk-keymanager
 //! A library for managing key state and keymaps for self-made keyboards.
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+#[cfg(feature = "alloc")]
+type Vec<T, const N: usize> = alloc::vec::Vec<T>;
+
+#[cfg(all(feature = "heapless", not(feature = "alloc")))]
+type Vec<T, const N: usize> = heapless::Vec<T, N>;
 
 use keycode::{KeyAction, KeyCode};
 

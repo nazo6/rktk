@@ -1,4 +1,4 @@
-use heapless::Vec;
+use crate::Vec;
 
 use super::KeyChangeEvent;
 
@@ -33,21 +33,17 @@ impl<const COL: usize, const ROW: usize> Pressed<COL, ROW> {
             match (event.pressed, *key_pressed) {
                 (true, false) => {
                     *key_pressed = true;
-                    pressed_events
-                        .push(KeyLocation {
-                            row: event.row,
-                            col: event.col,
-                        })
-                        .ok();
+                    let _ = pressed_events.push(KeyLocation {
+                        row: event.row,
+                        col: event.col,
+                    });
                 }
                 (false, true) => {
                     *key_pressed = false;
-                    released_events
-                        .push(KeyLocation {
-                            row: event.row,
-                            col: event.col,
-                        })
-                        .ok();
+                    let _ = released_events.push(KeyLocation {
+                        row: event.row,
+                        col: event.col,
+                    });
                 }
                 _ => {}
             }
@@ -65,7 +61,7 @@ impl<const COL: usize, const ROW: usize> Pressed<COL, ROW> {
                         .chain(released_events.iter())
                         .any(|e| e.row == row && e.col == col)
                 {
-                    pressing_events.push(KeyLocation { row, col }).ok();
+                    let _ = pressing_events.push(KeyLocation { row, col });
                 }
             }
         }

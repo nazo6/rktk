@@ -40,7 +40,7 @@ impl KeyboardLocalState {
                 if let EventType::Pressed = event {
                     common_local_state.normal_key_pressed = true;
                 }
-                common_local_state.keycodes.push(*key as u8).ok();
+                let _ = common_local_state.keycodes.push(*key as u8);
             }
             (_, KeyCode::Modifier(mod_key)) => {
                 self.modifier |= mod_key.bits();

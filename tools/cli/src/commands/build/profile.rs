@@ -104,7 +104,7 @@ gen_profile!(
             debug: Some(true),
         },
         cargo_cmd: CargoCmd {
-            build_std: Some("core,panic_abort".to_string()),
+            build_std: Some("core,alloc,panic_abort".to_string()),
             build_std_features: Some("panic_immediate_abort,optimize_for_size".to_string()),
         },
     },

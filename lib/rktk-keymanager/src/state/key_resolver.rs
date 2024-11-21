@@ -1,4 +1,5 @@
 use crate::time::{Duration, Instant};
+use crate::Vec;
 
 use super::{
     config::{
@@ -46,7 +47,7 @@ struct TapDanceActiveState {
 pub struct KeyResolver<const ROW: usize, const COL: usize> {
     key_state: [[Option<KeyPressedState>; COL]; ROW],
     tap_dance: [TapDance; MAX_TAP_DANCE_REPEAT_COUNT as usize],
-    oneshot: heapless::Vec<OneShotState, { ONESHOT_STATE_SIZE as usize }>,
+    oneshot: Vec<OneShotState, { ONESHOT_STATE_SIZE as usize }>,
     tap_threshold: Duration,
     tap_dance_threshold: Duration,
 }
@@ -62,7 +63,7 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
     pub fn new(mut config: KeyResolverConfig) -> Self {
         Self {
             key_state: core::array::from_fn(|_| core::array::from_fn(|_| None)),
-            oneshot: heapless::Vec::new(),
+            oneshot: Vec::new(),
             tap_dance: core::array::from_fn(|i| TapDance {
                 state: None,
                 config: config.tap_dance[i].take(),
@@ -106,10 +107,10 @@ impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
         cls: &CommonLocalState,
         key_events: &KeyStatusEvents,
         encoder_events: &[(u8, EncoderDirection)],
-    ) -> heapless::Vec<(EventType, KeyCode), { MAX_RESOLVED_KEY_COUNT as usize }> {
+    ) -> Vec<(EventType, KeyCode), { MAX_RESOLVED_KEY_COUNT as usize }> {
         use EventType::*;
 
-        let mut resolved_keys = heapless::Vec::new();
+        let mut resolved_keys = Vec::new();
 
         if let Some(loc) = key_events.pressed.first() {
             for osc in &mut self.oneshot {

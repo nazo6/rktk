@@ -12,7 +12,7 @@ impl KeyboardReportGenerator {
     }
 
     #[allow(clippy::get_first)]
-    pub fn gen(&mut self, keycodes: &heapless::Vec<u8, 6>, modifier: u8) -> Option<KeyboardReport> {
+    pub fn gen(&mut self, keycodes: &crate::Vec<u8, 6>, modifier: u8) -> Option<KeyboardReport> {
         if modifier == 0 && keycodes.is_empty() {
             if !self.empty_kb_sent {
                 self.empty_kb_sent = true;
