@@ -3,6 +3,7 @@ mod basic;
 mod encoder;
 mod keycode;
 mod keymap;
+mod mouse;
 
 #[allow(unused_imports)]
 mod prelude {

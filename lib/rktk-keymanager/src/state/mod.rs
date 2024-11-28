@@ -1,5 +1,6 @@
 //! Keyboard state management.
 
+#![allow(clippy::let_unit_value)]
 #![allow(clippy::single_match)]
 
 use crate::{

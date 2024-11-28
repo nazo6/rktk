@@ -11,8 +11,7 @@ impl KeyboardReportGenerator {
         }
     }
 
-    #[allow(clippy::get_first)]
-    pub fn gen(&mut self, keycodes: &crate::Vec<u8, 6>, modifier: u8) -> Option<KeyboardReport> {
+    pub fn gen(&mut self, keycodes: &[u8], modifier: u8) -> Option<KeyboardReport> {
         if modifier == 0 && keycodes.is_empty() {
             if !self.empty_kb_sent {
                 self.empty_kb_sent = true;
@@ -21,17 +20,13 @@ impl KeyboardReportGenerator {
                 None
             }
         } else {
-            let keycodes: [u8; 6] = [
-                keycodes.get(0).copied().unwrap_or(0),
-                keycodes.get(1).copied().unwrap_or(0),
-                keycodes.get(2).copied().unwrap_or(0),
-                keycodes.get(3).copied().unwrap_or(0),
-                keycodes.get(4).copied().unwrap_or(0),
-                keycodes.get(5).copied().unwrap_or(0),
-            ];
+            let keycode_len = keycodes.len().min(6);
+            let mut keycodes_array = [0; 6];
+            keycodes_array[..keycode_len].copy_from_slice(&keycodes[..keycode_len]);
+
             self.empty_kb_sent = false;
             Some(KeyboardReport {
-                keycodes,
+                keycodes: keycodes_array,
                 modifier,
                 reserved: 0,
                 leds: 0,
