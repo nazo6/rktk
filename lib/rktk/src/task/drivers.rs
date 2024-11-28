@@ -1,0 +1,46 @@
+use crate::interface::{
+    backlight::{BacklightDriver, DummyBacklightDriver},
+    ble::{BleDriver, DummyBleDriver, DummyBleDriverBuilder},
+    debounce::{DebounceDriver, NoopDebounceDriver},
+    display::{DisplayDriver, DummyDisplayDriver, DummyDisplayDriverBuilder},
+    double_tap::{DoubleTapResetDriver, DummyDoubleTapResetDriver},
+    encoder::{DummyEncoderDriver, EncoderDriver},
+    keyscan::KeyscanDriver,
+    mouse::{DummyMouseDriver, DummyMouseDriverBuilder, MouseDriver},
+    split::SplitDriver,
+    storage::{DummyStorageDriver, StorageDriver},
+    usb::{DummyUsbDriver, DummyUsbDriverBuilder, UsbDriver},
+    DriverBuilder, DriverBuilderWithTask,
+};
+
+#[derive(bon::Builder)]
+pub struct Drivers<
+    KeyScan: KeyscanDriver,
+    Split: SplitDriver,
+    Debounce: DebounceDriver = NoopDebounceDriver,
+    Ble: BleDriver = DummyBleDriver,
+    Usb: UsbDriver = DummyUsbDriver,
+    Backlight: BacklightDriver = DummyBacklightDriver,
+    Storage: StorageDriver = DummyStorageDriver,
+    Mouse: MouseDriver = DummyMouseDriver,
+    Display: DisplayDriver = DummyDisplayDriver,
+    MouseBuilder: DriverBuilder<Output = Mouse> = DummyMouseDriverBuilder,
+    DisplayBuilder: DriverBuilder<Output = Display> = DummyDisplayDriverBuilder,
+    UsbBuilder: DriverBuilderWithTask<Driver = Usb> = DummyUsbDriverBuilder,
+    BleBuilder: DriverBuilderWithTask<Driver = Ble> = DummyBleDriverBuilder,
+    DoubleTapReset: DoubleTapResetDriver = DummyDoubleTapResetDriver,
+    Encoder: EncoderDriver = DummyEncoderDriver,
+> {
+    pub double_tap_reset: Option<DoubleTapReset>,
+    pub keyscan: KeyScan,
+    pub debounce: Option<Debounce>,
+    pub encoder: Option<Encoder>,
+    pub split: Option<Split>,
+    pub backlight: Option<Backlight>,
+    pub storage: Option<Storage>,
+
+    pub ble_builder: Option<BleBuilder>,
+    pub usb_builder: Option<UsbBuilder>,
+    pub mouse_builder: Option<MouseBuilder>,
+    pub display_builder: Option<DisplayBuilder>,
+}

@@ -11,12 +11,9 @@ use embassy_executor::Spawner;
 use rktk::{
     hooks::create_empty_hooks,
     interface::{
-        backlight::DummyBacklightDriver, ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver,
-        display::DummyDisplayDriverBuilder, double_tap::DummyDoubleTapResetDriver,
-        encoder::DummyEncoderDriver, keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder,
-        split::DummySplitDriver, storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
+        debounce::NoopDebounceDriver, keyscan::DummyKeyscanDriver, split::DummySplitDriver,
     },
-    task::Drivers,
+    task::drivers::Drivers,
 };
 
 use keymap::KEY_CONFIG;
@@ -25,19 +22,11 @@ use keymap::KEY_CONFIG;
 async fn main(_spawner: Spawner) {
     let _p = embassy_rp::init(Default::default());
 
-    let drivers = Drivers {
-        keyscan: DummyKeyscanDriver,
-        double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
-        mouse_builder: Option::<DummyMouseDriverBuilder>::None,
-        usb_builder: Option::<DummyUsbDriverBuilder>::None,
-        display_builder: Option::<DummyDisplayDriverBuilder>::None,
-        split: DummySplitDriver,
-        backlight: Option::<DummyBacklightDriver>::None,
-        ble_builder: Option::<DummyBleDriverBuilder>::None,
-        storage: Option::<DummyStorageDriver>::None,
-        debounce: NoopDebounceDriver,
-        encoder: Option::<DummyEncoderDriver>::None,
-    };
+    let drivers: Drivers<_, _, _> = Drivers::builder()
+        .keyscan(DummyKeyscanDriver)
+        .debounce(NoopDebounceDriver)
+        .split(DummySplitDriver)
+        .build();
 
     rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;
 }
