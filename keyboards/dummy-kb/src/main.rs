@@ -9,11 +9,7 @@ use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
 use rktk::{
-    hooks::create_empty_hooks,
-    interface::{
-        debounce::NoopDebounceDriver, keyscan::DummyKeyscanDriver, split::DummySplitDriver,
-    },
-    task::drivers::Drivers,
+    hooks::create_empty_hooks, interface::keyscan::DummyKeyscanDriver, task::drivers::Drivers,
 };
 
 use keymap::KEY_CONFIG;
@@ -22,11 +18,7 @@ use keymap::KEY_CONFIG;
 async fn main(_spawner: Spawner) {
     let _p = embassy_rp::init(Default::default());
 
-    let drivers: Drivers<_, _, _> = Drivers::builder()
-        .keyscan(DummyKeyscanDriver)
-        .debounce(NoopDebounceDriver)
-        .split(DummySplitDriver)
-        .build();
+    let drivers: Drivers<_> = Drivers::builder().keyscan(DummyKeyscanDriver).build();
 
     rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;
 }
