@@ -3,11 +3,7 @@
 
 rktk is a keyboard firmware framework written in Rust.
 
-Initially, it was a firmware for the
-[keyball](https://github.com/Yowkees/keyball), but a driver system was
-introduced to make it easy to extend to various keyboards.
-
-Currently, it supports nRF52840 and RP2040, and although there are bugs and
+Currently, rktk supports nRF52840 and RP2040, and although there are bugs and
 performance issues (especially related to split keyboards), it can be used as a
 decent keyboard.
 
@@ -119,11 +115,13 @@ cargo features like `per-package-target`. So, it requires nightly toolchain.
 
 ### Creating new keyboard
 
-See [keyball61-rp2040](./keyboards/keyball61-rp2040) and
-[keyball61-nrf52840](./keyboards/keyball61-nrf52840) for example.
+Currently, there is no guide for building a new keyboard, but you can refer to
+the following repository:
 
-As normal matrix keyscan driver is not implemented yet, it is not possible to
-create a new keyboard without implementing a new driver.
+- https://github.com/nazo6/rktk-neg
+- https://github.com/nazo6/rktk-keyball-rs
+
+Please note that currently driver for regular matrix is not implemented.
 
 ## Credits & Acknowledgements
 

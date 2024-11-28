@@ -3,10 +3,11 @@
 #![no_std]
 #![no_main]
 
+mod keymap;
+
 use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
-use keyball_common::KEY_CONFIG;
 use rktk::{
     hooks::create_empty_hooks,
     interface::{
@@ -17,6 +18,8 @@ use rktk::{
     },
     task::Drivers,
 };
+
+use keymap::KEY_CONFIG;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {

@@ -24,7 +24,7 @@
 //!        "right_led_count": 34,
 //!        "left_led_count": 37,
 //!    
-//!        "name": "keyball61",
+//!        "name": "keyboard name",
 //!        "layout": <Put layout data of kle here>
 //!      },
 //!      "config": {

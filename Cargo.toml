@@ -10,9 +10,6 @@ members = [
   "lib/rktk-rrp",
   "lib/rktk-rrp-client-webhid",
   "keyboards/dummy-kb",
-  "keyboards/keyball61-rp2040",
-  "keyboards/keyball61-nrf52840",
-  "keyboards/keyball-common",
   "tools/cli",
   "tools/ra-check",
 ]
