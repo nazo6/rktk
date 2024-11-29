@@ -39,6 +39,7 @@ bitvec = { version = "1.0.1", default-features = false }
 ssmarshal = { version = "1.0.0", default-features = false }
 smart-leds = { workspace = true }
 usbd-hid = { workspace = true }
+log = { workspace = true }
 
 [features]
 default = ["nrf52840", "softdevice-s140", "ble"]

@@ -51,7 +51,7 @@ async fn usb<'d, D: Driver<'d>>(mut device: UsbDevice<'d, D>, signal: &'static R
             embassy_futures::select::Either::First(_) => {}
             embassy_futures::select::Either::Second(_) => {
                 if let Err(e) = device.remote_wakeup().await {
-                    rktk::log::warn!("Failed to send remote wakeup: {:?}", e);
+                    log::warn!("Failed to send remote wakeup: {:?}", e);
                 }
             }
         }

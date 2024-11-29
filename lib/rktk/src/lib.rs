@@ -9,7 +9,7 @@ pub mod hooks;
 pub mod interface;
 pub mod task;
 mod utils;
-pub use log;
+use log;
 
 #[doc(hidden)]
 pub mod reexports {

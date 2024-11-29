@@ -61,7 +61,7 @@ impl SecurityHandler for Bonder {
             devices.push(data).unwrap();
         }
 
-        rktk::log::info!("Bonded: {:?}", master_id.ediv);
+        log::info!("Bonded: {:?}", master_id.ediv);
 
         BOND_SAVE.signal(devices.clone());
     }
@@ -71,11 +71,11 @@ impl SecurityHandler for Bonder {
             let mut data = self.devices.borrow_mut();
 
             let Some(device) = data.iter_mut().find(|d| d.master_id == master_id) else {
-                rktk::log::info!("Key not found: {:?}", master_id);
+                log::info!("Key not found: {:?}", master_id);
                 return None;
             };
 
-            rktk::log::debug!("Got key: {:?}", master_id);
+            log::debug!("Got key: {:?}", master_id);
 
             device.encryption_info
         };
@@ -107,10 +107,10 @@ impl SecurityHandler for Bonder {
                 device.sys_attrs = Some(sys_attrs);
                 BOND_SAVE.signal(devices.clone());
             } else {
-                rktk::log::info!("Got empty sys_attrs. skipping save.");
+                log::info!("Got empty sys_attrs. skipping save.");
             }
         } else {
-            rktk::log::warn!("Failed to save sys_attrs");
+            log::warn!("Failed to save sys_attrs");
         }
     }
 
@@ -124,7 +124,7 @@ impl SecurityHandler for Bonder {
         {
             Some(Some(sys_attrs)) => set_sys_attrs(conn, Some(sys_attrs.as_slice())),
             _ => {
-                rktk::log::warn!("No sys_attrs to load");
+                log::warn!("No sys_attrs to load");
                 set_sys_attrs(conn, None)
             }
         };
@@ -140,7 +140,7 @@ pub async fn init_bonder(flash: &'static SharedFlash) -> &'static Bonder {
 
     let bond_map = storage::read_bond_map(flash).await.unwrap_or_default();
 
-    rktk::log::info!("Loaded {} bond info", bond_map.iter().count());
+    log::info!("Loaded {} bond info", bond_map.iter().count());
 
     SEC.init(Bonder {
         devices: RefCell::new(bond_map),

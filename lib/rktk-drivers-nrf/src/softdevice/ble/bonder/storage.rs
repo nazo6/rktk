@@ -45,7 +45,7 @@ pub async fn bonder_save_task(flash: &'static SharedFlash) {
 
                 if let Some(prev_data) = &prev_data {
                     if *prev_data == data {
-                        rktk::log::info!("Bond data save is skipped");
+                        log::info!("Bond data save is skipped");
                     }
                 }
 
@@ -67,7 +67,7 @@ pub async fn bonder_save_task(flash: &'static SharedFlash) {
                 .await
                 {
                     Ok(_) => {
-                        rktk::log::info!("Bond map stored");
+                        log::info!("Bond map stored");
                         prev_data = Some(data);
                     }
                     Err(e) => {
@@ -95,13 +95,13 @@ pub async fn read_bond_map(flash: &SharedFlash) -> Option<Devices> {
     )
     .await
     else {
-        rktk::log::warn!("Failed to read bond map");
+        log::warn!("Failed to read bond map");
         return None;
     };
 
     let data = postcard::from_bytes(data)
         .inspect_err(|e| {
-            rktk::log::warn!("Failed to deserialize bond map: {:?}", e);
+            log::warn!("Failed to deserialize bond map: {:?}", e);
         })
         .ok()?;
 
