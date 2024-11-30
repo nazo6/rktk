@@ -19,10 +19,15 @@ export const MOUSE_KEYS: Map<number, string> = new Map([
   [0x10, "Forward"],
 ]);
 
-export const SPECIAL_KEYS: Map<Special, string> = new Map([
-  ["MoScrl", "MoScrl"],
-  ["FlashClear", "Clear Flash"],
-]);
+export const SPECIAL_KEYS: Map<Special, string> = new Map(
+  [
+    ["MoScrl", "Scroll Mode"],
+    ["FlashClear", "Clear Flash"],
+    ["OutputBle", "Output BLE"],
+    ["OutputUsb", "Output USB"],
+    ["BleBondClear", "Clear BLE Bond"],
+  ] as const,
+);
 
 export const LAYER_KEYS: Map<string, string> = new Map([
   ["Toggle", "Toggle"],

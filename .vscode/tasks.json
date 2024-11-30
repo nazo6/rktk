@@ -27,9 +27,9 @@
       "command": "cargo rktk internal test all"
     },
     {
-      "label": "start rrp-client",
+      "label": "start rktk-client",
       "type": "shell",
-      "command": "cd tools/rrp-web && pnpm dev"
+      "command": "cd tools/rktk-client && pnpm dev"
     },
     {
       "label": "clean",

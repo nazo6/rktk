@@ -25,21 +25,23 @@ export function Home({ connection }: { connection: Connection }) {
   const disconnect = useDisconnect();
 
   useEffect(() => {
-    const handler = () => {
-      disconnect.mutate(false);
-      dispatchToast(
-        <Toast>
-          <ToastTitle>
-            Serial closed. disconnecting...
-          </ToastTitle>
-        </Toast>,
-        { intent: "warning" },
-      );
+    const handler = (event: HIDConnectionEvent) => {
+      if (event.device === connection.device) {
+        disconnect.mutate(false);
+        dispatchToast(
+          <Toast>
+            <ToastTitle>
+              Device disconnected
+            </ToastTitle>
+          </Toast>,
+          { intent: "warning" },
+        );
+      }
     };
-    connection.device.addEventListener("disconnect", handler);
+    navigator.hid.addEventListener("disconnect", handler);
 
     return () => {
-      connection.device.removeEventListener("disconnect", handler);
+      navigator.hid.removeEventListener("disconnect", handler);
     };
   }, []);
 

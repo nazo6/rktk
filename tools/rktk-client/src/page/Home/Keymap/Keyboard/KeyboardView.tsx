@@ -46,7 +46,7 @@ function Key(
   return (
     <div
       className={clsx(
-        "absolute border-2 p-1 font-bold cursor-pointer hover:bg-gray-500/20",
+        "absolute border-2 p-1 font-bold cursor-pointer hover:bg-gray-500/20 overflow-hidden",
         keyData.changed && "text-red-500",
         selected && "border-blue-500 dark:border-blue-400",
         !selected && "border-black dark:border-gray-500",

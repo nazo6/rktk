@@ -55,7 +55,7 @@ export function Providers() {
 function App() {
   const connection = useAtomValue(connectionAtom);
 
-  const serialSupported = !!navigator.serial;
+  const webHidSupported = !!navigator.hid;
 
   const disconnect = useDisconnect();
 
@@ -84,13 +84,12 @@ function App() {
       </TitleBar>
       <div className="min-h-0 flex-grow">
         <Toaster position="bottom-end" />
-        {serialSupported
+        {webHidSupported
           ? connection ? <Home connection={connection} /> : <Connect />
           : (
             <div className="flex justify-center items-center h-full text-lg p-2">
-              Sorry, this browser does not support web serial, so rrp-client
-              cannot be used. Please use browser that supports web serial, such
-              as Chrome or Edge browser.
+              It appears that this browser does not support WebHID. WebHID is
+              required to use RKTK Client.
             </div>
           )}
       </div>

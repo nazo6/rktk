@@ -56,7 +56,7 @@ export function TitleBar(props: { children?: React.ReactNode }) {
     <div
       className={"flex items-center py-2 px-2 gap-3 " + styles.title}
     >
-      <Text className={styles.titleText} as="h1">rrp-client</Text>
+      <Text className={styles.titleText} as="h1">RKTK Client</Text>
 
       <div className="ml-auto flex items-center">
         {props.children}

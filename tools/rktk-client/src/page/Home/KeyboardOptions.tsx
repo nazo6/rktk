@@ -35,7 +35,7 @@ export function KeyboardOptionsPage(props: { connection: Connection }) {
     )
     : fetchError
     ? <div>Failed to fetch keymap config: {fetchError.message}</div>
-    : <div>Loading...</div>;
+    : <></>;
 }
 
 function KeyboardOptionsPageInner(

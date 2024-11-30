@@ -63,9 +63,6 @@ importers:
       '@types/w3c-web-hid':
         specifier: ^1.0.6
         version: 1.0.6
-      '@types/w3c-web-serial':
-        specifier: ^1.0.6
-        version: 1.0.6
       '@vite-pwa/assets-generator':
         specifier: ^0.2.4
         version: 0.2.4
@@ -1921,9 +1918,6 @@ packages:
 
   '@types/w3c-web-hid@1.0.6':
     resolution: {integrity: sha512-IWyssXmRDo6K7s31dxf+U+x/XUWuVsl9qUIYbJmpUHPcTv/COfBCKw/F0smI45+gPV34brjyP30BFcIsHgYWLA==}
-
-  '@types/w3c-web-serial@1.0.6':
-    resolution: {integrity: sha512-5IlDdQ2C56sCVwc7CUlqT9Axxw+0V/FbWRbErklYIzZ5mKL9s4l7epXHygn+4X7L2nmAPnVvRl55XUVo0760Rg==}
 
   '@vite-pwa/assets-generator@0.2.4':
     resolution: {integrity: sha512-DXyPLPR/IpbZPSpo1amZEPghY/ziIwpTUKNaz0v1xG+ELzCXmrVQhVzEMqr2JLSqRxjc+UzKfGJA/YdUuaao3w==}
@@ -6073,8 +6067,6 @@ snapshots:
   '@types/trusted-types@2.0.7': {}
 
   '@types/w3c-web-hid@1.0.6': {}
-
-  '@types/w3c-web-serial@1.0.6': {}
 
   '@vite-pwa/assets-generator@0.2.4':
     dependencies:

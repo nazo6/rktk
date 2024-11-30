@@ -135,7 +135,12 @@ function HomeInner({ connection, keyData }: {
           keys={modifiedKeysData}
           layer={layer}
           layerCount={connection.keyboard.keymap.layer_count}
-          setLayer={setLayer}
+          setLayer={(layer) => {
+            setLayer(layer);
+            if (selectedKeyLoc) {
+              setSelectedKeyLoc({ ...selectedKeyLoc, layer });
+            }
+          }}
           selectKeyLoc={(key) => setSelectedKeyLoc(key)}
           selectedKeyLoc={selectedKeyLoc}
         />

@@ -41,7 +41,7 @@ export function useDisconnect() {
       dispatchToast(
         <Toast>
           <ToastTitle>
-            Disconnected serial
+            Disconnected
           </ToastTitle>
         </Toast>,
         { intent: "success" },
