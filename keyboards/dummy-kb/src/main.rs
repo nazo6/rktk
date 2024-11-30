@@ -1,4 +1,4 @@
-//! Just a dummy crate to ensure dummy drivers working
+//! Dummy keyboard to test dummy drivers.
 
 #![no_std]
 #![no_main]
@@ -11,7 +11,7 @@ use embassy_executor::Spawner;
 use rktk::{
     hooks::create_empty_hooks,
     interface::{
-        backlight::DummyBacklightDriver, ble::DummyBleDriverBuilder, debounce::NoopDebounceDriver,
+        backlight::DummyBacklightDriver, ble::DummyBleDriverBuilder, debounce::DummyDebounceDriver,
         display::DummyDisplayDriverBuilder, double_tap::DummyDoubleTapResetDriver,
         encoder::DummyEncoderDriver, keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder,
         split::DummySplitDriver, storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
@@ -31,11 +31,11 @@ async fn main(_spawner: Spawner) {
         mouse_builder: Option::<DummyMouseDriverBuilder>::None,
         usb_builder: Option::<DummyUsbDriverBuilder>::None,
         display_builder: Option::<DummyDisplayDriverBuilder>::None,
-        split: DummySplitDriver,
+        split: Option::<DummySplitDriver>::None,
         backlight: Option::<DummyBacklightDriver>::None,
         ble_builder: Option::<DummyBleDriverBuilder>::None,
         storage: Option::<DummyStorageDriver>::None,
-        debounce: NoopDebounceDriver,
+        debounce: Option::<DummyDebounceDriver>::None,
         encoder: Option::<DummyEncoderDriver>::None,
     };
 

@@ -35,9 +35,9 @@ impl DebounceDriver for EagerDebounceDriver {
     }
 }
 
-pub struct NoopDebounceDriver;
-impl DebounceDriver for NoopDebounceDriver {
+pub enum DummyDebounceDriver {}
+impl DebounceDriver for DummyDebounceDriver {
     fn should_ignore_event(&mut self, _: &KeyChangeEvent, _: embassy_time::Instant) -> bool {
-        false
+        unreachable!()
     }
 }
