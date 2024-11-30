@@ -9,17 +9,24 @@ use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
 use rktk::{
+    drivers::Drivers,
     hooks::create_empty_hooks,
-    interface::{
-        backlight::DummyBacklightDriver, ble::DummyBleDriverBuilder, debounce::DummyDebounceDriver,
-        display::DummyDisplayDriverBuilder, double_tap::DummyDoubleTapResetDriver,
-        encoder::DummyEncoderDriver, keyscan::DummyKeyscanDriver, mouse::DummyMouseDriverBuilder,
-        split::DummySplitDriver, storage::DummyStorageDriver, usb::DummyUsbDriverBuilder,
-    },
-    task::Drivers,
+    interface::keyscan::{Hand, KeyscanDriver},
+    keymanager::state::KeyChangeEvent,
+    none_driver,
 };
 
 use keymap::KEY_CONFIG;
+
+pub struct DummyKeyscanDriver;
+impl KeyscanDriver for DummyKeyscanDriver {
+    async fn scan(&mut self) -> rktk::reexports::heapless::Vec<KeyChangeEvent, 32> {
+        rktk::reexports::heapless::Vec::new()
+    }
+    async fn current_hand(&mut self) -> Hand {
+        Hand::Right
+    }
+}
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -27,16 +34,16 @@ async fn main(_spawner: Spawner) {
 
     let drivers = Drivers {
         keyscan: DummyKeyscanDriver,
-        double_tap_reset: Option::<DummyDoubleTapResetDriver>::None,
-        mouse_builder: Option::<DummyMouseDriverBuilder>::None,
-        usb_builder: Option::<DummyUsbDriverBuilder>::None,
-        display_builder: Option::<DummyDisplayDriverBuilder>::None,
-        split: Option::<DummySplitDriver>::None,
-        backlight: Option::<DummyBacklightDriver>::None,
-        ble_builder: Option::<DummyBleDriverBuilder>::None,
-        storage: Option::<DummyStorageDriver>::None,
-        debounce: Option::<DummyDebounceDriver>::None,
-        encoder: Option::<DummyEncoderDriver>::None,
+        double_tap_reset: none_driver!(DoubleTapReset),
+        mouse_builder: none_driver!(MouseBuilder),
+        usb_builder: none_driver!(UsbBuilder),
+        display_builder: none_driver!(DisplayBuilder),
+        split: none_driver!(Split),
+        backlight: none_driver!(Backlight),
+        ble_builder: none_driver!(BleBuilder),
+        storage: none_driver!(Storage),
+        debounce: none_driver!(Debounce),
+        encoder: none_driver!(Encoder),
     };
 
     rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;

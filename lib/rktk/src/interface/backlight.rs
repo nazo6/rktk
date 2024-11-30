@@ -18,9 +18,3 @@ pub enum BacklightMode {
 pub trait BacklightDriver {
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]);
 }
-
-/// Dummy driver that is only used to be given as a type argument.
-pub enum DummyBacklightDriver {}
-impl BacklightDriver for DummyBacklightDriver {
-    async fn write<const N: usize>(&mut self, _colors: &[RGB8; N]) {}
-}

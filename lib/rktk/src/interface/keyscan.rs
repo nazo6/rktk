@@ -20,13 +20,3 @@ pub trait KeyscanDriver {
     async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32>;
     async fn current_hand(&mut self) -> Hand;
 }
-
-pub struct DummyKeyscanDriver;
-impl KeyscanDriver for DummyKeyscanDriver {
-    async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32> {
-        heapless::Vec::new()
-    }
-    async fn current_hand(&mut self) -> Hand {
-        Hand::Right
-    }
-}

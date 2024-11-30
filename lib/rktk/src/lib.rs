@@ -5,6 +5,7 @@
 #![no_std]
 
 pub mod config;
+pub mod drivers;
 pub mod hooks;
 pub mod interface;
 pub mod task;

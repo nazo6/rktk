@@ -31,6 +31,3 @@ pub trait ReporterDriver {
         Err(RktkError::NotSupported)
     }
 }
-
-pub enum DummyReporterDriver {}
-impl ReporterDriver for DummyReporterDriver {}
