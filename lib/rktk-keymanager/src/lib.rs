@@ -12,16 +12,17 @@ type Vec<T, const N: usize> = alloc::vec::Vec<T>;
 #[cfg(all(feature = "heapless", not(feature = "alloc")))]
 type Vec<T, const N: usize> = heapless::Vec<T, N>;
 
-use keycode::{KeyAction, KeyCode};
-
 pub mod keycode;
 mod macros;
 #[cfg(any(test, feature = "state"))]
 pub mod state;
+mod time;
 #[cfg(not(any(test, feature = "state")))]
 pub mod state {
     pub mod config;
 }
+
+use keycode::{KeyAction, KeyCode};
 
 #[cfg_attr(feature = "serde", serde_with::serde_as)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -51,6 +52,7 @@ impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
 }
 
 pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
+
 #[derive(Clone)]
 pub struct Keymap<
     const LAYER: usize,
@@ -60,36 +62,4 @@ pub struct Keymap<
 > {
     pub layers: [Layer<ROW, COL>; LAYER],
     pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
-}
-
-pub mod time {
-    use core::ops::{Add, Sub};
-    pub use core::time::Duration;
-
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-    pub struct Instant {
-        from_start: core::time::Duration,
-    }
-
-    impl Instant {
-        pub const fn from_start(from_start: core::time::Duration) -> Self {
-            Self { from_start }
-        }
-    }
-
-    impl Add<Duration> for Instant {
-        type Output = Self;
-        fn add(self, rhs: Duration) -> Self {
-            Self {
-                from_start: self.from_start + rhs,
-            }
-        }
-    }
-
-    impl Sub<Instant> for Instant {
-        type Output = Duration;
-        fn sub(self, rhs: Instant) -> Duration {
-            self.from_start - rhs.from_start
-        }
-    }
 }

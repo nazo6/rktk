@@ -64,7 +64,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     State<LAYER, ROW, COL, ENCODER_COUNT>
 {
     pub fn new(layers: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
-        Self {
+        let s = Self {
             config: config.clone(),
             now: Instant::from_start(Duration::from_millis(0)),
             key_resolver: key_resolver::KeyResolver::new(config.key_resolver),
@@ -75,7 +75,18 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             keyboard: manager::keyboard::KeyboardState::new(),
             media_keyboard: manager::media_keyboard::MediaKeyboardState::new(),
             transparent: manager::transparent::TransparentState::new(config.initial_output),
+        };
+
+        #[cfg(test)]
+        {
+            fn size<T>(_: &T) -> usize {
+                std::mem::size_of::<T>()
+            }
+
+            dbg!(size(&s.cs.keymap.layers[0].map[0]));
         }
+
+        s
     }
 
     /// Updates state with the given events.
