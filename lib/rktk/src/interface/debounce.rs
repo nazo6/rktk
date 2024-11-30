@@ -27,8 +27,6 @@ impl DebounceDriver for EagerDebounceDriver {
         let last = self.last[event.row as usize][event.col as usize];
         if let Some(last) = last {
             if now - last < self.debounce_time {
-                crate::log::info!("debounce: {:?}", event);
-
                 return true;
             }
         }

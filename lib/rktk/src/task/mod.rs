@@ -43,9 +43,9 @@ pub struct Drivers<
 > {
     pub double_tap_reset: Option<DoubleTapReset>,
     pub keyscan: KeyScan,
-    pub debounce: Debounce,
+    pub debounce: Option<Debounce>,
     pub encoder: Option<Encoder>,
-    pub split: Split,
+    pub split: Option<Split>,
     pub backlight: Option<Backlight>,
     pub storage: Option<Storage>,
 

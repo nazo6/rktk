@@ -19,7 +19,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: Debounc
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
     mut keyscan: KS,
-    mut debounce: DB,
+    mut debounce: Option<DB>,
     mut mouse: Option<M>,
     mut hooks: MH,
 ) {
@@ -59,10 +59,13 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: Debounc
 
                 let key_events = keyscan.scan().await;
 
-                for event in key_events
-                    .iter()
-                    .filter(|ev| !debounce.should_ignore_event(ev, start))
-                {
+                for event in key_events {
+                    if let Some(debounce) = &mut debounce {
+                        if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
+                            return;
+                        }
+                    }
+
                     let event = if event.pressed {
                         SlaveToMaster::Pressed(event.row, event.col)
                     } else {
