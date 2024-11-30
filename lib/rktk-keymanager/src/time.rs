@@ -4,13 +4,13 @@ pub use core::time::Duration;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Instant {
     /// Time from start in milliseconds.
-    from_start: u16,
+    from_start: u32,
 }
 
 impl Instant {
     pub const fn from_start(from_start: core::time::Duration) -> Self {
         Self {
-            from_start: from_start.as_millis() as u16,
+            from_start: from_start.as_millis() as u32,
         }
     }
 }
@@ -19,7 +19,7 @@ impl Add<Duration> for Instant {
     type Output = Self;
     fn add(self, rhs: Duration) -> Self {
         Self {
-            from_start: self.from_start + rhs.as_millis() as u16,
+            from_start: self.from_start + rhs.as_millis() as u32,
         }
     }
 }
