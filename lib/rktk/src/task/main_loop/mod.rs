@@ -58,11 +58,11 @@ pub async fn start<
     ble: Option<Ble>,
     usb: Option<Usb>,
     mut keyscan: KS,
-    debounce: Option<DB>,
+    debounce: DB,
     encoder: Option<EN>,
     mut mouse: Option<M>,
     mut storage: Option<S>,
-    mut split: Option<SP>,
+    mut split: SP,
     backlight: Option<BL>,
     key_config: KeyConfig,
     mut hooks: crate::hooks::Hooks<MainHooks, BacklightHooks>,
@@ -92,9 +92,7 @@ pub async fn start<
             }
         },
         async {
-            if let Some(split) = &mut split {
-                let _ = split.init().await;
-            }
+            let _ = split.init().await;
 
             let usb_available = if let Some(usb) = &usb {
                 match select(
@@ -110,7 +108,7 @@ pub async fn start<
                 false
             };
 
-            let is_master = split.is_none() || usb_available || ble.is_some();
+            let is_master = usb_available || ble.is_some();
 
             hooks
                 .main
@@ -133,27 +131,19 @@ pub async fn start<
             let m2s_tx = m2s_chan.sender();
             let m2s_rx = m2s_chan.receiver();
 
-            if let Some(split) = split {
-                if is_master {
-                    join(
-                        split_handler::start(split, s2m_tx, m2s_rx, is_master),
-                        master::start(
-                            m2s_tx, s2m_rx, ble, usb, keyscan, debounce, encoder, storage, mouse,
-                            key_config, hand, hooks.main,
-                        ),
-                    )
-                    .await;
-                } else {
-                    join(
-                        split_handler::start(split, m2s_tx, s2m_rx, is_master),
-                        slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.main),
-                    )
-                    .await;
-                }
+            if is_master {
+                join(
+                    split_handler::start(split, s2m_tx, m2s_rx, is_master),
+                    master::start(
+                        m2s_tx, s2m_rx, ble, usb, keyscan, debounce, encoder, storage, mouse,
+                        key_config, hand, hooks.main,
+                    ),
+                )
+                .await;
             } else {
-                master::start(
-                    m2s_tx, s2m_rx, ble, usb, keyscan, debounce, encoder, storage, mouse,
-                    key_config, hand, hooks.main,
+                join(
+                    split_handler::start(split, m2s_tx, s2m_rx, is_master),
+                    slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.main),
                 )
                 .await;
             }

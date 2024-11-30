@@ -1,6 +1,5 @@
 //! Program entrypoint.
 
-use drivers::Drivers;
 use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
 
@@ -18,14 +17,42 @@ use crate::{
 
 mod backlight;
 pub mod display;
-pub mod drivers;
 mod logger;
 pub(crate) mod main_loop;
 
-macro_rules! types {
-    () => {
-        T, U, V
-    };
+/// All drivers required to run the keyboard.
+///
+/// Only the `key_scanner` and `usb` drivers are required.
+/// For other drivers, if the value is None, it will be handled appropriately.
+pub struct Drivers<
+    KeyScan: KeyscanDriver,
+    Debounce: DebounceDriver,
+    Encoder: EncoderDriver,
+    Ble: BleDriver,
+    Usb: UsbDriver,
+    Split: SplitDriver,
+    Backlight: BacklightDriver,
+    DoubleTapReset: DoubleTapResetDriver,
+    Storage: StorageDriver,
+    Mouse: MouseDriver,
+    Display: DisplayDriver,
+    MouseBuilder: DriverBuilder<Output = Mouse>,
+    DisplayBuilder: DriverBuilder<Output = Display>,
+    UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
+    BleBuilder: DriverBuilderWithTask<Driver = Ble>,
+> {
+    pub double_tap_reset: Option<DoubleTapReset>,
+    pub keyscan: KeyScan,
+    pub debounce: Debounce,
+    pub encoder: Option<Encoder>,
+    pub split: Split,
+    pub backlight: Option<Backlight>,
+    pub storage: Option<Storage>,
+
+    pub ble_builder: Option<BleBuilder>,
+    pub usb_builder: Option<UsbBuilder>,
+    pub mouse_builder: Option<MouseBuilder>,
+    pub display_builder: Option<DisplayBuilder>,
 }
 
 /// Receives the [`Drivers`] and executes the main process of the keyboard.
@@ -52,11 +79,13 @@ pub async fn start<
 >(
     mut drivers: Drivers<
         KeyScan,
-        Split,
         Debounce,
+        Encoder,
         Ble,
         Usb,
+        Split,
         Backlight,
+        DoubleTapReset,
         Storage,
         Mouse,
         Display,
@@ -64,8 +93,6 @@ pub async fn start<
         DisplayBuilder,
         UsbBuilder,
         BleBuilder,
-        DoubleTapReset,
-        Encoder,
     >,
     key_config: KeyConfig,
     hooks: Hooks<MainHooks, BacklightHooks>,

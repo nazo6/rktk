@@ -97,7 +97,7 @@ pub async fn start<
     mut ble: Option<Ble>,
     usb: Option<Usb>,
     mut keyscan: KS,
-    mut debounce: Option<DB>,
+    mut debounce: DB,
     mut encoder: Option<EN>,
     storage: Option<S>,
     mut mouse: Option<M>,
@@ -317,17 +317,19 @@ pub async fn start<
                     async {
                         loop {
                             Timer::after(SCAN_INTERVAL_KEYBOARD).await;
-                            let now = embassy_time::Instant::now();
-
-                            for mut event in keyscan.scan().await {
-                                if let Some(debounce) = &mut debounce {
-                                    if debounce.should_ignore_event(&event, now) {
-                                        continue;
-                                    }
-                                }
-                                resolve_entire_key_pos(&mut event, hand);
-
-                                let _ = key_event_ch_sender.try_send(event);
+                            let mut events = keyscan
+                                .scan()
+                                .await
+                                .into_iter()
+                                .filter(|ev| {
+                                    !debounce.should_ignore_event(ev, embassy_time::Instant::now())
+                                })
+                                .collect::<heapless::Vec<_, 32>>();
+                            events
+                                .iter_mut()
+                                .for_each(|ev| resolve_entire_key_pos(ev, hand));
+                            for ev in events {
+                                let _ = key_event_ch_sender.try_send(ev);
                             }
                         }
                     },
