@@ -22,6 +22,12 @@ pub mod drivers;
 mod logger;
 pub(crate) mod main_loop;
 
+macro_rules! types {
+    () => {
+        T, U, V
+    };
+}
+
 /// Receives the [`Drivers`] and executes the main process of the keyboard.
 /// This function must not be called more than once.
 #[allow(clippy::type_complexity)]
