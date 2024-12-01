@@ -5,7 +5,8 @@ mod uf2;
 
 use anyhow::Context as _;
 use colored::Colorize as _;
-use config::{BuildConfig, BuildMcu};
+use config::BuildConfig;
+use mcu::BuildMcuList;
 use profile::{BuildProfileList, PROFILE_CONFIG_TOML};
 use std::{io::Write as _, path::PathBuf};
 
@@ -22,7 +23,7 @@ pub struct BuildCommand {
     /// Chip mcu.
     /// Overrides value in `rktk.build.json`
     #[arg(long, short, value_enum, verbatim_doc_comment)]
-    pub mcu: Option<BuildMcu>,
+    pub mcu: Option<BuildMcuList>,
 
     /// Profile to use for building the binary. This internally use cargo profile, but they are different things.
     /// If not specified, `min-size` will be used.
@@ -119,10 +120,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         BuildProfileList::MinSize
     };
 
-    let mcu_config = match mcu {
-        BuildMcu::Rp2040 => mcu::MCU_CONFIG_RP2040,
-        BuildMcu::Nrf52840 => mcu::MCU_CONFIG_NRF52840,
-    };
+    let mcu_config = mcu.get_mcu_config();
     let profile = profile_name.get_profile();
     let config_toml_file_path = write_profile_config_toml(metadata.target_directory.as_std_path())?;
 
