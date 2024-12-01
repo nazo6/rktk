@@ -1938,7 +1938,7 @@ dependencies = [
 
 [[package]]
 name = "ra-check"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "anyhow",
  "duct",
@@ -2022,7 +2022,7 @@ dependencies = [
 
 [[package]]
 name = "rktk"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "critical-section",
  "display-interface",
@@ -2048,7 +2048,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -2067,7 +2067,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-common"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "display-interface",
  "embassy-executor",
@@ -2092,7 +2092,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-nrf"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "bitvec",
  "display-interface",
@@ -2123,7 +2123,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-rp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "display-interface",
  "embassy-embedded-hal",
@@ -2148,7 +2148,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-keymanager"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "bitflags",
  "critical-section",
@@ -2166,7 +2166,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-rrp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "embedded-io-async",
  "futures",
@@ -2185,7 +2185,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-rrp-client-webhid"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "anyhow",
  "async-lock",

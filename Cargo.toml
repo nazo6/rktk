@@ -18,17 +18,17 @@ resolver = "2"
 [workspace.package]
 authors = ["nazo6"]
 license = "MIT"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 edition = "2021"
 repository = "https://github.com/nazo6/rktk"
 
 [workspace.dependencies]
-rktk-drivers-common = { path = "lib/rktk-drivers-common", version = "0.1.0-beta.1" }
-rktk-drivers-nrf = { path = "lib/rktk-drivers-nrf", version = "0.1.0-beta.1" }
-rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.1.0-beta.1" }
-rktk = { path = "lib/rktk", version = "0.1.0-beta.1" }
-rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.1.0-beta.1" }
-rktk-rrp = { path = "lib/rktk-rrp", version = "0.1.0-beta.1" }
+rktk-drivers-common = { path = "lib/rktk-drivers-common", version = "0.1.0-beta.2" }
+rktk-drivers-nrf = { path = "lib/rktk-drivers-nrf", version = "0.1.0-beta.2" }
+rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.1.0-beta.2" }
+rktk = { path = "lib/rktk", version = "0.1.0-beta.2" }
+rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.1.0-beta.2" }
+rktk-rrp = { path = "lib/rktk-rrp", version = "0.1.0-beta.2" }
 
 # embedded core libraries
 embedded-hal = "1.0.0"
