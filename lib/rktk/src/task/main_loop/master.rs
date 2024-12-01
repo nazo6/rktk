@@ -374,7 +374,7 @@ pub async fn start<
                     async {
                         // this is dummy task to make time-dependent things work
                         loop {
-                            Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+                            Timer::after_millis(10).await;
                             let _ = mouse_move_ch_sender.try_send((0, 0));
                         }
                     },
