@@ -10,6 +10,9 @@ edition.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+no-default-features = true
+
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }

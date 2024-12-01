@@ -7,6 +7,9 @@ version.workspace = true
 edition.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+rustc-args = ["--cfg=web_sys_unstable_apis"]
+
 [lib]
 crate-type = ["cdylib"]
 
