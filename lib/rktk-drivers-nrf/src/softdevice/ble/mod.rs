@@ -1,7 +1,6 @@
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use nrf_softdevice::{raw, Softdevice};
 
-use rktk::drivers::interface::DriverBuilderWithTask;
+use rktk::{drivers::interface::DriverBuilderWithTask, utils::Channel};
 use server::Server;
 pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -22,7 +21,7 @@ pub enum HidReport {
     Mouse(MouseReport),
 }
 
-static REPORT_CHAN: Channel<CriticalSectionRawMutex, HidReport, 8> = Channel::new();
+static REPORT_CHAN: Channel<HidReport, 8> = Channel::new();
 
 pub async fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> Server {
     unsafe {

@@ -9,7 +9,7 @@ use crate::{
     keymap_config::KeyConfig,
 };
 
-use super::{ConfiguredState, SharedState, ThreadModeMutex, RKTK_CONFIG};
+use super::{ConfiguredState, SharedState, RKTK_CONFIG};
 
 /// TODO: Currently, split index is changed like below.
 /// Splitted:
@@ -93,5 +93,5 @@ pub async fn load_state(
         initial_output,
     });
 
-    ThreadModeMutex::new(ConfiguredState::new(keymap, state_config))
+    SharedState::new(ConfiguredState::new(keymap, state_config))
 }

@@ -29,11 +29,14 @@ macro_rules! display_state {
     }};
 }
 pub(crate) use display_state;
-use embassy_sync::mutex::Mutex;
 
 #[cfg(target_arch = "arm")]
-pub(crate) type ThreadModeMutex<T> =
-    Mutex<embassy_sync::blocking_mutex::raw::ThreadModeRawMutex, T>;
+pub type RawMutex = embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
 #[cfg(not(target_arch = "arm"))]
-pub(crate) type ThreadModeMutex<T> =
-    Mutex<embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex, T>;
+pub type RawMutex = embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+
+pub type Mutex<T> = embassy_sync::mutex::Mutex<RawMutex, T>;
+pub type Channel<T, const N: usize> = embassy_sync::channel::Channel<RawMutex, T, N>;
+pub type Sender<'a, T, const N: usize> = embassy_sync::channel::Sender<'a, RawMutex, T, N>;
+pub type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<'a, RawMutex, T, N>;
+pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;

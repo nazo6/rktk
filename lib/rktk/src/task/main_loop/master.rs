@@ -20,7 +20,7 @@ use crate::{
         report::{ENCODER_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
         split::{M2sTx, S2mRx},
     },
-    utils::ThreadModeMutex,
+    utils::Mutex,
 };
 
 mod handle_keyboard;
@@ -37,7 +37,7 @@ type ConfiguredState = State<
     { KEYBOARD.encoder_count as usize },
 >;
 
-type SharedState = ThreadModeMutex<ConfiguredState>;
+type SharedState = Mutex<ConfiguredState>;
 
 #[allow(clippy::too_many_arguments)]
 pub async fn start<

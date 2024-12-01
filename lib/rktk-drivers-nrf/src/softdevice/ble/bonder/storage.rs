@@ -1,17 +1,17 @@
 use embassy_futures::join::join;
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, signal::Signal};
+use rktk::utils::Signal;
 use sequential_storage::cache::NoCache;
 
 use crate::softdevice::flash::SharedFlash;
 
 use super::{Devices, MAX_PEER_COUNT};
 
-pub static BOND_SAVE: Signal<CriticalSectionRawMutex, Devices> = Signal::new();
+pub static BOND_SAVE: Signal<Devices> = Signal::new();
 
 pub enum BondFlashCommand {
     Clear,
 }
-pub static BOND_FLASH: Signal<CriticalSectionRawMutex, BondFlashCommand> = Signal::new();
+pub static BOND_FLASH: Signal<BondFlashCommand> = Signal::new();
 
 const BOND_FLASH_START: u32 = 4096 * 170;
 const BOND_FLASH_END: u32 = BOND_FLASH_START + 4096 * 2;

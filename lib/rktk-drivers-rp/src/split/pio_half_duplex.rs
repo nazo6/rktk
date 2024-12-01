@@ -1,13 +1,15 @@
 use embassy_futures::yield_now;
-use embassy_rp::pio::{Common, Config, Instance, Pin, Pio, PioPin, ShiftDirection, StateMachine};
-use embassy_rp::Peripheral;
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_rp::{
+    pio::{Common, Config, Instance, Pin, Pio, PioPin, ShiftDirection, StateMachine},
+    Peripheral,
+};
 use embassy_sync::semaphore::{FairSemaphore, Semaphore};
 use embassy_time::Timer;
-
 use fixed::traits::ToFixed;
-use rktk::drivers::interface::error::RktkError;
-use rktk::drivers::interface::split::SplitDriver;
+use rktk::{
+    drivers::interface::{error::RktkError, split::SplitDriver},
+    utils::RawMutex,
+};
 
 pub const SPLIT_BITRATE: f64 = 1000000.0;
 pub const SPLIT_CLK_DIVIDER: f64 = 62_000_000.0 / (SPLIT_BITRATE * 8.0);
@@ -89,7 +91,7 @@ pub struct PioHalfDuplexSplitDriver<'a, I: Instance> {
     pin: Pin<'a, I>,
 }
 
-static COMM_SEMAPHORE: FairSemaphore<CriticalSectionRawMutex, 3> = FairSemaphore::new(1);
+static COMM_SEMAPHORE: FairSemaphore<RawMutex, 3> = FairSemaphore::new(1);
 
 impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
     pub fn new<'b: 'a>(

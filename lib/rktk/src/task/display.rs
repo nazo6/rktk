@@ -1,10 +1,12 @@
 use core::fmt::Write as _;
 
 use embassy_futures::select::{select, Either};
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use rktk_keymanager::state::config::Output;
 
-use crate::drivers::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder};
+use crate::{
+    drivers::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder},
+    utils::Channel,
+};
 
 pub enum DisplayMessage {
     Clear,
@@ -17,12 +19,8 @@ pub enum DisplayMessage {
     Hand(Option<Hand>),
 }
 
-pub static DISPLAY_CONTROLLER: Channel<CriticalSectionRawMutex, DisplayMessage, 5> = Channel::new();
-pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<
-    CriticalSectionRawMutex,
-    heapless::String<256>,
-    3,
-> = Channel::new();
+pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
+pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<heapless::String<256>, 3> = Channel::new();
 
 pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<Output = D>) {
     let mut display = match display_builder.build().await {

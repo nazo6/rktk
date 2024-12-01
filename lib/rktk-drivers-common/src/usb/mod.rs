@@ -2,16 +2,14 @@
 
 use core::sync::atomic::AtomicBool;
 
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-
 mod builder;
 mod driver;
 mod handler;
 mod rrp;
 mod task;
 
-type RemoteWakeupSignal = embassy_sync::signal::Signal<CriticalSectionRawMutex, ()>;
-type ReadySignal = embassy_sync::signal::Signal<CriticalSectionRawMutex, ()>;
+type RemoteWakeupSignal = rktk::utils::Signal<()>;
+type ReadySignal = rktk::utils::Signal<()>;
 static SUSPENDED: AtomicBool = AtomicBool::new(false);
 
 pub use builder::CommonUsbDriverBuilder;

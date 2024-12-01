@@ -14,7 +14,7 @@ pub mod config;
 pub mod drivers;
 pub mod hooks;
 pub mod task;
-mod utils;
+pub mod utils;
 
 #[doc(hidden)]
 pub mod reexports {

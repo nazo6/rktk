@@ -15,7 +15,7 @@ use crate::{
     },
 };
 
-use super::{ConfiguredState, SharedState, ThreadModeMutex, RKTK_CONFIG};
+use super::{ConfiguredState, SharedState, RKTK_CONFIG};
 
 pub async fn start(
     usb: &Option<impl UsbDriver>,
@@ -37,7 +37,7 @@ pub async fn start(
 }
 
 struct Handlers<'a, S: StorageDriver> {
-    pub state: &'a ThreadModeMutex<ConfiguredState>,
+    pub state: &'a SharedState,
     pub storage: Option<&'a StorageConfigManager<S>>,
 }
 impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Handlers<'_, S> {

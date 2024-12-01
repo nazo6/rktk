@@ -12,10 +12,10 @@ use crate::{
     },
 };
 
-use super::{ConfiguredState, ThreadModeMutex};
+use super::SharedState;
 
 pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver, MH: MasterHooks>(
-    state: &ThreadModeMutex<ConfiguredState>,
+    state: &SharedState,
     config_store: &Option<StorageConfigManager<S>>,
     ble: &Option<Ble>,
     usb: &Option<Usb>,

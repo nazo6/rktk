@@ -1,7 +1,6 @@
 use core::fmt::Debug;
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use embedded_storage_async::nor_flash::{MultiwriteNorFlash, NorFlash, ReadNorFlash};
-use rktk::drivers::interface::storage::StorageDriver;
+use rktk::{drivers::interface::storage::StorageDriver, utils::Mutex};
 pub use sequential_storage;
 use sequential_storage::{
     cache::NoCache,
@@ -10,8 +9,8 @@ use sequential_storage::{
 
 pub struct FlashSequentialMapStorage<'a, F: NorFlash + ReadNorFlash + MultiwriteNorFlash> {
     pub flash_range: core::ops::Range<u32>,
-    pub flash: &'a Mutex<CriticalSectionRawMutex, F>,
-    pub cache: &'a Mutex<CriticalSectionRawMutex, NoCache>,
+    pub flash: &'a Mutex<F>,
+    pub cache: &'a Mutex<NoCache>,
 }
 
 #[derive(Debug)]

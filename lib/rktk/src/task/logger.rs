@@ -1,7 +1,8 @@
 use core::fmt::Write;
 
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use rktk_rrp::endpoints::get_log::{self, LogChunk};
+
+use crate::utils::Channel;
 
 pub struct LogWriter;
 
@@ -23,7 +24,7 @@ impl Write for LogWriter {
     }
 }
 
-pub static LOG_CHANNEL: Channel<CriticalSectionRawMutex, LogChunk, 64> = Channel::new();
+pub static LOG_CHANNEL: Channel<LogChunk, 64> = Channel::new();
 
 pub struct RrpLogger;
 

@@ -1,22 +1,21 @@
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_futures::join::{join, join3};
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel, pipe::Pipe};
+use embassy_sync::pipe::Pipe;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
 use embassy_usb::UsbDevice;
 use rktk::drivers::interface::BackgroundTask;
+use rktk::utils::{Channel, RawMutex};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{ReadySignal, RemoteWakeupSignal};
 
-pub static HID_KEYBOARD_CHANNEL: Channel<CriticalSectionRawMutex, KeyboardReport, 8> =
-    Channel::new();
-pub static HID_MOUSE_CHANNEL: Channel<CriticalSectionRawMutex, MouseReport, 8> = Channel::new();
-pub static HID_MEDIA_KEYBOARD_CHANNEL: Channel<CriticalSectionRawMutex, MediaKeyboardReport, 8> =
-    Channel::new();
-pub static RRP_SEND_PIPE: Pipe<CriticalSectionRawMutex, 128> = Pipe::new();
-pub static RRP_RECV_PIPE: Pipe<CriticalSectionRawMutex, 128> = Pipe::new();
+pub static HID_KEYBOARD_CHANNEL: Channel<KeyboardReport, 8> = Channel::new();
+pub static HID_MOUSE_CHANNEL: Channel<MouseReport, 8> = Channel::new();
+pub static HID_MEDIA_KEYBOARD_CHANNEL: Channel<MediaKeyboardReport, 8> = Channel::new();
+pub static RRP_SEND_PIPE: Pipe<RawMutex, 128> = Pipe::new();
+pub static RRP_RECV_PIPE: Pipe<RawMutex, 128> = Pipe::new();
 
 pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub device: UsbDevice<'d, D>,
