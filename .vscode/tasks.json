@@ -2,21 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "deploy keyball61 rp2040",
-      "type": "shell",
-      "command": "cargo rktk build keyboards/keyball61-rp2040 -d /mnt/e"
-    },
-    {
-      "label": "deploy keyball61 nrf52840 (1.usb)",
-      "type": "shell",
-      "command": "cargo rktk build keyboards/keyball61-nrf52840 -d /mnt/e -- --no-default-features --features usb"
-    },
-    {
-      "label": "deploy keyball61 nrf52840 (2.ble)",
-      "type": "shell",
-      "command": "cargo rktk build keyboards/keyball61-nrf52840 -d /mnt/e -- --no-default-features --features ble"
-    },
-    {
       "label": "check all",
       "type": "shell",
       "command": "cargo rktk internal check all"
