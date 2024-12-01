@@ -28,7 +28,7 @@ impl ReporterDriver for NrfBleDriver {
     }
 }
 impl BleDriver for NrfBleDriver {
-    async fn clear_bond_data(&mut self) {
+    async fn clear_bond_data(&self) {
         BOND_FLASH.signal(super::bonder::BondFlashCommand::Clear);
     }
 }

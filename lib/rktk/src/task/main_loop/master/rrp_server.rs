@@ -10,12 +10,33 @@ use rktk_rrp::{
 
 use crate::{
     config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
-    drivers::interface::{reporter::ReporterDriver, storage::StorageDriver},
+    drivers::interface::{
+        ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, usb::UsbDriver,
+    },
 };
 
-use super::{ConfiguredState, ThreadModeMutex, RKTK_CONFIG};
+use super::{ConfiguredState, SharedState, ThreadModeMutex, RKTK_CONFIG};
 
-pub struct Handlers<'a, S: StorageDriver> {
+pub async fn start(
+    usb: &Option<impl UsbDriver>,
+    _ble: &Option<impl BleDriver>,
+    state: &SharedState,
+    config_store: &Option<StorageConfigManager<impl StorageDriver>>,
+) {
+    if let Some(usb) = &usb {
+        let mut server = rktk_rrp::server::Server::<_, _, _, 512>::new(
+            ServerTransport::new(usb),
+            ServerTransport::new(usb),
+            Handlers {
+                state,
+                storage: config_store.as_ref(),
+            },
+        );
+        server.start().await;
+    }
+}
+
+struct Handlers<'a, S: StorageDriver> {
     pub state: &'a ThreadModeMutex<ConfiguredState>,
     pub storage: Option<&'a StorageConfigManager<S>>,
 }
@@ -134,7 +155,7 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
     }
 }
 
-pub struct ServerTransport<'a, R: ReporterDriver> {
+struct ServerTransport<'a, R: ReporterDriver> {
     reporter: &'a R,
 }
 
