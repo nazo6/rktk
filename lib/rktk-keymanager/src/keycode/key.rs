@@ -1,3 +1,5 @@
+//! Normal keys
+
 use macro_rules_attribute::apply;
 
 use crate::macros::{common_derive, normal, with_consts};

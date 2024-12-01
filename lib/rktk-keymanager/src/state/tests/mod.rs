@@ -7,9 +7,8 @@ mod mouse;
 
 #[allow(unused_imports)]
 mod prelude {
-    use crate::state::manager::transparent::TransparentReport;
     pub use crate::time::{Duration, Instant};
-    use crate::Keymap;
+    use crate::{keymap::Keymap, state::manager::transparent::TransparentReport};
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};

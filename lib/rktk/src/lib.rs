@@ -30,7 +30,7 @@ pub mod keymap_config {
     use rktk_keymanager::state::config::TapDanceConfig;
 
     pub struct KeyConfig {
-        pub keymap: keymanager::Keymap<
+        pub keymap: keymanager::keymap::Keymap<
             { RKTK_CONFIG.layer_count as usize },
             { KEYBOARD.rows as usize },
             { KEYBOARD.cols as usize },
@@ -39,15 +39,16 @@ pub mod keymap_config {
         pub tap_dance: [Option<TapDanceConfig>; 8],
     }
 
-    pub type Keymap = keymanager::Keymap<
+    pub type Keymap = keymanager::keymap::Keymap<
         { RKTK_CONFIG.layer_count as usize },
         { KEYBOARD.rows as usize },
         { KEYBOARD.cols as usize },
         { KEYBOARD.encoder_count as usize },
     >;
 
-    pub type Layer = keymanager::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+    pub type Layer =
+        keymanager::keymap::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
 
     pub type LayerMap =
-        keymanager::LayerMap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+        keymanager::keymap::LayerMap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
 }

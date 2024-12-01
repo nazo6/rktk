@@ -1,7 +1,12 @@
+//! Media keys.
+
 use macro_rules_attribute::apply;
 
 use crate::macros::{common_derive, normal, with_consts};
 
+/// Represents `media key` which is used for media control.
+///
+/// These keys are sent using a different descriptor than normal keys.
 #[apply(with_consts)]
 #[apply(common_derive)]
 #[derive(Copy)]

@@ -1,3 +1,5 @@
+//! Utility functions to define keymap.
+
 use super::{modifier::Modifier, KeyAction, KeyCode};
 
 /// Press key with shift

@@ -6,6 +6,9 @@ version.workspace = true
 edition.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+features = ["state", "postcard"]
+
 [dependencies]
 bitflags = { version = "2.6.0" }
 heapless = { workspace = true, optional = true }
@@ -27,7 +30,6 @@ wasm-bindgen = { workspace = true, optional = true }
 critical-section = { version = "1.1.2", features = ["std"] }
 pretty_assertions = "1.4.0"
 usbd-hid = { workspace = true }
-
 
 [features]
 default = ["heapless"]

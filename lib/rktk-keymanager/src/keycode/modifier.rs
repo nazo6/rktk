@@ -1,3 +1,5 @@
+//! Modifier keys
+
 use bitflags::bitflags;
 use macro_rules_attribute::apply;
 

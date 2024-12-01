@@ -9,3 +9,5 @@ very thin wrapper for MCUs that have embassy hal.
 
 Users who want to build keyboard should use mcu-specific crate like
 `rktk-drivers-nrf` instead of this crate.
+
+For more detail, see [project's README](https://github.com/nazo6/rktk)

@@ -1,3 +1,5 @@
+//! Mouse button codes.
+
 use bitflags::bitflags;
 use macro_rules_attribute::apply;
 

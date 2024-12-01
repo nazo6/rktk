@@ -4,8 +4,8 @@
 #![allow(clippy::single_match)]
 
 use crate::{
+    keymap::Keymap,
     time::{Duration, Instant},
-    Keymap,
 };
 use config::{
     KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,

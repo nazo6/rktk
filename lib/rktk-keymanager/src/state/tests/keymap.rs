@@ -1,6 +1,6 @@
 //! common keymap for test
 
-use crate::{Keymap, Layer, LayerMap};
+use crate::keymap::{Keymap, Layer, LayerMap};
 
 use super::prelude::*;
 

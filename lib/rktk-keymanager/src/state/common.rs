@@ -1,6 +1,6 @@
 use crate::time::Instant;
 
-use crate::{keycode::KeyAction, Keymap};
+use crate::{keycode::KeyAction, keymap::Keymap};
 
 pub(super) struct CommonState<
     const LAYER: usize,

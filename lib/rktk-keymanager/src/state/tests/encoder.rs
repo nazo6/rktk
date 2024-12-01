@@ -1,4 +1,4 @@
-use crate::{state::EncoderDirection, Keymap};
+use crate::{keymap::Keymap, state::EncoderDirection};
 
 use super::prelude::*;
 use pretty_assertions::assert_eq;
