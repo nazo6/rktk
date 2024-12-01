@@ -20,7 +20,7 @@ mod backlight;
 pub(crate) mod channels;
 pub mod display;
 mod logger;
-pub mod main_loop;
+pub(crate) mod main_loop;
 
 /// Receives configs and executes the main process of the keyboard.
 ///
