@@ -31,6 +31,7 @@ mod prelude {
             flash_clear: false,
             ble_bond_clear: false,
             output: Output::Usb,
+            bootloader: false,
         }
     }
 

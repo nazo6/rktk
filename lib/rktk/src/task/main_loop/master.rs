@@ -12,6 +12,7 @@ use crate::{
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         storage::StorageDriver,
+        system::SystemDriver,
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
@@ -49,10 +50,12 @@ pub async fn start<
     Ble: BleDriver,
     Usb: UsbDriver,
     S: StorageDriver,
+    Sys: SystemDriver,
     MH: MasterHooks,
 >(
     _m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
+    system: &Sys,
     ble: Option<Ble>,
     usb: Option<Usb>,
     mut keyscan: KS,
@@ -75,7 +78,7 @@ pub async fn start<
 
     join(
         join(
-            report::report_task(&state, &config_store, &ble, &usb, master_hooks),
+            report::report_task(system, &state, &config_store, &ble, &usb, master_hooks),
             join5(
                 handle_slave::start(hand, s2m_rx),
                 handle_keyboard::start(hand, keyscan, debounce),

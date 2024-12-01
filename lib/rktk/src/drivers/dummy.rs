@@ -13,9 +13,9 @@ use rktk_keymanager::state::EncoderDirection;
 
 use crate::drivers::interface::{
     backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
-    double_tap::DoubleTapResetDriver, encoder::EncoderDriver, error::RktkError, mouse::MouseDriver,
-    reporter::ReporterDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
-    BackgroundTask, DriverBuilder, DriverBuilderWithTask,
+    encoder::EncoderDriver, error::RktkError, mouse::MouseDriver, reporter::ReporterDriver,
+    split::SplitDriver, storage::StorageDriver, usb::UsbDriver, BackgroundTask, DriverBuilder,
+    DriverBuilderWithTask,
 };
 
 // Backlight
@@ -107,14 +107,6 @@ impl DriverBuilder for DisplayBuilder {
     type Error = ();
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
-        unreachable!()
-    }
-}
-
-// dtr
-pub enum DoubleTapReset {}
-impl DoubleTapResetDriver for DoubleTapReset {
-    async fn execute(&self, _timeout: embassy_time::Duration) {
         unreachable!()
     }
 }

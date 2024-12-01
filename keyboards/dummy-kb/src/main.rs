@@ -19,6 +19,7 @@ use rktk::{
 };
 
 use keymap::KEY_CONFIG;
+use rktk_drivers_rp::system::RpSystemDriver;
 
 pub struct DummyKeyscanDriver;
 impl KeyscanDriver for DummyKeyscanDriver {
@@ -36,7 +37,7 @@ async fn main(_spawner: Spawner) {
 
     let drivers = Drivers {
         keyscan: DummyKeyscanDriver,
-        double_tap_reset: none_driver!(DoubleTapReset),
+        system: RpSystemDriver,
         mouse_builder: none_driver!(MouseBuilder),
         usb_builder: none_driver!(UsbBuilder),
         display_builder: none_driver!(DisplayBuilder),

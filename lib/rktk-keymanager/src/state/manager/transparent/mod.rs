@@ -28,6 +28,7 @@ impl TransparentState {
             flash_clear: local_state.flash_clear,
             output: self.output,
             ble_bond_clear: local_state.ble_bond_clear,
+            bootloader: local_state.bootloader,
         }
     }
 }
@@ -35,6 +36,7 @@ impl TransparentState {
 pub struct TransparentLocalState {
     flash_clear: bool,
     ble_bond_clear: bool,
+    bootloader: bool,
 }
 
 impl TransparentLocalState {
@@ -42,6 +44,7 @@ impl TransparentLocalState {
         Self {
             flash_clear: false,
             ble_bond_clear: false,
+            bootloader: false,
         }
     }
 
@@ -63,6 +66,9 @@ impl TransparentLocalState {
             }
             (EventType::Pressed, KeyCode::Special(Special::BleBondClear)) => {
                 self.ble_bond_clear = true;
+            }
+            (EventType::Pressed, KeyCode::Special(Special::Bootloader)) => {
+                self.bootloader = true;
             }
             _ => {}
         };

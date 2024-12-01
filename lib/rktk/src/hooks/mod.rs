@@ -3,6 +3,7 @@
 use interface::*;
 
 pub mod interface;
+pub use empty_hooks::create_empty_hooks;
 
 /// Hooks that can be passed to [`crate::task::start`] function.
 /// See earch trait's documentation for more information.

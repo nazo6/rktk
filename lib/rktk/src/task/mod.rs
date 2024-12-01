@@ -1,6 +1,9 @@
 //! Program entrypoint.
 
-use crate::{drivers::Drivers, hooks::interface::*};
+use crate::{
+    drivers::{interface::system::SystemDriver, Drivers},
+    hooks::interface::*,
+};
 use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
 
@@ -8,9 +11,9 @@ use crate::{
     config::static_config::RKTK_CONFIG,
     drivers::interface::{
         backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver,
-        display::DisplayDriver, double_tap::DoubleTapResetDriver, encoder::EncoderDriver,
-        keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, storage::StorageDriver,
-        usb::UsbDriver, BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
+        display::DisplayDriver, encoder::EncoderDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
+        split::SplitDriver, storage::StorageDriver, usb::UsbDriver, BackgroundTask as _,
+        DriverBuilder, DriverBuilderWithTask,
     },
     hooks::Hooks,
     keymap_config::KeyConfig,
@@ -37,7 +40,7 @@ pub async fn start<
     Usb: UsbDriver,
     Split: SplitDriver,
     Backlight: BacklightDriver,
-    DoubleTapReset: DoubleTapResetDriver,
+    System: SystemDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
     Display: DisplayDriver,
@@ -50,7 +53,7 @@ pub async fn start<
     SH: SlaveHooks,
     BH: BacklightHooks,
 >(
-    mut drivers: Drivers<
+    drivers: Drivers<
         KeyScan,
         Debounce,
         Encoder,
@@ -58,7 +61,7 @@ pub async fn start<
         Usb,
         Split,
         Backlight,
-        DoubleTapReset,
+        System,
         Storage,
         Mouse,
         Display,
@@ -85,10 +88,10 @@ pub async fn start<
         drivers.display_builder.is_some(),
     );
 
-    if let Some(dtr) = &mut drivers.double_tap_reset {
-        dtr.execute(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
-            .await;
-    }
+    drivers
+        .system
+        .double_reset_usb_boot(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
+        .await;
 
     join(
         async move {
@@ -141,6 +144,7 @@ pub async fn start<
                 },
                 async {
                     main_loop::start(
+                        &drivers.system,
                         ble,
                         usb,
                         drivers.keyscan,

@@ -4,7 +4,8 @@ use rktk_keymanager::state::{config::Output, StateReport};
 use crate::{
     config::storage_config::StorageConfigManager,
     drivers::interface::{
-        ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, usb::UsbDriver,
+        ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, system::SystemDriver,
+        usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
     task::channels::report::{
@@ -14,7 +15,14 @@ use crate::{
 
 use super::SharedState;
 
-pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver, MH: MasterHooks>(
+pub async fn report_task<
+    System: SystemDriver,
+    S: StorageDriver,
+    Ble: BleDriver,
+    Usb: UsbDriver,
+    MH: MasterHooks,
+>(
+    system: &System,
     state: &SharedState,
     config_store: &Option<StorageConfigManager<S>>,
     ble: &Option<Ble>,
@@ -89,6 +97,10 @@ pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver, MH: M
         master_hooks.on_state_update(&mut state_report).await;
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+
+        if state_report.transparent_report.bootloader {
+            system.reset_to_bootloader();
+        }
 
         if state_report.transparent_report.flash_clear {
             if let Some(ref storage) = config_store {

@@ -12,4 +12,5 @@ pub enum Special {
     OutputBle,
     OutputUsb,
     BleBondClear,
+    Bootloader,
 }

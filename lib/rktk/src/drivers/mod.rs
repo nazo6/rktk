@@ -1,10 +1,11 @@
 //! Drivers for the keyboard.
 
+use interface::system::SystemDriver;
+
 use crate::drivers::interface::{
     backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
-    double_tap::DoubleTapResetDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
-    mouse::MouseDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver, DriverBuilder,
-    DriverBuilderWithTask,
+    encoder::EncoderDriver, keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver,
+    storage::StorageDriver, usb::UsbDriver, DriverBuilder, DriverBuilderWithTask,
 };
 
 pub mod dummy;
@@ -34,7 +35,7 @@ pub struct Drivers<
     Usb: UsbDriver,
     Split: SplitDriver,
     Backlight: BacklightDriver,
-    DoubleTapReset: DoubleTapResetDriver,
+    System: SystemDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
     Display: DisplayDriver,
@@ -43,7 +44,7 @@ pub struct Drivers<
     UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
     BleBuilder: DriverBuilderWithTask<Driver = Ble>,
 > {
-    pub double_tap_reset: Option<DoubleTapReset>,
+    pub system: System,
     pub keyscan: KeyScan,
     pub debounce: Option<Debounce>,
     pub encoder: Option<Encoder>,

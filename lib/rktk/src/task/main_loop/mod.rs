@@ -9,6 +9,7 @@ use crate::{
         mouse::MouseDriver,
         split::SplitDriver,
         storage::StorageDriver,
+        system::SystemDriver,
         usb::UsbDriver,
     },
     hooks::{
@@ -30,6 +31,7 @@ mod split_handler;
 
 #[allow(clippy::too_many_arguments)]
 pub async fn start<
+    Sys: SystemDriver,
     KS: KeyscanDriver,
     DB: DebounceDriver,
     EN: EncoderDriver,
@@ -44,6 +46,7 @@ pub async fn start<
     SH: SlaveHooks,
     BH: BacklightHooks,
 >(
+    system: &Sys,
     ble: Option<Ble>,
     usb: Option<Usb>,
     mut keyscan: KS,
@@ -121,6 +124,7 @@ pub async fn start<
                         master::start(
                             m2s_tx,
                             s2m_rx,
+                            system,
                             ble,
                             usb,
                             keyscan,
@@ -145,6 +149,7 @@ pub async fn start<
                 master::start(
                     m2s_tx,
                     s2m_rx,
+                    system,
                     ble,
                     usb,
                     keyscan,

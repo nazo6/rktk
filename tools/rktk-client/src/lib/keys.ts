@@ -26,6 +26,7 @@ export const SPECIAL_KEYS: Map<Special, string> = new Map(
     ["OutputBle", "Output BLE"],
     ["OutputUsb", "Output USB"],
     ["BleBondClear", "Clear BLE Bond"],
+    ["Bootloader", "Bootloader"],
   ] as const,
 );
 
