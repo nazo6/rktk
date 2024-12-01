@@ -16,5 +16,7 @@ pub enum BacklightMode {
 }
 
 pub trait BacklightDriver {
-    async fn write<const N: usize>(&mut self, colors: &[RGB8; N]);
+    type Error: core::error::Error;
+
+    async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error>;
 }

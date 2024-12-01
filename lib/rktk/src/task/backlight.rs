@@ -31,7 +31,7 @@ pub async fn start<const BACKLIGHT_COUNT: usize>(
             .await;
 
         if let Some(rgb_data) = rgb_data {
-            bl.write(&rgb_data).await;
+            let _ = bl.write(&rgb_data).await;
         }
     }
 }

@@ -22,7 +22,11 @@ use crate::drivers::interface::{
 // Backlight
 pub enum Backlight {}
 impl BacklightDriver for Backlight {
-    async fn write<const N: usize>(&mut self, _colors: &[smart_leds::RGB8; N]) {
+    type Error = Infallible;
+    async fn write<const N: usize>(
+        &mut self,
+        _colors: &[smart_leds::RGB8; N],
+    ) -> Result<(), Self::Error> {
         unreachable!()
     }
 }
@@ -61,7 +65,13 @@ impl ReporterDriver for Ble {
         unreachable!()
     }
 }
-impl BleDriver for Ble {}
+impl BleDriver for Ble {
+    type Error = Infallible;
+
+    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
+        unreachable!()
+    }
+}
 
 pub enum BleBuilder {}
 impl DriverBuilderWithTask for BleBuilder {
@@ -196,7 +206,7 @@ impl SplitDriver for Split {
 // storage
 pub enum Storage {}
 impl StorageDriver for Storage {
-    type Error = ();
+    type Error = Infallible;
     async fn format(&self) -> Result<(), Self::Error> {
         unreachable!()
     }

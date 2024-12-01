@@ -1,3 +1,5 @@
+use core::convert::Infallible;
+
 use embassy_rp::dma::{AnyChannel, Channel};
 use embassy_rp::pio::{
     Config, FifoJoin, Instance, Pio, PioPin, ShiftConfig, ShiftDirection, StateMachine,
@@ -85,7 +87,9 @@ impl<'a, I: Instance> Ws2812Pio<'a, I> {
 }
 
 impl<I: Instance> BacklightDriver for Ws2812Pio<'_, I> {
-    async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) {
+    type Error = Infallible;
+
+    async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error> {
         // Precompute the word bytes from the colors
         let mut words = [0u32; N];
         for i in 0..N {
@@ -99,5 +103,7 @@ impl<I: Instance> BacklightDriver for Ws2812Pio<'_, I> {
         self.sm.tx().dma_push(self.dma.reborrow(), &words).await;
 
         Timer::after_micros(55).await;
+
+        Ok(())
     }
 }

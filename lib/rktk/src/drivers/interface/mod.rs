@@ -8,7 +8,6 @@ pub mod display;
 pub mod encoder;
 pub mod keyscan;
 pub mod mouse;
-pub mod rand;
 pub mod reporter;
 pub mod split;
 pub mod storage;

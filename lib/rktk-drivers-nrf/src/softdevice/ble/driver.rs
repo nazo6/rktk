@@ -51,7 +51,10 @@ impl ReporterDriver for NrfBleDriver {
     }
 }
 impl BleDriver for NrfBleDriver {
-    async fn clear_bond_data(&self) {
+    type Error = BleError;
+
+    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
         BOND_FLASH.signal(super::bonder::BondFlashCommand::Clear);
+        Ok(())
     }
 }

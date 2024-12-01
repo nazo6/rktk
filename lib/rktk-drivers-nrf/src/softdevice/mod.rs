@@ -7,7 +7,6 @@ use nrf_softdevice::{raw, Softdevice};
 #[cfg(feature = "ble")]
 pub mod ble;
 pub mod flash;
-pub mod rand;
 
 /// Initialize the softdevice and return the instance.
 /// After softdevice usage ends, spawn softdevice task.

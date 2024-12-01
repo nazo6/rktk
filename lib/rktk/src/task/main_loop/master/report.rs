@@ -119,7 +119,7 @@ pub async fn report_task<
 
         if state_report.transparent_report.ble_bond_clear {
             if let Some(ble) = &ble {
-                ble.clear_bond_data().await;
+                let _ = ble.clear_bond_data().await;
             }
         }
 

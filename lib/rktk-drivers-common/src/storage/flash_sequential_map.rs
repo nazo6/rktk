@@ -13,9 +13,11 @@ pub struct FlashSequentialMapStorage<'a, F: NorFlash + ReadNorFlash + Multiwrite
     pub cache: &'a Mutex<NoCache>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error<E: Debug> {
+    #[error("Storage error: {0:?}")]
     Storage(sequential_storage::Error<E>),
+    #[error("Not found")]
     NotFound,
 }
 
