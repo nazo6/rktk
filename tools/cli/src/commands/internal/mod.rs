@@ -19,6 +19,8 @@ pub enum InternalCommands {
         crate_name: String,
     },
     Release {
+        crate_name: Option<String>,
+
         #[arg(long)]
         execute: bool,
         #[arg(long)]
@@ -31,9 +33,10 @@ pub fn start(command: InternalCommands) -> anyhow::Result<()> {
         InternalCommands::Check { crate_name } => check::start(crate_name)?,
         InternalCommands::Test { crate_name } => test::start(crate_name)?,
         InternalCommands::Release {
+            crate_name,
             execute,
             continue_on_error,
-        } => release::start(execute, continue_on_error)?,
+        } => release::start(crate_name, execute, continue_on_error)?,
     };
 
     Ok(())

@@ -21,7 +21,9 @@ embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
-nrf-softdevice = { workspace = true, features = ["ble-peripheral"] }
+nrf-softdevice = { optional = true, workspace = true, features = [
+  "ble-peripheral",
+] }
 embedded-io-async = { workspace = true }
 
 embedded-storage-async = { workspace = true }
@@ -44,9 +46,13 @@ thiserror = { workspace = true }
 
 [features]
 default = ["nrf52840", "softdevice-s140", "ble"]
-nrf52840 = ["embassy-nrf/nrf52840", "nrf-softdevice/nrf52840"]
-softdevice-s140 = ["nrf-softdevice/s140"]
-ble = ["nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
+
+softdevice = ["dep:nrf-softdevice"]
+
+ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
+nrf52840 = ["embassy-nrf/nrf52840", "nrf-softdevice/s140"]
+softdevice-s140 = ["nrf-softdevice/nrf52840"]
+
 nightly = ["embassy-executor/nightly"]
 
-_check = []
+_check = ["embassy-nrf/nrf52840"]
