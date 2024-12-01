@@ -51,7 +51,7 @@ impl<S: SpiDevice> Paw3395Builder<S> {
 impl<S: SpiDevice> DriverBuilder for Paw3395Builder<S> {
     type Output = Paw3395<S>;
 
-    type Error = Paw3395Error;
+    type Error = Paw3395Error<S::Error>;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Paw3395 {
@@ -73,7 +73,7 @@ pub struct Paw3395<S: SpiDevice> {
 }
 
 impl<S: SpiDevice> MouseDriver for Paw3395<S> {
-    type Error = Paw3395Error;
+    type Error = Paw3395Error<S::Error>;
 
     async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
         self.burst_read()
@@ -92,7 +92,7 @@ impl<S: SpiDevice> MouseDriver for Paw3395<S> {
 }
 
 impl<S: SpiDevice> Paw3395<S> {
-    async fn write(&mut self, address: u8, data: u8) -> Result<(), Paw3395Error> {
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Paw3395Error<S::Error>> {
         self.spi
             .transaction(&mut [
                 Operation::DelayNs(timing::NCS_SCLK),
@@ -100,14 +100,14 @@ impl<S: SpiDevice> Paw3395<S> {
                 Operation::DelayNs(timing::SCLK_NCS_WRITE),
             ])
             .await
-            .map_err(|_| Paw3395Error::Spi)?;
+            .map_err(Paw3395Error::Spi)?;
 
         Timer::after_nanos((timing::SWW_R - timing::SCLK_NCS_WRITE) as u64).await;
 
         Ok(())
     }
 
-    async fn read(&mut self, address: u8) -> Result<u8, Paw3395Error> {
+    async fn read(&mut self, address: u8) -> Result<u8, Paw3395Error<S::Error>> {
         let mut buf = [0x00];
         self.spi
             .transaction(&mut [
@@ -119,7 +119,7 @@ impl<S: SpiDevice> Paw3395<S> {
                 Operation::DelayNs(timing::SCLK_NCS_READ),
             ])
             .await
-            .map_err(|_| Paw3395Error::Spi)?;
+            .map_err(Paw3395Error::Spi)?;
 
         //  tSRW/tSRR minus tSCLK-NCS
         Timer::after_nanos((timing::SRW_R - timing::SCLK_NCS_WRITE) as u64).await;
@@ -127,7 +127,7 @@ impl<S: SpiDevice> Paw3395<S> {
         Ok(buf[0])
     }
 
-    pub async fn burst_read(&mut self) -> Result<BurstData, Paw3395Error> {
+    pub async fn burst_read(&mut self) -> Result<BurstData, Paw3395Error<S::Error>> {
         let mut buf = [0u8; 12];
         self.spi
             .transaction(&mut [
@@ -137,7 +137,7 @@ impl<S: SpiDevice> Paw3395<S> {
                 Operation::Read(&mut buf),
             ])
             .await
-            .map_err(|_| Paw3395Error::Spi)?;
+            .map_err(Paw3395Error::Spi)?;
 
         Timer::after_nanos(timing::BEXIT as u64).await;
 
@@ -159,7 +159,7 @@ impl<S: SpiDevice> Paw3395<S> {
         Ok(data)
     }
 
-    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Paw3395Error> {
+    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Paw3395Error<S::Error>> {
         let resolution = (cpi / 50) - 1;
         let resolution_low = resolution as u8;
         let resolution_high = (resolution >> 8) as u8;
@@ -180,20 +180,20 @@ impl<S: SpiDevice> Paw3395<S> {
         Ok((resolution_x + 1) * 50)
     }
 
-    pub async fn check_signature(&mut self) -> Result<bool, Paw3395Error> {
+    pub async fn check_signature(&mut self) -> Result<bool, Paw3395Error<S::Error>> {
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INV_PRODUCT_ID).await.unwrap_or(0);
 
         Ok(pid == 0x51 && ipid == 0xAE)
     }
 
-    async fn shutdown(&mut self) -> Result<(), Paw3395Error> {
+    async fn shutdown(&mut self) -> Result<(), Paw3395Error<S::Error>> {
         self.write(reg::SHUTDOWN, 0xB6).await?;
         Timer::after_millis(5).await;
         Ok(())
     }
 
-    async fn power_up(&mut self) -> Result<(), Paw3395Error> {
+    async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error>> {
         Timer::after_micros(50).await;
 
         self.write(reg::POWER_UP_RESET, 0x5A).await?;
