@@ -126,9 +126,6 @@ impl<
     > KeyscanDriver for DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
-        // TODO: Make this value configurable
-        embassy_time::Timer::after_millis(10).await;
-
         Self::scan_dir(
             &mut self.rows,
             &mut self.cols,

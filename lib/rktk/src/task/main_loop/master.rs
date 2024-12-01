@@ -316,6 +316,8 @@ pub async fn start<
                     // key
                     async {
                         loop {
+                            Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+
                             let mut buf = heapless::Vec::<_, 32>::new();
                             keyscan
                                 .scan(|event| {

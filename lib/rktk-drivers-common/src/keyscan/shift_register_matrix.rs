@@ -67,10 +67,8 @@ impl<
         const ROWS: usize,
     > KeyscanDriver for ShiftRegisterMatrix<S, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
+    // TODO: support async matrix
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
-        // TODO: Implement async matrix instead of polling
-        embassy_time::Timer::after_millis(10).await;
-
         for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self
                 .row_shift_register
