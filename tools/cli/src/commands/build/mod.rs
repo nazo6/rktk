@@ -1,6 +1,7 @@
 mod config;
 mod mcu;
 mod profile;
+mod uf2;
 
 use anyhow::Context as _;
 use colored::Colorize as _;
@@ -187,51 +188,11 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
     );
 
     if !args.no_uf2 || args.deploy_dir.is_some() {
-        let artifact_path = PathBuf::from(artifact_path);
-        let artifact_dir = artifact_path
-            .parent()
-            .context("No parent dir in output file")?;
-        let artifact_stem = artifact_path
-            .file_stem()
-            .context("No file stem in output file")?
-            .to_string_lossy();
-        let uf2_path = artifact_dir.join(format!("{}.uf2", artifact_stem));
-
-        match mcu {
-            BuildMcu::Rp2040 => {
-                duct::cmd!("elf2uf2-rs", &artifact_path, &uf2_path)
-                    .run()
-                    .context("Failed to convert to uf2. Is elf2uf2-rs installed?")?;
-            }
-            BuildMcu::Nrf52840 => {
-                let hex_path = artifact_dir.join(format!("{}.hex", artifact_stem));
-                duct::cmd!("arm-none-eabi-objcopy", "-Oihex", &artifact_path, &hex_path)
-                    .run()
-                    .context("Failed to convert to hex. Is arm-none-eabi-objcopy installed?")?;
-                xprintln!("Hex file generated at: {}", hex_path.display());
-                duct::cmd!(
-                    "python3",
-                    "-",
-                    &hex_path,
-                    "-o",
-                    &uf2_path,
-                    "-c",
-                    "-b",
-                    "0x26000",
-                    "-f",
-                    "0xADA52840"
-                )
-                .stdin_bytes(include_bytes!("uf2conv.py"))
-                .run()
-                .context("Failed to convert to uf2. Is python3 installed?")?;
-            }
-        }
-
-        xprintln!(
-            "Uf2 file generated at: {} ({})",
-            uf2_path.display(),
-            get_bytes(&uf2_path)
-        );
+        let uf2_path = uf2::elf2uf2(
+            &PathBuf::from(artifact_path),
+            mcu_config.uf2_family_id,
+            mcu_config.uf2_start_addr,
+        )?;
 
         if let Some(deploy_path) = args.deploy_dir {
             let deploy_path = PathBuf::from(deploy_path).join(uf2_path.file_name().unwrap());

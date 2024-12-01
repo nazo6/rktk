@@ -102,10 +102,7 @@ development.
 
 You need to install some tools to generate firmware.
 
-- [elf2uf2-rs](https://github.com/JoNil/elf2uf2-rs): Required to generate uf2
-  firmware for RP2040
-- `arm-none-eabi-objcopy` and `python3`: Required to generate uf2 firmware for
-  nRF52840
+- `arm-none-eabi-objcopy`: Required to generate uf2 firmware for nRF52840
 - `wasm-pack`: Required to build rktk-client
 
 ### MSRV

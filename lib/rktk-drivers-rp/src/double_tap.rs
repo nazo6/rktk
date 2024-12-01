@@ -3,9 +3,9 @@ use core::{mem::MaybeUninit, ptr::write_volatile};
 use embassy_time::{Duration, Timer};
 use rktk::drivers::interface::double_tap::DoubleTapResetDriver;
 
-const BOOTLOADER_MAGIC: u32 = 0xDEADBEEF;
+const BOOTLOADER_MAGIC: u32 = 0xABCD_EF01;
 
-#[link_section = ".uninit.FLAG"]
+#[link_section = ".uninit"]
 static mut FLAG: MaybeUninit<u32> = MaybeUninit::uninit();
 
 pub struct DoubleTapResetRp;
