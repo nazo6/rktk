@@ -2086,6 +2086,7 @@ dependencies = [
  "sequential-storage",
  "ssd1306",
  "static_cell",
+ "thiserror 2.0.3",
  "usbd-hid",
 ]
 
@@ -2116,6 +2117,7 @@ dependencies = [
  "ssd1306",
  "ssmarshal",
  "static_cell",
+ "thiserror 2.0.3",
  "usbd-hid",
 ]
 
@@ -2136,12 +2138,12 @@ dependencies = [
  "fixed-macro",
  "pio",
  "pio-proc",
- "rand_core",
  "rktk",
  "rktk-drivers-common",
  "smart-leds",
  "ssd1306",
  "static_cell",
+ "thiserror 2.0.3",
 ]
 
 [[package]]

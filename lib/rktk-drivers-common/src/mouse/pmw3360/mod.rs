@@ -42,7 +42,7 @@ impl<S: SpiDevice> Pmw3360Builder<S> {
 impl<S: SpiDevice> DriverBuilder for Pmw3360Builder<S> {
     type Output = Pmw3360<S>;
 
-    type Error = Pmw3360Error<S::Error>;
+    type Error = Pmw3360Error;
 
     async fn build(self) -> Result<Self::Output, Self::Error> {
         let mut driver = Pmw3360 {
@@ -62,27 +62,25 @@ pub struct Pmw3360<S: SpiDevice> {
 }
 
 impl<S: SpiDevice> MouseDriver for Pmw3360<S> {
-    async fn read(&mut self) -> Result<(i8, i8), rktk::drivers::interface::error::RktkError> {
+    type Error = Pmw3360Error;
+    async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
         self.burst_read()
             .await
             .map(|data| (data.dx as i8, data.dy as i8))
-            .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("Failed to read PMW3360"))
     }
 
-    async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::drivers::interface::error::RktkError> {
-        self.set_cpi(cpi).await.map_err(|_| {
-            rktk::drivers::interface::error::RktkError::GeneralError("Failed to set cpi to PMW3360")
-        })?;
+    async fn set_cpi(&mut self, cpi: u16) -> Result<(), Self::Error> {
+        self.set_cpi(cpi).await?;
         Ok(())
     }
 
-    async fn get_cpi(&mut self) -> Result<u16, rktk::drivers::interface::error::RktkError> {
-        Err(rktk::drivers::interface::error::RktkError::NotSupported)
+    async fn get_cpi(&mut self) -> Result<u16, Self::Error> {
+        Err(Self::Error::NotSupported)
     }
 }
 
 impl<S: SpiDevice> Pmw3360<S> {
-    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error<S::Error>> {
+    async fn write(&mut self, address: u8, data: u8) -> Result<(), Pmw3360Error> {
         self.in_burst_mode = false;
         self.spi
             .transaction(&mut [
@@ -93,7 +91,7 @@ impl<S: SpiDevice> Pmw3360<S> {
                 Operation::DelayNs(35 * 1000),
             ])
             .await
-            .map_err(Pmw3360Error::Spi)?;
+            .map_err(|_| Pmw3360Error::Spi)?;
 
         // tSWW/tSWR minus tSCLK-NCS (write)
         Timer::after_micros(145).await;
@@ -101,7 +99,7 @@ impl<S: SpiDevice> Pmw3360<S> {
         Ok(())
     }
 
-    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error<S::Error>> {
+    async fn read(&mut self, address: u8) -> Result<u8, Pmw3360Error> {
         self.in_burst_mode = false;
         let mut buf = [0x00];
         self.spi
@@ -117,7 +115,7 @@ impl<S: SpiDevice> Pmw3360<S> {
                 Operation::DelayNs(120),
             ])
             .await
-            .map_err(Pmw3360Error::Spi)?;
+            .map_err(|_| Pmw3360Error::Spi)?;
 
         //  tSRW/tSRR
         Timer::after_micros(20).await;
@@ -125,7 +123,7 @@ impl<S: SpiDevice> Pmw3360<S> {
         Ok(buf[0])
     }
 
-    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error<S::Error>> {
+    pub async fn burst_read(&mut self) -> Result<BurstData, Pmw3360Error> {
         if !self.in_burst_mode {
             self.write(reg::MOTION_BURST, 0x00).await?;
             self.in_burst_mode = true;
@@ -142,7 +140,7 @@ impl<S: SpiDevice> Pmw3360<S> {
                 Operation::Read(&mut data),
             ])
             .await
-            .map_err(Pmw3360Error::Spi)?;
+            .map_err(|_| Pmw3360Error::Spi)?;
 
         // tBEXIT
         Timer::after_micros(1).await;
@@ -163,7 +161,7 @@ impl<S: SpiDevice> Pmw3360<S> {
         Ok(data)
     }
 
-    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S::Error>> {
+    pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error> {
         let val: u16;
         if cpi < 100 {
             val = 0
@@ -181,7 +179,7 @@ impl<S: SpiDevice> Pmw3360<S> {
         Ok((val + 1) * 100)
     }
 
-    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
+    pub async fn check_signature(&mut self) -> Result<bool, Pmw3360Error> {
         let srom = self.read(reg::SROM_ID).await.unwrap_or(0);
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INVERSE_PRODUCT_ID).await.unwrap_or(0);
@@ -191,7 +189,7 @@ impl<S: SpiDevice> Pmw3360<S> {
     }
 
     #[allow(dead_code)]
-    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
+    pub async fn self_test(&mut self) -> Result<bool, Pmw3360Error> {
         self.write(reg::SROM_ENABLE, 0x15).await?;
         Timer::after_micros(10000).await;
 
@@ -201,7 +199,7 @@ impl<S: SpiDevice> Pmw3360<S> {
         Ok(u == 0xBE && l == 0xEF)
     }
 
-    async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
+    async fn power_up(&mut self) -> Result<(), Pmw3360Error> {
         let is_valid_signature = self.power_up_inner().await?;
         if is_valid_signature {
             Ok(())
@@ -210,12 +208,12 @@ impl<S: SpiDevice> Pmw3360<S> {
         }
     }
 
-    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error<S::Error>> {
+    async fn power_up_inner(&mut self) -> Result<bool, Pmw3360Error> {
         // reset spi port
         self.spi
             .transaction(&mut [])
             .await
-            .map_err(Pmw3360Error::Spi)?;
+            .map_err(|_| Pmw3360Error::Spi)?;
 
         // Write to reset register
         self.write(reg::POWER_UP_RESET, 0x5A).await?;

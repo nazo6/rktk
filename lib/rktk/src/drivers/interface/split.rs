@@ -1,13 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use super::{backlight::BacklightCommand, error::RktkError};
+use super::backlight::BacklightCommand;
 
 pub trait SplitDriver {
-    async fn init(&mut self) -> Result<(), RktkError> {
+    type Error: core::error::Error;
+
+    async fn init(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
-    async fn wait_recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<(), RktkError>;
-    async fn send(&mut self, buf: &[u8], is_master: bool) -> Result<(), RktkError>;
+    async fn wait_recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<(), Self::Error>;
+    async fn send(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
 }
 
 #[derive(Deserialize, Serialize, Debug)]

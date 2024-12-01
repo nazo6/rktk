@@ -15,6 +15,12 @@ use embassy_nrf::{
 use embedded_io_async::{Read as _, Write};
 use rktk::drivers::interface::split::SplitDriver;
 
+#[derive(Debug, thiserror::Error)]
+pub enum UartHalfDuplexSplitDriverError {
+    #[error("General error: {0}")]
+    GeneralError(&'static str),
+}
+
 pub struct UartHalfDuplexSplitDriver<
     UARTE: Instance,
     UARTEP: Peripheral<P = UARTE>,
@@ -92,11 +98,9 @@ impl<
     > SplitDriver
     for UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
 {
-    async fn wait_recv(
-        &mut self,
-        buf: &mut [u8],
-        _is_master: bool,
-    ) -> Result<(), rktk::drivers::interface::error::RktkError> {
+    type Error = UartHalfDuplexSplitDriverError;
+
+    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
@@ -116,7 +120,7 @@ impl<
         loop {
             rx.read_exact(&mut reader)
                 .await
-                .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("read error"))?;
+                .map_err(|_| UartHalfDuplexSplitDriverError::GeneralError("read error"))?;
             if reader[0] == 0 {
                 buf[i] = reader[0];
                 break;
@@ -130,11 +134,7 @@ impl<
         Ok(())
     }
 
-    async fn send(
-        &mut self,
-        buf: &[u8],
-        _is_master: bool,
-    ) -> Result<(), rktk::drivers::interface::error::RktkError> {
+    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
@@ -148,10 +148,10 @@ impl<
 
         tx.write_all(buf)
             .await
-            .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("write error"))?;
+            .map_err(|_| UartHalfDuplexSplitDriverError::GeneralError("write error"))?;
         tx.flush()
             .await
-            .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("flush error"))?;
+            .map_err(|_| UartHalfDuplexSplitDriverError::GeneralError("flush error"))?;
         drop(tx);
 
         embassy_time::Timer::after_micros(50).await;

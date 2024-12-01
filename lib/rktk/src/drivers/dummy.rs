@@ -2,6 +2,8 @@
 //!
 //! This is intended to be used by the [`crate::none_driver`] macro.
 
+use core::convert::Infallible;
+
 use display_interface::DisplayError;
 use embedded_graphics::{
     mono_font::{ascii::FONT_6X10, MonoTextStyle, MonoTextStyleBuilder},
@@ -13,9 +15,8 @@ use rktk_keymanager::state::EncoderDirection;
 
 use crate::drivers::interface::{
     backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
-    encoder::EncoderDriver, error::RktkError, mouse::MouseDriver, reporter::ReporterDriver,
-    split::SplitDriver, storage::StorageDriver, usb::UsbDriver, BackgroundTask, DriverBuilder,
-    DriverBuilderWithTask,
+    encoder::EncoderDriver, mouse::MouseDriver, reporter::ReporterDriver, split::SplitDriver,
+    storage::StorageDriver, usb::UsbDriver, BackgroundTask, DriverBuilder, DriverBuilderWithTask,
 };
 
 // Backlight
@@ -28,7 +29,38 @@ impl BacklightDriver for Backlight {
 
 // BLE
 pub enum Ble {}
-impl ReporterDriver for Ble {}
+impl ReporterDriver for Ble {
+    type Error = core::convert::Infallible;
+
+    fn try_send_keyboard_report(
+        &self,
+        _report: usbd_hid::descriptor::KeyboardReport,
+    ) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    fn try_send_media_keyboard_report(
+        &self,
+        _report: usbd_hid::descriptor::MediaKeyboardReport,
+    ) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    fn try_send_mouse_report(
+        &self,
+        _report: usbd_hid::descriptor::MouseReport,
+    ) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    fn wakeup(&self) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+}
 impl BleDriver for Ble {}
 
 pub enum BleBuilder {}
@@ -122,7 +154,17 @@ impl EncoderDriver for Encoder {
 // mouse
 pub enum Mouse {}
 impl MouseDriver for Mouse {
-    async fn read(&mut self) -> Result<(i8, i8), RktkError> {
+    type Error = Infallible;
+
+    async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
+        unreachable!()
+    }
+
+    async fn set_cpi(&mut self, _cpi: u16) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    async fn get_cpi(&mut self) -> Result<u16, Self::Error> {
         unreachable!()
     }
 }
@@ -141,10 +183,12 @@ impl DriverBuilder for MouseBuilder {
 // split
 pub enum Split {}
 impl SplitDriver for Split {
-    async fn wait_recv(&mut self, _buf: &mut [u8], _is_master: bool) -> Result<(), RktkError> {
+    type Error = Infallible;
+
+    async fn wait_recv(&mut self, _buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         unreachable!()
     }
-    async fn send(&mut self, _buf: &[u8], _is_master: bool) -> Result<(), RktkError> {
+    async fn send(&mut self, _buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         unreachable!()
     }
 }
@@ -166,8 +210,45 @@ impl StorageDriver for Storage {
 
 // usb
 pub enum Usb {}
-impl ReporterDriver for Usb {}
-impl UsbDriver for Usb {}
+impl ReporterDriver for Usb {
+    type Error = core::convert::Infallible;
+
+    fn try_send_keyboard_report(
+        &self,
+        _report: usbd_hid::descriptor::KeyboardReport,
+    ) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    fn try_send_media_keyboard_report(
+        &self,
+        _report: usbd_hid::descriptor::MediaKeyboardReport,
+    ) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    fn try_send_mouse_report(
+        &self,
+        _report: usbd_hid::descriptor::MouseReport,
+    ) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+
+    fn wakeup(&self) -> Result<(), Self::Error> {
+        unreachable!()
+    }
+}
+impl UsbDriver for Usb {
+    type Error = Infallible;
+
+    async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error> {
+        unreachable!()
+    }
+}
 
 pub enum UsbBuilder {}
 impl DriverBuilderWithTask for UsbBuilder {

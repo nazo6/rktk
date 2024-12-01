@@ -1,7 +1,7 @@
-use super::{error::RktkError, reporter::ReporterDriver};
+use super::reporter::ReporterDriver;
 
 pub trait UsbDriver: ReporterDriver {
-    async fn vbus_detect(&self) -> Result<bool, RktkError> {
-        Err(RktkError::NotSupported)
-    }
+    type Error: core::error::Error;
+
+    async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error>;
 }

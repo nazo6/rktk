@@ -29,7 +29,6 @@ ssd1306 = { workspace = true }
 display-interface = { workspace = true }
 
 smart-leds = { workspace = true }
-rand_core = { workspace = true }
 
 pio-proc = "0.2.2"
 pio = "0.2.1"
@@ -37,6 +36,7 @@ pio = "0.2.1"
 fixed = { workspace = true }
 fixed-macro = { workspace = true }
 static_cell = { workspace = true }
+thiserror = { workspace = true }
 
 [features]
 _check = []

@@ -35,6 +35,7 @@ embedded-graphics = { workspace = true }
 heapless = { workspace = true }
 static_cell = { workspace = true }
 log = { workspace = true }
+thiserror = { workspace = true }
 
 [features]
 _check = []

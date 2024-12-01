@@ -6,10 +6,7 @@ use embassy_rp::{
 use embassy_sync::semaphore::{FairSemaphore, Semaphore};
 use embassy_time::Timer;
 use fixed::traits::ToFixed;
-use rktk::{
-    drivers::interface::{error::RktkError, split::SplitDriver},
-    utils::RawMutex,
-};
+use rktk::{drivers::interface::split::SplitDriver, utils::RawMutex};
 
 pub const SPLIT_BITRATE: f64 = 1000000.0;
 pub const SPLIT_CLK_DIVIDER: f64 = 62_000_000.0 / (SPLIT_BITRATE * 8.0);
@@ -145,13 +142,21 @@ impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("General: {0}")]
+    GeneralError(&'static str),
+}
+
 impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
-    async fn init(&mut self) -> Result<(), RktkError> {
+    type Error = Error;
+
+    async fn init(&mut self) -> Result<(), Self::Error> {
         self.enter_rx().await;
         Ok(())
     }
 
-    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), RktkError> {
+    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         let _permit = loop {
             let (start, end, data) = self.recv_byte().await;
 
@@ -183,7 +188,7 @@ impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
         Ok(())
     }
 
-    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), RktkError> {
+    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         let _permit = COMM_SEMAPHORE.acquire(1).await;
 
         self.enter_tx().await;
