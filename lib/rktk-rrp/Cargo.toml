@@ -7,6 +7,9 @@ version.workspace = true
 edition.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
 [dependencies]
 futures = { workspace = true }
 rktk-keymanager = { workspace = true, features = ["postcard"] }
