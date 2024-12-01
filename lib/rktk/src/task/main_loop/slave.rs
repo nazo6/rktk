@@ -9,24 +9,25 @@ use crate::{
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
     },
-    hooks::MainHooks,
-    task::backlight::BACKLIGHT_CTRL,
+    hooks::interface::SlaveHooks,
+    task::channels::{
+        backlight::BACKLIGHT_CHANNEL,
+        split::{M2sRx, S2mTx},
+    },
 };
 
-use super::{M2sRx, S2mTx};
-
-pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: DebounceDriver>(
+pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: SlaveHooks>(
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
     mut keyscan: KS,
     mut debounce: Option<DB>,
     mut mouse: Option<M>,
-    mut hooks: MH,
+    mut slave_hooks: SH,
 ) {
     crate::print!("Slave start");
 
-    hooks
-        .on_slave_init(&mut keyscan, mouse.as_mut(), &s2m_tx)
+    slave_hooks
+        .on_slave_init(&mut keyscan, mouse.as_mut())
         .await;
 
     join3(
@@ -83,7 +84,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: Debounc
                 let data = m2s_rx.receive().await;
                 match data {
                     MasterToSlave::Backlight(ctrl) => {
-                        let _ = BACKLIGHT_CTRL.try_send(ctrl);
+                        let _ = BACKLIGHT_CHANNEL.try_send(ctrl);
                     }
                     MasterToSlave::Message(_) => {}
                 }

@@ -6,22 +6,24 @@ use crate::{
     drivers::interface::{
         ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, usb::UsbDriver,
     },
-    task::main_loop::master::{
+    hooks::interface::MasterHooks,
+    task::channels::report::{
         ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL,
     },
 };
 
 use super::{ConfiguredState, ThreadModeMutex};
 
-pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver>(
+pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver, MH: MasterHooks>(
     state: &ThreadModeMutex<ConfiguredState>,
     config_store: &Option<StorageConfigManager<S>>,
     ble: &Option<Ble>,
     usb: &Option<Usb>,
+    mut master_hooks: MH,
 ) {
     let mut prev_report_time = embassy_time::Instant::now();
     loop {
-        let state_report = match select3(
+        let mut state_report = match select3(
             MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
             KEYBOARD_EVENT_REPORT_CHANNEL.ready_to_receive(),
             ENCODER_EVENT_REPORT_CHANNEL.ready_to_receive(),
@@ -35,6 +37,10 @@ pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver>(
                     mouse_move.1 += y;
                 }
 
+                if !master_hooks.on_mouse_event(&mut mouse_move).await {
+                    continue;
+                }
+
                 state.lock().await.update(
                     &mut [],
                     mouse_move,
@@ -43,10 +49,22 @@ pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver>(
                 )
             }
             Either3::Second(_) => {
-                let mut events = heapless::Vec::<_, 10>::new();
-                while let Ok(ev) = KEYBOARD_EVENT_REPORT_CHANNEL.try_receive() {
+                let mut events = heapless::Vec::<_, 5>::new();
+                while let Ok(mut ev) = KEYBOARD_EVENT_REPORT_CHANNEL.try_receive() {
+                    if !master_hooks.on_keyboard_event(&mut ev).await {
+                        continue;
+                    }
+
                     events.push(ev).ok();
+                    if events.len() >= events.capacity() {
+                        break;
+                    }
                 }
+
+                if events.is_empty() {
+                    continue;
+                }
+
                 state.lock().await.update(
                     &mut events,
                     (0, 0),
@@ -55,7 +73,10 @@ pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver>(
                 )
             }
             Either3::Third(_) => {
-                let (id, dir) = ENCODER_EVENT_REPORT_CHANNEL.receive().await;
+                let (mut id, mut dir) = ENCODER_EVENT_REPORT_CHANNEL.receive().await;
+                if !master_hooks.on_encoder_event(&mut id, &mut dir).await {
+                    continue;
+                }
                 state.lock().await.update(
                     &mut [],
                     (0, 0),
@@ -65,7 +86,7 @@ pub async fn report_task<S: StorageDriver, Ble: BleDriver, Usb: UsbDriver>(
             }
         };
 
-        // handle_led(&state_report, m2s_tx, &mut latest_led);
+        master_hooks.on_state_update(&mut state_report).await;
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 

@@ -1,6 +1,6 @@
 //! Program entrypoint.
 
-use crate::drivers::Drivers;
+use crate::{drivers::Drivers, hooks::interface::*};
 use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
 
@@ -17,12 +17,17 @@ use crate::{
 };
 
 mod backlight;
+pub(crate) mod channels;
 pub mod display;
 mod logger;
-pub(crate) mod main_loop;
+pub mod main_loop;
 
-/// Receives the [`Drivers`] and executes the main process of the keyboard.
-/// This function must not be called more than once.
+/// Receives configs and executes the main process of the keyboard.
+///
+/// # Parameters
+/// - `drivers`: Drivers for the keyboard.
+/// - `key_config`: Key configuration such as keymaps.
+/// - `hooks`: Hooks for the keyboard. See [`Hooks`] for detail.
 #[allow(clippy::type_complexity)]
 pub async fn start<
     KeyScan: KeyscanDriver,
@@ -40,8 +45,10 @@ pub async fn start<
     DisplayBuilder: DriverBuilder<Output = Display>,
     UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
     BleBuilder: DriverBuilderWithTask<Driver = Ble>,
-    MainHooks: crate::hooks::MainHooks,
-    BacklightHooks: crate::hooks::BacklightHooks,
+    CH: CommonHooks,
+    MH: MasterHooks,
+    SH: SlaveHooks,
+    BH: BacklightHooks,
 >(
     mut drivers: Drivers<
         KeyScan,
@@ -61,7 +68,7 @@ pub async fn start<
         BleBuilder,
     >,
     key_config: KeyConfig,
-    hooks: Hooks<MainHooks, BacklightHooks>,
+    hooks: Hooks<CH, MH, SH, BH>,
 ) {
     critical_section::with(|_| unsafe {
         let _ = log::set_logger_racy(&logger::RRP_LOGGER);

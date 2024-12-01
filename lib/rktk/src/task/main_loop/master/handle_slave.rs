@@ -2,12 +2,13 @@ use rktk_keymanager::state::KeyChangeEvent;
 
 use crate::{
     drivers::interface::{keyscan::Hand, split::SlaveToMaster},
-    task::main_loop::S2mRx,
+    task::channels::{
+        report::{KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
+        split::S2mRx,
+    },
 };
 
-use super::{
-    utils::resolve_entire_key_pos, KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL,
-};
+use super::utils::resolve_entire_key_pos;
 
 pub async fn start(hand: Hand, s2m_rx: S2mRx<'_>) {
     loop {

@@ -1,18 +1,11 @@
 use rktk_keymanager::state::{
     config::{KeyResolverConfig, MouseConfig, Output, StateConfig},
-    KeyChangeEvent, StateReport,
+    KeyChangeEvent,
 };
 
 use crate::{
     config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
-    drivers::interface::{
-        backlight::{BacklightCommand, BacklightMode},
-        keyscan::Hand,
-        split::MasterToSlave,
-        storage::StorageDriver,
-    },
-    hooks::M2sTx,
-    task::backlight::BACKLIGHT_CTRL,
+    drivers::interface::{keyscan::Hand, storage::StorageDriver},
     KeyConfig,
 };
 
@@ -30,29 +23,6 @@ pub fn resolve_entire_key_pos(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
         ev.col = KEYBOARD.cols - 1 - ev.col;
     }
-}
-
-pub fn handle_led(
-    state_report: &StateReport,
-    m2s_tx: M2sTx<'_>,
-    latest_led: &mut Option<BacklightCommand>,
-) {
-    let led = match state_report.highest_layer {
-        1 => BacklightCommand::Start(BacklightMode::SolidColor(0, 0, 1)),
-        2 => BacklightCommand::Start(BacklightMode::SolidColor(1, 0, 0)),
-        3 => BacklightCommand::Start(BacklightMode::SolidColor(0, 1, 0)),
-        4 => BacklightCommand::Start(BacklightMode::SolidColor(1, 1, 0)),
-        _ => BacklightCommand::Reset,
-    };
-
-    if let Some(latest_led) = &latest_led {
-        if led != *latest_led {
-            let _ = BACKLIGHT_CTRL.try_send(led.clone());
-            let _ = m2s_tx.try_send(MasterToSlave::Backlight(led.clone()));
-        }
-    }
-
-    *latest_led = Some(led);
 }
 
 /// Initialise storage as configuration manager

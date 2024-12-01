@@ -6,9 +6,10 @@ use crate::{
         debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
     },
+    task::channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
 };
 
-use super::{utils::resolve_entire_key_pos, KEYBOARD_EVENT_REPORT_CHANNEL};
+use super::utils::resolve_entire_key_pos;
 
 pub async fn start(
     hand: Hand,

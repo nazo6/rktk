@@ -14,26 +14,29 @@ makes it easy to extend.
 ## Features
 
 - ✅ : Working
-- 🟡 : WIP, partly implemented.
+- 🔵 : Almost working
+- 🟡 : Partially working, missing some features
 - 🔴 : Planned.
 - ❌ : Not planned.
 - (blank): Not needed.
 
 ### Core features
 
-| Feature                                  | Status |
-| ---------------------------------------- | ------ |
-| Keyscan                                  | ✅     |
-| Mouse                                    | ✅     |
-| Advanced key mapping system (layer etc.) | 🟡     |
-| Split keyboard                           | ✅     |
-| Non-Split keyboard                       | 🟡     |
-| Display                                  | 🟡     |
-| Backlight                                | 🟡     |
-| USB                                      | ✅     |
-| Bluetooth                                | 🟡     |
-| Remapper support                         | 🟡     |
-| Double-tap reset                         | ✅     |
+| Feature            | Status                          |
+| ------------------ | ------------------------------- |
+| Keyscan            | ✅                              |
+| Mouse              | ✅                              |
+| Encoder            | 🔵                              |
+| Key mapping        | 🟡 (See below table for detail) |
+| Hook system        | 🟡                              |
+| Split keyboard     | ✅                              |
+| Non-Split keyboard | 🔵                              |
+| Display            | 🟡                              |
+| Backlight          | 🟡                              |
+| USB                | ✅                              |
+| Bluetooth          | 🟡                              |
+| Remapper support   | 🟡                              |
+| Double-tap reset   | ✅                              |
 
 #### Key mapping features
 
@@ -65,33 +68,33 @@ See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
   Drivers implemented in `rktk-drivers-common` use embassy traits, so they can
   be easily ported to various platforms.
 
-| Driver                     | Common | RP2040    | NRF52840  |
-| -------------------------- | ------ | --------- | --------- |
-| **Key scanner**            |        |           |           |
-| Matrix                     | 🔴     | 🔴        | 🔴        |
-| Matrix with shift register | 🟡     | 🔴        | 🟡        |
-| (Japanese) Duplex-Matrix   | ✅     | ✅        | ✅        |
-| &nbsp;                     |        |           |           |
-| **Mouse**                  |        |           |           |
-| PMW3360                    | ✅     | ✅        | ✅        |
-| PAW3395                    | ✅     | ✅        | ✅        |
-| &nbsp;                     |        |           |           |
-| **Host communication**     |        |           |           |
-| USB                        | ✅     | ✅        | ✅        |
-| Bluetooth                  | ❌     | ❌        | ✅        |
-| &nbsp;                     |        |           |           |
-| **Display**                |        |           |           |
-| SSD1306                    | ✅     | ✅        | ✅        |
-| &nbsp;                     |        |           |           |
-| **Split**                  |        |           |           |
-| Half-duplex single wire    | ❌     | ✅ (PIO)  | ✅ (UART) |
-| Full-duplex dual wire      | ❌     | 🔴 (UART) | 🔴 (UART) |
-| Bluetooth                  | ❌     | ❌        | 🔴        |
-| &nbsp;                     |        |           |           |
-| **Backlight**              |        |           |           |
-| WS2812                     |        | ✅ (PIO)  | ✅ (PWM)  |
-| &nbsp;                     |        |           |           |
-| **Double-tap reset**       |        | ✅        |           |
+| Driver                     | Common | RP2040    | NRF52840        |
+| -------------------------- | ------ | --------- | --------------- |
+| **Key scanner**            |        |           |                 |
+| Matrix                     | 🔴     | 🔴        | 🔴              |
+| Matrix with shift register | 🔵     | 🔴        | 🔵              |
+| (Japanese) Duplex-Matrix   | ✅     | ✅        | ✅              |
+| &nbsp;                     |        |           |                 |
+| **Mouse**                  |        |           |                 |
+| PMW3360                    | ✅     | ✅        | ✅              |
+| PAW3395                    | ✅     | ✅        | ✅              |
+| &nbsp;                     |        |           |                 |
+| **Host communication**     |        |           |                 |
+| USB                        | ✅     | ✅        | ✅              |
+| Bluetooth                  | ❌     | ❌        | ✅ (SoftDevice) |
+| &nbsp;                     |        |           |                 |
+| **Display**                |        |           |                 |
+| SSD1306                    | ✅     | ✅        | ✅              |
+| &nbsp;                     |        |           |                 |
+| **Split**                  |        |           |                 |
+| Half-duplex single wire    |        | ✅ (PIO)  | ✅ (UART)       |
+| Full-duplex dual wire      |        | 🔴 (UART) | 🔴 (UART)       |
+| Bluetooth                  |        | ❌        | 🔴              |
+| &nbsp;                     |        |           |                 |
+| **Backlight**              |        |           |                 |
+| WS2812                     |        | ✅ (PIO)  | ✅ (PWM)        |
+| &nbsp;                     |        |           |                 |
+| **Double-tap reset**       |        | ✅        |                 |
 
 ## Development
 

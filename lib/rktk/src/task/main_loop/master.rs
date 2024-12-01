@@ -1,7 +1,6 @@
 use embassy_futures::join::{join, join5};
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Timer;
-use rktk_keymanager::state::{config::Output, EncoderDirection, KeyChangeEvent, State};
+use rktk_keymanager::state::{config::Output, State};
 use utils::{init_storage, load_state};
 
 use crate::{
@@ -15,12 +14,14 @@ use crate::{
         storage::StorageDriver,
         usb::UsbDriver,
     },
-    hooks::MainHooks,
+    hooks::interface::MasterHooks,
+    task::channels::{
+        report::{ENCODER_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
+        split::{M2sTx, S2mRx},
+    },
     utils::ThreadModeMutex,
     KeyConfig,
 };
-
-use super::{M2sTx, S2mRx};
 
 mod handle_keyboard;
 mod handle_mouse;
@@ -38,12 +39,6 @@ type ConfiguredState = State<
 
 type SharedState = ThreadModeMutex<ConfiguredState>;
 
-static MOUSE_EVENT_REPORT_CHANNEL: Channel<CriticalSectionRawMutex, (i8, i8), 5> = Channel::new();
-static KEYBOARD_EVENT_REPORT_CHANNEL: Channel<CriticalSectionRawMutex, KeyChangeEvent, 5> =
-    Channel::new();
-static ENCODER_EVENT_REPORT_CHANNEL: Channel<CriticalSectionRawMutex, (u8, EncoderDirection), 5> =
-    Channel::new();
-
 #[allow(clippy::too_many_arguments)]
 pub async fn start<
     'a,
@@ -54,9 +49,9 @@ pub async fn start<
     Ble: BleDriver,
     Usb: UsbDriver,
     S: StorageDriver,
-    MH: MainHooks,
+    MH: MasterHooks,
 >(
-    m2s_tx: M2sTx<'a>,
+    _m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
     ble: Option<Ble>,
     usb: Option<Usb>,
@@ -67,19 +62,20 @@ pub async fn start<
     mut mouse: Option<M>,
     key_config: KeyConfig,
     hand: Hand,
-    mut hook: MH,
+    mut master_hooks: MH,
 ) {
     let config_store = init_storage(storage).await;
     let state = load_state(&config_store, key_config, Output::Usb).await;
 
     log::info!("Master side task start");
 
-    hook.on_master_init(&mut keyscan, mouse.as_mut(), &m2s_tx)
+    master_hooks
+        .on_master_init(&mut keyscan, mouse.as_mut())
         .await;
 
     join(
         join(
-            report::report_task(&state, &config_store, &ble, &usb),
+            report::report_task(&state, &config_store, &ble, &usb, master_hooks),
             join5(
                 handle_slave::start(hand, s2m_rx),
                 handle_keyboard::start(hand, keyscan, debounce),
