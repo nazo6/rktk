@@ -1,4 +1,4 @@
-use crate::interface::{
+use crate::drivers::interface::{
     backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
     double_tap::DoubleTapResetDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
     mouse::MouseDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver, DriverBuilder,
@@ -6,6 +6,7 @@ use crate::interface::{
 };
 
 pub mod dummy;
+pub mod interface;
 
 #[macro_export]
 macro_rules! none_driver {

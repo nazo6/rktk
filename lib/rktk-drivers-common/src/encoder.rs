@@ -2,7 +2,7 @@ use embassy_futures::select::{select, select_slice, Either};
 use embassy_time::Timer;
 use embedded_hal::digital::InputPin;
 use embedded_hal_async::digital::Wait;
-use rktk::interface::encoder::{EncoderDirection, EncoderDriver};
+use rktk::drivers::interface::encoder::{EncoderDirection, EncoderDriver};
 
 pub struct GeneralEncoder<PIN: Wait + InputPin, const ENCODER_COUNT: usize> {
     encoders: [(PIN, PIN); ENCODER_COUNT],

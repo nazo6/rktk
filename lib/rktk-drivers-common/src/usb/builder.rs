@@ -4,7 +4,7 @@ use embassy_usb::driver::Driver;
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_usb::Builder;
-use rktk::interface::DriverBuilderWithTask;
+use rktk::drivers::interface::DriverBuilderWithTask;
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };

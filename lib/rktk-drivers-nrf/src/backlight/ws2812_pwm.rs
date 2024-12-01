@@ -10,7 +10,7 @@ use embassy_nrf::{
     Peripheral,
 };
 use embassy_time::Timer;
-use rktk::interface::backlight::BacklightDriver;
+use rktk::drivers::interface::backlight::BacklightDriver;
 use smart_leds::RGB8;
 
 pub struct Ws2812Pwm<

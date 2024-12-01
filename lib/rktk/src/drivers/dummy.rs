@@ -7,7 +7,7 @@ use embedded_graphics::{
 };
 use rktk_keymanager::state::EncoderDirection;
 
-use crate::interface::{
+use crate::drivers::interface::{
     backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
     double_tap::DoubleTapResetDriver, encoder::EncoderDriver, error::RktkError, mouse::MouseDriver,
     reporter::ReporterDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,

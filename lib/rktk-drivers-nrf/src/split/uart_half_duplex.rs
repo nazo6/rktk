@@ -13,7 +13,7 @@ use embassy_nrf::{
     Peripheral,
 };
 use embedded_io_async::{Read as _, Write};
-use rktk::interface::split::SplitDriver;
+use rktk::drivers::interface::split::SplitDriver;
 
 pub struct UartHalfDuplexSplitDriver<
     UARTE: Instance,
@@ -96,7 +96,7 @@ impl<
         &mut self,
         buf: &mut [u8],
         _is_master: bool,
-    ) -> Result<(), rktk::interface::error::RktkError> {
+    ) -> Result<(), rktk::drivers::interface::error::RktkError> {
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
@@ -116,7 +116,7 @@ impl<
         loop {
             rx.read_exact(&mut reader)
                 .await
-                .map_err(|_| rktk::interface::error::RktkError::GeneralError("read error"))?;
+                .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("read error"))?;
             if reader[0] == 0 {
                 buf[i] = reader[0];
                 break;
@@ -134,7 +134,7 @@ impl<
         &mut self,
         buf: &[u8],
         _is_master: bool,
-    ) -> Result<(), rktk::interface::error::RktkError> {
+    ) -> Result<(), rktk::drivers::interface::error::RktkError> {
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
@@ -148,10 +148,10 @@ impl<
 
         tx.write_all(buf)
             .await
-            .map_err(|_| rktk::interface::error::RktkError::GeneralError("write error"))?;
+            .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("write error"))?;
         tx.flush()
             .await
-            .map_err(|_| rktk::interface::error::RktkError::GeneralError("flush error"))?;
+            .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("flush error"))?;
         drop(tx);
 
         embassy_time::Timer::after_micros(50).await;

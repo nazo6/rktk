@@ -2,7 +2,7 @@ use super::pressed::Pressed;
 use embedded_hal::{digital::InputPin, spi::Operation};
 use embedded_hal_async::spi::SpiDevice;
 use rktk::{
-    interface::keyscan::{Hand, KeyscanDriver},
+    drivers::interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
 };
 
@@ -105,7 +105,7 @@ impl<
         events
     }
 
-    async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
+    async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
         if self
             .scan()
             .await

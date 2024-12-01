@@ -1,5 +1,5 @@
 use embassy_rp::gpio::Flex;
-use rktk::interface::keyscan::KeyscanDriver;
+use rktk::drivers::interface::keyscan::KeyscanDriver;
 use rktk_drivers_common::keyscan::{
     duplex_matrix::{DuplexMatrixScanner, ScanDir},
     flex_pin::{FlexPin, Pull},

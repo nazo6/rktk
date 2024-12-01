@@ -7,7 +7,7 @@ use embedded_graphics::{
 };
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
-use rktk::interface::{display::DisplayDriver, DriverBuilder};
+use rktk::drivers::interface::{display::DisplayDriver, DriverBuilder};
 use ssd1306::{
     mode::BufferedGraphicsModeAsync, prelude::*, size::DisplaySizeAsync, I2CDisplayInterface,
     Ssd1306Async,

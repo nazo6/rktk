@@ -1,5 +1,5 @@
 use nrf_softdevice::{random_bytes, Softdevice};
-use rktk::interface::rand::RandomDriver;
+use rktk::drivers::interface::rand::RandomDriver;
 
 pub struct SdRand {
     sd: &'static Softdevice,

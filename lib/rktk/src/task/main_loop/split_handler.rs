@@ -6,7 +6,7 @@ use embassy_sync::{
 use postcard::{from_bytes_cobs, to_slice_cobs};
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::{config::static_config::RKTK_CONFIG, interface::split::SplitDriver};
+use crate::{config::static_config::RKTK_CONFIG, drivers::interface::split::SplitDriver};
 
 pub const MAX_DATA_SIZE: usize = 16;
 

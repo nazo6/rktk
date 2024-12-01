@@ -1,7 +1,7 @@
 use core::{mem::MaybeUninit, ptr::write_volatile};
 
 use embassy_time::{Duration, Timer};
-use rktk::interface::double_tap::DoubleTapResetDriver;
+use rktk::drivers::interface::double_tap::DoubleTapResetDriver;
 
 const BOOTLOADER_MAGIC: u32 = 0xDEADBEEF;
 

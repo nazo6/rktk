@@ -10,7 +10,7 @@ use embassy_nrf::{
     Peripheral,
 };
 use embedded_io_async::Read as _;
-use rktk::interface::split::SplitDriver;
+use rktk::drivers::interface::split::SplitDriver;
 
 pub struct UartHalfDuplexSplitDriverRx<'a, UARTE: Instance, TIMER: embassy_nrf::timer::Instance> {
     rx: BufferedUarteRx<'a, UARTE, TIMER>,
@@ -57,14 +57,14 @@ impl<'a, UARTE: Instance, TIMER: embassy_nrf::timer::Instance> SplitDriver
         &mut self,
         buf: &mut [u8],
         _is_master: bool,
-    ) -> Result<(), rktk::interface::error::RktkError> {
+    ) -> Result<(), rktk::drivers::interface::error::RktkError> {
         let mut reader = [0u8];
         let mut i = 0;
         loop {
             self.rx
                 .read_exact(&mut reader)
                 .await
-                .map_err(|_| rktk::interface::error::RktkError::GeneralError("read error"))?;
+                .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("read error"))?;
             if reader[0] == 0 {
                 buf[i] = reader[0];
                 break;
@@ -81,7 +81,7 @@ impl<'a, UARTE: Instance, TIMER: embassy_nrf::timer::Instance> SplitDriver
         &mut self,
         _buf: &[u8],
         _is_master: bool,
-    ) -> Result<(), rktk::interface::error::RktkError> {
+    ) -> Result<(), rktk::drivers::interface::error::RktkError> {
         Ok(())
     }
 }

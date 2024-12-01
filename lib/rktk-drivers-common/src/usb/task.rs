@@ -5,7 +5,7 @@ use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channe
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
 use embassy_usb::UsbDevice;
-use rktk::interface::BackgroundTask;
+use rktk::drivers::interface::BackgroundTask;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{ReadySignal, RemoteWakeupSignal};

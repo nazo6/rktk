@@ -2,8 +2,8 @@ use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channe
 use smart_leds::RGB8;
 
 use crate::{
+    drivers::interface::backlight::{BacklightCommand, BacklightDriver, BacklightMode},
     hooks::BacklightHooks,
-    interface::backlight::{BacklightCommand, BacklightDriver, BacklightMode},
 };
 
 pub(super) static BACKLIGHT_CTRL: Channel<CriticalSectionRawMutex, BacklightCommand, 3> =

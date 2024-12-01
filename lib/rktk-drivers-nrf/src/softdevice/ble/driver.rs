@@ -1,4 +1,4 @@
-use rktk::interface::{ble::BleDriver, error::RktkError, reporter::ReporterDriver};
+use rktk::drivers::interface::{ble::BleDriver, error::RktkError, reporter::ReporterDriver};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{bonder::BOND_FLASH, HidReport, REPORT_CHAN};

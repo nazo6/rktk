@@ -1,6 +1,6 @@
 #![allow(async_fn_in_trait)]
 
-use crate::interface::{
+use crate::drivers::interface::{
     backlight::{BacklightCommand, BacklightDriver},
     keyscan::{Hand, KeyscanDriver},
     mouse::MouseDriver,

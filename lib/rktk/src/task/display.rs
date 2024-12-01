@@ -4,7 +4,7 @@ use embassy_futures::select::{select, Either};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use rktk_keymanager::state::config::Output;
 
-use crate::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder};
+use crate::drivers::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder};
 
 pub enum DisplayMessage {
     Clear,

@@ -77,8 +77,8 @@ fn parse_panic_message(panic_info: &PanicMessage) -> &str {
 ///
 /// When None is returned, caller can stop execution using something like [`cortex_m::asm::udf`]
 pub async fn display_message_if_panicked<
-    D: rktk::interface::display::DisplayDriver,
-    DB: rktk::interface::DriverBuilder<Output = D>,
+    D: rktk::drivers::interface::display::DisplayDriver,
+    DB: rktk::drivers::interface::DriverBuilder<Output = D>,
 >(
     display_builder: DB,
 ) -> Option<DB> {

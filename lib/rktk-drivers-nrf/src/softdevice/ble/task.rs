@@ -7,7 +7,7 @@ use nrf_softdevice::ble::{
     gatt_server, peripheral,
 };
 use nrf_softdevice::Softdevice;
-use rktk::interface::BackgroundTask;
+use rktk::drivers::interface::BackgroundTask;
 
 use crate::softdevice::ble::REPORT_CHAN;
 use crate::softdevice::flash::SharedFlash;

@@ -14,8 +14,7 @@ use crate::{
         static_config::{KEYBOARD, RKTK_CONFIG, SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
         storage_config::StorageConfigManager,
     },
-    hooks::MainHooks,
-    interface::{
+    drivers::interface::{
         backlight::{BacklightCommand, BacklightMode},
         ble::BleDriver,
         debounce::DebounceDriver,
@@ -27,6 +26,7 @@ use crate::{
         storage::StorageDriver,
         usb::UsbDriver,
     },
+    hooks::MainHooks,
     task::backlight::BACKLIGHT_CTRL,
     utils::ThreadModeMutex,
     KeyConfig,
@@ -102,7 +102,7 @@ pub async fn start<
     storage: Option<S>,
     mut mouse: Option<M>,
     key_config: KeyConfig,
-    hand: crate::interface::keyscan::Hand,
+    hand: crate::drivers::interface::keyscan::Hand,
     mut hook: MH,
 ) {
     let mut config_storage = None;

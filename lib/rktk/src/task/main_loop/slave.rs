@@ -3,13 +3,13 @@ use embassy_time::Timer;
 
 use crate::{
     config::static_config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
-    hooks::MainHooks,
-    interface::{
+    drivers::interface::{
         debounce::DebounceDriver,
         keyscan::KeyscanDriver,
         mouse::MouseDriver,
         split::{MasterToSlave, SlaveToMaster},
     },
+    hooks::MainHooks,
     task::backlight::BACKLIGHT_CTRL,
 };
 

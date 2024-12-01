@@ -6,13 +6,13 @@ use embassy_time::Duration;
 
 use crate::{
     config::static_config::RKTK_CONFIG,
-    hooks::Hooks,
-    interface::{
+    drivers::interface::{
         backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver,
         display::DisplayDriver, double_tap::DoubleTapResetDriver, encoder::EncoderDriver,
         keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver, storage::StorageDriver,
         usb::UsbDriver, BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
     },
+    hooks::Hooks,
     KeyConfig,
 };
 

@@ -6,8 +6,8 @@ use embassy_sync::semaphore::{FairSemaphore, Semaphore};
 use embassy_time::Timer;
 
 use fixed::traits::ToFixed;
-use rktk::interface::error::RktkError;
-use rktk::interface::split::SplitDriver;
+use rktk::drivers::interface::error::RktkError;
+use rktk::drivers::interface::split::SplitDriver;
 
 pub const SPLIT_BITRATE: f64 = 1000000.0;
 pub const SPLIT_CLK_DIVIDER: f64 = 62_000_000.0 / (SPLIT_BITRATE * 8.0);

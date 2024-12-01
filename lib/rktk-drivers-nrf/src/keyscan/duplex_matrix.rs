@@ -1,5 +1,5 @@
 use embassy_nrf::gpio::{Flex, OutputDrive, Pull as NrfPull};
-use rktk::interface::keyscan::KeyscanDriver;
+use rktk::drivers::interface::keyscan::KeyscanDriver;
 pub use rktk_drivers_common::keyscan::duplex_matrix::ScanDir;
 use rktk_drivers_common::keyscan::{
     duplex_matrix::DuplexMatrixScanner,

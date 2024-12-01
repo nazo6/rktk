@@ -10,7 +10,7 @@ use rktk_rrp::{
 
 use crate::{
     config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
-    interface::{reporter::ReporterDriver, storage::StorageDriver},
+    drivers::interface::{reporter::ReporterDriver, storage::StorageDriver},
 };
 
 use super::{ConfiguredState, ThreadModeMutex, RKTK_CONFIG};

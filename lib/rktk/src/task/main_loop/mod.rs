@@ -1,6 +1,6 @@
 use crate::{
     config::static_config::{KEYBOARD, RKTK_CONFIG},
-    interface::{
+    drivers::interface::{
         backlight::BacklightDriver,
         ble::BleDriver,
         debounce::DebounceDriver,

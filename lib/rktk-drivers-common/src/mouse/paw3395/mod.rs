@@ -10,7 +10,7 @@ use embedded_hal::spi::Operation;
 use embedded_hal_async::spi::SpiDevice;
 use error::Paw3395Error;
 use registers as reg;
-use rktk::interface::{mouse::MouseDriver, DriverBuilder};
+use rktk::drivers::interface::{mouse::MouseDriver, DriverBuilder};
 
 mod timing {
     pub const NCS_SCLK: u32 = 120;
@@ -73,22 +73,22 @@ pub struct Paw3395<S: SpiDevice> {
 }
 
 impl<S: SpiDevice> MouseDriver for Paw3395<S> {
-    async fn read(&mut self) -> Result<(i8, i8), rktk::interface::error::RktkError> {
+    async fn read(&mut self) -> Result<(i8, i8), rktk::drivers::interface::error::RktkError> {
         self.burst_read()
             .await
             .map(|data| (data.dx as i8, data.dy as i8))
-            .map_err(|_| rktk::interface::error::RktkError::GeneralError("Failed to read PAW3395"))
+            .map_err(|_| rktk::drivers::interface::error::RktkError::GeneralError("Failed to read PAW3395"))
     }
 
-    async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::interface::error::RktkError> {
+    async fn set_cpi(&mut self, cpi: u16) -> Result<(), rktk::drivers::interface::error::RktkError> {
         self.set_cpi(cpi).await.map_err(|_| {
-            rktk::interface::error::RktkError::GeneralError("Failed to set cpi of PAW3395")
+            rktk::drivers::interface::error::RktkError::GeneralError("Failed to set cpi of PAW3395")
         })?;
         Ok(())
     }
 
-    async fn get_cpi(&mut self) -> Result<u16, rktk::interface::error::RktkError> {
-        Err(rktk::interface::error::RktkError::NotSupported)
+    async fn get_cpi(&mut self) -> Result<u16, rktk::drivers::interface::error::RktkError> {
+        Err(rktk::drivers::interface::error::RktkError::NotSupported)
     }
 }
 

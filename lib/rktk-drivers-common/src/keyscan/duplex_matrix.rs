@@ -3,7 +3,7 @@ use super::{
     pressed::Pressed,
 };
 use rktk::{
-    interface::keyscan::{Hand, KeyscanDriver},
+    drivers::interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
 };
 
@@ -176,7 +176,7 @@ impl<
         events
     }
 
-    async fn current_hand(&mut self) -> rktk::interface::keyscan::Hand {
+    async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
         if self
             .scan()
             .await

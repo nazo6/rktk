@@ -9,9 +9,11 @@ use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
 use rktk::{
-    drivers::Drivers,
+    drivers::{
+        interface::keyscan::{Hand, KeyscanDriver},
+        Drivers,
+    },
     hooks::create_empty_hooks,
-    interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
     none_driver,
 };

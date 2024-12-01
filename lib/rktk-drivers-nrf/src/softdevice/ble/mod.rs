@@ -1,7 +1,7 @@
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use nrf_softdevice::{raw, Softdevice};
 
-use rktk::interface::DriverBuilderWithTask;
+use rktk::drivers::interface::DriverBuilderWithTask;
 use server::Server;
 pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -62,7 +62,7 @@ impl DriverBuilderWithTask for NrfBleDriverBuilder {
 
     async fn build(
         self,
-    ) -> Result<(Self::Driver, impl rktk::interface::BackgroundTask), Self::Error> {
+    ) -> Result<(Self::Driver, impl rktk::drivers::interface::BackgroundTask), Self::Error> {
         Ok((
             driver::NrfBleDriver {},
             task::SoftdeviceBleTask {

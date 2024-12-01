@@ -6,7 +6,7 @@ use embassy_rp::{clocks, into_ref, Peripheral, PeripheralRef};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
-use rktk::interface::backlight::BacklightDriver;
+use rktk::drivers::interface::backlight::BacklightDriver;
 use smart_leds::RGB8;
 
 pub struct Ws2812Pio<'a, I: Instance> {
