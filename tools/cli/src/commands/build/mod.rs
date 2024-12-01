@@ -47,6 +47,9 @@ pub struct BuildCommand {
 }
 
 fn write_profile_config_toml(target_dir: &std::path::Path) -> anyhow::Result<PathBuf> {
+    if !target_dir.exists() {
+        std::fs::create_dir_all(target_dir).context("Failed to create target directory")?;
+    }
     let config_toml_file_path = target_dir.join("profile_config.toml");
     let mut config_toml_file = std::fs::OpenOptions::new()
         .create(true)
