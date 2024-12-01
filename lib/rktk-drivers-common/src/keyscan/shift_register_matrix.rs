@@ -69,7 +69,7 @@ impl<
 {
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         // TODO: Implement async matrix instead of polling
-        embassy_time::Timer::after_micros(10).await;
+        embassy_time::Timer::after_millis(10).await;
 
         for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self
