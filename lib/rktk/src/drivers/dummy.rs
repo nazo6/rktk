@@ -1,3 +1,7 @@
+//! Dummy drivers for type annotations.
+//!
+//! This is intended to be used by the [`crate::none_driver`] macro.
+
 use display_interface::DisplayError;
 use embedded_graphics::{
     mono_font::{ascii::FONT_6X10, MonoTextStyle, MonoTextStyleBuilder},

@@ -13,7 +13,7 @@ use rktk::{
         interface::keyscan::{Hand, KeyscanDriver},
         Drivers,
     },
-    hooks::create_empty_hooks,
+    hooks::empty_hooks::create_empty_hooks,
     keymanager::state::KeyChangeEvent,
     none_driver,
 };

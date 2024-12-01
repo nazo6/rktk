@@ -15,8 +15,8 @@ use crate::{
         interface::{BacklightHooks, CommonHooks, MasterHooks, SlaveHooks},
         Hooks,
     },
+    keymap_config::KeyConfig,
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
-    KeyConfig,
 };
 use embassy_futures::{
     join::join,

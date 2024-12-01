@@ -13,7 +13,7 @@ use crate::{
         usb::UsbDriver, BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
     },
     hooks::Hooks,
-    KeyConfig,
+    keymap_config::KeyConfig,
 };
 
 mod backlight;

@@ -3,7 +3,7 @@ use rktk::keymanager::keycode::{
     key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
 };
 use rktk::keymanager::state::config::TapDanceConfig;
-use rktk::{KeyConfig, Keymap, Layer, LayerMap};
+use rktk::keymap_config::{KeyConfig, Keymap, Layer, LayerMap};
 
 const L2ENTER: KeyAction = KeyAction::TapHold(
     KeyCode::Key(Key::Enter),

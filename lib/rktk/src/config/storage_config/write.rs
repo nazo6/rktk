@@ -2,7 +2,7 @@ use core::fmt::Debug;
 use postcard::experimental::max_size::MaxSize as _;
 use rktk_keymanager::state::config::StateConfig;
 
-use crate::{drivers::interface::storage::StorageDriver, Layer};
+use crate::{drivers::interface::storage::StorageDriver, keymap_config::Layer};
 
 use super::{ConfigKey, StorageConfigManager};
 

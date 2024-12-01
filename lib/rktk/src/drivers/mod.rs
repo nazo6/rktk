@@ -1,3 +1,5 @@
+//! Drivers for the keyboard.
+
 use crate::drivers::interface::{
     backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
     double_tap::DoubleTapResetDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
@@ -8,6 +10,11 @@ use crate::drivers::interface::{
 pub mod dummy;
 pub mod interface;
 
+/// Utility to pass `None` as a driver.
+///
+/// In Rust, you need to specify a type even when putting None into an Option value that uses generics.
+/// This can be cumbersome when not using a driver, so we provide a driver for type annotations that cannot be constructed, such as [`dummy`].
+/// This macro makes it easy to use the dummy driver.
 #[macro_export]
 macro_rules! none_driver {
     ($type:ident) => {

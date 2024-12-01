@@ -12,6 +12,8 @@ pub mod backlight {
 
     pub(crate) static BACKLIGHT_CHANNEL: Channel<CriticalSectionRawMutex, BacklightCommand, 3> =
         Channel::new();
+
+    /// Get [`DynamicSender`] that can be used to control RGB.
     pub fn backlight_sender() -> DynamicSender<'static, BacklightCommand> {
         BACKLIGHT_CHANNEL.dyn_sender()
     }
@@ -51,6 +53,7 @@ pub mod report {
     pub(crate) static MOUSE_EVENT_REPORT_CHANNEL: Channel<CriticalSectionRawMutex, (i8, i8), 5> =
         Channel::new();
 
+    /// Get [`DynamicSender`] that can be used to report mouse events.
     pub fn mouse_event_sender() -> DynamicSender<'static, (i8, i8)> {
         MOUSE_EVENT_REPORT_CHANNEL.dyn_sender()
     }
@@ -61,6 +64,7 @@ pub mod report {
         5,
     > = Channel::new();
 
+    /// Get [`DynamicSender`] that can be used to report keyboard events.
     pub fn keyboard_event_sender() -> DynamicSender<'static, KeyChangeEvent> {
         KEYBOARD_EVENT_REPORT_CHANNEL.dyn_sender()
     }
@@ -71,6 +75,7 @@ pub mod report {
         5,
     > = Channel::new();
 
+    /// Get [`DynamicSender`] that can be used to report encoder events.
     pub fn encoder_event_sender() -> DynamicSender<'static, (u8, EncoderDirection)> {
         ENCODER_EVENT_REPORT_CHANNEL.dyn_sender()
     }

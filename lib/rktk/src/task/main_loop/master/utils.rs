@@ -6,7 +6,7 @@ use rktk_keymanager::state::{
 use crate::{
     config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
     drivers::interface::{keyscan::Hand, storage::StorageDriver},
-    KeyConfig,
+    keymap_config::KeyConfig,
 };
 
 use super::{ConfiguredState, SharedState, ThreadModeMutex, RKTK_CONFIG};

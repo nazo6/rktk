@@ -15,12 +15,12 @@ use crate::{
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
+    keymap_config::KeyConfig,
     task::channels::{
         report::{ENCODER_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
         split::{M2sTx, S2mRx},
     },
     utils::ThreadModeMutex,
-    KeyConfig,
 };
 
 mod handle_keyboard;

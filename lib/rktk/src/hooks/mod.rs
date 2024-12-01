@@ -21,6 +21,7 @@ pub mod channels {
     };
 }
 
+/// Collection of empty hooks and utility functions.
 pub mod empty_hooks {
     use super::{
         interface::{BacklightHooks, CommonHooks},
