@@ -1,8 +1,4 @@
-#![cfg_attr(all(not(test), not(feature = "std")), no_std)]
-#![allow(non_snake_case)]
-
-//! # rktk-keymanager
-//! Keymap/keystate management library
+#![doc = include_str!("../README.md")]
 //!
 //! This crate consists of the following modules:
 //! - [`keycode`]: Keycode definitions
@@ -10,6 +6,9 @@
 //! - [`state`]: State management
 //!
 //! To know how to define keymap, see `keycode` and `keymap` modules.
+
+#![cfg_attr(all(not(test), not(feature = "std")), no_std)]
+#![allow(non_snake_case)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

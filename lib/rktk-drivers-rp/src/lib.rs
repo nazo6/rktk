@@ -1,5 +1,4 @@
-//! rktk drivers for RP2040
-
+#![doc = include_str!("../README.md")]
 #![no_std]
 
 pub mod backlight;
