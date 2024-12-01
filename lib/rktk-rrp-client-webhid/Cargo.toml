@@ -1,5 +1,6 @@
 [package]
 name = "rktk-rrp-client-webhid"
+description = "rrp over webhid client"
 authors.workspace = true
 license.workspace = true
 version.workspace = true

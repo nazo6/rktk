@@ -1,5 +1,6 @@
 [package]
 name = "rktk-keymanager"
+description = "Keymap/state manager for self-made keyboard firmware"
 authors.workspace = true
 license.workspace = true
 version.workspace = true

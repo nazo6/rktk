@@ -1,5 +1,6 @@
 [package]
 name = "rktk-cli"
+description = "CLI for RKTK"
 authors.workspace = true
 license.workspace = true
 version.workspace = true

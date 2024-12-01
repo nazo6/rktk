@@ -1,6 +1,6 @@
 [package]
 name = "rktk"
-description = "rktk - Rust Keyboard Toolkit"
+description = "rktk - Rust Keyboard firmware Toolkit"
 version.workspace = true
 license.workspace = true
 edition.workspace = true
