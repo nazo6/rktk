@@ -12,6 +12,8 @@ repository.workspace = true
 
 [package.metadata.docs.rs]
 no-default-features = true
+features = ["embassy-nrf/nrf52840"]
+default-target = "thumbv7em-none-eabihf"
 
 [dependencies]
 rktk = { workspace = true }

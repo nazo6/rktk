@@ -7,6 +7,9 @@ edition.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+# default-target = "thumbv6m-none-eabi"
+
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
