@@ -22,8 +22,8 @@ use keymap::KEY_CONFIG;
 
 pub struct DummyKeyscanDriver;
 impl KeyscanDriver for DummyKeyscanDriver {
-    async fn scan(&mut self) -> rktk::reexports::heapless::Vec<KeyChangeEvent, 32> {
-        rktk::reexports::heapless::Vec::new()
+    async fn scan(&mut self, _cb: impl FnMut(KeyChangeEvent)) {
+        let _: () = core::future::pending().await;
     }
     async fn current_hand(&mut self) -> Hand {
         Hand::Right

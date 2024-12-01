@@ -1,4 +1,4 @@
-use rktk_keymanager::state::KeyChangeEvent;
+pub use rktk_keymanager::state::KeyChangeEvent;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Hand {
@@ -17,6 +17,6 @@ impl Hand {
 
 /// Key scanner driver interface.
 pub trait KeyscanDriver {
-    async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32>;
+    async fn scan(&mut self, callback: impl FnMut(KeyChangeEvent));
     async fn current_hand(&mut self) -> Hand;
 }

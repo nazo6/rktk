@@ -115,8 +115,17 @@ impl<
             output.set_as_input();
         }
     }
+}
 
-    async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
+impl<
+        F: FlexPin,
+        const ROW_PIN_COUNT: usize,
+        const COL_PIN_COUNT: usize,
+        const COLS: usize,
+        const ROWS: usize,
+    > KeyscanDriver for DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+{
+    async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         Self::scan_dir(
             &mut self.rows,
             &mut self.cols,
@@ -157,35 +166,16 @@ impl<
         )
         .await;
     }
-}
-
-impl<
-        F: FlexPin,
-        const ROW_PIN_COUNT: usize,
-        const COL_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > KeyscanDriver for DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
-{
-    async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32> {
-        let mut events = heapless::Vec::new();
-        self.scan_with_cb(|e| {
-            events.push(e).ok();
-        })
-        .await;
-        events
-    }
 
     async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
-        if self
-            .scan()
-            .await
-            .iter()
-            .any(|e| e.row == self.left_detect_key.0 as u8 && e.col == self.left_detect_key.1 as u8)
-        {
-            Hand::Left
-        } else {
-            Hand::Right
-        }
+        let mut hand = Hand::Right;
+        let left_detect_key = self.left_detect_key;
+        self.scan(|e| {
+            if e.row == left_detect_key.0 as u8 && e.col == left_detect_key.1 as u8 {
+                hand = Hand::Left;
+            }
+        })
+        .await;
+        hand
     }
 }

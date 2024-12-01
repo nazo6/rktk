@@ -6,7 +6,7 @@ use rktk::{
     keymanager::state::KeyChangeEvent,
 };
 
-/// A matrix scanner using spi-like shift register such as 74HC595.
+/// A matrix scanner using spi-like shift register such as 74HC595 as output pin.
 ///
 /// NOTE: Currently, chained shift register is not supported and OUTPUT_PIN_COUNT must be number of 1 to 8.
 pub struct ShiftRegisterMatrix<
@@ -56,8 +56,21 @@ impl<
             map_key,
         }
     }
+}
 
-    async fn scan_with_cb(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
+impl<
+        S: SpiDevice,
+        IP: InputPin,
+        const OUTPUT_PIN_COUNT: usize,
+        const INPUT_PIN_COUNT: usize,
+        const COLS: usize,
+        const ROWS: usize,
+    > KeyscanDriver for ShiftRegisterMatrix<S, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+{
+    async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
+        // TODO: Implement async matrix instead of polling
+        embassy_time::Timer::after_micros(10).await;
+
         for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self
                 .row_shift_register
@@ -85,36 +98,16 @@ impl<
             }
         }
     }
-}
-
-impl<
-        S: SpiDevice,
-        IP: InputPin,
-        const ROW_PIN_COUNT: usize,
-        const COL_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > KeyscanDriver for ShiftRegisterMatrix<S, IP, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
-{
-    async fn scan(&mut self) -> heapless::Vec<KeyChangeEvent, 32> {
-        let mut events = heapless::Vec::new();
-        self.scan_with_cb(|e| {
-            events.push(e).ok();
-        })
-        .await;
-        events
-    }
 
     async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
-        if self
-            .scan()
-            .await
-            .iter()
-            .any(|e| e.row == self.left_detect_key.1 as u8 && e.col == self.left_detect_key.1 as u8)
-        {
-            Hand::Left
-        } else {
-            Hand::Right
-        }
+        let mut hand = Hand::Right;
+        let left_detect_key = self.left_detect_key;
+        self.scan(|e| {
+            if e.row == left_detect_key.0 as u8 && e.col == left_detect_key.1 as u8 {
+                hand = Hand::Left;
+            }
+        })
+        .await;
+        hand
     }
 }

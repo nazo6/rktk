@@ -2,7 +2,7 @@ use embassy_futures::join::join3;
 use embassy_time::Timer;
 
 use crate::{
-    config::static_config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
+    config::static_config::SCAN_INTERVAL_MOUSE,
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::KeyscanDriver,
@@ -55,11 +55,13 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: Debounc
         },
         async {
             loop {
-                let start = embassy_time::Instant::now();
-
-                let key_events = keyscan.scan().await;
-
-                for event in key_events {
+                let mut buf = heapless::Vec::<_, 32>::new();
+                keyscan
+                    .scan(|event| {
+                        let _ = buf.push(event);
+                    })
+                    .await;
+                for event in buf {
                     if let Some(debounce) = &mut debounce {
                         if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
                             return;
@@ -73,11 +75,6 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, MH: MainHooks, DB: Debounc
                     };
 
                     s2m_tx.send(event).await;
-                }
-
-                let took = start.elapsed();
-                if took < SCAN_INTERVAL_KEYBOARD {
-                    Timer::after(SCAN_INTERVAL_KEYBOARD - took).await;
                 }
             }
         },
