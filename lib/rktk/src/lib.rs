@@ -18,8 +18,8 @@
 //!
 //! Basically, by passing [`drivers::Drivers`], [`hooks::Hooks`] and [`keymap_config::KeyConfig`] to [`task::start`], you can start the keyboard firmware.
 //!
-//! # Note about static configured value.
-//! You may see some type has hard-coded const generics (ex: [`keymap_config::Keymap`]). These
+//! ## Note about static configured value
+//! You may see some type has hard-coded const generics (ex: [`keymap_config::Keymap`]).
 //! These types are not actually hardcoded, but are configurable using the `rktk.json` file.
 //! Just a random value is provided because it is required to generate docs.
 

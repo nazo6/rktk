@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+//!
 //! This crate provides the rktk drivers for the nRF series microcontrollers. Currently, only nRF52840
 //! is enabled, but it should be easy to add support for other nRF series microcontrollers.
 //!
