@@ -4,8 +4,6 @@
 
 use rktk_keymanager::state::KeyChangeEvent;
 
-use crate::config::static_config::CONFIG;
-
 /// Debounce driver interface
 pub trait DebounceDriver {
     /// Determines whether events occurring at a certain time should be ignored.
