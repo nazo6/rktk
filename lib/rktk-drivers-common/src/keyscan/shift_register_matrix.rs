@@ -6,7 +6,7 @@ use rktk::{
     keymanager::state::KeyChangeEvent,
 };
 
-/// A matrix scanner using spi-like shift register such as 74HC595 as output pin.
+/// Matrix scanner using spi-like shift register such as 74HC595 as output pin.
 ///
 /// NOTE: Currently, chained shift register is not supported and OUTPUT_PIN_COUNT must be number of 1 to 8.
 pub struct ShiftRegisterMatrix<

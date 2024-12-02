@@ -1,3 +1,5 @@
+//! PMW3360 optical sensor driver.
+
 #![allow(dead_code)]
 
 mod error;

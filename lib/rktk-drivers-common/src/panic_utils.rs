@@ -1,9 +1,8 @@
-//! Panic message handling
+//! Panic message handling utilities.
 //!
-//! do something complicated in panic_handler is difficult (eg. async function can't be called).
-//! So, if panic occurs, save panic message to uninitialized memory and read it after reboot.
-//!
-//! By using this method, you can display panic message on display after reboot.
+//! Because doing something complicated in panic_handler is difficult (eg. async function can't be called),
+//! alternatively you can reboot the device in panic_handler.
+//! By saving panic info in uninit section, you can display panic message on display after reboot.
 //!
 //! Note that this module depends on .uninit section, which is handled by cortex_m_rt.
 
@@ -27,6 +26,9 @@ impl Write for PanicMessage {
 static mut PANIC_INFO: MaybeUninit<PanicMessage> = MaybeUninit::uninit();
 const PANIC_INFO_MAGIC: u32 = 0x54_41_43_4B;
 
+/// Save panic info to uninit section.
+///
+/// This function should be called in panic_handler.
 pub fn save_panic_info(info: &core::panic::PanicInfo) {
     let mut panic_info = PanicMessage {
         magic: PANIC_INFO_MAGIC,

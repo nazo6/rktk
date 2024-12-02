@@ -1,36 +1,13 @@
+//! Debounce driver type
+//!
+//! `debounce` is way to reduce chatter or noise this can be achieved by ignoring events that are too close to each other in time.
+
 use rktk_keymanager::state::KeyChangeEvent;
 
 use crate::config::static_config::CONFIG;
 
-/// `debounce` is way to reduce chatter or noise.
+/// Debounce driver interface
 pub trait DebounceDriver {
+    /// Determines whether events occurring at a certain time should be ignored.
     fn should_ignore_event(&mut self, event: &KeyChangeEvent, now: embassy_time::Instant) -> bool;
-}
-
-pub struct EagerDebounceDriver {
-    last: [[Option<embassy_time::Instant>; CONFIG.keyboard.cols as usize];
-        CONFIG.keyboard.rows as usize],
-    debounce_time: embassy_time::Duration,
-}
-
-impl EagerDebounceDriver {
-    pub fn new(debounce_time: embassy_time::Duration) -> Self {
-        Self {
-            last: [[None; CONFIG.keyboard.cols as usize]; CONFIG.keyboard.rows as usize],
-            debounce_time,
-        }
-    }
-}
-
-impl DebounceDriver for EagerDebounceDriver {
-    fn should_ignore_event(&mut self, event: &KeyChangeEvent, now: embassy_time::Instant) -> bool {
-        let last = self.last[event.row as usize][event.col as usize];
-        if let Some(last) = last {
-            if now - last < self.debounce_time {
-                return true;
-            }
-        }
-        self.last[event.row as usize][event.col as usize] = Some(now);
-        false
-    }
 }

@@ -7,7 +7,4 @@ This library is the basis of `rktk-drivers-nrf` and `nrf-drivers-rp`, and by
 utilizing traits defined by embassy etc., you can create drivers with only a
 very thin wrapper for MCUs that have embassy hal.
 
-Users who want to build keyboard should use mcu-specific crate like
-`rktk-drivers-nrf` instead of this crate.
-
-For more detail, see [project's README](https://github.com/nazo6/rktk)
+For more detail, see [RKTK project README](https://github.com/nazo6/rktk)

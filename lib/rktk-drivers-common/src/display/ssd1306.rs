@@ -1,3 +1,5 @@
+//! SSD1306 OLED display driver
+
 use display_interface::DisplayError;
 use embedded_graphics::{
     geometry::Point,

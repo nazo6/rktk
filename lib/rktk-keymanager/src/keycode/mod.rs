@@ -1,4 +1,4 @@
-//! Keycode
+//! Key action and keycode definitions.
 //!
 //! A key is represented by a three-layer structure: `KeyAction` → `KeyCode` → `Key`.
 //! For example, the definition of a normal key `A` is as follows.
@@ -9,7 +9,7 @@
 //! For example, QMK only allows Mod-Tap and Layer-Tap as TapHolds.
 //! However, it requires more bytes to represent one key.
 //!
-//! For convenience, some keycodes are defined as constants with normal keyaction like this:
+//! For convenience, keycodes are defined as constants with normal keyaction like this:
 //! ```ignore
 //! const A: KeyAction = KeyAction::Normal(KeyCode::Key(Key::A));
 //! ```

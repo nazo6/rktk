@@ -1,3 +1,5 @@
+//! (Japanese) duplex matrix scanner.
+
 use super::{
     flex_pin::{FlexPin, Pull},
     pressed::Pressed,
@@ -7,12 +9,7 @@ use rktk::{
     keymanager::state::KeyChangeEvent,
 };
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum ScanDir {
-    Col2Row,
-    Row2Col,
-}
-
+/// Implementation of keyscan driver for [duplex matrix](https://kbd.news/The-Japanese-duplex-matrix-1391.html).
 pub struct DuplexMatrixScanner<
     F: FlexPin,
     const ROW_PIN_COUNT: usize,
@@ -178,4 +175,10 @@ impl<
         .await;
         hand
     }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ScanDir {
+    Col2Row,
+    Row2Col,
 }

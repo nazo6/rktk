@@ -22,28 +22,7 @@ mod key_resolver;
 mod manager;
 mod pressed;
 
-#[derive(Debug, PartialEq)]
-pub struct StateReport {
-    pub keyboard_report: Option<KeyboardReport>,
-    pub mouse_report: Option<MouseReport>,
-    pub media_keyboard_report: Option<MediaKeyboardReport>,
-    pub transparent_report: TransparentReport,
-    pub highest_layer: u8,
-}
-
-#[derive(Debug)]
-pub struct KeyChangeEvent {
-    pub col: u8,
-    pub row: u8,
-    pub pressed: bool,
-}
-
-#[derive(Debug)]
-pub enum EncoderDirection {
-    Clockwise,
-    CounterClockwise,
-}
-
+/// Represents the state of the keyboard.
 pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
 {
     now: Instant,
@@ -63,6 +42,7 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const E
 impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
     State<LAYER, ROW, COL, ENCODER_COUNT>
 {
+    /// Creates a new state with the given keymap and configuration.
     pub fn new(layers: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
         Self {
             config: config.clone(),
@@ -79,7 +59,6 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     }
 
     /// Updates state with the given events.
-    /// If the keyboard is not split, slave_events should be empty.
     pub fn update(
         &mut self,
         key_events: &mut [KeyChangeEvent],
@@ -136,6 +115,33 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             max_resolved_key_count: MAX_RESOLVED_KEY_COUNT,
         }
     }
+}
+
+/// Information to be communicated to the outside as a result of a state change
+#[derive(Debug, PartialEq)]
+pub struct StateReport {
+    pub keyboard_report: Option<KeyboardReport>,
+    pub mouse_report: Option<MouseReport>,
+    pub media_keyboard_report: Option<MediaKeyboardReport>,
+    pub transparent_report: TransparentReport,
+    pub highest_layer: u8,
+}
+
+/// Represents a key event.
+///
+/// Used generically to indicate that the state of a physical key has changed
+#[derive(Debug)]
+pub struct KeyChangeEvent {
+    pub col: u8,
+    pub row: u8,
+    pub pressed: bool,
+}
+
+/// Represents the direction of an encoder
+#[derive(Debug)]
+pub enum EncoderDirection {
+    Clockwise,
+    CounterClockwise,
 }
 
 #[cfg(test)]

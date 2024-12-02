@@ -1,3 +1,5 @@
+//! Backlight driver type
+
 use serde::{Deserialize, Serialize};
 use smart_leds::RGB8;
 
@@ -15,8 +17,10 @@ pub enum BacklightMode {
     SolidColor(u8, u8, u8),
 }
 
+/// Driver for controlling the backlight.
 pub trait BacklightDriver {
     type Error: core::error::Error;
 
+    /// Write provided colors to backlight.
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error>;
 }

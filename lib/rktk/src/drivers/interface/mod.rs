@@ -1,4 +1,4 @@
-//! This module contains the interface for the drivers.
+//! Driver interface types
 #![allow(async_fn_in_trait)]
 
 pub mod backlight;

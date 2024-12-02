@@ -1,3 +1,5 @@
+//! PAW3395 optical sensor driver.
+
 #![allow(dead_code)]
 
 pub mod config;

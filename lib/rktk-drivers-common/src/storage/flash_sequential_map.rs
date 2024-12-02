@@ -1,3 +1,5 @@
+//! Storage driver using [`sequential_storage`] and nor flash.
+
 use core::fmt::Debug;
 use embedded_storage_async::nor_flash::{MultiwriteNorFlash, NorFlash, ReadNorFlash};
 use rktk::{drivers::interface::storage::StorageDriver, utils::Mutex};

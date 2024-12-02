@@ -1,4 +1,4 @@
-//! Common usb module
+//! Common usb driver implementation over [`embassy_usb`].
 
 use core::sync::atomic::AtomicBool;
 

@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
 
+pub mod debounce;
 pub mod display;
 pub mod encoder;
 pub mod keyscan;

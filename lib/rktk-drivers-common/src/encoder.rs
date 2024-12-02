@@ -1,9 +1,12 @@
+//! Encoder driver implementations.
+
 use embassy_futures::select::{select, select_slice, Either};
 use embassy_time::Timer;
 use embedded_hal::digital::InputPin;
 use embedded_hal_async::digital::Wait;
 use rktk::drivers::interface::encoder::{EncoderDirection, EncoderDriver};
 
+/// General encoder driver that can be used with any digital input pin.
 pub struct GeneralEncoder<PIN: Wait + InputPin, const ENCODER_COUNT: usize> {
     encoders: [(PIN, PIN); ENCODER_COUNT],
 }
