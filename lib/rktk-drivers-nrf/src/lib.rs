@@ -11,10 +11,10 @@
 #![no_std]
 #![cfg_attr(feature = "nightly", feature(impl_trait_in_assoc_type))]
 
-pub mod backlight;
 pub mod display;
 pub mod keyscan;
 pub mod mouse;
+pub mod rgb;
 #[cfg(feature = "softdevice")]
 pub mod softdevice;
 pub mod split;

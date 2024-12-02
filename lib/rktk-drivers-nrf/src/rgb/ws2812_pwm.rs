@@ -12,7 +12,7 @@ use embassy_nrf::{
     Peripheral,
 };
 use embassy_time::Timer;
-use rktk::drivers::interface::backlight::BacklightDriver;
+use rktk::drivers::interface::rgb::RgbDriver;
 use smart_leds::RGB8;
 
 pub struct Ws2812Pwm<
@@ -37,8 +37,8 @@ impl<PWM: Instance, PWMP: Peripheral<P = PWM>, DATA: Pin, DATAP: Peripheral<P = 
     }
 }
 
-impl<PWM: Instance, PWMP: Peripheral<P = PWM>, DATA: Pin, DATAP: Peripheral<P = DATA>>
-    BacklightDriver for Ws2812Pwm<PWM, PWMP, DATA, DATAP>
+impl<PWM: Instance, PWMP: Peripheral<P = PWM>, DATA: Pin, DATAP: Peripheral<P = DATA>> RgbDriver
+    for Ws2812Pwm<PWM, PWMP, DATA, DATAP>
 {
     type Error = Infallible;
 

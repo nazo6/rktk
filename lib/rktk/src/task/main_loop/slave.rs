@@ -11,7 +11,7 @@ use crate::{
     },
     hooks::interface::SlaveHooks,
     task::channels::{
-        backlight::BACKLIGHT_CHANNEL,
+        rgb::RGB_CHANNEL,
         split::{M2sRx, S2mTx},
     },
 };
@@ -83,8 +83,8 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
             loop {
                 let data = m2s_rx.receive().await;
                 match data {
-                    MasterToSlave::Backlight(ctrl) => {
-                        let _ = BACKLIGHT_CHANNEL.try_send(ctrl);
+                    MasterToSlave::Rgb(ctrl) => {
+                        let _ = RGB_CHANNEL.try_send(ctrl);
                     }
                     MasterToSlave::Message(_) => {}
                 }

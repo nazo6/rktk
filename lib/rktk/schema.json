@@ -54,7 +54,7 @@
           "description": "The layout of the keyboard."
         },
         "left_led_count": {
-          "description": "Backlight led count for left side. This is also used for non-split keyboard.",
+          "description": "RGB led count for left side. This is also used for non-split keyboard.",
           "default": 0,
           "type": "integer",
           "format": "uint",
@@ -65,7 +65,7 @@
           "type": "string"
         },
         "right_led_count": {
-          "description": "Backlight led count for right side",
+          "description": "RGB led count for right side",
           "default": 0,
           "type": "integer",
           "format": "uint",

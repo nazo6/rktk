@@ -66,11 +66,11 @@ pub struct Keyboard {
     #[cfg_attr(not(no_build), serde(default = "u8_default::<0>"))]
     pub encoder_count: u8,
 
-    /// Backlight led count for right side
+    /// RGB led count for right side
     #[cfg_attr(not(no_build), serde(default = "usize_default::<0>"))]
     pub right_led_count: usize,
 
-    /// Backlight led count for left side. This is also used for non-split keyboard.
+    /// RGB led count for left side. This is also used for non-split keyboard.
     #[cfg_attr(not(no_build), serde(default = "usize_default::<0>"))]
     pub left_led_count: usize,
 }

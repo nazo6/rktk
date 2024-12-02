@@ -1,19 +1,19 @@
 use crate::{
     config::static_config::{KEYBOARD, RKTK_CONFIG},
     drivers::interface::{
-        backlight::BacklightDriver,
         ble::BleDriver,
         debounce::DebounceDriver,
         encoder::EncoderDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
+        rgb::RgbDriver,
         split::SplitDriver,
         storage::StorageDriver,
         system::SystemDriver,
         usb::UsbDriver,
     },
     hooks::{
-        interface::{BacklightHooks, CommonHooks, MasterHooks, SlaveHooks},
+        interface::{CommonHooks, MasterHooks, RgbHooks, SlaveHooks},
         Hooks,
     },
     keymap_config::KeyConfig,
@@ -37,14 +37,14 @@ pub async fn start<
     EN: EncoderDriver,
     M: MouseDriver,
     SP: SplitDriver,
-    BL: BacklightDriver,
+    RGB: RgbDriver,
     Ble: BleDriver,
     Usb: UsbDriver,
     S: StorageDriver,
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
-    BH: BacklightHooks,
+    BH: RgbHooks,
 >(
     system: &Sys,
     ble: Option<Ble>,
@@ -55,7 +55,7 @@ pub async fn start<
     mut mouse: Option<M>,
     mut storage: Option<S>,
     mut split: Option<SP>,
-    backlight: Option<BL>,
+    rgb: Option<RGB>,
     key_config: KeyConfig,
     mut hooks: Hooks<CH, MH, SH, BH>,
 ) {
@@ -64,21 +64,13 @@ pub async fn start<
 
     join(
         async {
-            if let Some(backlight) = backlight {
+            if let Some(rgb) = rgb {
                 match hand {
                     Hand::Right => {
-                        super::backlight::start::<{ KEYBOARD.right_led_count }>(
-                            backlight,
-                            hooks.backlight,
-                        )
-                        .await
+                        super::rgb::start::<{ KEYBOARD.right_led_count }>(rgb, hooks.rgb).await
                     }
                     Hand::Left => {
-                        super::backlight::start::<{ KEYBOARD.left_led_count }>(
-                            backlight,
-                            hooks.backlight,
-                        )
-                        .await
+                        super::rgb::start::<{ KEYBOARD.left_led_count }>(rgb, hooks.rgb).await
                     }
                 }
             }

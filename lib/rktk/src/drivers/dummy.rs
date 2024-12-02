@@ -14,14 +14,14 @@ use embedded_graphics::{
 use rktk_keymanager::state::EncoderDirection;
 
 use crate::drivers::interface::{
-    backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
-    encoder::EncoderDriver, mouse::MouseDriver, reporter::ReporterDriver, split::SplitDriver,
+    ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
+    mouse::MouseDriver, reporter::ReporterDriver, rgb::RgbDriver, split::SplitDriver,
     storage::StorageDriver, usb::UsbDriver, BackgroundTask, DriverBuilder, DriverBuilderWithTask,
 };
 
-// Backlight
-pub enum Backlight {}
-impl BacklightDriver for Backlight {
+// Rgb
+pub enum Rgb {}
+impl RgbDriver for Rgb {
     type Error = Infallible;
     async fn write<const N: usize>(
         &mut self,

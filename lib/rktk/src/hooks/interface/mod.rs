@@ -2,12 +2,12 @@
 
 #![allow(async_fn_in_trait)]
 
-pub mod backlight;
 pub mod master;
+pub mod rgb;
 
-pub use backlight::BacklightHooks;
 pub use common::CommonHooks;
 pub use master::MasterHooks;
+pub use rgb::RgbHooks;
 pub use slave::SlaveHooks;
 
 mod common {

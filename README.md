@@ -32,7 +32,7 @@ makes it easy to extend.
 | Split keyboard     | ✅                              |
 | Non-Split keyboard | 🔵                              |
 | Display            | 🟡                              |
-| Backlight          | 🟡                              |
+| RGB led            | 🟡                              |
 | USB                | ✅                              |
 | Bluetooth          | 🟡                              |
 | Remapper support   | 🟡                              |
@@ -91,7 +91,7 @@ See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
 | Full-duplex dual wire      |        | 🔴 (UART) | 🔴 (UART)       |
 | Bluetooth                  |        | ❌        | 🔴              |
 | &nbsp;                     |        |           |                 |
-| **Backlight**              |        |           |                 |
+| **RGB led**                |        |           |                 |
 | WS2812                     |        | ✅ (PIO)  | ✅ (PWM)        |
 | &nbsp;                     |        |           |                 |
 | **Double-tap reset**       |        | ✅        |                 |

@@ -42,7 +42,7 @@ async fn main(_spawner: Spawner) {
         usb_builder: none_driver!(UsbBuilder),
         display_builder: none_driver!(DisplayBuilder),
         split: none_driver!(Split),
-        backlight: none_driver!(Backlight),
+        rgb: none_driver!(Rgb),
         ble_builder: none_driver!(BleBuilder),
         storage: none_driver!(Storage),
         debounce: none_driver!(Debounce),

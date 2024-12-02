@@ -3,16 +3,16 @@
 use crate::utils::{Channel, Receiver, Sender};
 use embassy_sync::channel::DynamicSender;
 
-pub mod backlight {
-    use crate::drivers::interface::backlight::BacklightCommand;
+pub mod rgb {
+    use crate::drivers::interface::rgb::RgbCommand;
 
     use super::*;
 
-    pub(crate) static BACKLIGHT_CHANNEL: Channel<BacklightCommand, 3> = Channel::new();
+    pub(crate) static RGB_CHANNEL: Channel<RgbCommand, 3> = Channel::new();
 
     /// Get [`DynamicSender`] that can be used to control RGB.
-    pub fn backlight_sender() -> DynamicSender<'static, BacklightCommand> {
-        BACKLIGHT_CHANNEL.dyn_sender()
+    pub fn rgb_sender() -> DynamicSender<'static, RgbCommand> {
+        RGB_CHANNEL.dyn_sender()
     }
 }
 

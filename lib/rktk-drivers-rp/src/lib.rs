@@ -5,11 +5,11 @@
 //! implements some original drivers like [`split::pio_half_duplex`].
 #![no_std]
 
-pub mod backlight;
 pub mod display;
 pub mod flash;
 pub mod keyscan;
 pub mod mouse;
+pub mod rgb;
 pub mod split;
 pub mod system;
 pub mod usb;

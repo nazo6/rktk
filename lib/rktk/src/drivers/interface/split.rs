@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::backlight::BacklightCommand;
+use super::rgb::RgbCommand;
 
 pub trait SplitDriver {
     type Error: core::error::Error;
@@ -14,7 +14,7 @@ pub trait SplitDriver {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub enum MasterToSlave {
-    Backlight(BacklightCommand),
+    Rgb(RgbCommand),
     Message(u8),
 }
 

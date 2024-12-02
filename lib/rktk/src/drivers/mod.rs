@@ -3,8 +3,8 @@
 use interface::system::SystemDriver;
 
 use crate::drivers::interface::{
-    backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver,
-    encoder::EncoderDriver, keyscan::KeyscanDriver, mouse::MouseDriver, split::SplitDriver,
+    ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
+    keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,
     storage::StorageDriver, usb::UsbDriver, DriverBuilder, DriverBuilderWithTask,
 };
 
@@ -34,7 +34,7 @@ pub struct Drivers<
     Ble: BleDriver,
     Usb: UsbDriver,
     Split: SplitDriver,
-    Backlight: BacklightDriver,
+    Rgb: RgbDriver,
     System: SystemDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
@@ -49,7 +49,7 @@ pub struct Drivers<
     pub debounce: Option<Debounce>,
     pub encoder: Option<Encoder>,
     pub split: Option<Split>,
-    pub backlight: Option<Backlight>,
+    pub rgb: Option<Rgb>,
     pub storage: Option<Storage>,
 
     pub ble_builder: Option<BleBuilder>,

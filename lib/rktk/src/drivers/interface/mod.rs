@@ -1,7 +1,6 @@
 //! Driver interface types
 #![allow(async_fn_in_trait)]
 
-pub mod backlight;
 pub mod ble;
 pub mod debounce;
 pub mod display;
@@ -9,6 +8,7 @@ pub mod encoder;
 pub mod keyscan;
 pub mod mouse;
 pub mod reporter;
+pub mod rgb;
 pub mod split;
 pub mod storage;
 pub mod system;

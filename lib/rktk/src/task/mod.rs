@@ -10,20 +10,20 @@ use embassy_time::Duration;
 use crate::{
     config::static_config::RKTK_CONFIG,
     drivers::interface::{
-        backlight::BacklightDriver, ble::BleDriver, debounce::DebounceDriver,
-        display::DisplayDriver, encoder::EncoderDriver, keyscan::KeyscanDriver, mouse::MouseDriver,
-        split::SplitDriver, storage::StorageDriver, usb::UsbDriver, BackgroundTask as _,
-        DriverBuilder, DriverBuilderWithTask,
+        ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
+        keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,
+        storage::StorageDriver, usb::UsbDriver, BackgroundTask as _, DriverBuilder,
+        DriverBuilderWithTask,
     },
     hooks::Hooks,
     keymap_config::KeyConfig,
 };
 
-mod backlight;
 pub(crate) mod channels;
 pub mod display;
 mod logger;
 pub(crate) mod main_loop;
+mod rgb;
 
 /// Receives configs and executes the main process of the keyboard.
 ///
@@ -39,7 +39,7 @@ pub async fn start<
     Ble: BleDriver,
     Usb: UsbDriver,
     Split: SplitDriver,
-    Backlight: BacklightDriver,
+    Rgb: RgbDriver,
     System: SystemDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
@@ -51,7 +51,7 @@ pub async fn start<
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
-    BH: BacklightHooks,
+    BH: RgbHooks,
 >(
     drivers: Drivers<
         KeyScan,
@@ -60,7 +60,7 @@ pub async fn start<
         Ble,
         Usb,
         Split,
-        Backlight,
+        Rgb,
         System,
         Storage,
         Mouse,
@@ -79,8 +79,8 @@ pub async fn start<
     });
 
     log::info!(
-        "RKTK Starting... (backlight: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
-        drivers.backlight.is_some(),
+        "RKTK Starting... (rgb: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
+        drivers.rgb.is_some(),
         drivers.ble_builder.is_some(),
         drivers.usb_builder.is_some(),
         drivers.storage.is_some(),
@@ -153,7 +153,7 @@ pub async fn start<
                         mouse,
                         drivers.storage,
                         drivers.split,
-                        drivers.backlight,
+                        drivers.rgb,
                         key_config,
                         hooks,
                     )

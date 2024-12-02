@@ -8,7 +8,7 @@ use embassy_rp::{clocks, into_ref, Peripheral, PeripheralRef};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
-use rktk::drivers::interface::backlight::BacklightDriver;
+use rktk::drivers::interface::rgb::RgbDriver;
 use smart_leds::RGB8;
 
 pub struct Ws2812Pio<'a, I: Instance> {
@@ -86,7 +86,7 @@ impl<'a, I: Instance> Ws2812Pio<'a, I> {
     }
 }
 
-impl<I: Instance> BacklightDriver for Ws2812Pio<'_, I> {
+impl<I: Instance> RgbDriver for Ws2812Pio<'_, I> {
     type Error = Infallible;
 
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error> {
