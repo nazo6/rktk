@@ -1,23 +1,21 @@
 use super::pressed::Pressed;
-use embedded_hal::{digital::InputPin, spi::Operation};
-use embedded_hal_async::spi::SpiDevice;
+use embedded_hal::digital::{InputPin, OutputPin};
+use embedded_hal_async::digital::Wait;
 use rktk::{
     drivers::interface::keyscan::{Hand, KeyscanDriver},
     keymanager::state::KeyChangeEvent,
 };
 
-/// Matrix scanner using spi-like shift register such as 74HC595 as output pin.
-///
-/// NOTE: Currently, chained shift register is not supported and OUTPUT_PIN_COUNT must be number of 1 to 8.
-pub struct ShiftRegisterMatrix<
-    S: SpiDevice,
-    IP: InputPin,
+/// Matrix scanner
+pub struct Matrix<
+    OP: OutputPin,
+    IP: InputPin + Wait,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
     const COLS: usize,
     const ROWS: usize,
 > {
-    row_shift_register: S,
+    output_pins: [OP; OUTPUT_PIN_COUNT],
     input_pins: [IP; INPUT_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
     left_detect_key: (usize, usize),
@@ -25,31 +23,31 @@ pub struct ShiftRegisterMatrix<
 }
 
 impl<
-        S: SpiDevice,
-        IP: InputPin,
+        OP: OutputPin,
+        IP: InputPin + Wait,
         const OUTPUT_PIN_COUNT: usize,
         const INPUT_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > ShiftRegisterMatrix<S, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    > Matrix<OP, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
-    /// Detect the hand and initialize the scanner.
+    /// Initialize the scanner.
     ///
     /// # Arguments
-    /// - `row_shift_register`: SPI bus for the shift register used as output pin.
+    /// - `output_pins`: Output pins to control the matrix.
     /// - `input_pins`: Input pins to read the matrix.
     /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
     /// - `map_key`: Function to map key position from pin number. This function must return
     ///    position within specified `COLS` and `ROWS`.
     ///    Signature: (row, col) -> Option<(row, col)>
     pub fn new(
-        row_shift_register: S,
+        output_pins: [OP; OUTPUT_PIN_COUNT],
         input_pins: [IP; INPUT_PIN_COUNT],
         left_detect_key: (usize, usize),
         map_key: fn(usize, usize) -> Option<(usize, usize)>,
     ) -> Self {
         Self {
-            row_shift_register,
+            output_pins,
             input_pins,
             left_detect_key,
             pressed: Pressed::new(),
@@ -59,26 +57,20 @@ impl<
 }
 
 impl<
-        S: SpiDevice,
-        IP: InputPin,
+        OP: OutputPin,
+        IP: InputPin + Wait,
         const OUTPUT_PIN_COUNT: usize,
         const INPUT_PIN_COUNT: usize,
         const COLS: usize,
         const ROWS: usize,
-    > KeyscanDriver for ShiftRegisterMatrix<S, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    > KeyscanDriver for Matrix<OP, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
     // TODO: support async matrix
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         for output_idx in 0..OUTPUT_PIN_COUNT {
-            let _ = self
-                .row_shift_register
-                .transaction(&mut [
-                    Operation::DelayNs(1000),
-                    Operation::Write(&[1 << output_idx]),
-                ])
-                .await;
+            let _ = self.output_pins[output_idx].set_high();
 
-            embassy_time::Timer::after_nanos(100).await;
+            embassy_time::Timer::after_micros(10).await;
 
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
                 if let Some((row, col)) = (self.map_key)(input_idx, output_idx) {
@@ -94,6 +86,8 @@ impl<
                     }
                 }
             }
+
+            let _ = self.output_pins[output_idx].set_low();
         }
     }
 
