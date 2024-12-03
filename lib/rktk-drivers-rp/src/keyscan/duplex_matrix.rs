@@ -3,6 +3,7 @@ use rktk::drivers::interface::keyscan::KeyscanDriver;
 use rktk_drivers_common::keyscan::{
     duplex_matrix::{DuplexMatrixScanner, ScanDir},
     flex_pin::{FlexPin, Pull},
+    HandDetector,
 };
 
 struct FlexWrap<'a>(Flex<'a>);
@@ -57,7 +58,7 @@ pub fn create_duplex_matrix<
 >(
     rows: [Flex<'a>; ROW_PIN_COUNT],
     cols: [Flex<'a>; COL_PIN_COUNT],
-    left_detect_key: (usize, usize),
+    hand_detector: HandDetector,
     translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
 ) -> impl KeyscanDriver + 'a {
     let rows = rows.map(FlexWrap);
@@ -65,7 +66,7 @@ pub fn create_duplex_matrix<
     DuplexMatrixScanner::<FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
         rows,
         cols,
-        left_detect_key,
+        hand_detector,
         true,
         translate_key_position,
     )

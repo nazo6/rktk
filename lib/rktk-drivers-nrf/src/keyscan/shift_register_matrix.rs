@@ -5,7 +5,7 @@ use embassy_nrf::{
     Peripheral,
 };
 use embassy_sync::{blocking_mutex::raw::RawMutex, mutex::Mutex};
-use rktk_drivers_common::keyscan::shift_register_matrix::ShiftRegisterMatrix;
+use rktk_drivers_common::keyscan::{shift_register_matrix::ShiftRegisterMatrix, HandDetector};
 
 pub fn create_shift_register_matrix<
     'a,
@@ -21,7 +21,7 @@ pub fn create_shift_register_matrix<
     shared_spi: &'a Mutex<M, Spim<'d, T>>,
     ncs: CS,
     input_pins: [Input<'d>; INPUT_PIN_COUNT],
-    left_detect_key: (usize, usize),
+    hand_detector: HandDetector,
     map_key: fn(usize, usize) -> Option<(usize, usize)>,
 ) -> ShiftRegisterMatrix<
     SpiDevice<'a, M, Spim<'d, T>, Output<'d>>,
@@ -38,5 +38,5 @@ pub fn create_shift_register_matrix<
     );
     let spi_device = SpiDevice::new(shared_spi, cs_output);
 
-    ShiftRegisterMatrix::new(spi_device, input_pins, left_detect_key, map_key)
+    ShiftRegisterMatrix::new(spi_device, input_pins, hand_detector, map_key)
 }

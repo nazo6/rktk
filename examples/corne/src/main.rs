@@ -8,12 +8,14 @@ use core::panic::PanicInfo;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::{Input, Level, Output, Pull};
 use rktk::{
-    config::static_config::KEYBOARD, drivers::Drivers, hooks::empty_hooks::create_empty_hooks,
+    config::static_config::KEYBOARD,
+    drivers::{interface::keyscan::Hand, Drivers},
+    hooks::empty_hooks::create_empty_hooks,
     none_driver,
 };
 
 use keymap::KEY_CONFIG;
-use rktk_drivers_common::keyscan::matrix::Matrix;
+use rktk_drivers_common::keyscan::{matrix::Matrix, HandDetector};
 use rktk_drivers_rp::system::RpSystemDriver;
 
 #[embassy_executor::main]
@@ -36,7 +38,16 @@ async fn main(_spawner: Spawner) {
                 Input::new(p.PIN_9, Pull::Down),
                 Input::new(p.PIN_10, Pull::Down),
             ],
-            (0, 0),
+            HandDetector::Constant({
+                #[cfg(feature = "left")]
+                {
+                    Hand::Left
+                }
+                #[cfg(feature = "right")]
+                {
+                    Hand::Right
+                }
+            }),
             |row, col| Some((row, col)),
         ),
         system: RpSystemDriver,

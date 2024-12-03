@@ -3,6 +3,7 @@
 use super::{
     flex_pin::{FlexPin, Pull},
     pressed::Pressed,
+    HandDetector,
 };
 use rktk::{
     drivers::interface::keyscan::{Hand, KeyscanDriver},
@@ -21,7 +22,7 @@ pub struct DuplexMatrixScanner<
     cols: [F; COL_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
     output_awaitable: bool,
-    left_detect_key: (usize, usize),
+    hand_detector: HandDetector,
     translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
 }
 
@@ -48,14 +49,14 @@ impl<
     pub fn new(
         rows: [F; ROW_PIN_COUNT],
         cols: [F; COL_PIN_COUNT],
-        left_detect_key: (usize, usize),
+        hand_detector: HandDetector,
         output_awaitable: bool,
         translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
     ) -> Self {
         Self {
             rows,
             cols,
-            left_detect_key,
+            hand_detector,
             pressed: Pressed::new(),
             output_awaitable,
             translate_key_position,
@@ -165,15 +166,19 @@ impl<
     }
 
     async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
-        let mut hand = Hand::Right;
-        let left_detect_key = self.left_detect_key;
-        self.scan(|e| {
-            if e.row == left_detect_key.0 as u8 && e.col == left_detect_key.1 as u8 {
-                hand = Hand::Left;
+        match self.hand_detector {
+            HandDetector::ByKey(d_col, d_row) => {
+                let mut hand = Hand::Right;
+                self.scan(|e| {
+                    if e.row == d_col as u8 && e.col == d_row as u8 {
+                        hand = Hand::Left;
+                    }
+                })
+                .await;
+                hand
             }
-        })
-        .await;
-        hand
+            HandDetector::Constant(hand) => hand,
+        }
     }
 }
 

@@ -41,5 +41,10 @@ portable-atomic = { version = "1.6.0", features = [
 ] }
 
 [features]
+default = ["right"]
+
+right = []
+left = []
+
 # Remove this line in your project. It's just used in this workspace for check.
 _check = []

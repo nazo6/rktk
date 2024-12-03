@@ -1,4 +1,4 @@
-use super::pressed::Pressed;
+use super::{pressed::Pressed, HandDetector};
 use embedded_hal::digital::{InputPin, OutputPin};
 use embedded_hal_async::digital::Wait;
 use rktk::{
@@ -18,7 +18,7 @@ pub struct Matrix<
     output_pins: [OP; OUTPUT_PIN_COUNT],
     input_pins: [IP; INPUT_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
-    left_detect_key: (usize, usize),
+    hand_detector: HandDetector,
     map_key: fn(usize, usize) -> Option<(usize, usize)>,
 }
 
@@ -43,13 +43,13 @@ impl<
     pub fn new(
         output_pins: [OP; OUTPUT_PIN_COUNT],
         input_pins: [IP; INPUT_PIN_COUNT],
-        left_detect_key: (usize, usize),
+        hand_detector: HandDetector,
         map_key: fn(usize, usize) -> Option<(usize, usize)>,
     ) -> Self {
         Self {
             output_pins,
             input_pins,
-            left_detect_key,
+            hand_detector,
             pressed: Pressed::new(),
             map_key,
         }
@@ -92,14 +92,18 @@ impl<
     }
 
     async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
-        let mut hand = Hand::Right;
-        let left_detect_key = self.left_detect_key;
-        self.scan(|e| {
-            if e.row == left_detect_key.0 as u8 && e.col == left_detect_key.1 as u8 {
-                hand = Hand::Left;
+        match self.hand_detector {
+            HandDetector::ByKey(d_col, d_row) => {
+                let mut hand = Hand::Right;
+                self.scan(|e| {
+                    if e.row == d_col as u8 && e.col == d_row as u8 {
+                        hand = Hand::Left;
+                    }
+                })
+                .await;
+                hand
             }
-        })
-        .await;
-        hand
+            HandDetector::Constant(hand) => hand,
+        }
     }
 }
