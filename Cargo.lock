@@ -986,6 +986,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "example-corne"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-executor",
+ "embassy-rp",
+ "portable-atomic",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-rp",
+]
+
+[[package]]
 name = "fixed"
 version = "1.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
