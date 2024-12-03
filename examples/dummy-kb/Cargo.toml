@@ -1,7 +1,10 @@
+cargo-features = ["per-package-target"]
+
 [package]
 name = "dummy-kb"
 version = "0.1.0"
 edition = "2021"
+forced-target = "thumbv6m-none-eabi"
 publish = false
 
 [package.metadata.rktk-cli]

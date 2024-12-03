@@ -1,5 +1,0 @@
-[build]
-target = "thumbv6m-none-eabi"
-
-[profile.release]
-lto = true
