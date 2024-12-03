@@ -71,28 +71,43 @@ fn write_profile_config_toml(target_dir: &std::path::Path) -> anyhow::Result<Pat
 
 pub fn start(args: BuildCommand) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
-        anyhow::bail!("No metadata found. Are you running this command from a workspace?");
+        anyhow::bail!("No metadata found. Are you running build in rust project?");
     };
 
-    let keyboard_crate_dir = {
-        let mut specified_path = std::path::PathBuf::from(&args.path).canonicalize()?;
-        loop {
-            let cargo_toml_path = specified_path.join("Cargo.toml");
-            if cargo_toml_path.exists() {
-                break specified_path;
-            }
+    let (package, keyboard_crate_dir) = {
+        let mut crr_package = None;
+        let keyboard_crate_dir = {
+            let mut specified_path = std::path::PathBuf::from(&args.path).canonicalize()?;
+            loop {
+                let cargo_toml_path = specified_path.join("Cargo.toml");
+                if cargo_toml_path.exists() {
+                    break specified_path;
+                }
 
-            let Some(p) = specified_path.parent() else {
-                anyhow::bail!("Cargo.toml not found. This should be bug.")
-            };
-            specified_path = p.to_path_buf();
+                let Some(p) = specified_path.parent() else {
+                    anyhow::bail!("Cargo.toml not found. This should be bug.")
+                };
+                specified_path = p.to_path_buf();
+            }
+        };
+        for package in &metadata.packages {
+            if package.manifest_path == keyboard_crate_dir.join("Cargo.toml") {
+                crr_package = Some(package);
+                break;
+            }
+        }
+
+        if let Some(package) = crr_package {
+            (package, keyboard_crate_dir)
+        } else {
+            anyhow::bail!("Failed to find the package in the metadata");
         }
     };
 
     let keyboard_build_config = {
-        if let Ok(str) = std::fs::read_to_string(keyboard_crate_dir.join("rktk.build.json")) {
-            let keyboard_build_config: BuildConfig =
-                serde_json::from_str(&str).context("Invalid rktk.build.json file")?;
+        if let Some(val) = package.metadata.get("rktk-cli") {
+            let keyboard_build_config: BuildConfig = serde_json::from_value(val.clone())
+                .context("Invalid rktk metadata type in Cargo.toml")?;
             Some(keyboard_build_config)
         } else {
             None

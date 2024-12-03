@@ -7,6 +7,9 @@ edition = "2021"
 forced-target = "thumbv6m-none-eabi"
 publish = false
 
+[package.metadata.rktk-cli]
+mcu = "Rp2040"
+
 [dependencies]
 rktk-drivers-rp = { workspace = true }
 rktk = { workspace = true }
