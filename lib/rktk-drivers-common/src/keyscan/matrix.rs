@@ -7,6 +7,10 @@ use rktk::{
 };
 
 /// Matrix scanner
+///
+/// NOTE: `COLS` const generic is the number of columns. Though you can set this value same as
+/// specified in [`rktk::::config::static_config::Keyboard::cols`], for split keyboard, this also can be set to
+/// "columns of the half keyboard". By using this value, you can save memory usage.
 pub struct Matrix<
     OP: OutputPin,
     IP: InputPin + Wait,
@@ -37,9 +41,9 @@ impl<
     /// - `output_pins`: Output pins to control the matrix.
     /// - `input_pins`: Input pins to read the matrix.
     /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
-    /// - `map_key`: Function to map key position from pin number. This function must return
+    /// - `map_key`: Function to map key position from pin index. This function must return
     ///    position within specified `COLS` and `ROWS`.
-    ///    Signature: (row, col) -> Option<(row, col)>
+    ///    Signature: (input_pin_idx, output_pin_idx) -> Option<(row, col)>
     pub fn new(
         output_pins: [OP; OUTPUT_PIN_COUNT],
         input_pins: [IP; INPUT_PIN_COUNT],

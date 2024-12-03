@@ -1,42 +1,14 @@
-//! This module contains the static configuration of the firmware.
-//! `static` means that the configuration is compiled into the firmware binary.
+//! Static configuration of the firmware.
 //!
-//! # Configuration
-//! Values in [`StaticConfig`] struct can be set from your keyboard crate through json file. Here
-//! is the way to set the configuration:
+//! These values are read from a json file set in the environment variable `RKTK_CONFIG_PATH`
+//! and set at build time.
 //!
-//! 1. Set the `RKTK_CONFIG_PATH` environment variable.
-//!    Easy way to set this value is to add following section to `.cargo/config.toml`:
-//!    ```toml
-//!    [env]
-//!    RKTK_CONFIG_PATH = { value = "rktk.json", relative = true }
-//!    ```
-//!    By adding this line, rktk will read `rktk.json` file in the root of your keyboard crate.
-//! 2. Create `rktk.json` in the root of your keyboard crate.
-//!    Here is an example of `rktk.json`:
-//!    ```json
-//!    {
-//!      "$schema": "https://raw.githubusercontent.com/nazo6/rktk/master/lib/rktk/schema.json",
-//!      "keyboard": {
-//!        "cols": 14,
-//!        "rows": 5,
-//!    
-//!        "right_led_count": 34,
-//!        "left_led_count": 37,
-//!    
-//!        "name": "keyboard name",
-//!        "layout": <Put layout data of kle here>
-//!      },
-//!      "config": {
-//!        "rktk": {
-//!          "scan_interval_keyboard": 10,
-//!          "scan_interval_mouse": 5
-//!        }
-//!      }
-//!    }
-//!
-//!    ```
-//! 3. Run `cargo build`
+//! It is convenient to set environment variables in `.cargo/config.toml` as follows.
+//! ```toml
+//! [env]
+//! RKTK_CONFIG_PATH = { value = "rktk.json", relative = true }
+//! ```
+//! See the examples folder for an example of this json.
 
 mod schema;
 

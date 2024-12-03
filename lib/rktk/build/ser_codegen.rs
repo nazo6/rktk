@@ -153,7 +153,7 @@ impl ser::Serializer for &mut Serializer {
     }
 
     fn serialize_unit(self) -> Result<()> {
-        self.output += "null";
+        self.output += "None";
         Ok(())
     }
 

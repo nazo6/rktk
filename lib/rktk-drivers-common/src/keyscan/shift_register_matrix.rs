@@ -35,7 +35,8 @@ impl<
 {
     /// Detect the hand and initialize the scanner.
     ///
-    /// NOTE: Shift register is not actually spi so you should set proper spi mode.
+    /// WARNING: Shift register is not actually spi so you should set proper spi mode.
+    /// Also, the scan direction can be different depending spi mode.
     ///
     /// # Arguments
     /// - `row_shift_register`: SPI bus for the shift register used as output pin.
@@ -44,7 +45,6 @@ impl<
     /// - `map_key`: Function to map key position from pin number. This function must return
     ///    position within specified `COLS` and `ROWS`.
     ///    Signature: (row, col) -> Option<(row, col)>
-    ///
     pub fn new(
         row_shift_register: S,
         input_pins: [IP; INPUT_PIN_COUNT],

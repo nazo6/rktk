@@ -1,5 +1,5 @@
 {
-  "$schema": "../lib/rktk/schema.json",
+  "$schema": "./lib/rktk/schema.json",
   "keyboard": {
     "cols": 14,
     "rows": 5,

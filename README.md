@@ -109,16 +109,20 @@ See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
 | &nbsp;                     |        |           |                 |
 | **Double-tap reset**       |        | ✅        |                 |
 
+## Examples
+
+You can find examples in the `examples` directory.
+
 ## Development
 
-See `cargo x --help` and `.vscode/tasks.json` to build firmware and start
+See `cargo rktk --help` and `.vscode/tasks.json` to build firmware and start
 development.
 
 ### Dependencies
 
 You need to install some tools to generate firmware.
 
-- `arm-none-eabi-objcopy`: Required to generate uf2 firmware for nRF52840
+- `arm-none-eabi-objcopy`: Required to generate uf2 file.
 - `wasm-pack`: Required to build rktk-client
 
 ### MSRV
@@ -129,12 +133,10 @@ cargo features like `per-package-target`. So, it requires nightly toolchain.
 ### Creating new keyboard
 
 Currently, there is no guide for building a new keyboard, but you can refer to
-the following repository:
+the examples in this repo or the following repository:
 
 - https://github.com/nazo6/rktk-neg
 - https://github.com/nazo6/rktk-keyball-rs
-
-Please note that currently driver for regular matrix is not implemented.
 
 ## Credits & Acknowledgements
 

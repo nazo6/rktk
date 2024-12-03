@@ -604,19 +604,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dummy-kb"
-version = "0.1.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "embassy-executor",
- "embassy-rp",
- "portable-atomic",
- "rktk",
- "rktk-drivers-rp",
-]
-
-[[package]]
 name = "dyn-clone"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -996,6 +983,19 @@ dependencies = [
  "portable-atomic",
  "rktk",
  "rktk-drivers-common",
+ "rktk-drivers-rp",
+]
+
+[[package]]
+name = "example-dummy-kb-rp"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-executor",
+ "embassy-rp",
+ "portable-atomic",
+ "rktk",
  "rktk-drivers-rp",
 ]
 

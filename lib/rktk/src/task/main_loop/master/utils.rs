@@ -11,17 +11,22 @@ use crate::{
 
 use super::{ConfiguredState, SharedState, RKTK_CONFIG};
 
-/// TODO: Currently, split index is changed like below.
-/// Splitted:
-/// 0 1 2 3 4   4 3 2 1 0
-/// ↓
-/// Entire:
-/// 0 1 2 3 4   5 6 7 8 9
-///
-/// I'm not sure this is a common practice.
+const SPLIT_RIGHT_SHIFT: u8 = {
+    if let Some(val) = KEYBOARD.split_right_shift {
+        val
+    } else {
+        assert!(
+            KEYBOARD.cols % 2 == 0,
+            "Split right shift is not defined, but the keyboard has odd number of columns."
+        );
+        KEYBOARD.cols / 2
+    }
+};
+
+/// Resolves one-handed coordinates to two-handed coordinates using split_right_shift.
 pub fn resolve_entire_key_pos(ev: &mut KeyChangeEvent, hand: Hand) {
     if hand == Hand::Right {
-        ev.col = KEYBOARD.cols - 1 - ev.col;
+        ev.col += SPLIT_RIGHT_SHIFT;
     }
 }
 
