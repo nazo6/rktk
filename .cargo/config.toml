@@ -5,7 +5,7 @@ lto = true
 rktk = "run -p rktk-cli --"
 
 [env]
-RKTK_CONFIG_PATH = { value = "keyboards/rktk.json", relative = true }
+RKTK_CONFIG_PATH = { value = "rktk.dev.json", relative = true }
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]
