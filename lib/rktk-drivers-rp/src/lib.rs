@@ -12,4 +12,3 @@ pub mod mouse;
 pub mod rgb;
 pub mod split;
 pub mod system;
-pub mod usb;

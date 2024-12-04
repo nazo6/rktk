@@ -20,4 +20,3 @@ pub mod rgb;
 pub mod softdevice;
 pub mod split;
 pub mod system;
-pub mod usb;

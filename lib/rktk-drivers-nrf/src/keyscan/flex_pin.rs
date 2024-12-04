@@ -1,19 +1,15 @@
 use embassy_nrf::gpio::{Flex, OutputDrive, Pull as NrfPull};
-use rktk::drivers::interface::keyscan::KeyscanDriver;
 pub use rktk_drivers_common::keyscan::duplex_matrix::ScanDir;
-use rktk_drivers_common::keyscan::{
-    duplex_matrix::DuplexMatrixScanner,
-    flex_pin::{FlexPin, Pull},
-    HandDetector,
-};
+use rktk_drivers_common::keyscan::flex_pin::{FlexPin, Pull};
 
-struct FlexWrap<'a> {
+/// Wrapper over flex pin that implements rktk_drivers_common's [`FlexPin`] trait.
+pub struct NrfFlexPin<'a> {
     pin: Flex<'a>,
     pull: NrfPull,
     drive: OutputDrive,
 }
 
-impl FlexPin for FlexWrap<'_> {
+impl FlexPin for NrfFlexPin<'_> {
     fn set_as_input(&mut self) {
         #[allow(clippy::needless_match)]
         let pull = match self.pull {
@@ -58,35 +54,4 @@ impl FlexPin for FlexWrap<'_> {
             Pull::Down => NrfPull::Down,
         };
     }
-}
-
-pub fn create_duplex_matrix<
-    'a: 'a,
-    const ROW_PIN_COUNT: usize,
-    const COL_PIN_COUNT: usize,
-    const ROWS: usize,
-    const COLS: usize,
->(
-    rows: [Flex<'a>; ROW_PIN_COUNT],
-    cols: [Flex<'a>; COL_PIN_COUNT],
-    hand_detector: HandDetector,
-    translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
-) -> impl KeyscanDriver + 'a {
-    let rows = rows.map(|pin| FlexWrap {
-        pin,
-        pull: NrfPull::None,
-        drive: OutputDrive::HighDrive,
-    });
-    let cols = cols.map(|pin| FlexWrap {
-        pin,
-        pull: NrfPull::None,
-        drive: OutputDrive::HighDrive,
-    });
-    DuplexMatrixScanner::<FlexWrap<'a>, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>::new(
-        rows,
-        cols,
-        hand_detector,
-        false,
-        translate_key_position,
-    )
 }
