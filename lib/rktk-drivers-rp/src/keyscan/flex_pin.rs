@@ -1,8 +1,14 @@
-use embassy_rp::gpio::Flex;
+use embassy_rp::{clocks::GpinPin, gpio::Flex, Peripheral};
 use rktk_drivers_common::keyscan::flex_pin::{FlexPin, Pull};
 
 /// Wrapper over flex pin that implements rktk_drivers_common's [`FlexPin`] trait.
 pub struct RpFlexPin<'a>(Flex<'a>);
+
+impl<'a> RpFlexPin<'a> {
+    pub fn new(pin: impl Peripheral<P = impl GpinPin> + 'a) -> Self {
+        Self(Flex::new(pin))
+    }
+}
 
 impl FlexPin for RpFlexPin<'_> {
     fn set_as_input(&mut self) {
