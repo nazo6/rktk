@@ -2,7 +2,7 @@ use usbd_hid::descriptor::KeyboardReport;
 
 use crate::{
     keycode::KeyCode,
-    state::{action_handler::EventType, common::CommonLocalState},
+    state::{common::CommonLocalState, key_resolver::EventType},
 };
 
 mod reporter;

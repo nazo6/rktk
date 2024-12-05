@@ -12,7 +12,7 @@ mod tap_dance;
 mod tap_hold;
 
 /// Handles layer related events and resolve physical key position to keycode.
-pub struct ActionHandler<const ROW: usize, const COL: usize> {
+pub struct KeyResolver<const ROW: usize, const COL: usize> {
     normal_state: normal::NormalState,
     tap_dance: tap_dance::TapDanceState,
     oneshot: oneshot::OneshotState,
@@ -26,7 +26,7 @@ pub enum EventType {
     Released,
 }
 
-impl<const ROW: usize, const COL: usize> ActionHandler<ROW, COL> {
+impl<const ROW: usize, const COL: usize> KeyResolver<ROW, COL> {
     pub fn new(config: KeyResolverConfig) -> Self {
         Self {
             normal_state: normal::NormalState::new(),

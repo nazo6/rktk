@@ -16,9 +16,9 @@ use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::state::common::CommonLocalState;
 
-mod action_handler;
 mod common;
 pub mod config;
+mod key_resolver;
 // mod keycode_handler;
 mod manager;
 mod mouse_handler;
@@ -36,7 +36,7 @@ pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const E
 {
     now: Instant,
 
-    action_handler: action_handler::ActionHandler<ROW, COL>,
+    action_handler: key_resolver::KeyResolver<ROW, COL>,
 
     cs: common::CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
     mouse: manager::mouse::MouseState,
@@ -55,7 +55,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
         Self {
             config: config.clone(),
             now: Instant::from_start(Duration::from_millis(0)),
-            action_handler: action_handler::ActionHandler::new(config.key_resolver),
+            action_handler: key_resolver::KeyResolver::new(config.key_resolver),
 
             cs: common::CommonState::new(layers),
             mouse: manager::mouse::MouseState::new(config.mouse),
