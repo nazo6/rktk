@@ -7,21 +7,22 @@ mod mouse;
 
 #[allow(unused_imports)]
 mod prelude {
-    pub use crate::time::{Duration, Instant};
-    use crate::{keymap::Keymap, state::manager::transparent::TransparentReport};
-    pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
-
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
-    use crate::state::config::{
-        KeyResolverConfig, MouseConfig, Output, TapDanceConfig, TapDanceDefinition,
-        MAX_TAP_DANCE_REPEAT_COUNT,
-    };
-    pub(super) use crate::state::Event;
     pub(super) use crate::{
-        keycode::*,
-        keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*},
+        keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
+        state::Event,
+        state::TransparentReport,
+        time::{Duration, Instant},
     };
+    use crate::{
+        keymap::Keymap,
+        state::config::{
+            KeyResolverConfig, MouseConfig, Output, TapDanceConfig, TapDanceDefinition,
+            MAX_TAP_DANCE_REPEAT_COUNT,
+        },
+    };
+    pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
     pub const fn time(ms: u64) -> Duration {
         Duration::from_millis(ms)

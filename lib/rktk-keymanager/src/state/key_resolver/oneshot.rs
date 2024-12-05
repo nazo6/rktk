@@ -24,24 +24,31 @@ impl OneshotState {
         }
     }
 
-    pub fn pre_resolve(&mut self, event: &KeyChangeEvent, mut cb: impl FnMut(EventType, KeyCode)) {
-        for oneshot in &mut self.oneshot {
-            if event.pressed {
-                if oneshot.active.is_none() {
-                    oneshot.active = Some((event.row, event.col));
-                    cb(EventType::Pressed, oneshot.key);
-                    continue;
+    pub fn pre_resolve(
+        &mut self,
+        event: Option<&KeyChangeEvent>,
+        mut cb: impl FnMut(EventType, KeyCode),
+    ) {
+        self.oneshot.retain_mut(|oneshot| {
+            if let Some(event) = event {
+                if event.pressed {
+                    if oneshot.active.is_none() {
+                        oneshot.active = Some((event.row, event.col));
+                        cb(EventType::Pressed, oneshot.key);
+                        return true;
+                    }
+                } else if oneshot.active == Some((event.row, event.col)) {
+                    cb(EventType::Released, oneshot.key);
+                    return false;
                 }
-            } else if oneshot.active == Some((event.row, event.col)) {
-                oneshot.active = None;
-                cb(EventType::Released, oneshot.key);
-                continue;
             }
 
             if oneshot.active.is_some() {
                 cb(EventType::Pressing, oneshot.key);
             }
-        }
+
+            true
+        });
     }
 
     pub fn process_keycode(&mut self, kc: &KeyCode, pressed: bool) {

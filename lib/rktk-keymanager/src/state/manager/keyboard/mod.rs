@@ -1,9 +1,8 @@
 use usbd_hid::descriptor::KeyboardReport;
 
-use crate::{
-    keycode::KeyCode,
-    state::{common::CommonLocalState, key_resolver::EventType},
-};
+use crate::{keycode::KeyCode, state::key_resolver::EventType};
+
+use super::SharedLocalManagerState;
 
 mod reporter;
 
@@ -30,7 +29,7 @@ impl KeyboardLocalState {
 
     pub fn process_event(
         &mut self,
-        common_local_state: &mut CommonLocalState,
+        common_local_state: &mut SharedLocalManagerState,
         kc: &KeyCode,
         event: EventType,
     ) {
@@ -51,7 +50,7 @@ impl KeyboardLocalState {
 
     pub fn report(
         self,
-        common_local_state: &CommonLocalState,
+        common_local_state: &SharedLocalManagerState,
         global_state: &mut KeyboardState,
     ) -> Option<KeyboardReport> {
         global_state
