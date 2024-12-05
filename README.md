@@ -57,23 +57,23 @@ Key mapping features is implemented in `rktk-keymanager` and this crate does not
 depend on rktk or embassy. Keymap is defined as normal two-dimensional array.
 See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
 
-| Feature name           | Status |                                                         |
-| ---------------------- | ------ | ------------------------------------------------------- |
-| &nbsp;                 |        |                                                         |
-| **Key action**         |        |                                                         |
-| Mod-Tap                | ✅     | Unlike QMK, any keycode can be specified as modifier.   |
-| Tap-Hold               | 🟡     | Currently, this behaves like `HOLD_ON_OTHER_KEY_PRESS`. |
-| Tap Dance              | ✅     |                                                         |
-| Oneshot key            | ✅     |                                                         |
-| &nbsp;                 |        |                                                         |
-| **KeyCode**            |        |                                                         |
-| Normal key             | ✅     |                                                         |
-| Modifier key           | ✅     |                                                         |
-| Media key              | ✅     |                                                         |
-| Mouse key              | ✅     |                                                         |
-| Mouse scroll momentary | ✅     |                                                         |
-| Layer momentary (MO)   | ✅     |                                                         |
-| Layer toggle (TG)      | ✅     |                                                         |
+| Feature name           | Status | Note                                                  |
+| ---------------------- | ------ | ----------------------------------------------------- |
+| **Key action**         |        |                                                       |
+| Mod-Tap                | ✅     | Unlike QMK, any keycode can be specified as modifier. |
+| Tap-Hold               | ✅     |                                                       |
+| Tap Dance              | ✅     |                                                       |
+| Oneshot key            | ✅     |                                                       |
+| Combo key              | 🟡     |                                                       |
+| &nbsp;                 |        |                                                       |
+| **Key code**           |        |                                                       |
+| Normal key             | ✅     |                                                       |
+| Modifier key           | ✅     |                                                       |
+| Media key              | ✅     |                                                       |
+| Mouse key              | ✅     |                                                       |
+| Mouse scroll momentary | ✅     |                                                       |
+| Layer momentary (MO)   | ✅     |                                                       |
+| Layer toggle (TG)      | ✅     |                                                       |
 
 ### Drivers
 
