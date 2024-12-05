@@ -19,9 +19,7 @@ use crate::state::common::CommonLocalState;
 mod common;
 pub mod config;
 mod key_resolver;
-// mod keycode_handler;
 mod manager;
-mod mouse_handler;
 
 #[derive(Debug)]
 pub enum Event {
