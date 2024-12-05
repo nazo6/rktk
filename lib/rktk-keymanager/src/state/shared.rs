@@ -27,9 +27,6 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     }
 
     pub fn highest_layer(&self) -> usize {
-        #[cfg(test)]
-        dbg!(self.layer_active);
-
         self.layer_active.iter().rposition(|&x| x).unwrap_or(0)
     }
 }

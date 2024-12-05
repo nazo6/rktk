@@ -19,11 +19,6 @@ mod shared;
 
 pub use interface::*;
 
-fn size<T>(_: &T) {
-    #[cfg(test)]
-    dbg!(core::mem::size_of::<T>());
-}
-
 /// Represents the state of the keyboard.
 pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
 {
@@ -38,7 +33,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
 {
     /// Creates a new state with the given keymap and configuration.
     pub fn new(keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
-        let s = Self {
+        Self {
             config: config.clone(),
             key_resolver: key_resolver::KeyResolver::new(
                 config.key_resolver,
@@ -46,9 +41,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             ),
             shared: shared::SharedState::new(keymap),
             manager: GlobalManagerState::new(config.mouse, config.initial_output),
-        };
-        size(&s.key_resolver);
-        s
+        }
     }
 
     /// Updates state with the given events.
