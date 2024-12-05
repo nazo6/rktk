@@ -1,4 +1,5 @@
 use crate::state::tests::prelude::*;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn tap_dance_tap1() {
@@ -21,7 +22,7 @@ fn tap_dance_tap1() {
         "TapDance key released. nothing happens yet"
     );
 
-    let report = update!(state, time(50), (0, 0, false));
+    let report = update!(state, time(50));
     let expected = NONE_REPORT;
     assert_eq!(
         report, expected,

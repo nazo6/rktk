@@ -112,6 +112,12 @@ impl TapDanceState {
                         hold_start: now,
                     };
                 }
+                (true, TapDanceKeyState::ReleasedPending { tap_count, .. }) => {
+                    td.state = TapDanceKeyState::PressedPending {
+                        tap_count: tap_count + 1,
+                        hold_start: now,
+                    };
+                }
                 (false, TapDanceKeyState::Holding { tap_count }) => {
                     if let Some(hkc) = td.get_hold_key(*tap_count) {
                         cb(EventType::Released, hkc);

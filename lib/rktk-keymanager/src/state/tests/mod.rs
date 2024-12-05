@@ -141,7 +141,7 @@ mod prelude {
                 key_resolver: KeyResolverConfig {
                     tap_threshold: 500,
                     tap_dance: TapDanceConfig {
-                        threshold: 500,
+                        threshold: 100,
                         definitions: tap_dance,
                     },
                 },

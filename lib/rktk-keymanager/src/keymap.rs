@@ -36,8 +36,8 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     pub fn get_encoder_key(&self, encoder: usize, direction: EncoderDirection) -> Option<&KeyCode> {
         if let Some(key) = self.encoder_keys.get(encoder) {
             match direction {
-                EncoderDirection::Clockwise => Some(&key.0),
-                EncoderDirection::CounterClockwise => Some(&key.1),
+                EncoderDirection::Clockwise => Some(&key.1),
+                EncoderDirection::CounterClockwise => Some(&key.0),
             }
         } else {
             None
