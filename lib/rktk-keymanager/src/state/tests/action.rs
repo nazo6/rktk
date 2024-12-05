@@ -51,7 +51,7 @@ fn taphold_action_hold() {
         "TapHold action key, Sill in tapping term"
     );
 
-    let report = update!(state, time(1000), (0, 0, true));
+    let report = update!(state, time(1000));
     let mut expected = NONE_REPORT;
     expected.keyboard_report = Some(KeyboardReport {
         keycodes: [0x05, 0, 0, 0, 0, 0],

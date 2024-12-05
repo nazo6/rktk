@@ -89,9 +89,6 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             key_change.as_ref(),
             self.shared.now,
             |et, kc| {
-                #[cfg(test)]
-                dbg!(&et, &kc);
-
                 lms.process_keycode(&mut self.shared.layer_active, &mut self.manager, &kc, et);
             },
         );

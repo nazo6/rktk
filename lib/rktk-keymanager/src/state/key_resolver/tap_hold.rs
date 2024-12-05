@@ -4,6 +4,7 @@ use crate::{keycode::KeyCode, state::KeyChangeEvent, time::Instant};
 
 use super::EventType;
 
+#[derive(Debug)]
 struct TapHoldKeyState {
     tkc: KeyCode,
     hkc: KeyCode,
@@ -56,8 +57,8 @@ impl TapHoldState {
 
     pub fn post_resolve(&mut self, now: Instant, mut cb: impl FnMut(EventType, KeyCode)) {
         for (_, state) in self.pressed.iter_mut() {
-            if let Some(pending_dur) = state.pending {
-                if now - pending_dur > self.threshold {
+            if let Some(press_start) = state.pending {
+                if now - press_start > self.threshold {
                     // threshold reached, it's a hold.
                     cb(EventType::Pressed, state.hkc);
                     state.pending = None;
