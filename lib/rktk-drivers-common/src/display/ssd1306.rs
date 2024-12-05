@@ -82,6 +82,12 @@ where
     fn calculate_point(col: i32, row: i32) -> Point {
         Point::new((col - 1) * 6, (row - 1) * 10)
     }
+
+    async fn set_brightness(&mut self, brightness: u8) -> Result<(), DisplayError> {
+        self.0
+            .set_brightness(Brightness::custom(1, brightness))
+            .await
+    }
 }
 
 impl<I2C, SIZE> Dimensions for Ssd1306Display<I2C, SIZE>

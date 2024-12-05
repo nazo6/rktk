@@ -48,4 +48,11 @@ pub trait DisplayDriver: DrawTarget + Sized {
 
         let _ = self.flush().await;
     }
+
+    /// Sets brightness of the display.
+    ///
+    /// 0 is off, 255 is full brightness.
+    async fn set_brightness(&mut self, _brightness: u8) -> Result<(), DisplayError> {
+        Err(DisplayError::DataFormatNotImplemented)
+    }
 }
