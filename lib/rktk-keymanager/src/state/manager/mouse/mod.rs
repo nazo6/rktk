@@ -1,10 +1,9 @@
-use core::time::Duration;
-
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
     keycode::{key::Key, special::Special, KeyCode},
     state::{config::MouseConfig, key_resolver::EventType, shared::SharedState},
+    time::Duration,
 };
 
 use self::aml::Aml;
@@ -27,7 +26,7 @@ impl MouseState {
     pub fn new(config: MouseConfig) -> Self {
         Self {
             aml: Aml::new(
-                Duration::from_millis(config.auto_mouse_duration as u64),
+                Duration::from_millis(config.auto_mouse_duration),
                 config.auto_mouse_threshold,
             ),
             scroll_mode: false,

@@ -7,6 +7,8 @@ mod mouse;
 
 #[allow(unused_imports)]
 mod prelude {
+    use core::time::Duration;
+
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::config::MAX_TAP_DANCE_REPEAT_COUNT;
@@ -16,7 +18,7 @@ mod prelude {
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
         state::Event,
         state::TransparentReport,
-        time::{Duration, Instant},
+        time::Instant,
     };
     use crate::{
         keymap::Keymap,
@@ -24,8 +26,8 @@ mod prelude {
     };
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-    pub const fn time(ms: u64) -> Duration {
-        Duration::from_millis(ms)
+    pub const fn time(ms: u32) -> Duration {
+        Duration::from_millis(ms as u64)
     }
 
     pub const fn default_transparent_report() -> TransparentReport {

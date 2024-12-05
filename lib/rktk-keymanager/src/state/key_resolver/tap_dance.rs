@@ -1,11 +1,9 @@
-use core::time::Duration;
-
 use crate::{
     config::MAX_TAP_DANCE_KEY_COUNT,
     keycode::KeyCode,
     keymap::{TapDanceDefinition, TapDanceDefinitions},
     state::config::TapDanceConfig,
-    time::Instant,
+    time::{Duration, Instant},
 };
 
 use super::EventType;
@@ -57,7 +55,7 @@ impl TapDanceState {
                 state: TapDanceKeyState::None,
                 config: def,
             }),
-            threshold: Duration::from_millis(config.threshold as u64),
+            threshold: Duration::from_millis(config.threshold),
         }
     }
 

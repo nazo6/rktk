@@ -6,7 +6,7 @@
 use crate::config::{
     MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
 };
-use crate::{keymap::Keymap, time::Duration};
+use crate::keymap::Keymap;
 use config::{KeymapInfo, StateConfig};
 use key_resolver::EventType;
 use manager::{GlobalManagerState, LocalManagerState};
@@ -52,11 +52,8 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     }
 
     /// Updates state with the given events.
-    pub fn update(&mut self, event: Event, since_last_update: Duration) -> StateReport {
-        #[cfg(test)]
-        dbg!("update");
-
-        self.shared.now = self.shared.now + since_last_update;
+    pub fn update(&mut self, event: Event, since_last_update: core::time::Duration) -> StateReport {
+        self.shared.now = self.shared.now + since_last_update.into();
 
         let mut lms = LocalManagerState::new();
 

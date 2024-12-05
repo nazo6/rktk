@@ -69,7 +69,7 @@ macro_rules_attribute = "0.2.0"
 thiserror = { version = "2.0.3", default-features = false }
 
 tsify-next = { version = "0.5.4", features = ["js"] }
-wasm-bindgen = "0.2.93"
+wasm-bindgen = "0.2.97"
 schemars = "0.8.21"
 
 log = "0.4.22"

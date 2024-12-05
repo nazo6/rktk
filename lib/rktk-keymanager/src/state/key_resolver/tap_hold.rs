@@ -1,8 +1,7 @@
-use core::time::Duration;
-
 use crate::{
     keycode::KeyCode,
     state::{config::TapHoldConfig, KeyChangeEvent},
+    time::Duration,
     time::Instant,
 };
 
@@ -28,7 +27,7 @@ impl TapHoldState {
     pub fn new(config: TapHoldConfig) -> Self {
         Self {
             pressed: heapless::FnvIndexMap::new(),
-            threshold: Duration::from_millis(config.threshold as u64),
+            threshold: Duration::from_millis(config.threshold),
             hold_on_other_key: config.hold_on_other_key,
         }
     }

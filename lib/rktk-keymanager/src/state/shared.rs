@@ -1,6 +1,4 @@
-use core::time::Duration;
-
-use crate::time::Instant;
+use crate::time::{Duration, Instant};
 
 use crate::keymap::Keymap;
 
@@ -22,7 +20,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
         Self {
             keymap,
             layer_active: [false; LAYER],
-            now: Instant::from_start(Duration::from_secs(0)),
+            now: Instant::from_start(Duration::from_millis(0)),
         }
     }
 
