@@ -1,6 +1,7 @@
 import { Connection } from "@/lib/connection";
 import {
   Button,
+  Checkbox,
   Input,
   Title2,
   Toast,
@@ -41,6 +42,8 @@ export function KeyboardOptionsPage(props: { connection: Connection }) {
 function KeyboardOptionsPageInner(
   props: { keymapConfig: StateConfig; connection: Connection },
 ) {
+  console.log(props);
+
   const { dispatchToast } = useToastController();
   const queryClient = useQueryClient();
 
@@ -119,13 +122,18 @@ function KeyboardOptionsPageInner(
         <Title2>Key resolver</Title2>
         <div className="grid grid-cols-3 items-center gap-y-2">
           <NumberForm
-            name="key_resolver.tap_threshold"
-            title="Tap threshold"
+            name="key_resolver.tap_hold.threshold"
+            title="Tap-hold threshold"
+            control={control}
+          />
+          <BoolForm
+            name="key_resolver.tap_hold.hold_on_other_key"
+            title="Make Tap-hold hold on other key pressed"
             control={control}
           />
           <NumberForm
-            name="key_resolver.tap_dance_threshold"
-            title="Tap dance threshold"
+            name="key_resolver.tap_dance.threshold"
+            title="Tap-dance threshold"
             control={control}
           />
         </div>
@@ -154,6 +162,30 @@ function NumberForm<T extends FieldValues>(props: {
             className="col-span-2"
             type="number"
             onChange={(e) => field.onChange(parseInt(e.target.value))}
+          />
+        )}
+      />
+    </>
+  );
+}
+
+function BoolForm<T extends FieldValues>(props: {
+  name: Path<T>;
+  title: string;
+  control: Control<T>;
+}) {
+  return (
+    <>
+      <p className="col-span-1">{props.title}</p>
+      <Controller
+        name={props.name}
+        control={props.control}
+        render={({ field }) => (
+          <Checkbox
+            {...field}
+            checked={field.value}
+            className="col-span-2"
+            onChange={(e) => field.onChange(e.target.checked)}
           />
         )}
       />
