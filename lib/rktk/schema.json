@@ -35,7 +35,7 @@
               "auto_mouse_layer": 1,
               "auto_mouse_threshold": 1,
               "scroll_divider_x": 20,
-              "scroll_divider_y": 12
+              "scroll_divider_y": -12
             }
           },
           "allOf": [
@@ -89,7 +89,7 @@
             "auto_mouse_layer": 1,
             "auto_mouse_threshold": 1,
             "scroll_divider_x": 20,
-            "scroll_divider_y": 12
+            "scroll_divider_y": -12
           },
           "allOf": [
             {

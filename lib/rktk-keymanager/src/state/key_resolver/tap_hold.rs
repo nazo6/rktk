@@ -32,7 +32,13 @@ impl TapHoldState {
         }
     }
 
-    pub fn pre_resolve(&mut self, event: Option<&KeyChangeEvent>) {
+    pub fn pre_resolve(
+        &mut self,
+        event: Option<&KeyChangeEvent>,
+
+        now: Instant,
+        mut cb: impl FnMut(EventType, KeyCode),
+    ) {
         if let Some(event) = event {
             if event.pressed && self.hold_on_other_key {
                 for (key, state) in self.pressed.iter_mut() {
@@ -40,6 +46,18 @@ impl TapHoldState {
                         state.pending = None;
                     }
                 }
+            }
+        }
+
+        for (_, state) in self.pressed.iter_mut() {
+            if let Some(press_start) = state.pending {
+                if now - press_start > self.threshold {
+                    // threshold reached, it's a hold.
+                    cb(EventType::Pressed, state.hkc);
+                    state.pending = None;
+                }
+            } else {
+                cb(EventType::Pressing, state.hkc);
             }
         }
     }
@@ -68,20 +86,6 @@ impl TapHoldState {
             } else {
                 // released in holding term. it's a hold.
                 cb(EventType::Released, state.hkc);
-            }
-        }
-    }
-
-    pub fn post_resolve(&mut self, now: Instant, mut cb: impl FnMut(EventType, KeyCode)) {
-        for (_, state) in self.pressed.iter_mut() {
-            if let Some(press_start) = state.pending {
-                if now - press_start > self.threshold {
-                    // threshold reached, it's a hold.
-                    cb(EventType::Pressed, state.hkc);
-                    state.pending = None;
-                }
-            } else {
-                cb(EventType::Pressing, state.hkc);
             }
         }
     }

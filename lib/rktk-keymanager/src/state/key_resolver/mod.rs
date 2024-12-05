@@ -1,6 +1,7 @@
 use crate::keymap::{Keymap, TapDanceDefinitions};
 use crate::time::Instant;
 
+use super::shared::LayerActive;
 use super::KeyChangeEvent;
 use crate::keycode::{KeyAction, KeyCode};
 
@@ -44,13 +45,19 @@ impl KeyResolver {
     >(
         &mut self,
         keymap: &Keymap<LAYER, ROW, COL, ENCODER_COUNT>,
-        layer_state: [bool; LAYER],
+        layer_state: &mut LayerActive<LAYER>,
         event: Option<&KeyChangeEvent>,
         now: Instant,
-        mut cb: impl FnMut(EventType, KeyCode),
+        mut cb: impl FnMut(&mut LayerActive<LAYER>, EventType, KeyCode),
     ) {
-        self.oneshot.pre_resolve(event, &mut cb);
-        self.tap_hold.pre_resolve(event);
+        self.oneshot
+            .pre_resolve(event, &mut |event_type, key_code| {
+                cb(layer_state, event_type, key_code);
+            });
+        self.tap_hold
+            .pre_resolve(event, now, &mut |event_type, key_code| {
+                cb(layer_state, event_type, key_code);
+            });
 
         let highest_layer = layer_state
             .iter()
@@ -59,6 +66,10 @@ impl KeyResolver {
             .find(|(_, &active)| active)
             .map(|(idx, _)| idx)
             .unwrap_or(0);
+
+        let mut cb_with_layer = |event_type, key_code| {
+            cb(layer_state, event_type, key_code);
+        };
 
         if let Some(event) = event {
             let Some(mut key_action) =
@@ -85,28 +96,30 @@ impl KeyResolver {
                 KeyAction::Inherit => {}
                 KeyAction::Normal(key_code) => {
                     self.normal_state
-                        .process_event(event, (*key_code, None), &mut cb);
+                        .process_event(event, (*key_code, None), &mut cb_with_layer);
                 }
                 KeyAction::Normal2(key_code, key_code1) => {
-                    self.normal_state
-                        .process_event(event, (*key_code, Some(*key_code1)), &mut cb);
+                    self.normal_state.process_event(
+                        event,
+                        (*key_code, Some(*key_code1)),
+                        &mut cb_with_layer,
+                    );
                 }
                 KeyAction::TapHold(tkc, hkc) => {
                     self.tap_hold
-                        .process_event(now, event, (*tkc, *hkc), &mut cb);
+                        .process_event(now, event, (*tkc, *hkc), &mut cb_with_layer);
                 }
                 KeyAction::OneShot(key_code) => {
                     self.oneshot.process_keycode(key_code, event.pressed);
                 }
                 KeyAction::TapDance(id) => {
                     self.tap_dance
-                        .process_event(*id, now, event.pressed, &mut cb);
+                        .process_event(*id, now, event.pressed, &mut cb_with_layer);
                 }
             }
         }
 
-        self.tap_dance.post_resolve(now, &mut cb);
-        self.tap_hold.post_resolve(now, &mut cb);
-        self.normal_state.post_resolve(&mut cb);
+        self.tap_dance.post_resolve(now, &mut cb_with_layer);
+        self.normal_state.post_resolve(&mut cb_with_layer);
     }
 }

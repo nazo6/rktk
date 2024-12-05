@@ -192,7 +192,7 @@ impl Default for KeyManagerConfig {
                 auto_mouse_duration: 500,
                 auto_mouse_threshold: 1,
                 scroll_divider_x: 20,
-                scroll_divider_y: 12,
+                scroll_divider_y: -12,
             },
             key_resolver: KeyResolverConfig {
                 tap_hold: TapHoldConfig {

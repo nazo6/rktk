@@ -93,8 +93,9 @@ fn taphold_action_tap() {
 #[test]
 fn taphold_action_other_key_press() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
-    keymap.layers[0].map[0][1] = KeyAction::Normal(KeyCode::Key(Key::C));
+    keymap.layers[0].map[0][0] =
+        KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Layer(LayerOp::Momentary(1)));
+    keymap.layers[1].map[0][1] = KeyAction::Normal(KeyCode::Key(Key::C));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -105,11 +106,12 @@ fn taphold_action_other_key_press() {
     let report = update!(state, time(0), (0, 1, true));
     let mut expected = NONE_REPORT;
     expected.keyboard_report = Some(KeyboardReport {
-        keycodes: [0x06, 0x05, 0, 0, 0, 0],
+        keycodes: [0x06, 0, 0, 0, 0, 0],
         modifier: 0,
         reserved: 0,
         leds: 0,
     });
+    expected.highest_layer = 1;
     assert_eq!(
         report, expected,
         "In tapping term, but act as hold because another key is pressed"

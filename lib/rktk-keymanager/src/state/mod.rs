@@ -85,11 +85,11 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
 
         self.key_resolver.resolve_key(
             &self.shared.keymap,
-            self.shared.layer_active,
+            &mut self.shared.layer_active,
             key_change.as_ref(),
             self.shared.now,
-            |et, kc| {
-                lms.process_keycode(&mut self.shared.layer_active, &mut self.manager, &kc, et);
+            |layer_active, et, kc| {
+                lms.process_keycode(layer_active, &mut self.manager, &kc, et);
             },
         );
 
