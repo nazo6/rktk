@@ -3,11 +3,11 @@
 #![allow(clippy::let_unit_value)]
 #![allow(clippy::single_match)]
 
-use crate::{keymap::Keymap, time::Duration};
-use config::{
-    KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
-    MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
+use crate::config::{
+    MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
 };
+use crate::{keymap::Keymap, time::Duration};
+use config::{KeymapInfo, StateConfig};
 use key_resolver::EventType;
 use manager::{GlobalManagerState, LocalManagerState};
 
@@ -40,7 +40,10 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     pub fn new(keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
         let s = Self {
             config: config.clone(),
-            key_resolver: key_resolver::KeyResolver::new(config.key_resolver),
+            key_resolver: key_resolver::KeyResolver::new(
+                config.key_resolver,
+                keymap.tap_dance.clone(),
+            ),
             shared: shared::SharedState::new(keymap),
             manager: GlobalManagerState::new(config.mouse, config.initial_output),
         };

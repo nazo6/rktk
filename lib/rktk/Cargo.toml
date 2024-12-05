@@ -45,7 +45,10 @@ embassy-time = { workspace = true, features = ["mock-driver", "generic-queue"] }
 critical-section = { version = "1.1.2", features = ["std"] }
 
 [build-dependencies]
-schemars = "0.8.21"
+schemars = { workspace = true }
+ssmarshal = { workspace = true, default-features = true }
+smart-default = "0.7.1"
+rktk-keymanager = { workspace = true, features = ["state", "schemars"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 

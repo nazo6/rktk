@@ -18,12 +18,99 @@
     "Config": {
       "description": "Configuration for the firmware.",
       "type": "object",
+      "properties": {
+        "key_manager": {
+          "default": {
+            "key_resolver": {
+              "tap_dance": {
+                "threshold": 100
+              },
+              "tap_hold": {
+                "hold_on_other_key": true,
+                "threshold": 500
+              }
+            },
+            "mouse": {
+              "auto_mouse_duration": 500,
+              "auto_mouse_layer": 1,
+              "auto_mouse_threshold": 1,
+              "scroll_divider_x": 20,
+              "scroll_divider_y": 12
+            }
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/KeyManagerConfig"
+            }
+          ]
+        },
+        "rktk": {
+          "default": {
+            "default_auto_mouse_duration": 500,
+            "default_cpi": 600,
+            "double_tap_threshold": 500,
+            "layer_count": 5,
+            "scan_interval_keyboard": 5,
+            "scan_interval_mouse": 5,
+            "split_channel_size": 64,
+            "split_usb_timeout": 1000
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/RktkConfig"
+            }
+          ]
+        }
+      }
+    },
+    "KeyManagerConfig": {
+      "description": "Configs passed to [`rktk_keymanager`]",
+      "type": "object",
+      "properties": {
+        "key_resolver": {
+          "default": {
+            "tap_dance": {
+              "threshold": 100
+            },
+            "tap_hold": {
+              "hold_on_other_key": true,
+              "threshold": 500
+            }
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/KeyResolverConfig"
+            }
+          ]
+        },
+        "mouse": {
+          "default": {
+            "auto_mouse_duration": 500,
+            "auto_mouse_layer": 1,
+            "auto_mouse_threshold": 1,
+            "scroll_divider_x": 20,
+            "scroll_divider_y": 12
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/MouseConfig"
+            }
+          ]
+        }
+      }
+    },
+    "KeyResolverConfig": {
+      "type": "object",
       "required": [
-        "rktk"
+        "tap_dance",
+        "tap_hold"
       ],
       "properties": {
-        "rktk": {
-          "$ref": "#/definitions/RktkConfig"
+        "tap_dance": {
+          "$ref": "#/definitions/TapDanceConfig"
+        },
+        "tap_hold": {
+          "$ref": "#/definitions/TapHoldConfig"
         }
       }
     },
@@ -89,6 +176,41 @@
         }
       }
     },
+    "MouseConfig": {
+      "type": "object",
+      "required": [
+        "auto_mouse_duration",
+        "auto_mouse_layer",
+        "auto_mouse_threshold",
+        "scroll_divider_x",
+        "scroll_divider_y"
+      ],
+      "properties": {
+        "auto_mouse_duration": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0.0
+        },
+        "auto_mouse_layer": {
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0.0
+        },
+        "auto_mouse_threshold": {
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0.0
+        },
+        "scroll_divider_x": {
+          "type": "integer",
+          "format": "int8"
+        },
+        "scroll_divider_y": {
+          "type": "integer",
+          "format": "int8"
+        }
+      }
+    },
     "RktkConfig": {
       "description": "RKTK behavior configuration.\n\nMainly keymap related configurations are defined in this struct.",
       "type": "object",
@@ -100,51 +222,11 @@
           "format": "uint32",
           "minimum": 0.0
         },
-        "default_auto_mouse_layer": {
-          "description": "When auto mouse mode is enabled, this layer is used",
-          "default": 1,
-          "type": "integer",
-          "format": "uint8",
-          "minimum": 0.0
-        },
-        "default_auto_mouse_threshold": {
-          "description": "Mouse movement threshold to enable auto mouse mode",
-          "default": 1,
-          "type": "integer",
-          "format": "uint8",
-          "minimum": 0.0
-        },
         "default_cpi": {
           "description": "Default CPI value for mouse",
           "default": 600,
           "type": "integer",
           "format": "uint16",
-          "minimum": 0.0
-        },
-        "default_scroll_divider_x": {
-          "description": "Scroll divider for x axis",
-          "default": 20,
-          "type": "integer",
-          "format": "int8"
-        },
-        "default_scroll_divider_y": {
-          "description": "Scroll divider for y axis",
-          "default": -12,
-          "type": "integer",
-          "format": "int8"
-        },
-        "default_tap_dance_threshold": {
-          "description": "Threshold for tap dance (ms)",
-          "default": 100,
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0.0
-        },
-        "default_tap_threshold": {
-          "description": "Threshold for tap (ms)",
-          "default": 200,
-          "type": "integer",
-          "format": "uint32",
           "minimum": 0.0
         },
         "double_tap_threshold": {
@@ -184,9 +266,39 @@
         },
         "split_usb_timeout": {
           "description": "Timeout for detecting split USB connection (ms).",
-          "default": 600,
+          "default": 1000,
           "type": "integer",
           "format": "uint64",
+          "minimum": 0.0
+        }
+      }
+    },
+    "TapDanceConfig": {
+      "type": "object",
+      "required": [
+        "threshold"
+      ],
+      "properties": {
+        "threshold": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0.0
+        }
+      }
+    },
+    "TapHoldConfig": {
+      "type": "object",
+      "required": [
+        "hold_on_other_key",
+        "threshold"
+      ],
+      "properties": {
+        "hold_on_other_key": {
+          "type": "boolean"
+        },
+        "threshold": {
+          "type": "integer",
+          "format": "uint32",
           "minimum": 0.0
         }
       }

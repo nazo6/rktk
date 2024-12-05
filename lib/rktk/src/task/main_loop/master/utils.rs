@@ -1,12 +1,15 @@
 use rktk_keymanager::state::{
-    config::{KeyResolverConfig, MouseConfig, Output, StateConfig, TapDanceConfig},
+    config::{Output, StateConfig},
     KeyChangeEvent,
 };
 
 use crate::{
-    config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
+    config::{
+        static_config::{KEYBOARD, KM_CONFIG},
+        storage_config::StorageConfigManager,
+    },
     drivers::interface::{keyscan::Hand, storage::StorageDriver},
-    keymap_config::KeyConfig,
+    keymap_config::Keymap,
 };
 
 use super::{ConfiguredState, SharedState, RKTK_CONFIG};
@@ -64,11 +67,10 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 /// If storage doesn't exist or read fails, uses provided static config value insted.
 pub async fn load_state(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
-    key_config: KeyConfig,
+    mut keymap: Keymap,
     initial_output: Output,
 ) -> SharedState {
     let (state_config, keymap) = if let Some(storage) = &config_store {
-        let mut keymap = key_config.keymap;
         for l in 0..RKTK_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
                 keymap.layers[l as usize] = layer;
@@ -79,24 +81,12 @@ pub async fn load_state(
 
         (c.ok(), keymap)
     } else {
-        (None, key_config.keymap)
+        (None, keymap)
     };
 
     let state_config = state_config.unwrap_or(StateConfig {
-        mouse: MouseConfig {
-            auto_mouse_layer: RKTK_CONFIG.default_auto_mouse_layer,
-            auto_mouse_duration: RKTK_CONFIG.default_auto_mouse_duration,
-            auto_mouse_threshold: RKTK_CONFIG.default_auto_mouse_threshold,
-            scroll_divider_x: RKTK_CONFIG.default_scroll_divider_x,
-            scroll_divider_y: RKTK_CONFIG.default_scroll_divider_y,
-        },
-        key_resolver: KeyResolverConfig {
-            tap_threshold: RKTK_CONFIG.default_tap_threshold,
-            tap_dance: TapDanceConfig {
-                definitions: key_config.tap_dance,
-                threshold: RKTK_CONFIG.default_tap_dance_threshold,
-            },
-        },
+        mouse: KM_CONFIG.mouse,
+        key_resolver: KM_CONFIG.key_resolver,
         initial_output,
     });
 

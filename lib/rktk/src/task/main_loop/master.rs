@@ -16,7 +16,7 @@ use crate::{
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
-    keymap_config::KeyConfig,
+    keymap_config::Keymap,
     task::channels::{
         report::{ENCODER_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
         split::{M2sTx, S2mRx},
@@ -63,7 +63,7 @@ pub async fn start<
     mut encoder: Option<EN>,
     storage: Option<S>,
     mut mouse: Option<M>,
-    key_config: KeyConfig,
+    key_config: Keymap,
     hand: Hand,
     mut master_hooks: MH,
 ) {

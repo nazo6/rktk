@@ -2,8 +2,10 @@ use rktk::keymanager::keycode::*;
 use rktk::keymanager::keycode::{
     key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
 };
-use rktk::keymanager::state::config::TapDanceDefinition;
-use rktk::keymap_config::{KeyConfig, Keymap, Layer, LayerMap};
+use rktk::{
+    keymanager::keymap::TapDanceDefinition,
+    keymap_config::{Keymap, Layer, LayerMap},
+};
 
 const L2ENTER: KeyAction = KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
@@ -98,10 +100,6 @@ pub const KEYMAP: Keymap = Keymap {
             arrowmouse: true,
         },
     ],
-};
-
-pub const KEY_CONFIG: KeyConfig = KeyConfig {
-    keymap: KEYMAP,
     tap_dance: [
         Some(TapDanceDefinition {
             tap: [
@@ -112,10 +110,6 @@ pub const KEY_CONFIG: KeyConfig = KeyConfig {
             ],
             hold: [None, None, None, None],
         }),
-        None,
-        None,
-        None,
-        None,
         None,
         None,
         None,

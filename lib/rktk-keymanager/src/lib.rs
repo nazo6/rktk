@@ -10,15 +10,7 @@
 #![cfg_attr(all(not(test), not(feature = "std")), no_std)]
 #![allow(non_snake_case)]
 
-#[cfg(feature = "alloc")]
-extern crate alloc;
-
-#[cfg(feature = "alloc")]
-type Vec<T, const N: usize> = alloc::vec::Vec<T>;
-
-#[cfg(all(feature = "heapless", not(feature = "alloc")))]
-type Vec<T, const N: usize> = heapless::Vec<T, N>;
-
+pub mod config;
 pub mod keycode;
 pub mod keymap;
 mod macros;

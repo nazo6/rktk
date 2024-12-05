@@ -12,7 +12,7 @@ features = ["state", "postcard"]
 
 [dependencies]
 bitflags = { version = "2.6.0" }
-heapless = { workspace = true, optional = true }
+heapless = { workspace = true }
 usbd-hid = { workspace = true, optional = true }
 
 paste = { workspace = true }
@@ -26,6 +26,8 @@ postcard = { workspace = true, optional = true, features = [
 
 tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
+schemars = { workspace = true, optional = true }
+ssmarshal = { workspace = true, optional = true }
 
 [dev-dependencies]
 critical-section = { version = "1.1.2", features = ["std"] }
@@ -33,20 +35,16 @@ pretty_assertions = "1.4.0"
 usbd-hid = { workspace = true }
 
 [features]
-default = ["heapless"]
-
-alloc = []
-heapless = ["dep:heapless"]
-
 # Enables state management.
 state = ["dep:usbd-hid"]
 # Enables serialization.
 serde = ["dep:serde", "dep:serde_with"]
 # Enables serialization with postcard.
 postcard = ["dep:postcard", "serde"]
+schemars = ["dep:schemars", "serde", "std"]
 
 std = []
 # Enables type export by specta.
 tsify = ["std", "dep:tsify-next", "dep:wasm-bindgen", "postcard"]
 
-_check = ["state", "alloc"]
+_check = ["state", "schemars", "ssmarshal/std"]

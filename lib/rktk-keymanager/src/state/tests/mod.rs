@@ -9,6 +9,8 @@ mod mouse;
 mod prelude {
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
+    use crate::config::MAX_TAP_DANCE_REPEAT_COUNT;
+    use crate::keymap::TapDanceDefinition;
     use crate::state::config::TapHoldConfig;
     pub(super) use crate::{
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
@@ -18,10 +20,7 @@ mod prelude {
     };
     use crate::{
         keymap::Keymap,
-        state::config::{
-            KeyResolverConfig, MouseConfig, Output, TapDanceConfig, TapDanceDefinition,
-            MAX_TAP_DANCE_REPEAT_COUNT,
-        },
+        state::config::{KeyResolverConfig, MouseConfig, Output, TapDanceConfig},
     };
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
@@ -113,22 +112,6 @@ mod prelude {
     pub fn new_state(
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT>,
     ) -> State<LAYER_COUNT, ROWS, COLS, ENC_COUNT> {
-        let mut tap_dance = [const { None }; MAX_TAP_DANCE_REPEAT_COUNT as usize];
-        tap_dance[0] = Some(TapDanceDefinition {
-            tap: [
-                Some(KeyCode::Key(Key::A)),
-                Some(KeyCode::Key(Key::B)),
-                Some(KeyCode::Layer(LayerOp::Toggle(2))),
-                None,
-            ],
-            hold: [
-                Some(KeyCode::Modifier(Modifier::LCtrl)),
-                Some(KeyCode::Layer(LayerOp::Momentary(1))),
-                None,
-                None,
-            ],
-        });
-
         State::new(
             keymap,
             crate::state::StateConfig {
@@ -144,10 +127,7 @@ mod prelude {
                         threshold: 300,
                         hold_on_other_key: true,
                     },
-                    tap_dance: TapDanceConfig {
-                        threshold: 100,
-                        definitions: tap_dance,
-                    },
+                    tap_dance: TapDanceConfig { threshold: 100 },
                 },
                 initial_output: Output::Usb,
             },

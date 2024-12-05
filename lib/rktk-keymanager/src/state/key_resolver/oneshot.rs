@@ -1,7 +1,4 @@
-use crate::{
-    keycode::KeyCode,
-    state::{config::ONESHOT_STATE_SIZE, KeyChangeEvent},
-};
+use crate::{config::ONESHOT_STATE_SIZE, keycode::KeyCode, state::KeyChangeEvent};
 
 use super::EventType;
 
@@ -14,13 +11,13 @@ struct OneshotKeyState {
 }
 
 pub struct OneshotState {
-    oneshot: crate::Vec<OneshotKeyState, { ONESHOT_STATE_SIZE as usize }>,
+    oneshot: heapless::Vec<OneshotKeyState, { ONESHOT_STATE_SIZE as usize }>,
 }
 
 impl OneshotState {
     pub fn new() -> Self {
         Self {
-            oneshot: crate::Vec::new(),
+            oneshot: heapless::Vec::new(),
         }
     }
 

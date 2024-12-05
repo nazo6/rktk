@@ -14,7 +14,6 @@ use rktk::{
     none_driver,
 };
 
-use keymap::KEY_CONFIG;
 use rktk_drivers_common::keyscan::{matrix::Matrix, HandDetector};
 use rktk_drivers_rp::system::RpSystemDriver;
 
@@ -76,7 +75,7 @@ async fn main(_spawner: Spawner) {
         encoder: none_driver!(Encoder),
     };
 
-    rktk::task::start(drivers, KEY_CONFIG, create_empty_hooks()).await;
+    rktk::task::start(drivers, keymap::KEYMAP, create_empty_hooks()).await;
 }
 
 #[panic_handler]

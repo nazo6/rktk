@@ -2056,7 +2056,9 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "smart-default",
  "smart-leds",
+ "ssmarshal",
  "usbd-hid",
 ]
 
@@ -2171,8 +2173,10 @@ dependencies = [
  "paste",
  "postcard",
  "pretty_assertions",
+ "schemars",
  "serde",
  "serde_with",
+ "ssmarshal",
  "tsify-next",
  "usbd-hid",
  "wasm-bindgen",
@@ -2453,6 +2457,17 @@ name = "smallvec"
 version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
+
+[[package]]
+name = "smart-default"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eb01866308440fc64d6c44d9e86c5cc17adfe33c4d6eed55da9145044d0ffc1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.89",
+]
 
 [[package]]
 name = "smart-leds"

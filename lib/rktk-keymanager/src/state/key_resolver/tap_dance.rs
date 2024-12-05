@@ -1,8 +1,10 @@
 use core::time::Duration;
 
 use crate::{
+    config::MAX_TAP_DANCE_KEY_COUNT,
     keycode::KeyCode,
-    state::config::{TapDanceConfig, TapDanceDefinition, MAX_TAP_DANCE_KEY_COUNT},
+    keymap::{TapDanceDefinition, TapDanceDefinitions},
+    state::config::TapDanceConfig,
     time::Instant,
 };
 
@@ -49,9 +51,9 @@ pub struct TapDanceState {
 }
 
 impl TapDanceState {
-    pub fn new(config: TapDanceConfig) -> Self {
+    pub fn new(def: TapDanceDefinitions, config: TapDanceConfig) -> Self {
         Self {
-            state: config.definitions.map(|def| TapDanceUnit {
+            state: def.map(|def| TapDanceUnit {
                 state: TapDanceKeyState::None,
                 config: def,
             }),

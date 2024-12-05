@@ -1,4 +1,4 @@
-use crate::keymap::Keymap;
+use crate::keymap::{Keymap, TapDanceDefinitions};
 use crate::time::Instant;
 
 use super::KeyChangeEvent;
@@ -27,10 +27,10 @@ pub enum EventType {
 }
 
 impl KeyResolver {
-    pub fn new(config: KeyResolverConfig) -> Self {
+    pub fn new(config: KeyResolverConfig, tap_dance_def: TapDanceDefinitions) -> Self {
         Self {
             normal_state: normal::NormalState::new(),
-            tap_dance: tap_dance::TapDanceState::new(config.tap_dance),
+            tap_dance: tap_dance::TapDanceState::new(tap_dance_def, config.tap_dance),
             oneshot: oneshot::OneshotState::new(),
             tap_hold: tap_hold::TapHoldState::new(config.tap_hold),
         }
