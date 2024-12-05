@@ -11,30 +11,29 @@ use config::{
     KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
     MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
 };
-use manager::transparent::TransparentReport;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::state::common::CommonLocalState;
 
+mod action_handler;
 mod common;
 pub mod config;
-mod key_resolver;
-mod manager;
-mod pressed;
+mod keycode_handler;
+mod mouse_handler;
+
+pub enum Event {
+    Key(KeyChangeEvent),
+    Mouse((i8, i8)),
+    Encoder((u8, EncoderDirection)),
+}
 
 /// Represents the state of the keyboard.
 pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
 {
     now: Instant,
 
-    key_resolver: key_resolver::KeyResolver<ROW, COL>,
-    pressed: pressed::Pressed<COL, ROW>,
-
-    cs: common::CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
-    mouse: manager::mouse::MouseState,
-    keyboard: manager::keyboard::KeyboardState,
-    media_keyboard: manager::media_keyboard::MediaKeyboardState,
-    transparent: manager::transparent::TransparentState,
+    action_handler: action_handler::ActionHandler<ROW, COL>,
+    keycode_handler: keycode_handler::KeyCodeHandler<ROW, COL>,
 
     config: StateConfig,
 }
@@ -97,6 +96,8 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             highest_layer: highest_layer as u8,
         }
     }
+
+    pub fn update_cb(mut cb: impl FnMut(EventType, KeyCode)) {}
 
     pub fn get_keymap(&self) -> &Keymap<LAYER, ROW, COL, ENCODER_COUNT> {
         &self.cs.keymap

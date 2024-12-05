@@ -16,6 +16,21 @@ pub struct Keymap<
     pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
 }
 
+impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
+    Keymap<LAYER, ROW, COL, ENCODER_COUNT>
+{
+    pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
+        if let Some(layer) = self.layers.get(layer) {
+            if let Some(row) = layer.map.get(row) {
+                if let Some(key) = row.get(col) {
+                    return Some(key);
+                }
+            }
+        }
+        None
+    }
+}
+
 /// Layer definition
 ///
 /// This structure holds information about layer. This contains keymap and arrowmouse flag.

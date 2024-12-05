@@ -42,7 +42,7 @@ pub use rktk_keymanager as keymanager;
 pub mod keymap_config {
     use crate::config::static_config::{KEYBOARD, RKTK_CONFIG};
     use crate::keymanager;
-    use rktk_keymanager::state::config::TapDanceConfig;
+    use rktk_keymanager::state::config::TapDanceDefinition;
 
     pub struct KeyConfig {
         pub keymap: keymanager::keymap::Keymap<
@@ -51,7 +51,7 @@ pub mod keymap_config {
             { KEYBOARD.cols as usize },
             { KEYBOARD.encoder_count as usize },
         >,
-        pub tap_dance: [Option<TapDanceConfig>; 8],
+        pub tap_dance: [Option<TapDanceDefinition>; 8],
     }
 
     pub type Keymap = keymanager::keymap::Keymap<

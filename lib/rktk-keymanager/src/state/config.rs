@@ -30,14 +30,19 @@ pub struct MouseConfig {
 #[apply(common_derive)]
 pub struct KeyResolverConfig {
     pub tap_threshold: u32,
-    pub tap_dance_threshold: u32,
-    pub tap_dance: [Option<TapDanceConfig>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+    pub tap_dance: TapDanceConfig,
 }
 
 #[apply(common_derive)]
 pub struct TapDanceConfig {
-    pub tap: [Option<KeyCode>; MAX_TAP_DANCE_KEY_COUNT as usize],
-    pub hold: [Option<KeyCode>; MAX_TAP_DANCE_KEY_COUNT as usize],
+    pub threshold: u32,
+    pub definitions: [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize],
+}
+
+#[apply(common_derive)]
+pub struct TapDanceDefinition {
+    pub tap: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+    pub hold: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
 }
 
 #[apply(common_derive)]

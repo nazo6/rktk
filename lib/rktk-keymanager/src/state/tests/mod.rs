@@ -14,7 +14,7 @@ mod prelude {
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::state::config::{
-        KeyResolverConfig, MouseConfig, Output, TapDanceConfig, MAX_TAP_DANCE_REPEAT_COUNT,
+        KeyResolverConfig, MouseConfig, Output, TapDanceDefinition, MAX_TAP_DANCE_REPEAT_COUNT,
     };
     pub(super) use crate::{
         keycode::*,
@@ -125,7 +125,7 @@ mod prelude {
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT>,
     ) -> State<LAYER_COUNT, ROWS, COLS, ENC_COUNT> {
         let mut tap_dance = [const { None }; MAX_TAP_DANCE_REPEAT_COUNT as usize];
-        tap_dance[0] = Some(TapDanceConfig {
+        tap_dance[0] = Some(TapDanceDefinition {
             tap: [
                 Some(KeyCode::Key(Key::A)),
                 Some(KeyCode::Key(Key::B)),

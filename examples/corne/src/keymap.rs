@@ -2,7 +2,7 @@ use rktk::keymanager::keycode::*;
 use rktk::keymanager::keycode::{
     key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
 };
-use rktk::keymanager::state::config::TapDanceConfig;
+use rktk::keymanager::state::config::TapDanceDefinition;
 use rktk::keymap_config::{KeyConfig, Keymap, Layer, LayerMap};
 
 const L2ENTER: KeyAction = KeyAction::TapHold(
@@ -103,7 +103,7 @@ pub const KEYMAP: Keymap = Keymap {
 pub const KEY_CONFIG: KeyConfig = KeyConfig {
     keymap: KEYMAP,
     tap_dance: [
-        Some(TapDanceConfig {
+        Some(TapDanceDefinition {
             tap: [
                 Some(KeyCode::Key(Key::RightBracket)),
                 Some(KeyCode::Layer(LayerOp::Toggle(2))),
