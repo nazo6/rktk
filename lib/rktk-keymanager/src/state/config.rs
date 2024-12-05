@@ -29,8 +29,14 @@ pub struct MouseConfig {
 
 #[apply(common_derive)]
 pub struct KeyResolverConfig {
-    pub tap_threshold: u32,
+    pub tap_hold: TapHoldConfig,
     pub tap_dance: TapDanceConfig,
+}
+
+#[apply(common_derive)]
+pub struct TapHoldConfig {
+    pub threshold: u32,
+    pub hold_on_other_key: bool,
 }
 
 #[apply(common_derive)]

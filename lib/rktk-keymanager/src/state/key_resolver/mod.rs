@@ -32,7 +32,7 @@ impl KeyResolver {
             normal_state: normal::NormalState::new(),
             tap_dance: tap_dance::TapDanceState::new(config.tap_dance),
             oneshot: oneshot::OneshotState::new(),
-            tap_hold: tap_hold::TapHoldState::new(config.tap_threshold),
+            tap_hold: tap_hold::TapHoldState::new(config.tap_hold),
         }
     }
 
@@ -50,6 +50,7 @@ impl KeyResolver {
         mut cb: impl FnMut(EventType, KeyCode),
     ) {
         self.oneshot.pre_resolve(event, &mut cb);
+        self.tap_hold.pre_resolve(event);
 
         let highest_layer = layer_state
             .iter()
@@ -81,7 +82,7 @@ impl KeyResolver {
             }
 
             match key_action {
-                KeyAction::Inherit => unreachable!(),
+                KeyAction::Inherit => {}
                 KeyAction::Normal(key_code) => {
                     self.normal_state
                         .process_event(event, (*key_code, None), &mut cb);

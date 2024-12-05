@@ -9,6 +9,7 @@ mod mouse;
 mod prelude {
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
+    use crate::state::config::TapHoldConfig;
     pub(super) use crate::{
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
         state::Event,
@@ -139,7 +140,10 @@ mod prelude {
                     scroll_divider_y: -12,
                 },
                 key_resolver: KeyResolverConfig {
-                    tap_threshold: 500,
+                    tap_hold: TapHoldConfig {
+                        threshold: 300,
+                        hold_on_other_key: true,
+                    },
                     tap_dance: TapDanceConfig {
                         threshold: 100,
                         definitions: tap_dance,

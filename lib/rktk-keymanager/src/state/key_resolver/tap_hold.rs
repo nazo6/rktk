@@ -1,6 +1,10 @@
 use core::time::Duration;
 
-use crate::{keycode::KeyCode, state::KeyChangeEvent, time::Instant};
+use crate::{
+    keycode::KeyCode,
+    state::{config::TapHoldConfig, KeyChangeEvent},
+    time::Instant,
+};
 
 use super::EventType;
 
@@ -17,13 +21,27 @@ struct TapHoldKeyState {
 pub struct TapHoldState {
     pressed: heapless::FnvIndexMap<(u8, u8), TapHoldKeyState, 16>,
     threshold: Duration,
+    hold_on_other_key: bool,
 }
 
 impl TapHoldState {
-    pub fn new(threshold: u32) -> Self {
+    pub fn new(config: TapHoldConfig) -> Self {
         Self {
             pressed: heapless::FnvIndexMap::new(),
-            threshold: Duration::from_millis(threshold as u64),
+            threshold: Duration::from_millis(config.threshold as u64),
+            hold_on_other_key: config.hold_on_other_key,
+        }
+    }
+
+    pub fn pre_resolve(&mut self, event: Option<&KeyChangeEvent>) {
+        if let Some(event) = event {
+            if event.pressed && self.hold_on_other_key {
+                for (key, state) in self.pressed.iter_mut() {
+                    if *key != (event.row, event.col) {
+                        state.pending = None;
+                    }
+                }
+            }
         }
     }
 

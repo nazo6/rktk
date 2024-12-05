@@ -53,7 +53,7 @@ impl OneshotState {
 
     pub fn process_keycode(&mut self, kc: &KeyCode, pressed: bool) {
         if pressed {
-            self.oneshot.push(OneshotKeyState {
+            let _ = self.oneshot.push(OneshotKeyState {
                 key: *kc,
                 active: None,
             });
