@@ -1,5 +1,5 @@
 use rktk_keymanager::state::config::{
-    KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
+    ComboConfig, KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
 };
 
 #[cfg_attr(
@@ -200,6 +200,7 @@ impl Default for KeyManagerConfig {
                     hold_on_other_key: true,
                 },
                 tap_dance: TapDanceConfig { threshold: 100 },
+                combo: ComboConfig { threshold: 20 },
             },
         }
     }

@@ -15,6 +15,19 @@
     }
   },
   "definitions": {
+    "ComboConfig": {
+      "type": "object",
+      "required": [
+        "threshold"
+      ],
+      "properties": {
+        "threshold": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0.0
+        }
+      }
+    },
     "Config": {
       "description": "Configuration for the firmware.",
       "type": "object",
@@ -22,6 +35,9 @@
         "key_manager": {
           "default": {
             "key_resolver": {
+              "combo": {
+                "threshold": 20
+              },
               "tap_dance": {
                 "threshold": 100
               },
@@ -69,6 +85,9 @@
       "properties": {
         "key_resolver": {
           "default": {
+            "combo": {
+              "threshold": 20
+            },
             "tap_dance": {
               "threshold": 100
             },
@@ -102,10 +121,14 @@
     "KeyResolverConfig": {
       "type": "object",
       "required": [
+        "combo",
         "tap_dance",
         "tap_hold"
       ],
       "properties": {
+        "combo": {
+          "$ref": "#/definitions/ComboConfig"
+        },
         "tap_dance": {
           "$ref": "#/definitions/TapDanceConfig"
         },

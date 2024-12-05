@@ -12,9 +12,7 @@
 
 mod schema;
 
-use rktk_keymanager::state::config::{
-    KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
-};
+use rktk_keymanager::state::config::*;
 
 use embassy_time::Duration;
 

@@ -98,4 +98,5 @@ pub const KEYMAP: Keymap = Keymap {
         },
     ],
     tap_dance: [None, None, None, None],
+    combo: [None, None, None, None],
 };

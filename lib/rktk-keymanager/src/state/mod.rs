@@ -3,9 +3,7 @@
 #![allow(clippy::let_unit_value)]
 #![allow(clippy::single_match)]
 
-use crate::config::{
-    MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
-};
+use crate::config::{MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE};
 use crate::keymap::Keymap;
 use config::{KeymapInfo, StateConfig};
 use key_resolver::EventType;
@@ -38,6 +36,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             key_resolver: key_resolver::KeyResolver::new(
                 config.key_resolver,
                 keymap.tap_dance.clone(),
+                keymap.combo.clone(),
             ),
             shared: shared::SharedState::new(keymap),
             manager: GlobalManagerState::new(config.mouse, config.initial_output),
@@ -103,7 +102,6 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             max_tap_dance_key_count: MAX_TAP_DANCE_KEY_COUNT,
             max_tap_dance_repeat_count: MAX_TAP_DANCE_REPEAT_COUNT,
             oneshot_state_size: ONESHOT_STATE_SIZE,
-            max_resolved_key_count: MAX_RESOLVED_KEY_COUNT,
         }
     }
 }

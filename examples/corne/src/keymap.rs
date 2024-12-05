@@ -114,4 +114,5 @@ pub const KEYMAP: Keymap = Keymap {
         None,
         None,
     ],
+    combo: [None, None, None, None],
 };

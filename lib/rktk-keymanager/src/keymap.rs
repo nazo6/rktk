@@ -3,7 +3,10 @@
 use macro_rules_attribute::apply;
 
 use crate::{
-    config::{MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT},
+    config::{
+        MAX_COMBO_COMBINATION_COUNT, MAX_COMBO_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
+        MAX_TAP_DANCE_REPEAT_COUNT,
+    },
     keycode::{KeyAction, KeyCode},
     macros::common_derive,
 };
@@ -23,7 +26,8 @@ pub struct Keymap<
 > {
     pub layers: [Layer<ROW, COL>; LAYER],
     pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
-    pub tap_dance: [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize],
+    pub tap_dance: TapDanceDefinitions,
+    pub combo: ComboDefinitions,
 }
 
 #[cfg(feature = "state")]
@@ -96,3 +100,10 @@ pub struct TapDanceDefinition {
 }
 
 pub type TapDanceDefinitions = [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize];
+
+#[apply(common_derive)]
+pub struct ComboDefinition {
+    pub src: [Option<KeyCode>; MAX_COMBO_COMBINATION_COUNT as usize],
+    pub dst: KeyCode,
+}
+pub type ComboDefinitions = [Option<ComboDefinition>; MAX_COMBO_KEY_COUNT as usize];

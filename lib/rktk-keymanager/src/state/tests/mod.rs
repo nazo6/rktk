@@ -1,5 +1,6 @@
 mod action;
 mod basic;
+mod combo;
 mod encoder;
 mod keycode;
 mod keymap;
@@ -13,7 +14,7 @@ mod prelude {
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::config::MAX_TAP_DANCE_REPEAT_COUNT;
     use crate::keymap::TapDanceDefinition;
-    use crate::state::config::TapHoldConfig;
+    use crate::state::config::{ComboConfig, TapHoldConfig};
     pub(super) use crate::{
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
         state::Event,
@@ -130,6 +131,7 @@ mod prelude {
                         hold_on_other_key: true,
                     },
                     tap_dance: TapDanceConfig { threshold: 100 },
+                    combo: ComboConfig { threshold: 20 },
                 },
                 initial_output: Output::Usb,
             },

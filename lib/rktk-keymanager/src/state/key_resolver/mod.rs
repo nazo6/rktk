@@ -1,4 +1,4 @@
-use crate::keymap::{Keymap, TapDanceDefinitions};
+use crate::keymap::{ComboDefinitions, Keymap, TapDanceDefinitions};
 use crate::time::Instant;
 
 use super::shared::LayerActive;
@@ -7,6 +7,7 @@ use crate::keycode::{KeyAction, KeyCode};
 
 use super::config::KeyResolverConfig;
 
+mod combo;
 mod normal;
 mod oneshot;
 mod tap_dance;
@@ -18,6 +19,7 @@ pub struct KeyResolver {
     tap_dance: tap_dance::TapDanceState,
     oneshot: oneshot::OneshotState,
     tap_hold: tap_hold::TapHoldState,
+    combo: combo::ComboState,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -28,12 +30,17 @@ pub enum EventType {
 }
 
 impl KeyResolver {
-    pub fn new(config: KeyResolverConfig, tap_dance_def: TapDanceDefinitions) -> Self {
+    pub fn new(
+        config: KeyResolverConfig,
+        tap_dance_def: TapDanceDefinitions,
+        combo_def: ComboDefinitions,
+    ) -> Self {
         Self {
             normal_state: normal::NormalState::new(),
             tap_dance: tap_dance::TapDanceState::new(tap_dance_def, config.tap_dance),
             oneshot: oneshot::OneshotState::new(),
             tap_hold: tap_hold::TapHoldState::new(config.tap_hold),
+            combo: combo::ComboState::new(combo_def, config.combo),
         }
     }
 
@@ -50,14 +57,19 @@ impl KeyResolver {
         now: Instant,
         mut cb: impl FnMut(&mut LayerActive<LAYER>, EventType, KeyCode),
     ) {
-        self.oneshot
-            .pre_resolve(event, &mut |event_type, key_code| {
+        {
+            let mut cb_with_layer = |event_type, mut key_code| {
+                self.combo.process_keycode(&event_type, &mut key_code, now);
+                cb(layer_state, event_type, key_code);
+            };
+
+            self.oneshot.pre_resolve(event, &mut cb_with_layer);
+            self.tap_hold.pre_resolve(event, now, &mut cb_with_layer);
+
+            self.combo.pre_resolve(now, |event_type, key_code| {
                 cb(layer_state, event_type, key_code);
             });
-        self.tap_hold
-            .pre_resolve(event, now, &mut |event_type, key_code| {
-                cb(layer_state, event_type, key_code);
-            });
+        }
 
         let highest_layer = layer_state
             .iter()
@@ -67,7 +79,8 @@ impl KeyResolver {
             .map(|(idx, _)| idx)
             .unwrap_or(0);
 
-        let mut cb_with_layer = |event_type, key_code| {
+        let mut cb_with_layer = |event_type, mut key_code| {
+            self.combo.process_keycode(&event_type, &mut key_code, now);
             cb(layer_state, event_type, key_code);
         };
 

@@ -29,6 +29,7 @@ pub struct MouseConfig {
 pub struct KeyResolverConfig {
     pub tap_hold: TapHoldConfig,
     pub tap_dance: TapDanceConfig,
+    pub combo: ComboConfig,
 }
 
 #[apply(common_derive)]
@@ -43,10 +44,14 @@ pub struct TapDanceConfig {
 }
 
 #[apply(common_derive)]
+pub struct ComboConfig {
+    pub threshold: u32,
+}
+
+#[apply(common_derive)]
 pub struct KeymapInfo {
     pub layer_count: u8,
     pub max_tap_dance_key_count: u8,
     pub max_tap_dance_repeat_count: u8,
     pub oneshot_state_size: u8,
-    pub max_resolved_key_count: u8,
 }

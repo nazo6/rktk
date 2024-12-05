@@ -1,6 +1,6 @@
 //! common keymap for test
 
-use crate::keymap::{Keymap, Layer, LayerMap, TapDanceDefinition};
+use crate::keymap::{ComboDefinition, Keymap, Layer, LayerMap, TapDanceDefinition};
 
 use super::prelude::*;
 
@@ -52,6 +52,15 @@ pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT> = Keymap {
                 None,
                 None,
             ],
+        }),
+        None,
+        None,
+        None,
+    ],
+    combo: [
+        Some(ComboDefinition {
+            src: [Some(KeyCode::Key(Key::G)), Some(KeyCode::Key(Key::H)), None],
+            dst: KeyCode::Key(Key::I),
         }),
         None,
         None,
