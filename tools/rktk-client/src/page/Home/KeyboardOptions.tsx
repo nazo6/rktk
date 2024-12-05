@@ -42,8 +42,6 @@ export function KeyboardOptionsPage(props: { connection: Connection }) {
 function KeyboardOptionsPageInner(
   props: { keymapConfig: StateConfig; connection: Connection },
 ) {
-  console.log(props);
-
   const { dispatchToast } = useToastController();
   const queryClient = useQueryClient();
 
