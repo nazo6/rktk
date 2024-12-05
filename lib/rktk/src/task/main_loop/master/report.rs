@@ -1,5 +1,5 @@
 use embassy_futures::select::{select3, Either3};
-use rktk_keymanager::state::{config::Output, StateReport};
+use rktk_keymanager::state::{config::Output, Event, StateReport};
 
 use crate::{
     config::storage_config::StorageConfigManager,
@@ -31,7 +31,7 @@ pub async fn report_task<
 ) {
     let mut prev_report_time = embassy_time::Instant::now();
     loop {
-        let mut state_report = match select3(
+        let event = match select3(
             MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
             KEYBOARD_EVENT_REPORT_CHANNEL.ready_to_receive(),
             ENCODER_EVENT_REPORT_CHANNEL.ready_to_receive(),
@@ -49,50 +49,33 @@ pub async fn report_task<
                     continue;
                 }
 
-                state.lock().await.update(
-                    &mut [],
-                    mouse_move,
-                    &[],
-                    (embassy_time::Instant::now() - prev_report_time).into(),
-                )
+                Event::Mouse(mouse_move)
             }
             Either3::Second(_) => {
-                let mut events = heapless::Vec::<_, 5>::new();
-                while let Ok(mut ev) = KEYBOARD_EVENT_REPORT_CHANNEL.try_receive() {
-                    if !master_hooks.on_keyboard_event(&mut ev).await {
-                        continue;
-                    }
+                let Ok(mut event) = KEYBOARD_EVENT_REPORT_CHANNEL.try_receive() else {
+                    continue;
+                };
 
-                    events.push(ev).ok();
-                    if events.len() >= events.capacity() {
-                        break;
-                    }
-                }
-
-                if events.is_empty() {
+                if !master_hooks.on_keyboard_event(&mut event).await {
                     continue;
                 }
 
-                state.lock().await.update(
-                    &mut events,
-                    (0, 0),
-                    &[],
-                    (embassy_time::Instant::now() - prev_report_time).into(),
-                )
+                Event::Key(event)
             }
             Either3::Third(_) => {
                 let (mut id, mut dir) = ENCODER_EVENT_REPORT_CHANNEL.receive().await;
                 if !master_hooks.on_encoder_event(&mut id, &mut dir).await {
                     continue;
                 }
-                state.lock().await.update(
-                    &mut [],
-                    (0, 0),
-                    &[(id, dir)],
-                    (embassy_time::Instant::now() - prev_report_time).into(),
-                )
+
+                Event::Encoder((id, dir))
             }
         };
+
+        let mut state_report = state.lock().await.update(
+            event,
+            (embassy_time::Instant::now() - prev_report_time).into(),
+        );
 
         master_hooks.on_state_update(&mut state_report).await;
 

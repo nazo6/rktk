@@ -1,5 +1,5 @@
 use rktk_keymanager::state::{
-    config::{KeyResolverConfig, MouseConfig, Output, StateConfig},
+    config::{KeyResolverConfig, MouseConfig, Output, StateConfig, TapDanceConfig},
     KeyChangeEvent,
 };
 
@@ -82,7 +82,7 @@ pub async fn load_state(
         (None, key_config.keymap)
     };
 
-    let state_config = state_config.unwrap_or_else(|| StateConfig {
+    let state_config = state_config.unwrap_or(StateConfig {
         mouse: MouseConfig {
             auto_mouse_layer: RKTK_CONFIG.default_auto_mouse_layer,
             auto_mouse_duration: RKTK_CONFIG.default_auto_mouse_duration,
@@ -92,8 +92,10 @@ pub async fn load_state(
         },
         key_resolver: KeyResolverConfig {
             tap_threshold: RKTK_CONFIG.default_tap_threshold,
-            tap_dance_threshold: RKTK_CONFIG.default_tap_dance_threshold,
-            tap_dance: key_config.tap_dance.clone(),
+            tap_dance: TapDanceConfig {
+                definitions: key_config.tap_dance,
+                threshold: RKTK_CONFIG.default_tap_dance_threshold,
+            },
         },
         initial_output,
     });

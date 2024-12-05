@@ -51,7 +51,7 @@ pub mod keymap_config {
             { KEYBOARD.cols as usize },
             { KEYBOARD.encoder_count as usize },
         >,
-        pub tap_dance: [Option<TapDanceDefinition>; 8],
+        pub tap_dance: [Option<TapDanceDefinition>; 4],
     }
 
     pub type Keymap = keymanager::keymap::Keymap<
