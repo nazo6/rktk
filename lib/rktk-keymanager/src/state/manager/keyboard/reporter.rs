@@ -11,7 +11,11 @@ impl KeyboardReportGenerator {
         }
     }
 
-    pub fn gen(&mut self, keycodes: &[u8], modifier: u8) -> Option<KeyboardReport> {
+    pub fn gen(
+        &mut self,
+        keycodes: &heapless::FnvIndexSet<u8, 8>,
+        modifier: u8,
+    ) -> Option<KeyboardReport> {
         if modifier == 0 && keycodes.is_empty() {
             if !self.empty_kb_sent {
                 self.empty_kb_sent = true;
@@ -20,9 +24,10 @@ impl KeyboardReportGenerator {
                 None
             }
         } else {
-            let keycode_len = keycodes.len().min(6);
             let mut keycodes_array = [0; 6];
-            keycodes_array[..keycode_len].copy_from_slice(&keycodes[..keycode_len]);
+            for (i, kc) in keycodes.iter().take(6).enumerate() {
+                keycodes_array[i] = *kc;
+            }
 
             self.empty_kb_sent = false;
             Some(KeyboardReport {

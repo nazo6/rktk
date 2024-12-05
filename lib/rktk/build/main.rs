@@ -23,6 +23,16 @@ fn main() {
 
     println!("cargo:rustc-cfg=no_build");
 
+    if std::env::var("DOCS_RS").is_err() {
+        let schema = schema_for!(StaticConfig);
+        std::fs::write(
+            std::path::Path::new(std::env::var("CARGO_MANIFEST_DIR").unwrap().as_str())
+                .join("schema.json"),
+            serde_json::to_string_pretty(&schema).expect("Failed to serialize schema"),
+        )
+        .expect("Failed to write schema.json");
+    }
+
     let config = if std::env::var("DOCS_RS").is_ok() {
         // in docs.rs use demo config insted.
         println!("cargo:warning=Using demo json for docs.rs");
@@ -42,14 +52,4 @@ fn main() {
     std::fs::write(&gen_path, code).expect("Failed to write generated code");
 
     // println!("cargo:warning=Wrote generated code to {:?}", gen_path);
-
-    if std::env::var("DOCS_RS").is_err() {
-        let schema = schema_for!(StaticConfig);
-        std::fs::write(
-            std::path::Path::new(std::env::var("CARGO_MANIFEST_DIR").unwrap().as_str())
-                .join("schema.json"),
-            serde_json::to_string_pretty(&schema).expect("Failed to serialize schema"),
-        )
-        .expect("Failed to write schema.json");
-    }
 }

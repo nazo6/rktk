@@ -3,103 +3,94 @@
 #![allow(clippy::let_unit_value)]
 #![allow(clippy::single_match)]
 
-use crate::{
-    keymap::Keymap,
-    time::{Duration, Instant},
+use crate::config::{
+    MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
 };
-use config::{
-    KeymapInfo, StateConfig, MAX_RESOLVED_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
-    MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE,
-};
-use manager::transparent::TransparentReport;
-use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
+use crate::keymap::Keymap;
+use config::{KeymapInfo, StateConfig};
+use key_resolver::EventType;
+use manager::{GlobalManagerState, LocalManagerState};
 
-use crate::state::common::CommonLocalState;
-
-mod common;
 pub mod config;
+mod interface;
 mod key_resolver;
 mod manager;
-mod pressed;
+mod shared;
+
+pub use interface::*;
 
 /// Represents the state of the keyboard.
 pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
 {
-    now: Instant,
-
-    key_resolver: key_resolver::KeyResolver<ROW, COL>,
-    pressed: pressed::Pressed<COL, ROW>,
-
-    cs: common::CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
-    mouse: manager::mouse::MouseState,
-    keyboard: manager::keyboard::KeyboardState,
-    media_keyboard: manager::media_keyboard::MediaKeyboardState,
-    transparent: manager::transparent::TransparentState,
-
+    key_resolver: key_resolver::KeyResolver,
+    shared: shared::SharedState<LAYER, ROW, COL, ENCODER_COUNT>,
     config: StateConfig,
+    manager: GlobalManagerState,
 }
 
 impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
     State<LAYER, ROW, COL, ENCODER_COUNT>
 {
     /// Creates a new state with the given keymap and configuration.
-    pub fn new(layers: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
+    pub fn new(keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
         Self {
             config: config.clone(),
-            now: Instant::from_start(Duration::from_millis(0)),
-            key_resolver: key_resolver::KeyResolver::new(config.key_resolver),
-            pressed: pressed::Pressed::new(),
-
-            cs: common::CommonState::new(layers),
-            mouse: manager::mouse::MouseState::new(config.mouse),
-            keyboard: manager::keyboard::KeyboardState::new(),
-            media_keyboard: manager::media_keyboard::MediaKeyboardState::new(),
-            transparent: manager::transparent::TransparentState::new(config.initial_output),
+            key_resolver: key_resolver::KeyResolver::new(
+                config.key_resolver,
+                keymap.tap_dance.clone(),
+            ),
+            shared: shared::SharedState::new(keymap),
+            manager: GlobalManagerState::new(config.mouse, config.initial_output),
         }
     }
 
     /// Updates state with the given events.
-    pub fn update(
-        &mut self,
-        key_events: &mut [KeyChangeEvent],
-        mouse_event: (i8, i8),
-        encoder_events: &[(u8, EncoderDirection)],
-        since_last_update: Duration,
-    ) -> StateReport {
-        self.now = self.now + since_last_update;
+    pub fn update(&mut self, event: Event, since_last_update: core::time::Duration) -> StateReport {
+        self.shared.now = self.shared.now + since_last_update.into();
 
-        let mut cls = CommonLocalState::new(self.now);
+        let mut lms = LocalManagerState::new();
 
-        let mut mls = manager::mouse::MouseLocalState::new(mouse_event);
-        let mut kls = manager::keyboard::KeyboardLocalState::new();
-        let mut mkls = manager::media_keyboard::MediaKeyboardLocalState::new();
-        let mut tls = manager::transparent::TransparentLocalState::new();
+        let key_change = match event {
+            Event::Key(key_change) => Some(key_change),
+            Event::Mouse(movement) => {
+                lms.process_mouse_event(movement);
+                None
+            }
+            Event::Encoder((id, dir)) => {
+                if let Some(kc) = self.shared.keymap.get_encoder_key(id as usize, dir) {
+                    lms.process_keycode(
+                        &mut self.shared.layer_active,
+                        &mut self.manager,
+                        kc,
+                        EventType::Pressed,
+                    );
+                    lms.process_keycode(
+                        &mut self.shared.layer_active,
+                        &mut self.manager,
+                        kc,
+                        EventType::Released,
+                    );
+                }
+                None
+            }
+            _ => None,
+        };
 
-        let events_with_pressing = self.pressed.update_pressed(key_events);
-        for (event, kc) in
-            self.key_resolver
-                .resolve_key(&mut self.cs, &cls, &events_with_pressing, encoder_events)
-        {
-            mls.process_event(&mut self.mouse, &kc, event);
-            kls.process_event(&mut cls, &kc, event);
-            mkls.process_event(&kc);
-            tls.process_event(&mut self.transparent, &kc, event);
-        }
+        self.key_resolver.resolve_key(
+            &self.shared.keymap,
+            &mut self.shared.layer_active,
+            key_change.as_ref(),
+            self.shared.now,
+            |layer_active, et, kc| {
+                lms.process_keycode(layer_active, &mut self.manager, &kc, et);
+            },
+        );
 
-        let highest_layer = self.cs.highest_layer();
-        mls.loop_end(&mut self.cs, &mut cls, &mut self.mouse, highest_layer);
-
-        StateReport {
-            keyboard_report: kls.report(&cls, &mut self.keyboard),
-            mouse_report: mls.report(&mut self.mouse),
-            media_keyboard_report: mkls.report(&mut self.media_keyboard),
-            transparent_report: tls.report(&mut self.transparent),
-            highest_layer: highest_layer as u8,
-        }
+        lms.report(&mut self.shared, &mut self.manager)
     }
 
     pub fn get_keymap(&self) -> &Keymap<LAYER, ROW, COL, ENCODER_COUNT> {
-        &self.cs.keymap
+        &self.shared.keymap
     }
 
     pub fn get_config(&self) -> &StateConfig {
@@ -115,33 +106,6 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
             max_resolved_key_count: MAX_RESOLVED_KEY_COUNT,
         }
     }
-}
-
-/// Information to be communicated to the outside as a result of a state change
-#[derive(Debug, PartialEq)]
-pub struct StateReport {
-    pub keyboard_report: Option<KeyboardReport>,
-    pub mouse_report: Option<MouseReport>,
-    pub media_keyboard_report: Option<MediaKeyboardReport>,
-    pub transparent_report: TransparentReport,
-    pub highest_layer: u8,
-}
-
-/// Represents a key event.
-///
-/// Used generically to indicate that the state of a physical key has changed
-#[derive(Debug)]
-pub struct KeyChangeEvent {
-    pub col: u8,
-    pub row: u8,
-    pub pressed: bool,
-}
-
-/// Represents the direction of an encoder
-#[derive(Debug)]
-pub enum EncoderDirection {
-    Clockwise,
-    CounterClockwise,
 }
 
 #[cfg(test)]

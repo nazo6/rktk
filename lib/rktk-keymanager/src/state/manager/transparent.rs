@@ -3,13 +3,9 @@
 //! `transparent` keys is type of keys that does not handled by keymanager and directly passed to host.
 //! `crate::keycode::special::Special::FlashClear` is one of example.
 
-mod report;
-
-pub use report::TransparentReport;
-
 use crate::{
     keycode::{special::Special, KeyCode},
-    state::{config::Output, key_resolver::EventType},
+    state::{config::Output, interface::TransparentReport, key_resolver::EventType},
 };
 
 pub struct TransparentState {

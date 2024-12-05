@@ -3,6 +3,7 @@
 use crate::{
     drivers::{interface::system::SystemDriver, Drivers},
     hooks::interface::*,
+    keymap_config::Keymap,
 };
 use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
@@ -16,7 +17,6 @@ use crate::{
         DriverBuilderWithTask,
     },
     hooks::Hooks,
-    keymap_config::KeyConfig,
 };
 
 pub(crate) mod channels;
@@ -70,7 +70,7 @@ pub async fn start<
         UsbBuilder,
         BleBuilder,
     >,
-    key_config: KeyConfig,
+    key_config: Keymap,
     hooks: Hooks<CH, MH, SH, BH>,
 ) {
     critical_section::with(|_| unsafe {

@@ -35,6 +35,6 @@ impl MediaKeyboardLocalState {
     }
 
     pub fn report(self, global_state: &mut MediaKeyboardState) -> Option<MediaKeyboardReport> {
-        global_state.reporter.gen(self.media_key)
+        global_state.reporter.generate(self.media_key)
     }
 }

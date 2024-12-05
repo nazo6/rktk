@@ -46,8 +46,8 @@ async-lock = "3.4.0"
 gloo-timers = { version = "0.3.0", features = ["futures"] }
 
 tsify-next = { workspace = true }
-usbd-hid = "0.8.2"
-ssmarshal = "1.0.0"
+usbd-hid = { workspace = true }
+ssmarshal = { workspace = true, features = ["std"] }
 
 [features]
 _check = []

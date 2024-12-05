@@ -13,7 +13,7 @@ impl MediaKeyboardReportGenerator {
         }
     }
 
-    pub fn gen(&mut self, media_usage_id: Option<u16>) -> Option<MediaKeyboardReport> {
+    pub fn generate(&mut self, media_usage_id: Option<u16>) -> Option<MediaKeyboardReport> {
         match media_usage_id {
             Some(key) => {
                 self.empty_mkb_sent = false;

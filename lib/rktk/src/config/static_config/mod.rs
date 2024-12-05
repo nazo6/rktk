@@ -12,12 +12,17 @@
 
 mod schema;
 
+use rktk_keymanager::state::config::{
+    KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
+};
+
 use embassy_time::Duration;
 
 include!(concat!(env!("OUT_DIR"), "/gen.rs"));
 
 pub const KEYBOARD: schema::Keyboard = CONFIG.keyboard;
 pub(crate) const RKTK_CONFIG: schema::RktkConfig = CONFIG.config.rktk;
+pub(crate) const KM_CONFIG: schema::KeyManagerConfig = CONFIG.config.key_manager;
 
 pub const SCAN_INTERVAL_KEYBOARD: Duration =
     Duration::from_millis(RKTK_CONFIG.scan_interval_keyboard);

@@ -16,7 +16,7 @@ use crate::{
         interface::{CommonHooks, MasterHooks, RgbHooks, SlaveHooks},
         Hooks,
     },
-    keymap_config::KeyConfig,
+    keymap_config::Keymap,
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
 };
 use embassy_futures::{
@@ -56,7 +56,7 @@ pub async fn start<
     mut storage: Option<S>,
     mut split: Option<SP>,
     rgb: Option<RGB>,
-    key_config: KeyConfig,
+    key_config: Keymap,
     mut hooks: Hooks<CH, MH, SH, BH>,
 ) {
     let hand = keyscan.current_hand().await;

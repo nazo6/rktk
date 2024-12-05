@@ -1,8 +1,6 @@
 use crate::macros::common_derive;
 use macro_rules_attribute::apply;
 
-use crate::keycode::KeyCode;
-
 /// Configuration to initialize the keyboard state.
 #[apply(common_derive)]
 pub struct StateConfig {
@@ -29,15 +27,19 @@ pub struct MouseConfig {
 
 #[apply(common_derive)]
 pub struct KeyResolverConfig {
-    pub tap_threshold: u32,
-    pub tap_dance_threshold: u32,
-    pub tap_dance: [Option<TapDanceConfig>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+    pub tap_hold: TapHoldConfig,
+    pub tap_dance: TapDanceConfig,
+}
+
+#[apply(common_derive)]
+pub struct TapHoldConfig {
+    pub threshold: u32,
+    pub hold_on_other_key: bool,
 }
 
 #[apply(common_derive)]
 pub struct TapDanceConfig {
-    pub tap: [Option<KeyCode>; MAX_TAP_DANCE_KEY_COUNT as usize],
-    pub hold: [Option<KeyCode>; MAX_TAP_DANCE_KEY_COUNT as usize],
+    pub threshold: u32,
 }
 
 #[apply(common_derive)]
@@ -48,8 +50,3 @@ pub struct KeymapInfo {
     pub oneshot_state_size: u8,
     pub max_resolved_key_count: u8,
 }
-
-pub(super) const MAX_TAP_DANCE_KEY_COUNT: u8 = 4;
-pub(super) const MAX_TAP_DANCE_REPEAT_COUNT: u8 = 8;
-pub(super) const ONESHOT_STATE_SIZE: u8 = 4;
-pub(super) const MAX_RESOLVED_KEY_COUNT: u8 = 64;

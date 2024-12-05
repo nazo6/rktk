@@ -5,20 +5,20 @@ use pretty_assertions::assert_eq;
 pub fn aml() {
     let mut state = new_state(EMPTY_KEYMAP);
 
-    let report = state.update(&mut [], (1, 1), &[], time(0));
+    let report = state.update(Event::Mouse((1, 1)), time(0));
 
     assert_eq!(
         report.highest_layer, 0,
         "Mouse moved a bit, aml not activated"
     );
 
-    let report = state.update(&mut [], (1, 1), &[], time(0));
+    let report = state.update(Event::Mouse((1, 1)), time(0));
     assert_eq!(
         report.highest_layer, 0,
         "Mouse moved a bit again, aml not activated"
     );
 
-    let _ = state.update(&mut [], (1, 1), &[], time(0));
+    let _ = state.update(Event::Mouse((1, 1)), time(0));
     let report = update!(state, time(0));
     assert_eq!(
         report.highest_layer, 1,
@@ -33,7 +33,7 @@ pub fn aml_reset() {
 
     let mut state = new_state(keymap);
 
-    let _ = state.update(&mut [], (5, 5), &[], time(0));
+    let _ = state.update(Event::Mouse((5, 5)), time(0));
     let report = update!(state, time(0));
     assert_eq!(report.highest_layer, 1, "Mouse moved, aml activated");
 

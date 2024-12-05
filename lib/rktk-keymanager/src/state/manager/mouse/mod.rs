@@ -1,17 +1,14 @@
-use core::time::Duration;
-
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
     keycode::{key::Key, special::Special, KeyCode},
-    state::{
-        common::{CommonLocalState, CommonState},
-        config::MouseConfig,
-        key_resolver::EventType,
-    },
+    state::{config::MouseConfig, key_resolver::EventType, shared::SharedState},
+    time::Duration,
 };
 
 use self::aml::Aml;
+
+use super::SharedLocalManagerState;
 
 mod aml;
 mod reporter;
@@ -29,7 +26,7 @@ impl MouseState {
     pub fn new(config: MouseConfig) -> Self {
         Self {
             aml: Aml::new(
-                Duration::from_millis(config.auto_mouse_duration as u64),
+                Duration::from_millis(config.auto_mouse_duration),
                 config.auto_mouse_threshold,
             ),
             scroll_mode: false,
@@ -51,9 +48,9 @@ pub struct MouseLocalState {
 }
 
 impl MouseLocalState {
-    pub fn new(mouse_event: (i8, i8)) -> Self {
+    pub fn new() -> Self {
         Self {
-            mouse_event,
+            mouse_event: (0, 0),
             mouse_button: 0,
             disable_aml: false,
         }
@@ -83,6 +80,11 @@ impl MouseLocalState {
         }
     }
 
+    pub fn process_mouse_event(&mut self, (x, y): (i8, i8)) {
+        self.mouse_event.0 += x;
+        self.mouse_event.1 += y;
+    }
+
     pub fn loop_end<
         const LAYER: usize,
         const ROW: usize,
@@ -90,8 +92,8 @@ impl MouseLocalState {
         const ENCODER_COUNT: usize,
     >(
         &mut self,
-        common_state: &mut CommonState<LAYER, ROW, COL, ENCODER_COUNT>,
-        common_local_state: &mut CommonLocalState,
+        common_state: &mut SharedState<LAYER, ROW, COL, ENCODER_COUNT>,
+        common_local_state: &mut SharedLocalManagerState,
         global_mouse_state: &mut MouseState,
         highest_layer: usize,
     ) {
@@ -101,13 +103,13 @@ impl MouseLocalState {
 
             let mut reset = true;
             if global_mouse_state.arrowball_move.1 > 50 {
-                let _ = common_local_state.keycodes.push(Key::Right as u8);
+                let _ = common_local_state.keycodes.insert(Key::Right as u8);
             } else if global_mouse_state.arrowball_move.1 < -50 {
-                let _ = common_local_state.keycodes.push(Key::Left as u8);
+                let _ = common_local_state.keycodes.insert(Key::Left as u8);
             } else if global_mouse_state.arrowball_move.0 > 50 {
-                let _ = common_local_state.keycodes.push(Key::Down as u8);
+                let _ = common_local_state.keycodes.insert(Key::Down as u8);
             } else if global_mouse_state.arrowball_move.0 < -50 {
-                let _ = common_local_state.keycodes.push(Key::Up as u8);
+                let _ = common_local_state.keycodes.insert(Key::Up as u8);
             } else {
                 reset = false;
             }
@@ -120,7 +122,7 @@ impl MouseLocalState {
         } else {
             global_mouse_state.arrowball_move = (0, 0);
             let (enabled, changed) = global_mouse_state.aml.enabled_changed(
-                common_local_state.now,
+                common_state.now,
                 self.mouse_event,
                 self.mouse_button != 0 || global_mouse_state.scroll_mode,
                 self.disable_aml,

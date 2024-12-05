@@ -1,6 +1,15 @@
 //! Keymap related types
 
-use crate::keycode::{KeyAction, KeyCode};
+use macro_rules_attribute::apply;
+
+use crate::{
+    config::{MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT},
+    keycode::{KeyAction, KeyCode},
+    macros::common_derive,
+};
+
+#[cfg(feature = "state")]
+use crate::state::EncoderDirection;
 
 /// Root keymap type
 ///
@@ -14,6 +23,34 @@ pub struct Keymap<
 > {
     pub layers: [Layer<ROW, COL>; LAYER],
     pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
+    pub tap_dance: [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize],
+}
+
+#[cfg(feature = "state")]
+impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
+    Keymap<LAYER, ROW, COL, ENCODER_COUNT>
+{
+    pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
+        if let Some(layer) = self.layers.get(layer) {
+            if let Some(row) = layer.map.get(row) {
+                if let Some(key) = row.get(col) {
+                    return Some(key);
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_encoder_key(&self, encoder: usize, direction: EncoderDirection) -> Option<&KeyCode> {
+        if let Some(key) = self.encoder_keys.get(encoder) {
+            match direction {
+                EncoderDirection::Clockwise => Some(&key.1),
+                EncoderDirection::CounterClockwise => Some(&key.0),
+            }
+        } else {
+            None
+        }
+    }
 }
 
 /// Layer definition
@@ -50,3 +87,12 @@ impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
 ///
 /// Type that represents keymap for each layer.
 pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
+
+/// Tap dance definition
+#[apply(common_derive)]
+pub struct TapDanceDefinition {
+    pub tap: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+    pub hold: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+}
+
+pub type TapDanceDefinitions = [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize];

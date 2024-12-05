@@ -1,27 +1,10 @@
-#[cfg(not(no_build))]
-mod default_val {
-    macro_rules! def {
-        ($name:tt, $type:ty) => {
-            pub const fn $name<const U: $type>() -> $type {
-                U
-            }
-        };
-    }
-
-    def!(u64_default, u64);
-    def!(u32_default, u32);
-    def!(usize_default, usize);
-    def!(i8_default, i8);
-    def!(u16_default, u16);
-    def!(u8_default, u8);
-}
-
-#[cfg(not(no_build))]
-use default_val::*;
+use rktk_keymanager::state::config::{
+    KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
+};
 
 #[cfg_attr(
     not(no_build),
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema, Default)
 )]
 pub struct StaticConfig {
     pub keyboard: Keyboard,
@@ -79,7 +62,12 @@ type LayoutType = &'static str;
 /// ```
 #[cfg_attr(
     not(no_build),
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(
+        serde::Serialize,
+        serde::Deserialize,
+        schemars::JsonSchema,
+        smart_default::SmartDefault
+    )
 )]
 pub struct Keyboard {
     /// The name of the keyboard.
@@ -107,25 +95,35 @@ pub struct Keyboard {
     pub split_right_shift: Option<u8>,
 
     /// The number of encoder keys.
-    #[cfg_attr(not(no_build), serde(default = "u8_default::<0>"))]
+    #[cfg_attr(not(no_build), serde(default))]
+    #[cfg_attr(not(no_build), default(0))]
     pub encoder_count: u8,
 
     /// RGB led count for right side
-    #[cfg_attr(not(no_build), serde(default = "usize_default::<0>"))]
+    #[cfg_attr(not(no_build), serde(default))]
+    #[cfg_attr(not(no_build), default(0))]
     pub right_led_count: usize,
 
     /// RGB led count for left side. This is also used for non-split keyboard.
-    #[cfg_attr(not(no_build), serde(default = "usize_default::<0>"))]
+    #[cfg_attr(not(no_build), serde(default))]
+    #[cfg_attr(not(no_build), default(0))]
     pub left_led_count: usize,
 }
 
 /// Configuration for the firmware.
 #[cfg_attr(
     not(no_build),
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(
+        serde::Serialize,
+        serde::Deserialize,
+        schemars::JsonSchema,
+        smart_default::SmartDefault
+    )
 )]
+#[cfg_attr(not(no_build), serde(default))]
 pub struct Config {
     pub rktk: RktkConfig,
+    pub key_manager: KeyManagerConfig,
 }
 
 /// RKTK behavior configuration.
@@ -133,62 +131,76 @@ pub struct Config {
 /// Mainly keymap related configurations are defined in this struct.
 #[cfg_attr(
     not(no_build),
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(
+        serde::Serialize,
+        serde::Deserialize,
+        schemars::JsonSchema,
+        smart_default::SmartDefault
+    )
 )]
+#[cfg_attr(not(no_build), serde(default))]
 pub struct RktkConfig {
     /// The number of layers in the keyboard.
-    #[cfg_attr(not(no_build), serde(default = "u8_default::<5>"))]
+    #[cfg_attr(not(no_build), default(5))]
     pub layer_count: u8,
 
     /// Threshold for double tap (ms).
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<500>"))]
+    #[cfg_attr(not(no_build), default(500))]
     pub double_tap_threshold: u64,
 
-    /// Threshold for tap (ms)
-    #[cfg_attr(not(no_build), serde(default = "u32_default::<200>"))]
-    pub default_tap_threshold: u32,
-
-    /// Threshold for tap dance (ms)
-    #[cfg_attr(not(no_build), serde(default = "u32_default::<100>"))]
-    pub default_tap_dance_threshold: u32,
-
     /// Default CPI value for mouse
-    #[cfg_attr(not(no_build), serde(default = "u16_default::<600>"))]
+    #[cfg_attr(not(no_build), default(600))]
     pub default_cpi: u16,
 
     /// Default duration of auto mouse mode (ms)
-    #[cfg_attr(not(no_build), serde(default = "u32_default::<500>"))]
+    #[cfg_attr(not(no_build), default(500))]
     pub default_auto_mouse_duration: u32,
 
-    /// When auto mouse mode is enabled, this layer is used
-    #[cfg_attr(not(no_build), serde(default = "u8_default::<1>"))]
-    pub default_auto_mouse_layer: u8,
-
-    /// Mouse movement threshold to enable auto mouse mode
-    #[cfg_attr(not(no_build), serde(default = "u8_default::<1>"))]
-    pub default_auto_mouse_threshold: u8,
-
-    /// Scroll divider for x axis
-    #[cfg_attr(not(no_build), serde(default = "i8_default::<20>"))]
-    pub default_scroll_divider_x: i8,
-
-    /// Scroll divider for y axis
-    #[cfg_attr(not(no_build), serde(default = "i8_default::<-12>"))]
-    pub default_scroll_divider_y: i8,
-
     /// Timeout for detecting split USB connection (ms).
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<600>"))]
+    #[cfg_attr(not(no_build), default(1000))]
     pub split_usb_timeout: u64,
 
     /// Time (ms) to wait for the next keyboard scan
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<5>"))]
+    #[cfg_attr(not(no_build), default(5))]
     pub scan_interval_keyboard: u64,
 
     /// Time (ms) to wait for the next mouse scan
-    #[cfg_attr(not(no_build), serde(default = "u64_default::<5>"))]
+    #[cfg_attr(not(no_build), default(5))]
     pub scan_interval_mouse: u64,
 
     /// The size of the split channel. Usually, you don't need to change this value.
-    #[cfg_attr(not(no_build), serde(default = "usize_default::<64>"))]
+    #[cfg_attr(not(no_build), default(64))]
     pub split_channel_size: usize,
+}
+
+/// Configs passed to [`rktk_keymanager`]
+#[cfg_attr(
+    not(no_build),
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
+#[cfg_attr(not(no_build), serde(default))]
+pub struct KeyManagerConfig {
+    pub mouse: MouseConfig,
+    pub key_resolver: KeyResolverConfig,
+}
+
+impl Default for KeyManagerConfig {
+    fn default() -> Self {
+        Self {
+            mouse: MouseConfig {
+                auto_mouse_layer: 1,
+                auto_mouse_duration: 500,
+                auto_mouse_threshold: 1,
+                scroll_divider_x: 20,
+                scroll_divider_y: -12,
+            },
+            key_resolver: KeyResolverConfig {
+                tap_hold: TapHoldConfig {
+                    threshold: 500,
+                    hold_on_other_key: true,
+                },
+                tap_dance: TapDanceConfig { threshold: 100 },
+            },
+        }
+    }
 }

@@ -15,12 +15,7 @@ pub fn encoder_clockwise() {
 
     let _ = update!(state, time(0));
 
-    let report = state.update(
-        &mut [],
-        (0, 0),
-        &[(0, EncoderDirection::Clockwise)],
-        time(0),
-    );
+    let report = state.update(Event::Encoder((0, EncoderDirection::Clockwise)), time(0));
 
     let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0, 0, 0, 0, 0];
@@ -40,9 +35,7 @@ pub fn encoder_counterclockwise() {
     let _ = update!(state, time(0));
 
     let report = state.update(
-        &mut [],
-        (0, 0),
-        &[(0, EncoderDirection::CounterClockwise)],
+        Event::Encoder((0, EncoderDirection::CounterClockwise)),
         time(0),
     );
 

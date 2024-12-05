@@ -7,22 +7,27 @@ mod mouse;
 
 #[allow(unused_imports)]
 mod prelude {
-    pub use crate::time::{Duration, Instant};
-    use crate::{keymap::Keymap, state::manager::transparent::TransparentReport};
-    pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
+    use core::time::Duration;
 
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
-    use crate::state::config::{
-        KeyResolverConfig, MouseConfig, Output, TapDanceConfig, MAX_TAP_DANCE_REPEAT_COUNT,
-    };
+    use crate::config::MAX_TAP_DANCE_REPEAT_COUNT;
+    use crate::keymap::TapDanceDefinition;
+    use crate::state::config::TapHoldConfig;
     pub(super) use crate::{
-        keycode::*,
-        keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*},
+        keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
+        state::Event,
+        state::TransparentReport,
+        time::Instant,
     };
+    use crate::{
+        keymap::Keymap,
+        state::config::{KeyResolverConfig, MouseConfig, Output, TapDanceConfig},
+    };
+    pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-    pub const fn time(ms: u64) -> Duration {
-        Duration::from_millis(ms)
+    pub const fn time(ms: u32) -> Duration {
+        Duration::from_millis(ms as u64)
     }
 
     pub const fn default_transparent_report() -> TransparentReport {
@@ -90,56 +95,25 @@ mod prelude {
         highest_layer: 0,
     };
 
-    macro_rules! key_change {
-        ($(($row:expr, $col:expr, $pressed:expr)),*) => {
-            [$(
-                KeyChangeEvent {
+    macro_rules! update {
+        ($state:expr, $now:expr, ($row:expr, $col:expr, $pressed:expr)) => {
+            $state.update(
+                Event::Key(KeyChangeEvent {
                     row: $row,
                     col: $col,
                     pressed: $pressed,
-                }
-            ),*]
-        };
-    }
-
-    macro_rules! update {
-        ($state:expr, $now:expr, $($arg:tt),+) => {
-            $state.update(
-                &mut key_change!($($arg),*),
-                (0, 0),
-                &[],
-                $now
-)
+                }),
+                $now,
+            )
         };
         ($state:expr, $now:expr) => {
-            $state.update(
-                &mut [],
-                (0, 0),
-                &[],
-                $now
-)
+            $state.update(Event::None, $now)
         };
     }
 
     pub fn new_state(
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT>,
     ) -> State<LAYER_COUNT, ROWS, COLS, ENC_COUNT> {
-        let mut tap_dance = [const { None }; MAX_TAP_DANCE_REPEAT_COUNT as usize];
-        tap_dance[0] = Some(TapDanceConfig {
-            tap: [
-                Some(KeyCode::Key(Key::A)),
-                Some(KeyCode::Key(Key::B)),
-                Some(KeyCode::Layer(LayerOp::Toggle(2))),
-                None,
-            ],
-            hold: [
-                Some(KeyCode::Modifier(Modifier::LCtrl)),
-                Some(KeyCode::Layer(LayerOp::Momentary(1))),
-                None,
-                None,
-            ],
-        });
-
         State::new(
             keymap,
             crate::state::StateConfig {
@@ -151,15 +125,16 @@ mod prelude {
                     scroll_divider_y: -12,
                 },
                 key_resolver: KeyResolverConfig {
-                    tap_threshold: 500,
-                    tap_dance_threshold: 100,
-                    tap_dance,
+                    tap_hold: TapHoldConfig {
+                        threshold: 300,
+                        hold_on_other_key: true,
+                    },
+                    tap_dance: TapDanceConfig { threshold: 100 },
                 },
                 initial_output: Output::Usb,
             },
         )
     }
 
-    pub(crate) use key_change;
     pub(crate) use update;
 }
