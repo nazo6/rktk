@@ -5,9 +5,9 @@ use usbd_hid::descriptor::MouseReport;
 use crate::{
     keycode::{key::Key, special::Special, KeyCode},
     state::{
+        action_handler::EventType,
         common::{CommonLocalState, CommonState},
         config::MouseConfig,
-        key_resolver::EventType,
     },
 };
 
@@ -101,13 +101,13 @@ impl MouseLocalState {
 
             let mut reset = true;
             if global_mouse_state.arrowball_move.1 > 50 {
-                let _ = common_local_state.keycodes.push(Key::Right as u8);
+                let _ = common_local_state.keycodes.insert(Key::Right as u8);
             } else if global_mouse_state.arrowball_move.1 < -50 {
-                let _ = common_local_state.keycodes.push(Key::Left as u8);
+                let _ = common_local_state.keycodes.insert(Key::Left as u8);
             } else if global_mouse_state.arrowball_move.0 > 50 {
-                let _ = common_local_state.keycodes.push(Key::Down as u8);
+                let _ = common_local_state.keycodes.insert(Key::Down as u8);
             } else if global_mouse_state.arrowball_move.0 < -50 {
-                let _ = common_local_state.keycodes.push(Key::Up as u8);
+                let _ = common_local_state.keycodes.insert(Key::Up as u8);
             } else {
                 reset = false;
             }

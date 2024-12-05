@@ -14,7 +14,7 @@ struct TapHoldKeyState {
 
 /// State management for TapHold and Normal2 action
 pub struct TapHoldState {
-    pressed: heapless::FnvIndexMap<(u8, u8), TapHoldKeyState, 10>,
+    pressed: heapless::FnvIndexMap<(u8, u8), TapHoldKeyState, 16>,
     threshold: Duration,
 }
 
@@ -34,7 +34,7 @@ impl TapHoldState {
         mut cb: impl FnMut(EventType, KeyCode),
     ) {
         if event.pressed {
-            self.pressed.insert(
+            let _ = self.pressed.insert(
                 (event.row, event.col),
                 TapHoldKeyState {
                     tkc,

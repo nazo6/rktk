@@ -9,7 +9,7 @@ pub use report::TransparentReport;
 
 use crate::{
     keycode::{special::Special, KeyCode},
-    state::{config::Output, key_resolver::EventType},
+    state::{action_handler::EventType, config::Output},
 };
 
 pub struct TransparentState {

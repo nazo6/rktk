@@ -118,6 +118,12 @@ impl TapDanceState {
                     }
                     td.state = TapDanceKeyState::None;
                 }
+                (false, TapDanceKeyState::PressedPending { tap_count, .. }) => {
+                    td.state = TapDanceKeyState::ReleasedPending {
+                        tap_count: *tap_count,
+                        last_release: now,
+                    };
+                }
                 _ => {}
             }
         }

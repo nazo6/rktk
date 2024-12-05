@@ -4,7 +4,7 @@ use super::EventType;
 
 /// State management for Normal and Normal2 action
 pub struct NormalState {
-    pressed: heapless::FnvIndexMap<(u8, u8), (KeyCode, Option<KeyCode>), 10>,
+    pressed: heapless::FnvIndexMap<(u8, u8), (KeyCode, Option<KeyCode>), 16>,
 }
 
 impl NormalState {

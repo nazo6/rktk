@@ -14,8 +14,10 @@ mod prelude {
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::state::config::{
-        KeyResolverConfig, MouseConfig, Output, TapDanceDefinition, MAX_TAP_DANCE_REPEAT_COUNT,
+        KeyResolverConfig, MouseConfig, Output, TapDanceConfig, TapDanceDefinition,
+        MAX_TAP_DANCE_REPEAT_COUNT,
     };
+    pub(super) use crate::state::Event;
     pub(super) use crate::{
         keycode::*,
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*},
@@ -90,34 +92,19 @@ mod prelude {
         highest_layer: 0,
     };
 
-    macro_rules! key_change {
-        ($(($row:expr, $col:expr, $pressed:expr)),*) => {
-            [$(
-                KeyChangeEvent {
+    macro_rules! update {
+        ($state:expr, $now:expr, ($row:expr, $col:expr, $pressed:expr)) => {
+            $state.update(
+                Event::Key(KeyChangeEvent {
                     row: $row,
                     col: $col,
                     pressed: $pressed,
-                }
-            ),*]
-        };
-    }
-
-    macro_rules! update {
-        ($state:expr, $now:expr, $($arg:tt),+) => {
-            $state.update(
-                &mut key_change!($($arg),*),
-                (0, 0),
-                &[],
-                $now
-)
+                }),
+                $now,
+            )
         };
         ($state:expr, $now:expr) => {
-            $state.update(
-                &mut [],
-                (0, 0),
-                &[],
-                $now
-)
+            $state.update(Event::None, $now)
         };
     }
 
@@ -152,14 +139,15 @@ mod prelude {
                 },
                 key_resolver: KeyResolverConfig {
                     tap_threshold: 500,
-                    tap_dance_threshold: 100,
-                    tap_dance,
+                    tap_dance: TapDanceConfig {
+                        threshold: 500,
+                        definitions: tap_dance,
+                    },
                 },
                 initial_output: Output::Usb,
             },
         )
     }
 
-    pub(crate) use key_change;
     pub(crate) use update;
 }

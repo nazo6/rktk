@@ -1,6 +1,6 @@
 use crate::{
     keycode::KeyCode,
-    state::{config::ONESHOT_STATE_SIZE, pressed::KeyLocation, KeyChangeEvent},
+    state::{config::ONESHOT_STATE_SIZE, KeyChangeEvent},
 };
 
 use super::EventType;
@@ -10,7 +10,7 @@ struct OneshotKeyState {
     pub key: KeyCode,
     // When active, this is some and contains the location of the key that activated this oneshot
     // key.
-    pub active: Option<KeyLocation>,
+    pub active: Option<(u8, u8)>,
 }
 
 pub struct OneshotState {
@@ -28,19 +28,11 @@ impl OneshotState {
         for oneshot in &mut self.oneshot {
             if event.pressed {
                 if oneshot.active.is_none() {
-                    oneshot.active = Some(KeyLocation {
-                        row: event.row,
-                        col: event.col,
-                    });
+                    oneshot.active = Some((event.row, event.col));
                     cb(EventType::Pressed, oneshot.key);
                     continue;
                 }
-            } else if oneshot.active
-                == Some(KeyLocation {
-                    row: event.row,
-                    col: event.col,
-                })
-            {
+            } else if oneshot.active == Some((event.row, event.col)) {
                 oneshot.active = None;
                 cb(EventType::Released, oneshot.key);
                 continue;

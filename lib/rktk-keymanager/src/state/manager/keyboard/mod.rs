@@ -2,7 +2,7 @@ use usbd_hid::descriptor::KeyboardReport;
 
 use crate::{
     keycode::KeyCode,
-    state::{common::CommonLocalState, key_resolver::EventType},
+    state::{action_handler::EventType, common::CommonLocalState},
 };
 
 mod reporter;
@@ -40,7 +40,7 @@ impl KeyboardLocalState {
                 if let EventType::Pressed = event {
                     common_local_state.normal_key_pressed = true;
                 }
-                let _ = common_local_state.keycodes.push(*key as u8);
+                let _ = common_local_state.keycodes.insert(*key as u8);
             }
             (_, KeyCode::Modifier(mod_key)) => {
                 self.modifier |= mod_key.bits();

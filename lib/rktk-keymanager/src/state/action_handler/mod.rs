@@ -1,30 +1,18 @@
 use crate::keymap::Keymap;
-use crate::time::{Duration, Instant};
+use crate::time::Instant;
 
-use super::EncoderDirection;
 use super::KeyChangeEvent;
-use crate::keycode::{layer::LayerOp, KeyAction, KeyCode};
+use crate::keycode::{KeyAction, KeyCode};
 
-use super::{
-    common::{CommonLocalState, CommonState},
-    config::KeyResolverConfig,
-};
+use super::config::KeyResolverConfig;
 
 mod normal;
 mod oneshot;
 mod tap_dance;
 mod tap_hold;
 
-#[derive(Debug)]
-struct KeyPressedState {
-    pub press_start: Instant,
-    pub action: KeyAction,
-    pub hold: bool,
-}
-
 /// Handles layer related events and resolve physical key position to keycode.
 pub struct ActionHandler<const ROW: usize, const COL: usize> {
-    key_state: [[Option<KeyPressedState>; COL]; ROW],
     normal_state: normal::NormalState,
     tap_dance: tap_dance::TapDanceState,
     oneshot: oneshot::OneshotState,
@@ -42,7 +30,6 @@ impl<const ROW: usize, const COL: usize> ActionHandler<ROW, COL> {
     pub fn new(config: KeyResolverConfig) -> Self {
         Self {
             normal_state: normal::NormalState::new(),
-            key_state: core::array::from_fn(|_| core::array::from_fn(|_| None)),
             tap_dance: tap_dance::TapDanceState::new(config.tap_dance),
             oneshot: oneshot::OneshotState::new(),
             tap_hold: tap_hold::TapHoldState::new(config.tap_threshold),
@@ -54,8 +41,8 @@ impl<const ROW: usize, const COL: usize> ActionHandler<ROW, COL> {
         keymap: &Keymap<LAYER, ROW, COL, ENCODER_COUNT>,
         layer_state: [bool; LAYER],
         event: &KeyChangeEvent,
-        mut cb: impl FnMut(EventType, KeyCode),
         now: Instant,
+        mut cb: impl FnMut(EventType, KeyCode),
     ) {
         self.oneshot.pre_resolve(event, &mut cb);
 
@@ -109,5 +96,9 @@ impl<const ROW: usize, const COL: usize> ActionHandler<ROW, COL> {
                     .process_event(*id, now, event.pressed, &mut cb);
             }
         }
+
+        self.tap_dance.post_resolve(now, &mut cb);
+        self.tap_hold.post_resolve(now, &mut cb);
+        self.normal_state.post_resolve(&mut cb);
     }
 }

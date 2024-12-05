@@ -47,7 +47,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
 
 pub(super) struct CommonLocalState {
     pub normal_key_pressed: bool,
-    pub keycodes: crate::Vec<u8, 6>,
+    pub keycodes: heapless::FnvIndexSet<u8, 8>,
     pub now: Instant,
 }
 
@@ -55,7 +55,8 @@ impl CommonLocalState {
     pub fn new(now: Instant) -> Self {
         Self {
             normal_key_pressed: false,
-            keycodes: crate::Vec::new(),
+            keycodes: heapless::FnvIndexSet::new(),
+
             now,
         }
     }
