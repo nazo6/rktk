@@ -29,12 +29,12 @@ pub async fn report_task<
     usb: &Option<Usb>,
     mut master_hooks: MH,
 ) {
-    let mut prev_report_time = embassy_time::Instant::now();
+    let mut prev_update_time = embassy_time::Instant::now();
     loop {
         let event = match select3(
             MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
-            KEYBOARD_EVENT_REPORT_CHANNEL.ready_to_receive(),
-            ENCODER_EVENT_REPORT_CHANNEL.ready_to_receive(),
+            KEYBOARD_EVENT_REPORT_CHANNEL.receive(),
+            ENCODER_EVENT_REPORT_CHANNEL.receive(),
         )
         .await
         {
@@ -51,19 +51,14 @@ pub async fn report_task<
 
                 Event::Mouse(mouse_move)
             }
-            Either3::Second(_) => {
-                let Ok(mut event) = KEYBOARD_EVENT_REPORT_CHANNEL.try_receive() else {
-                    continue;
-                };
-
+            Either3::Second(mut event) => {
                 if !master_hooks.on_keyboard_event(&mut event).await {
                     continue;
                 }
 
                 Event::Key(event)
             }
-            Either3::Third(_) => {
-                let (mut id, mut dir) = ENCODER_EVENT_REPORT_CHANNEL.receive().await;
+            Either3::Third((mut id, mut dir)) => {
                 if !master_hooks.on_encoder_event(&mut id, &mut dir).await {
                     continue;
                 }
@@ -72,10 +67,11 @@ pub async fn report_task<
             }
         };
 
-        let mut state_report = state.lock().await.update(
-            event,
-            (embassy_time::Instant::now() - prev_report_time).into(),
-        );
+        let mut state_report = state
+            .lock()
+            .await
+            .update(event, prev_update_time.elapsed().into());
+        prev_update_time = embassy_time::Instant::now();
 
         master_hooks.on_state_update(&mut state_report).await;
 
@@ -120,8 +116,6 @@ pub async fn report_task<
                 }
             }
         }
-
-        prev_report_time = embassy_time::Instant::now();
     }
 }
 

@@ -6,7 +6,6 @@ use super::MOUSE_EVENT_REPORT_CHANNEL;
 
 pub async fn start(mut mouse: Option<impl MouseDriver>) {
     if let Some(mouse) = &mut mouse {
-        let mut empty_sent = false;
         loop {
             Timer::after(SCAN_INTERVAL_MOUSE).await;
 
@@ -19,11 +18,10 @@ pub async fn start(mut mouse: Option<impl MouseDriver>) {
                 }
             };
 
-            if mouse_move == (0, 0) && empty_sent {
+            if mouse_move == (0, 0) {
                 continue;
             } else {
                 let _ = MOUSE_EVENT_REPORT_CHANNEL.try_send(mouse_move);
-                empty_sent = mouse_move == (0, 0);
             }
         }
     }
