@@ -9,7 +9,7 @@ use crate::macros::common_derive;
 
 /// Keycode for layer operations.
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum LayerOp {
     /// Momentary activates the specified layer.
     Momentary(u8),

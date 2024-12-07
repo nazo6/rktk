@@ -15,7 +15,7 @@ use crate::macros::{common_derive, with_consts};
 ///    For example, while `MoScrl` key is pressed, mouse event is converted to scroll event.
 #[apply(with_consts)]
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum Special {
     MoScrl,
     AmlReset,

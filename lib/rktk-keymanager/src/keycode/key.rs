@@ -6,7 +6,7 @@ use crate::macros::{common_derive, normal, with_consts};
 
 #[apply(with_consts)]
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum Key {
     A = 0x04,
     B = 0x05,

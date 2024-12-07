@@ -26,7 +26,7 @@ pub use test_endpoints::*;
 
 attribute_alias! {
     #[apply(common_derive)] =
-        #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq)]
+        #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq, Eq, Clone)]
         #[cfg_attr(
             not(feature = "std"),
             derive(postcard::experimental::max_size::MaxSize)

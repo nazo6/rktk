@@ -40,7 +40,7 @@ pub fn Connected() -> Element {
                     "Log"
                 }
             }
-            div {
+            div { class: "flex-grow",
                 match *tab.read() {
                     Tabs::Remap => rsx! {
                         remap::Remap {}

@@ -9,7 +9,7 @@ use crate::macros::{common_derive, normal, with_consts};
 /// These keys are sent using a different descriptor than normal keys.
 #[apply(with_consts)]
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum Media {
     Zero = 0x00,
     Play = 0xB0,
