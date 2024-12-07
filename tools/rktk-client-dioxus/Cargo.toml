@@ -10,9 +10,16 @@ edition = "2021"
 dioxus = { version = "0.6.0", features = [] }
 dioxus-sdk = { git = "https://github.com/DioxusLabs/sdk", branch = "feat/dioxus-0.6" }
 rktk-rrp-client-webhid = { workspace = true }
+web-sys = { version = "0.3", features = ["Navigator", "Window"] }
+js-sys = "0.3"
+serde = { workspace = true }
+serde-wasm-bindgen = { version = "0.6.5" }
+wasm-bindgen-futures = { version = "0.4.49" }
+anyhow = { workspace = true }
 
 [features]
 default = ["web"]
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
 mobile = ["dioxus/mobile"]
+_check = []

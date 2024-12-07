@@ -1,6 +1,10 @@
 use dioxus::prelude::*;
+use rktk_rrp_client_webhid::Client;
+use web_sys::HidDevice;
 
-#[derive(Clone, Copy)]
 pub struct ConnectedState {
-    client: Signal<rktk_rrp_client_webhid::Client>,
+    pub client: Client,
+    pub device: HidDevice,
 }
+
+pub static CONN: GlobalSignal<Option<ConnectedState>> = GlobalSignal::new(|| None);

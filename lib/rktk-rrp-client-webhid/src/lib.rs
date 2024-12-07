@@ -32,7 +32,7 @@ pub struct VecLogEntry(pub Vec<LogEntry>);
 #[wasm_bindgen]
 impl Client {
     #[wasm_bindgen(constructor)]
-    pub fn new(device: HidDevice) -> Self {
+    pub fn new(device: &HidDevice) -> Self {
         Client {
             client: Mutex::new(rktk_rrp::client::Client::new(
                 HidReader::new(device.clone()),
