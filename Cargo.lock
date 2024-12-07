@@ -3331,7 +3331,7 @@ dependencies = [
 [[package]]
 name = "kle-serial"
 version = "0.3.0"
-source = "git+https://github.com/nazo6/kle-serial-rs?branch=impl-eq#ccb966915c9ebf0abd6fae090dabdd50ced63c01"
+source = "git+https://github.com/staticintlucas/kle-serial-rs#fe3e4d1aa98ded6b87908b5640e7111c433bec27"
 dependencies = [
  "csscolorparser",
  "num-traits",

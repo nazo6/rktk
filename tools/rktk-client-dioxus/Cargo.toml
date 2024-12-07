@@ -24,7 +24,7 @@ wasm-bindgen-futures = { workspace = true }
 anyhow = { workspace = true }
 futures = { workspace = true }
 
-kle-serial = { git = "https://github.com/nazo6/kle-serial-rs", branch = "impl-eq" }
+kle-serial = { git = "https://github.com/staticintlucas/kle-serial-rs" }
 
 [features]
 default = ["web"]
