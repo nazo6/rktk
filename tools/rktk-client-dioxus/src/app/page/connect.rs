@@ -77,6 +77,18 @@ mod conn {
 
         let client = Client::new(&device);
 
-        Ok(ConnectedState { client, device })
+        let keyboard = client
+            .client
+            .lock()
+            .await
+            .get_keyboard_info(())
+            .await
+            .context("Cannot get keyboard info")?;
+
+        Ok(ConnectedState {
+            client,
+            device,
+            keyboard,
+        })
     }
 }

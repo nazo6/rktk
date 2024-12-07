@@ -46,8 +46,6 @@ attribute_alias! {
             derive(postcard::experimental::max_size::MaxSize)
         )]
         #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-        #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
-        #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]
         #[derive(PartialEq, Eq, Clone, Debug)]
     ;
 }

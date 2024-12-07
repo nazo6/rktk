@@ -24,7 +24,6 @@ postcard = { workspace = true, optional = true, features = [
   "experimental-derive",
 ] }
 
-tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 schemars = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
@@ -44,7 +43,5 @@ postcard = ["dep:postcard", "serde"]
 schemars = ["dep:schemars", "serde", "std"]
 
 std = []
-# Enables type export by specta.
-tsify = ["std", "dep:tsify-next", "dep:wasm-bindgen", "postcard"]
 
 _check = ["state", "schemars", "ssmarshal/std"]

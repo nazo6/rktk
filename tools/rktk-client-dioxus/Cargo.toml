@@ -4,18 +4,20 @@ version = "0.1.0"
 authors = ["nazo6 <git@nazo6.dev>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+rktk-rrp = { workspace = true }
+rktk-rrp-client-webhid = { workspace = true }
+
 dioxus = { version = "0.6.0", features = [] }
 dioxus-sdk = { git = "https://github.com/DioxusLabs/sdk", branch = "feat/dioxus-0.6" }
-rktk-rrp-client-webhid = { workspace = true }
-web-sys = { version = "0.3", features = ["Navigator", "Window"] }
+
+web-sys = { workspace = true, features = ["Navigator", "Window"] }
 js-sys = "0.3"
 serde = { workspace = true }
 serde-wasm-bindgen = { version = "0.6.5" }
-wasm-bindgen-futures = { version = "0.4.49" }
+wasm-bindgen-futures = { workspace = true }
 anyhow = { workspace = true }
+
 
 [features]
 default = ["web"]

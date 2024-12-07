@@ -762,16 +762,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "console_log"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be8aed40e4edbf4d3b4431ab260b63fdc40f5780a4766824329ea0f1eefe3c0f"
-dependencies = [
- "log",
- "web-sys",
-]
-
-[[package]]
 name = "const-serialize"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2726,18 +2716,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
-]
-
-[[package]]
-name = "gloo-timers"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
-dependencies = [
- "futures-channel",
- "futures-core",
- "js-sys",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -4907,6 +4885,7 @@ dependencies = [
  "dioxus",
  "dioxus-sdk",
  "js-sys",
+ "rktk-rrp",
  "rktk-rrp-client-webhid",
  "serde",
  "serde-wasm-bindgen 0.6.5",
@@ -5011,7 +4990,6 @@ dependencies = [
  "serde",
  "serde_with",
  "ssmarshal",
- "tsify-next",
  "usbd-hid",
  "wasm-bindgen",
 ]
@@ -5031,7 +5009,6 @@ dependencies = [
  "serde_with",
  "thiserror 2.0.3",
  "tokio",
- "tsify-next",
  "wasm-bindgen",
 ]
 
@@ -5039,18 +5016,10 @@ dependencies = [
 name = "rktk-rrp-client-webhid"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-lock",
- "console_log",
  "futures",
- "gloo-timers",
- "log",
- "rktk-keymanager",
  "rktk-rrp",
- "serde",
- "serde-wasm-bindgen 0.6.5",
  "ssmarshal",
- "tsify-next",
  "usbd-hid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -6135,32 +6104,6 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
-
-[[package]]
-name = "tsify-next"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f4a645dca4ee0800f5ab60ce166deba2db6a0315de795a2691e138a3d55d756"
-dependencies = [
- "gloo-utils",
- "serde",
- "serde-wasm-bindgen 0.6.5",
- "serde_json",
- "tsify-next-macros",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "tsify-next-macros"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d5c06f8a51d759bb58129e30b2631739e7e1e4579fad1f30ac09a6c88e488a6"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde_derive_internals",
- "syn 2.0.89",
-]
 
 [[package]]
 name = "tungstenite"
