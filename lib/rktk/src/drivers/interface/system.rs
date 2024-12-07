@@ -8,8 +8,10 @@ pub trait SystemDriver {
     /// There is no need to implement this if the feature is already implemented, such as the nRF52840 uf2 bootloader.
     async fn double_reset_usb_boot(&self, _timeout: Duration) {}
 
-    fn reset(&self);
+    fn reset(&self) {}
 
     /// Reset to the bootloader (typically uf2 flash mode)
-    fn reset_to_bootloader(&self);
+    fn reset_to_bootloader(&self) {}
+
+    async fn power_off(&self) {}
 }

@@ -2111,6 +2111,7 @@ name = "rktk-drivers-nrf"
 version = "0.1.0"
 dependencies = [
  "bitvec",
+ "cortex-m",
  "display-interface",
  "embassy-embedded-hal",
  "embassy-executor",

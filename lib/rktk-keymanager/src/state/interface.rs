@@ -8,6 +8,7 @@ pub struct TransparentReport {
     pub ble_bond_clear: bool,
     pub output: Output,
     pub bootloader: bool,
+    pub power_off: bool,
 }
 
 /// Information to be communicated to the outside as a result of a state change

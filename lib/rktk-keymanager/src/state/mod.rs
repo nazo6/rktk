@@ -47,7 +47,7 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     pub fn update(&mut self, event: Event, since_last_update: core::time::Duration) -> StateReport {
         self.shared.now = self.shared.now + since_last_update.into();
 
-        let mut lms = LocalManagerState::new();
+        let mut lms = LocalManagerState::new(&self.manager);
 
         let key_change = match event {
             Event::Key(key_change) => Some(key_change),

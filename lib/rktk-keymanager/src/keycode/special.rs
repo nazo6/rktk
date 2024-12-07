@@ -24,4 +24,5 @@ pub enum Special {
     OutputUsb,
     BleBondClear,
     Bootloader,
+    PowerOff,
 }

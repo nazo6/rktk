@@ -102,6 +102,10 @@ pub async fn report_task<
             }
         }
 
+        if state_report.transparent_report.power_off {
+            system.power_off().await;
+        }
+
         match state_report.transparent_report.output {
             Output::Usb => {
                 crate::utils::display_state!(Output, Output::Usb);

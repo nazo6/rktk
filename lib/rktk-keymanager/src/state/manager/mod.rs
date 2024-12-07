@@ -41,12 +41,12 @@ pub struct LocalManagerState {
 }
 
 impl LocalManagerState {
-    pub fn new() -> Self {
+    pub fn new(global_state: &GlobalManagerState) -> Self {
         LocalManagerState {
             mouse: mouse::MouseLocalState::new(),
             keyboard: keyboard::KeyboardLocalState::new(),
             media_keyboard: media_keyboard::MediaKeyboardLocalState::new(),
-            transparent: transparent::TransparentLocalState::new(),
+            transparent: transparent::TransparentLocalState::new(&global_state.transparent),
             shared: SharedLocalManagerState::default(),
         }
     }
@@ -64,8 +64,7 @@ impl LocalManagerState {
         self.keyboard
             .process_event(&mut self.shared, keycode, event);
         self.media_keyboard.process_event(keycode);
-        self.transparent
-            .process_event(&mut global_state.transparent, keycode, event);
+        self.transparent.process_event(keycode, event);
     }
 
     pub fn process_mouse_event(&mut self, movement: (i8, i8)) {
