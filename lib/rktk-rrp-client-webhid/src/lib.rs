@@ -9,13 +9,6 @@ use web_sys::HidDevice;
 
 mod client;
 
-#[wasm_bindgen(start)]
-pub fn main() {
-    use log::Level;
-    console_log::init_with_level(Level::Trace).expect("error initializing log");
-    info!("rrp-client-web started!");
-}
-
 #[wasm_bindgen]
 pub struct Client {
     client: Mutex<rktk_rrp::client::Client<HidReader, HidWriter, 1024>>,

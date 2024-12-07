@@ -1,7 +1,13 @@
 cargo-features = ["profile-rustflags"]
 
 [workspace]
-members = ["lib/*", "examples/*", "tools/cli", "tools/ra-check"]
+members = [
+  "lib/*",
+  "examples/*",
+  "tools/cli",
+  "tools/ra-check",
+  "tools/rktk-client-dioxus",
+]
 resolver = "2"
 
 [workspace.package]
@@ -18,6 +24,7 @@ rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.1.0" }
 rktk = { path = "lib/rktk", version = "0.1.0" }
 rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.1.0" }
 rktk-rrp = { path = "lib/rktk-rrp", version = "0.1.0" }
+rktk-rrp-client-webhid = { path = "lib/rktk-rrp-client-webhid", version = "0.1.0" }
 
 # embedded core libraries
 embedded-hal = "1.0.0"
@@ -77,3 +84,15 @@ log = "0.4.22"
 # cli tools
 duct = "0.13.7"
 anyhow = "1.0.90"
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"

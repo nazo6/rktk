@@ -10,9 +10,6 @@ repository.workspace = true
 [package.metadata.docs.rs]
 rustc-args = ["--cfg=web_sys_unstable_apis"]
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 rktk-rrp = { workspace = true, features = ["tsify", "client"] }
 rktk-keymanager = { workspace = true }

@@ -17,6 +17,11 @@
       "command": "cd tools/rktk-client && pnpm dev"
     },
     {
+      "label": "start rktk-client-dioxus",
+      "type": "shell",
+      "command": "cd tools/rktk-client-dioxus && pnpm dev"
+    },
+    {
       "label": "clean",
       "type": "shell",
       "command": "cargo clean"
