@@ -1,4 +1,4 @@
-# You can remove this line and `forced-target` property and use `.cargo/config.toml` if youe crate isn't in workspace.
+# You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
 cargo-features = ["per-package-target"]
 
 [package]
@@ -8,13 +8,9 @@ edition = "2021"
 publish = false
 forced-target = "thumbv6m-none-eabi"
 
-# Config used by rktk-cli
+# Config used by rktk-cli. For details, see [rktk-cli](https://crates.io/crates/rktk-cli).
 [package.metadata.rktk-cli]
-# You can choose `Rp2040` or `Nrf52840` for now.
 mcu = "Rp2040"
-
-# By default, "MinSize" profile will be selected.
-# profile = "MaxPerf"
 
 [dependencies]
 rktk = { workspace = true }
