@@ -38,6 +38,17 @@ macro_rules! with_consts {
     }
 }
 
+macro_rules! impl_display_bitflags {
+    ($type:ty) => {
+        use core::fmt::{self, Display, Formatter};
+        impl Display for $type {
+            fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+                bitflags::parser::to_writer(self, f)
+            }
+        }
+    };
+}
+
 attribute_alias! {
     #[apply(common_derive)] =
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -50,5 +61,6 @@ attribute_alias! {
     ;
 }
 
+pub(super) use impl_display_bitflags;
 pub(super) use normal;
 pub(super) use with_consts;

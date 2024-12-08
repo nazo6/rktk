@@ -4949,6 +4949,7 @@ dependencies = [
  "futures",
  "js-sys",
  "kle-serial",
+ "rktk-keymanager",
  "rktk-rrp",
  "rktk-rrp-client-webhid",
  "serde",

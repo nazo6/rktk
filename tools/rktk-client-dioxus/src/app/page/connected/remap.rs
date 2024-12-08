@@ -68,12 +68,11 @@ fn get_keymap_mut(keymap: &mut Keymap, layer: u8, row: u8, col: u8) -> Option<&m
         .and_then(|row| row.get_mut(col as usize))
 }
 
-#[component]
-pub fn RemapInner(
+fn process_keymap(
     keyboard: KeyboardInfo,
     layout: kle_serial::Keyboard,
     key_data: Vec<KeyActionLoc>,
-) -> Element {
+) -> Keymap {
     let mut keymap: Keymap = vec![
         vec![
             vec![
@@ -113,10 +112,22 @@ pub fn RemapInner(
             }
         }
     }
+    keymap
+}
+
+#[component]
+pub fn RemapInner(
+    keyboard: KeyboardInfo,
+    layout: kle_serial::Keyboard,
+    key_data: Vec<KeyActionLoc>,
+) -> Element {
+    let keymap = process_keymap(keyboard, layout, key_data);
+
+    let selected: Signal<Option<(usize, usize)>> = use_signal(|| None);
 
     rsx! {
         div { class: "h-full flex justify-center pt-12",
-            keyboard::Keyboard { keymap: keymap[0].clone() }
+            keyboard::Keyboard { keymap: keymap[0].clone(), select_signal: selected }
         }
     }
 }

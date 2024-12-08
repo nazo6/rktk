@@ -3,7 +3,7 @@
 use bitflags::bitflags;
 use macro_rules_attribute::apply;
 
-use crate::macros::{common_derive, normal};
+use crate::macros::{common_derive, impl_display_bitflags, normal};
 
 #[apply(common_derive)]
 #[derive(Copy)]
@@ -21,6 +21,8 @@ bitflags! {
         const RGui = 0x80;
     }
 }
+
+impl_display_bitflags!(Modifier);
 
 normal!(L_CTRL, Modifier, LCtrl);
 normal!(L_SHFT, Modifier, LShft);

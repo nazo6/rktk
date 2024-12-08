@@ -3,7 +3,7 @@
 use bitflags::bitflags;
 use macro_rules_attribute::apply;
 
-use crate::macros::{common_derive, normal};
+use crate::macros::{common_derive, impl_display_bitflags, normal};
 
 #[apply(common_derive)]
 #[derive(Copy)]
@@ -18,6 +18,8 @@ bitflags! {
         const Forward = 0b0001_0000;
     }
 }
+
+impl_display_bitflags!(Mouse);
 
 normal!(M_L, Mouse, Left);
 normal!(M_R, Mouse, Right);
