@@ -5047,7 +5047,6 @@ dependencies = [
 name = "rktk-keymanager"
 version = "0.1.0"
 dependencies = [
- "bitflags 2.6.0",
  "critical-section",
  "heapless 0.7.17",
  "macro_rules_attribute",
