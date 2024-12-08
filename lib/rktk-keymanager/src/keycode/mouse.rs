@@ -8,9 +8,9 @@ use super::common_derive;
 #[apply(common_derive)]
 #[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum Mouse {
-    Left = 0b0000_0001,
-    Right = 0b0000_0010,
-    Middle = 0b0000_0100,
-    Back = 0b0000_1000,
-    Forward = 0b0001_0000,
+    MLeft = 0b0000_0001,
+    MRight = 0b0000_0010,
+    MMiddle = 0b0000_0100,
+    MBack = 0b0000_1000,
+    MForward = 0b0001_0000,
 }
