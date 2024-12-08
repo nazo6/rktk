@@ -1,6 +1,6 @@
 use macro_rules_attribute::apply;
 
-use crate::macros::with_consts;
+use crate::macros::{impl_display, with_consts};
 
 use super::common_derive;
 
@@ -14,3 +14,5 @@ pub enum Mouse {
     MBack = 0b0000_1000,
     MForward = 0b0001_0000,
 }
+
+impl_display!(Mouse);

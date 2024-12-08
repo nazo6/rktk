@@ -2,7 +2,7 @@
 
 use macro_rules_attribute::apply;
 
-use crate::macros::with_consts;
+use crate::macros::{impl_display, with_consts};
 
 use super::common_derive;
 
@@ -19,3 +19,5 @@ pub enum Modifier {
     RAlt = 0x40,
     RGui = 0x80,
 }
+
+impl_display!(Modifier);

@@ -3,7 +3,7 @@ use rktk_rrp::endpoints::{
     get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction, KeyActionLoc,
 };
 
-use crate::app::state::CONN;
+use crate::app::{components::selector::key_action::KeyActionSelector, state::CONN};
 
 mod keyboard;
 
@@ -122,13 +122,41 @@ pub fn RemapInner(
     key_data: Vec<KeyActionLoc>,
 ) -> Element {
     let keymap = process_keymap(keyboard, layout, key_data);
+    let mut modified_keymap = use_signal(|| keymap.clone());
+    let mut keymap_changes = use_signal(Vec::new);
 
     let selected: Signal<Option<(usize, usize)>> = use_signal(|| None);
     let layer = use_signal(|| 0);
 
     rsx! {
-        div { class: "h-full flex justify-center pt-12",
-            keyboard::Keyboard { layer, keymap: keymap.clone(), select_signal: selected }
+        div { class: "h-full flex flex-col items-center pt-12 gap-2",
+            keyboard::Keyboard {
+                layer,
+                keymap: modified_keymap.read().clone(),
+                select_signal: selected,
+            }
+            div {
+                if let Some((row, col)) = *selected.read() {
+                    if let Some(key_action) = modified_keymap.read()[*layer.read()][row][col].action {
+                        KeyActionSelector {
+                            key_action,
+                            select_key_action: Callback::new(move |ka| {
+                                let new_key_data = KeyActionLoc {
+                                    layer: *layer.read() as u8,
+                                    row: row as u8,
+                                    col: col as u8,
+                                    key: ka,
+                                };
+                                keymap_changes.push(new_key_data.clone());
+                                (*modified_keymap
+                                    .write())[new_key_data.layer
+                                        as usize][new_key_data.row as usize][new_key_data.col as usize]
+                                    .action = Some(new_key_data.key);
+                            }),
+                        }
+                    }
+                }
+            }
         }
     }
 }

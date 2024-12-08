@@ -23,7 +23,8 @@ pub fn Keyboard(
                 .unwrap_or(0 as f64)
                 .max(max)
         })
-        * SIZE_AMP;
+        * SIZE_AMP
+        + 10.0;
     let keyboard_height = keymap
         .iter()
         .flatten()
@@ -35,7 +36,8 @@ pub fn Keyboard(
                 .unwrap_or(0 as f64)
                 .max(max)
         })
-        * SIZE_AMP;
+        * SIZE_AMP
+        + 10.0;
 
     let mut elem_size = use_signal(|| Option::<PixelsSize>::None);
 
