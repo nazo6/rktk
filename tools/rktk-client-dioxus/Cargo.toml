@@ -1,0 +1,36 @@
+[package]
+name = "rktk-client-dioxus"
+version = "0.1.0"
+authors = ["nazo6 <git@nazo6.dev>"]
+edition = "2021"
+
+[dependencies]
+rktk-rrp = { workspace = true }
+rktk-rrp-client-webhid = { workspace = true }
+rktk-keymanager = { workspace = true }
+
+dioxus = { version = "0.6.0", features = [] }
+dioxus-sdk = { git = "https://github.com/DioxusLabs/sdk", branch = "feat/dioxus-0.6" }
+
+web-sys = { workspace = true, features = [
+  "Navigator",
+  "Window",
+  "ResizeObserver",
+] }
+js-sys = "0.3"
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde-wasm-bindgen = { version = "0.6.5" }
+wasm-bindgen-futures = { workspace = true }
+anyhow = { workspace = true }
+futures = { workspace = true }
+strum = { workspace = true }
+
+kle-serial = { version = "0.3.1" }
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
+_check = []

@@ -2,7 +2,7 @@
 
 use macro_rules_attribute::apply;
 
-use crate::macros::{common_derive, with_consts};
+use crate::macros::{common_derive, impl_display, with_consts};
 
 /// Represents special keys.
 ///
@@ -15,7 +15,7 @@ use crate::macros::{common_derive, with_consts};
 ///    For example, while `MoScrl` key is pressed, mouse event is converted to scroll event.
 #[apply(with_consts)]
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum Special {
     MoScrl,
     AmlReset,
@@ -26,3 +26,5 @@ pub enum Special {
     Bootloader,
     PowerOff,
 }
+
+impl_display!(Special);

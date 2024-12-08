@@ -1,6 +1,16 @@
 [profile.release]
 lto = true
 
+[profile.dioxus-wasm]
+inherits = "dev"
+opt-level = 2
+
+[profile.dioxus-server]
+inherits = "dev"
+
+[profile.dioxus-android]
+inherits = "dev"
+
 [alias]
 rktk = "run -p rktk-cli --"
 

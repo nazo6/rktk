@@ -1,0 +1,23 @@
+[application]
+
+# App (Project) Name
+name = "rktk-client"
+
+[web.app]
+
+# HTML title tag content
+title = "rktk-client"
+
+# include `assets` in web platform
+[web.resource]
+# Additional JavaScript files
+script = []
+
+[web.resource.dev]
+
+# Javascript code file
+# serve: [dev-server] only
+script = []
+
+[web.watcher]
+watch_path = ["src", "assets", "assets/tailwind.css"]

@@ -42,7 +42,7 @@ impl KeyboardLocalState {
                 let _ = common_local_state.keycodes.insert(*key as u8);
             }
             (_, KeyCode::Modifier(mod_key)) => {
-                self.modifier |= mod_key.bits();
+                self.modifier |= *mod_key as u8;
             }
             _ => {}
         };

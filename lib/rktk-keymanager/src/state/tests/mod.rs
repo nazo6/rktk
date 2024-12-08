@@ -37,6 +37,7 @@ mod prelude {
             ble_bond_clear: false,
             output: Output::Usb,
             bootloader: false,
+            power_off: false,
         }
     }
 

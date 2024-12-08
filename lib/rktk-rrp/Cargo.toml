@@ -26,7 +26,6 @@ heapless = { workspace = true, optional = true }
 embedded-io-async = { workspace = true, optional = true }
 
 # client deps
-tsify-next = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -39,7 +38,5 @@ server = ["dep:heapless", "dep:embedded-io-async"]
 client = ["std"]
 
 std = ["postcard/use-std", "futures/std"]
-
-tsify = ["dep:tsify-next", "dep:wasm-bindgen", "rktk-keymanager/tsify"]
 
 _check = ["server", "client"]
