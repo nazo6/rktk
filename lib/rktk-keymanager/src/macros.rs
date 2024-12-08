@@ -38,6 +38,18 @@ macro_rules! with_consts {
     }
 }
 
+macro_rules! impl_display {
+    ($type:ty) => {
+        use core::fmt::{self, Display, Formatter};
+        impl Display for $type {
+            fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+                let s: &'static str = self.into();
+                write!(f, "{}", s)
+            }
+        }
+    };
+}
+
 macro_rules! impl_display_bitflags {
     ($type:ty) => {
         use core::fmt::{self, Display, Formatter};
@@ -61,6 +73,7 @@ attribute_alias! {
     ;
 }
 
+pub(super) use impl_display;
 pub(super) use impl_display_bitflags;
 pub(super) use normal;
 pub(super) use with_consts;

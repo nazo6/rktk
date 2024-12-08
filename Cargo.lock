@@ -3330,8 +3330,9 @@ dependencies = [
 
 [[package]]
 name = "kle-serial"
-version = "0.3.0"
-source = "git+https://github.com/staticintlucas/kle-serial-rs#fe3e4d1aa98ded6b87908b5640e7111c433bec27"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "407175f72fa4c5ed81d741c05cf682102683ea16f21378928e3ac1a6cad36f23"
 dependencies = [
  "csscolorparser",
  "num-traits",
@@ -4955,6 +4956,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
+ "strum",
  "wasm-bindgen-futures",
  "web-sys",
 ]

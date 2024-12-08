@@ -24,8 +24,9 @@ serde-wasm-bindgen = { version = "0.6.5" }
 wasm-bindgen-futures = { workspace = true }
 anyhow = { workspace = true }
 futures = { workspace = true }
+strum = { workspace = true }
 
-kle-serial = { git = "https://github.com/staticintlucas/kle-serial-rs" }
+kle-serial = { version = "0.3.1" }
 
 [features]
 default = ["web"]

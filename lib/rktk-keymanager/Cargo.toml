@@ -18,7 +18,7 @@ usbd-hid = { workspace = true, optional = true }
 paste = { workspace = true }
 macro_rules_attribute = { workspace = true }
 
-strum = { version = "0.26.3", default-features = false, features = ["derive"] }
+strum = { workspace = true, features = ["derive"] }
 serde = { workspace = true, optional = true, features = ["derive"] }
 serde_with = { workspace = true, features = ["macros"], optional = true }
 postcard = { workspace = true, optional = true, features = [

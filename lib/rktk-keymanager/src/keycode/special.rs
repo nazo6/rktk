@@ -2,7 +2,7 @@
 
 use macro_rules_attribute::apply;
 
-use crate::macros::{common_derive, with_consts};
+use crate::macros::{common_derive, impl_display, with_consts};
 
 /// Represents special keys.
 ///
@@ -26,3 +26,5 @@ pub enum Special {
     Bootloader,
     PowerOff,
 }
+
+impl_display!(Special);

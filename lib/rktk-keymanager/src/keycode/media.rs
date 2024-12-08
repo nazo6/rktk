@@ -2,7 +2,7 @@
 
 use macro_rules_attribute::apply;
 
-use crate::macros::{common_derive, normal, with_consts};
+use crate::macros::{common_derive, impl_display, normal, with_consts};
 
 /// Represents `media key` which is used for media control.
 ///
@@ -26,6 +26,8 @@ pub enum Media {
     VolumeDecrement = 0xEA,
     Reserved = 0xEB,
 }
+
+impl_display!(Media);
 
 normal!(VOLUP, Media, VolumeIncrement);
 normal!(VOLDN, Media, VolumeDecrement);
