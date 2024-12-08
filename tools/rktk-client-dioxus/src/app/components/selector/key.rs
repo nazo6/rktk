@@ -19,7 +19,7 @@ pub fn KeySelector<I: Display + PartialEq + Clone + 'static>(
                 select_key(items[idx].clone());
             },
             for (i , item) in items.iter().enumerate() {
-                option { value: i, "{item}" }
+                option { value: i, selected: item == &selected_key, "{item}" }
             }
         }
     }

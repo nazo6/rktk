@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus_elements::geometry::PixelsSize;
 use rktk_rrp::endpoints::rktk_keymanager::keycode::KeyAction;
 
-use super::{Keymap, Layer};
+use super::Keymap;
 
 const SIZE_AMP: f64 = 60.0;
 

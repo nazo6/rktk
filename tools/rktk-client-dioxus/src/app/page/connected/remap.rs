@@ -5,6 +5,7 @@ use rktk_rrp::endpoints::{
 
 use crate::app::{components::selector::key_action::KeyActionSelector, state::CONN};
 
+mod bar;
 mod keyboard;
 
 #[component]
@@ -58,7 +59,6 @@ struct KeyData {
     action: Option<KeyAction>,
 }
 
-type Layer = Vec<Vec<KeyData>>;
 type Keymap = Vec<Vec<Vec<KeyData>>>;
 
 fn get_keymap_mut(keymap: &mut Keymap, layer: u8, row: u8, col: u8) -> Option<&mut KeyData> {
@@ -129,7 +129,8 @@ pub fn RemapInner(
     let layer = use_signal(|| 0);
 
     rsx! {
-        div { class: "h-full flex flex-col items-center pt-12 gap-2",
+        div { class: "h-full flex flex-col items-center gap-2",
+            bar::Bar { changes: keymap_changes.read().clone() }
             keyboard::Keyboard {
                 layer,
                 keymap: modified_keymap.read().clone(),
