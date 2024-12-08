@@ -124,10 +124,11 @@ pub fn RemapInner(
     let keymap = process_keymap(keyboard, layout, key_data);
 
     let selected: Signal<Option<(usize, usize)>> = use_signal(|| None);
+    let layer = use_signal(|| 0);
 
     rsx! {
         div { class: "h-full flex justify-center pt-12",
-            keyboard::Keyboard { keymap: keymap[0].clone(), select_signal: selected }
+            keyboard::Keyboard { layer, keymap: keymap.clone(), select_signal: selected }
         }
     }
 }

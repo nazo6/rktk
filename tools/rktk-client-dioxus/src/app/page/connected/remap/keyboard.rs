@@ -2,26 +2,40 @@ use dioxus::prelude::*;
 use dioxus_elements::geometry::PixelsSize;
 use rktk_rrp::endpoints::rktk_keymanager::keycode::KeyAction;
 
-use super::Layer;
+use super::{Keymap, Layer};
 
 const SIZE_AMP: f64 = 60.0;
 
 #[component]
-pub fn Keyboard(keymap: Layer, select_signal: Signal<Option<(usize, usize)>>) -> Element {
-    let keyboard_width = keymap.iter().flatten().fold(0 as f64, |max, key| {
-        key.key
-            .as_ref()
-            .map(|k| k.x + k.width)
-            .unwrap_or(0 as f64)
-            .max(max)
-    }) * SIZE_AMP;
-    let keyboard_height = keymap.iter().flatten().fold(0 as f64, |max, key| {
-        key.key
-            .as_ref()
-            .map(|k| k.y + k.height)
-            .unwrap_or(0 as f64)
-            .max(max)
-    }) * SIZE_AMP;
+pub fn Keyboard(
+    keymap: Keymap,
+    layer: Signal<usize>,
+    select_signal: Signal<Option<(usize, usize)>>,
+) -> Element {
+    let keyboard_width = keymap
+        .iter()
+        .flatten()
+        .flatten()
+        .fold(0 as f64, |max, key| {
+            key.key
+                .as_ref()
+                .map(|k| k.x + k.width)
+                .unwrap_or(0 as f64)
+                .max(max)
+        })
+        * SIZE_AMP;
+    let keyboard_height = keymap
+        .iter()
+        .flatten()
+        .flatten()
+        .fold(0 as f64, |max, key| {
+            key.key
+                .as_ref()
+                .map(|k| k.y + k.height)
+                .unwrap_or(0 as f64)
+                .max(max)
+        })
+        * SIZE_AMP;
 
     let mut elem_size = use_signal(|| Option::<PixelsSize>::None);
 
@@ -33,24 +47,35 @@ pub fn Keyboard(keymap: Layer, select_signal: Signal<Option<(usize, usize)>>) ->
 
     rsx! {
         div {
-            class: "h-full w-full max-w-[80rem] flex justify-center",
+            class: "w-full flex justify-center max-w-[80rem]",
             onresize: move |evt| elem_size.set(evt.data().get_content_box_size().ok()),
             div {
                 width: format!("{}px", keyboard_width * scale),
                 height: format!("{}px", keyboard_height * scale),
-                div {
-                    class: "relative h-auto w-auto",
-                    transform: format!("scale({})", scale),
-                    transform_origin: "top left",
-                    for (row , key) in keymap.iter().enumerate() {
-                        for (col , key) in key.iter().enumerate() {
-                            if let (Some(key), Some(action)) = (key.key.as_ref(), key.action.as_ref()) {
-                                Key {
-                                    kle_key: key.clone(),
-                                    action: *action,
-                                    row,
-                                    col,
-                                    select_signal,
+                div { class: "flex gap-2",
+                    div { class: "flex flex-col gap-2",
+                        for (l , _) in keymap.iter().enumerate() {
+                            button {
+                                class: "btn btn-square btn-sm rounded-sm",
+                                onclick: move |_| layer.set(l),
+                                "{l}"
+                            }
+                        }
+                    }
+                    div {
+                        class: "relative h-auto w-auto",
+                        transform: format!("scale({})", scale),
+                        transform_origin: "top left",
+                        for (row , key) in keymap[*layer.read()].iter().enumerate() {
+                            for (col , key) in key.iter().enumerate() {
+                                if let (Some(key), Some(action)) = (key.key.as_ref(), key.action.as_ref()) {
+                                    Key {
+                                        kle_key: key.clone(),
+                                        action: *action,
+                                        row,
+                                        col,
+                                        select_signal,
+                                    }
                                 }
                             }
                         }
