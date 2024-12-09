@@ -1,0 +1,20 @@
+{
+  "name": "rktk-client-dioxus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
+    "dev:dioxus": "dx serve -i true",
+    "dev": "conc -i -r -c auto npm:dev:*",
+    "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && pnpm dx build --release"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "daisyui": "^4.12.14",
+    "tailwindcss": "^3.4.16"
+  }
+}

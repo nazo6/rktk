@@ -2,11 +2,11 @@
 
 use macro_rules_attribute::apply;
 
-use crate::macros::{common_derive, normal, with_consts};
+use crate::macros::{common_derive, impl_display, normal, with_consts};
 
 #[apply(with_consts)]
 #[apply(common_derive)]
-#[derive(Copy)]
+#[derive(Copy, strum::EnumIter, strum::IntoStaticStr)]
 pub enum Key {
     A = 0x04,
     B = 0x05,
@@ -224,6 +224,8 @@ pub enum Key {
     // RightAlt = 0xE6,
     // RightGui = 0xE7,
 }
+
+impl_display!(Key);
 
 // aliases
 normal!(BS, Key, Backspace);

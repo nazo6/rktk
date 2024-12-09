@@ -38,6 +38,18 @@ macro_rules! with_consts {
     }
 }
 
+macro_rules! impl_display {
+    ($type:ty) => {
+        use core::fmt::{self, Display, Formatter};
+        impl Display for $type {
+            fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+                let s: &'static str = self.into();
+                write!(f, "{}", s)
+            }
+        }
+    };
+}
+
 attribute_alias! {
     #[apply(common_derive)] =
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -46,11 +58,10 @@ attribute_alias! {
             derive(postcard::experimental::max_size::MaxSize)
         )]
         #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-        #[cfg_attr(feature = "tsify", derive(tsify_next::Tsify))]
-        #[cfg_attr(feature = "tsify", tsify(into_wasm_abi, from_wasm_abi))]
         #[derive(PartialEq, Eq, Clone, Debug)]
     ;
 }
 
+pub(super) use impl_display;
 pub(super) use normal;
 pub(super) use with_consts;

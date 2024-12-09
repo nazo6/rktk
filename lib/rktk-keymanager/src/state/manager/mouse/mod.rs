@@ -63,7 +63,7 @@ impl MouseLocalState {
         event: EventType,
     ) {
         match (kc, event) {
-            (KeyCode::Mouse(btn), _) => self.mouse_button |= btn.bits(),
+            (KeyCode::Mouse(btn), _) => self.mouse_button |= *btn as u8,
             (KeyCode::Special(Special::MoScrl), EventType::Released) => {
                 global_mouse_state.scroll_mode = false;
             }
