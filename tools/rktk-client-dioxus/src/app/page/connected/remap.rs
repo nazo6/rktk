@@ -1,18 +1,22 @@
 use dioxus::prelude::*;
+use dioxus_query::prelude::*;
+
 use rktk_rrp::endpoints::{
     get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction, KeyActionLoc,
 };
 
-use crate::app::{components::selector::key_action::KeyActionSelector, state::CONN};
+use crate::app::{
+    components::selector::key_action::KeyActionSelector,
+    query::query::{use_app_get_query, QueryKey, QueryValue},
+    state::CONN,
+};
 
 mod bar;
 mod keyboard;
 
 #[component]
 pub fn Remap() -> Element {
-    let keymaps = use_resource(fetcher::get_keymap);
-
-    let keymaps = keymaps.read();
+    let res = use_app_get_query([QueryKey::GetKeymap]);
 
     let keyboard = CONN
         .read()
@@ -21,8 +25,9 @@ pub fn Remap() -> Element {
         .keyboard
         .clone();
 
-    match &*keymaps {
-        Some(Ok((layout, keymap))) => {
+    let res = res.result();
+    match res.value() {
+        QueryResult::Ok(QueryValue::Keymap(layout, keymap)) => {
             rsx! {
                 div { class: "h-full",
                     RemapInner {
@@ -33,7 +38,7 @@ pub fn Remap() -> Element {
                 }
             }
         }
-        None => {
+        QueryResult::Loading(_) => {
             rsx! {
                 div {
                     h1 { "Loading" }
@@ -41,7 +46,7 @@ pub fn Remap() -> Element {
                 }
             }
         }
-        Some(Err(e)) => {
+        QueryResult::Err(e) => {
             dioxus::logger::tracing::error!("{:?}", e);
             rsx! {
                 div {
@@ -50,6 +55,7 @@ pub fn Remap() -> Element {
                 }
             }
         }
+        _ => unreachable!(),
     }
 }
 

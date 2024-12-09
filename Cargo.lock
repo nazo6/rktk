@@ -1481,6 +1481,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-query"
+version = "0.5.1"
+source = "git+https://github.com/nazo6/dioxus-query?branch=dioxus-0.6#daa96573c6b71dcf6c57f0ad80ebadb26aad006c"
+dependencies = [
+ "dioxus-lib",
+ "futures-util",
+ "instant",
+]
+
+[[package]]
 name = "dioxus-rsx"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1490,19 +1500,6 @@ dependencies = [
  "proc-macro2-diagnostics",
  "quote",
  "syn 2.0.89",
-]
-
-[[package]]
-name = "dioxus-sdk"
-version = "0.6.0"
-source = "git+https://github.com/DioxusLabs/sdk?branch=feat%2Fdioxus-0.6#b1f77fe8542d5a8b7e44fd792abbdd1b58b0b883"
-dependencies = [
- "cfg-if",
- "dioxus",
- "js-sys",
- "tracing",
- "uuid",
- "warnings",
 ]
 
 [[package]]
@@ -2598,10 +2595,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -3207,6 +3202,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e0242819d153cba4b4b05a5a8f2a7e9bbf97b6055b2a002b395c96b5ff3c0222"
 dependencies = [
  "cfg-if",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -4946,7 +4944,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dioxus",
- "dioxus-sdk",
+ "dioxus-query",
  "futures",
  "js-sys",
  "kle-serial",
@@ -6369,10 +6367,6 @@ name = "uuid"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8c5f0a0af699448548ad1a2fbf920fb4bee257eae39953ba95cb84891a0446a"
-dependencies = [
- "getrandom 0.2.15",
- "wasm-bindgen",
-]
 
 [[package]]
 name = "vcell"

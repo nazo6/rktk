@@ -10,7 +10,7 @@ rktk-rrp-client-webhid = { workspace = true }
 rktk-keymanager = { workspace = true }
 
 dioxus = { version = "0.6.0", features = [] }
-dioxus-sdk = { git = "https://github.com/DioxusLabs/sdk", branch = "feat/dioxus-0.6" }
+dioxus-query = { git = "https://github.com/nazo6/dioxus-query", branch = "dioxus-0.6" }
 
 web-sys = { workspace = true, features = [
   "Navigator",
