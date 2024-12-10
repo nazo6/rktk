@@ -13,8 +13,7 @@ mod keyboard;
 
 #[component]
 pub fn Remap() -> Element {
-    let mut res =
-        use_resource(|| async { (fetcher::get_keymap().await, web_time::SystemTime::now()) });
+    let mut res = use_resource(|| async { (fetcher::get_keymap().await, js_sys::Date::now()) });
 
     let keyboard = CONN
         .read()
@@ -26,10 +25,6 @@ pub fn Remap() -> Element {
     match &*res.value().read() {
         Some((Ok(keymap), time)) => {
             dioxus::logger::tracing::info!("{:?}", time);
-            let time = time
-                .duration_since(web_time::UNIX_EPOCH)
-                .unwrap()
-                .as_millis();
             rsx! {
                 div { class: "h-full",
                     // Using array as re-rendering using key only works for list
