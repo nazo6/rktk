@@ -39,10 +39,29 @@ pub fn Topbar() -> Element {
 #[component]
 fn ThemeToggle() -> Element {
     rsx! {
-        input {
-            r#type: "checkbox",
-            class: "toggle theme-controller",
-            value: "dark",
+        div { class: "join bg-base-100 p-0.5",
+            input {
+                r#type: "radio",
+                class: "join-item theme-controller btn btn-sm btn-secondary",
+                checked: true,
+                value: "default",
+                name: "theme",
+                aria_label: "Default",
+            }
+            input {
+                r#type: "radio",
+                class: "join-item theme-controller btn btn-sm btn-secondary",
+                value: "cupcake",
+                name: "theme",
+                aria_label: "Light",
+            }
+            input {
+                r#type: "radio",
+                class: "join-item theme-controller btn btn-sm btn-secondary",
+                value: "dark",
+                name: "theme",
+                aria_label: "Dark",
+            }
         }
     }
 }
