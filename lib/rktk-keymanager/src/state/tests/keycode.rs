@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn mouse_left_click_key() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::Normal(KeyCode::Mouse(Mouse::Left));
+    keymap.layers[0].map[0][0] = KeyAction::Normal(KeyCode::Mouse(Mouse::MLeft));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
