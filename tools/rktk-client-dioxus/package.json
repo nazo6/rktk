@@ -7,7 +7,7 @@
     "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
     "dev:dioxus": "dx serve -i true",
     "dev": "conc -r -c auto npm:dev:*",
-    "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && pnpm dx build --release"
+    "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "concurrently": "^9.1.0",
     "daisyui": "^4.12.14",
-    "tailwindcss": "^3.4.16"
+    "tailwindcss": "^3.4.16",
+    "wrangler": "^3.94.0"
   }
 }
