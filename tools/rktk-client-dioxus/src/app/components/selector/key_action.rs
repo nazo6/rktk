@@ -4,62 +4,69 @@ use rktk_keymanager::keycode::{key::Key, KeyAction, KeyCode};
 use crate::app::components::selector::key_code::KeyCodeSelector;
 
 #[component]
-pub fn KeyActionSelector(key_action: KeyAction, select_key_action: Callback<KeyAction>) -> Element {
+pub fn KeyActionSelector(
+    key_action: KeyAction,
+    select_key_action: Callback<KeyAction>,
+    discard: Callback<()>,
+) -> Element {
     rsx! {
-        div { class: "flex flex-col gap-2",
-            form { class: "join",
-                input {
-                    r#type: "radio",
-                    name: "options",
-                    class: "join-item btn btn-sm",
-                    checked: matches!(key_action, KeyAction::Inherit),
-                    onclick: move |_| select_key_action(KeyAction::Inherit),
-                    aria_label: "Inherit",
+        div { class: "flex flex-col gap-2 p-2 rounded-md border-2",
+            div { class: "flex gap-2",
+                form { class: "join",
+                    input {
+                        r#type: "radio",
+                        name: "options",
+                        class: "join-item btn btn-sm",
+                        checked: matches!(key_action, KeyAction::Inherit),
+                        onclick: move |_| select_key_action(KeyAction::Inherit),
+                        aria_label: "Inherit",
+                    }
+                    input {
+                        r#type: "radio",
+                        name: "options",
+                        class: "join-item btn btn-sm",
+                        checked: matches!(key_action, KeyAction::Normal(_)),
+                        onclick: move |_| select_key_action(KeyAction::Normal(KeyCode::Key(Key::A))),
+                        aria_label: "Normal",
+                    }
+                    input {
+                        r#type: "radio",
+                        name: "options",
+                        class: "join-item btn btn-sm",
+                        checked: matches!(key_action, KeyAction::Normal2(_, _)),
+                        onclick: move |_| {
+                            select_key_action(KeyAction::Normal2(KeyCode::Key(Key::A), KeyCode::Key(Key::A)))
+                        },
+                        aria_label: "Normal2",
+                    }
+                    input {
+                        r#type: "radio",
+                        name: "options",
+                        class: "join-item btn btn-sm",
+                        checked: matches!(key_action, KeyAction::OneShot(_)),
+                        onclick: move |_| select_key_action(KeyAction::OneShot(KeyCode::Key(Key::A))),
+                        aria_label: "Oneshot",
+                    }
+                    input {
+                        r#type: "radio",
+                        name: "options",
+                        class: "join-item btn btn-sm",
+                        checked: matches!(key_action, KeyAction::TapHold(_, _)),
+                        onclick: move |_| {
+                            select_key_action(KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::A)))
+                        },
+                        aria_label: "Tap-Hold",
+                    }
+                    input {
+                        r#type: "radio",
+                        name: "options",
+                        class: "join-item btn btn-sm",
+                        checked: matches!(key_action, KeyAction::TapDance(_)),
+                        onclick: move |_| { select_key_action(KeyAction::TapDance(0)) },
+                        aria_label: "Tap-Dance",
+                    }
                 }
-                input {
-                    r#type: "radio",
-                    name: "options",
-                    class: "join-item btn btn-sm",
-                    checked: matches!(key_action, KeyAction::Normal(_)),
-                    onclick: move |_| select_key_action(KeyAction::Normal(KeyCode::Key(Key::A))),
-                    aria_label: "Normal",
-                }
-                input {
-                    r#type: "radio",
-                    name: "options",
-                    class: "join-item btn btn-sm",
-                    checked: matches!(key_action, KeyAction::Normal2(_, _)),
-                    onclick: move |_| {
-                        select_key_action(KeyAction::Normal2(KeyCode::Key(Key::A), KeyCode::Key(Key::A)))
-                    },
-                    aria_label: "Normal2",
-                }
-                input {
-                    r#type: "radio",
-                    name: "options",
-                    class: "join-item btn btn-sm",
-                    checked: matches!(key_action, KeyAction::OneShot(_)),
-                    onclick: move |_| select_key_action(KeyAction::OneShot(KeyCode::Key(Key::A))),
-                    aria_label: "Oneshot",
-                }
-                input {
-                    r#type: "radio",
-                    name: "options",
-                    class: "join-item btn btn-sm",
-                    checked: matches!(key_action, KeyAction::TapHold(_, _)),
-                    onclick: move |_| {
-                        select_key_action(KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::A)))
-                    },
-                    aria_label: "Tap-Hold",
-                }
-                input {
-                    r#type: "radio",
-                    name: "options",
-                    class: "join-item btn btn-sm",
-                    checked: matches!(key_action, KeyAction::TapDance(_)),
-                    onclick: move |_| { select_key_action(KeyAction::TapDance(0)) },
-                    aria_label: "Tap-Dance",
-                }
+                button { class: "btn btn-sm", onclick: move |_| discard(()), "Discard" }
             }
             div { class: "border-2 rounded-md p-2",
                 match key_action {

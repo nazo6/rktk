@@ -6,7 +6,7 @@
   "scripts": {
     "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
     "dev:dioxus": "dx serve -i true",
-    "dev": "conc -i -r -c auto npm:dev:*",
+    "dev": "conc -r -c auto npm:dev:*",
     "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && pnpm dx build --release"
   },
   "keywords": [],

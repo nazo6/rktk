@@ -2,13 +2,13 @@ use dioxus::prelude::*;
 use dioxus_elements::geometry::PixelsSize;
 use rktk_rrp::endpoints::rktk_keymanager::keycode::KeyAction;
 
-use super::Keymap;
+use super::KeymapData;
 
 const SIZE_AMP: f64 = 60.0;
 
 #[component]
 pub fn Keyboard(
-    keymap: Keymap,
+    keymap: KeymapData,
     layer: Signal<usize>,
     select_signal: Signal<Option<(usize, usize)>>,
 ) -> Element {
