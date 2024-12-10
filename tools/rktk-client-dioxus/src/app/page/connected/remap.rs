@@ -24,7 +24,6 @@ pub fn Remap() -> Element {
 
     match &*res.value().read() {
         Some((Ok(keymap), time)) => {
-            dioxus::logger::tracing::info!("{:?}", time);
             rsx! {
                 div { class: "h-full",
                     // Using array as re-rendering using key only works for list

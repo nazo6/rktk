@@ -73,8 +73,6 @@ mod conn {
             .await
             .map_err(|e| anyhow::anyhow!("Cannot open device: {:?}", e))?;
 
-        dioxus::logger::tracing::info!("{:?}", &device);
-
         let client = Client::new(&device);
 
         web_sys::console::log_1(&device);

@@ -11,14 +11,18 @@ pub fn Log() -> Element {
 
     let mut logs = use_signal(Vec::new);
 
+    let mut streaming = use_signal(|| true);
+
     use_effect(move || {
         spawn(async move {
             loop {
                 gloo_timers::future::TimeoutFuture::new(1000).await;
-                let Ok(new_logs) = fetcher::get_log().await else {
-                    continue;
-                };
-                logs.write().extend(new_logs);
+                if *streaming.read() {
+                    let Ok(new_logs) = fetcher::get_log().await else {
+                        continue;
+                    };
+                    logs.write().extend(new_logs);
+                }
             }
         });
     });
@@ -26,6 +30,19 @@ pub fn Log() -> Element {
     match &*base_time.value().read() {
         Some(Ok(base_time)) => rsx! {
             div { class: "p-2",
+                button {
+                    class: "btn btn-sm",
+                    class: if *streaming.read() { "btn-primary" } else { "btn-secondary" },
+                    onclick: move |_| {
+                        let prev = *streaming.read();
+                        streaming.set(!prev);
+                    },
+                    if *streaming.read() {
+                        "Pause"
+                    } else {
+                        "Resume"
+                    }
+                }
                 table { class: "table table-sm w-full [&_td]:py-1",
                     thead {
                         tr {

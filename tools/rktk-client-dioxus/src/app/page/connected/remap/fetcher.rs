@@ -23,8 +23,6 @@ struct LayoutJson {
 }
 
 pub async fn get_keymap() -> anyhow::Result<KeymapData> {
-    dioxus::logger::tracing::info!("Fetching keymap");
-
     let conn = &*CONN.read();
     let conn = conn.as_ref().context("Not connected")?;
     let mut client = conn.client.client.lock().await;
@@ -41,8 +39,6 @@ pub async fn get_keymap() -> anyhow::Result<KeymapData> {
 
     let keymaps = client.get_keymaps(()).await?;
     let keymaps = keymaps.try_collect::<Vec<_>>().await?;
-
-    dioxus::logger::tracing::info!("Keymap fetched");
 
     Ok(process_keymap(
         conn.keyboard.clone(),
