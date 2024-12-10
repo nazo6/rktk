@@ -77,6 +77,8 @@ mod conn {
 
         let client = Client::new(&device);
 
+        web_sys::console::log_1(&device);
+
         let keyboard = client
             .client
             .lock()

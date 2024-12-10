@@ -1,25 +1,20 @@
 use std::collections::HashMap;
 
 use dioxus::prelude::*;
-use dioxus_query::prelude::*;
 
-use futures::Stream;
-use rktk_rrp::endpoints::{
-    get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction, KeyActionLoc,
-};
+use fetcher::KeymapData;
+use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction};
 
-use crate::app::{
-    components::selector::key_action::KeyActionSelector,
-    query::query::{get_keymap::KeymapData, use_app_get_query, QueryKey, QueryValue},
-    state::CONN,
-};
+use crate::app::{components::selector::key_action::KeyActionSelector, state::CONN};
 
 mod bar;
+mod fetcher;
 mod keyboard;
 
 #[component]
 pub fn Remap() -> Element {
-    let res = use_app_get_query([QueryKey::GetKeymap]);
+    let mut res =
+        use_resource(|| async { (fetcher::get_keymap().await, web_time::SystemTime::now()) });
 
     let keyboard = CONN
         .read()
@@ -28,16 +23,28 @@ pub fn Remap() -> Element {
         .keyboard
         .clone();
 
-    let res = res.result();
-    match res.value() {
-        QueryResult::Ok(QueryValue::Keymap(keymap)) => {
+    match &*res.value().read() {
+        Some((Ok(keymap), time)) => {
+            dioxus::logger::tracing::info!("{:?}", time);
+            let time = time
+                .duration_since(web_time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis();
             rsx! {
                 div { class: "h-full",
-                    RemapInner { keyboard, keymap: keymap.to_owned() }
+                    // Using array as re-rendering using key only works for list
+                    {[rsx! {
+                        RemapInner {
+                            keyboard,
+                            keymap: keymap.to_owned(),
+                            refetch: Callback::new(move |_| res.restart()),
+                            key: "{time}",
+                        }
+                    }].iter()}
                 }
             }
         }
-        QueryResult::Loading(_) => {
+        None => {
             rsx! {
                 div {
                     h1 { "Loading" }
@@ -45,7 +52,7 @@ pub fn Remap() -> Element {
                 }
             }
         }
-        QueryResult::Err(e) => {
+        Some((Err(e), _)) => {
             dioxus::logger::tracing::error!("{:?}", e);
             rsx! {
                 div {
@@ -54,12 +61,11 @@ pub fn Remap() -> Element {
                 }
             }
         }
-        _ => unreachable!(),
     }
 }
 
 #[component]
-pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData) -> Element {
+pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData, refetch: Callback<()>) -> Element {
     let mut modified_keymap = use_signal(|| keymap.clone());
     let mut keymap_changes = use_signal(HashMap::new);
 
@@ -72,22 +78,8 @@ pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData) -> Element {
                 changes: keymap_changes.read().clone(),
                 apply: Callback::new(move |_| {
                     spawn(async move {
-                        if let Some(c) = &*CONN.read() {
-                            let changes: Vec<KeyActionLoc> = keymap_changes
-                                .read()
-                                .iter()
-                                .map(|(k, v)| {
-                                    KeyActionLoc {
-                                        layer: k.0,
-                                        row: k.1,
-                                        col: k.2,
-                                        key: v.clone(),
-                                    }
-                                })
-                                .collect();
-                            let changes = futures::stream::iter(changes);
-                            let res = c.client.client.lock().await.set_keymaps(changes).await;
-                            dioxus::logger::tracing::info!("{:?}", res);
+                        if fetcher::set_keymap(&keymap_changes.read()).await.is_ok() {
+                            refetch(());
                         }
                     });
                 }),
@@ -105,6 +97,7 @@ pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData) -> Element {
                 layer,
                 keymap: modified_keymap.read().clone(),
                 select_signal: selected,
+                keymap_changes,
             }
             div {
                 match *selected.read() {
@@ -112,6 +105,9 @@ pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData) -> Element {
                         let orig_key = keymap[*layer.read()][row][col].clone();
                         rsx! {
                             if let Some(key_action) = modified_keymap.read()[*layer.read()][row][col].action {
+                                div {
+                                    code { {format!("Layer: {}, Row: {}, Col: {}", *layer.read(), row, col)} }
+                                }
                                 KeyActionSelector {
                                     key_action,
                                     discard: Callback::new(move |_| {

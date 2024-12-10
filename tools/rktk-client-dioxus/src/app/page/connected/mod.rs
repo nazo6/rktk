@@ -17,7 +17,9 @@ pub fn Connected() -> Element {
 
     rsx! {
         div { class: "flex flex-col h-full",
-            div { role: "tablist", class: "tabs tabs-lifted pt-2",
+            div {
+                role: "tablist",
+                class: "tabs tabs-boxed ml-auto mr-auto my-2",
                 a {
                     role: "tab",
                     class: "tab",

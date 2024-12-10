@@ -31,6 +31,8 @@ web-sys = { workspace = true, features = [
   "HidUnitSystem",
 ] }
 
+log = { workspace = true }
+
 async-lock = "3.4.0"
 
 usbd-hid = { workspace = true }

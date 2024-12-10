@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::Context as _;
 use dioxus::signals::Readable as _;
 use futures::TryStreamExt as _;
@@ -21,6 +23,8 @@ struct LayoutJson {
 }
 
 pub async fn get_keymap() -> anyhow::Result<KeymapData> {
+    dioxus::logger::tracing::info!("Fetching keymap");
+
     let conn = &*CONN.read();
     let conn = conn.as_ref().context("Not connected")?;
     let mut client = conn.client.client.lock().await;
@@ -37,6 +41,8 @@ pub async fn get_keymap() -> anyhow::Result<KeymapData> {
 
     let keymaps = client.get_keymaps(()).await?;
     let keymaps = keymaps.try_collect::<Vec<_>>().await?;
+
+    dioxus::logger::tracing::info!("Keymap fetched");
 
     Ok(process_keymap(
         conn.keyboard.clone(),
@@ -97,4 +103,22 @@ fn process_keymap(
         }
     }
     keymap
+}
+
+pub async fn set_keymap(changes: &HashMap<(u8, u8, u8), KeyAction>) -> anyhow::Result<()> {
+    let conn = &*CONN.read();
+    let conn = conn.as_ref().context("Not connected")?;
+    let mut client = conn.client.client.lock().await;
+
+    let stream =
+        futures::stream::iter(changes.iter().map(|((layer, row, col), key)| KeyActionLoc {
+            layer: *layer,
+            row: *row,
+            col: *col,
+            key: *key,
+        }));
+
+    client.set_keymaps(stream).await?;
+
+    Ok(())
 }

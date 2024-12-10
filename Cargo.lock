@@ -1481,16 +1481,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dioxus-query"
-version = "0.5.1"
-source = "git+https://github.com/nazo6/dioxus-query?branch=dioxus-0.6#daa96573c6b71dcf6c57f0ad80ebadb26aad006c"
-dependencies = [
- "dioxus-lib",
- "futures-util",
- "instant",
-]
-
-[[package]]
 name = "dioxus-rsx"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3202,9 +3192,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e0242819d153cba4b4b05a5a8f2a7e9bbf97b6055b2a002b395c96b5ff3c0222"
 dependencies = [
  "cfg-if",
- "js-sys",
- "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]
@@ -4944,10 +4931,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dioxus",
- "dioxus-query",
  "futures",
  "js-sys",
  "kle-serial",
+ "log",
  "rktk-keymanager",
  "rktk-rrp",
  "rktk-rrp-client-webhid",
@@ -4955,8 +4942,10 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "strum",
+ "tracing-log",
  "wasm-bindgen-futures",
  "web-sys",
+ "web-time",
 ]
 
 [[package]]
@@ -5084,6 +5073,7 @@ version = "0.1.0"
 dependencies = [
  "async-lock",
  "futures",
+ "log",
  "rktk-rrp",
  "ssmarshal",
  "usbd-hid",
@@ -6143,6 +6133,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e672c95779cf947c5311f83787af4fa8fffd12fb27e4993211a84bdfd9610f9c"
 dependencies = [
  "once_cell",
+ "valuable",
+]
+
+[[package]]
+name = "tracing-log"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
+dependencies = [
+ "log",
+ "once_cell",
+ "tracing-core",
 ]
 
 [[package]]
@@ -6367,6 +6369,12 @@ name = "uuid"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8c5f0a0af699448548ad1a2fbf920fb4bee257eae39953ba95cb84891a0446a"
+
+[[package]]
+name = "valuable"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "vcell"

@@ -5,6 +5,8 @@ use rktk_keymanager::keycode::{
 };
 use strum::IntoEnumIterator as _;
 
+use crate::app::components::selector::key::LayerKeySelector;
+
 use super::key::KeySelector;
 
 #[component]
@@ -93,7 +95,13 @@ pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) ->
                             select_key: Callback::new(move |modifier| select_key_code(KeyCode::Modifier(modifier))),
                         }
                     },
-                    KeyCode::Layer(layer_op) => rsx! {},
+                    KeyCode::Layer(layer_op) => rsx! {
+                        LayerKeySelector {
+                            selected_key: layer_op,
+                            select_key: Callback::new(move |layer| select_key_code(KeyCode::Layer(layer))),
+
+                        }
+                    },
                     KeyCode::Special(special) => rsx! {
                         KeySelector {
                             items: Special::iter().collect(),

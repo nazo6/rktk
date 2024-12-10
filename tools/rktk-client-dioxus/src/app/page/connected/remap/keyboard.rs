@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use dioxus::prelude::*;
 use dioxus_elements::geometry::PixelsSize;
 use rktk_rrp::endpoints::rktk_keymanager::keycode::KeyAction;
@@ -11,6 +13,7 @@ pub fn Keyboard(
     keymap: KeymapData,
     layer: Signal<usize>,
     select_signal: Signal<Option<(usize, usize)>>,
+    keymap_changes: ReadOnlySignal<HashMap<(u8, u8, u8), KeyAction>>,
 ) -> Element {
     let keyboard_width = keymap
         .iter()
@@ -42,7 +45,7 @@ pub fn Keyboard(
     let mut elem_size = use_signal(|| Option::<PixelsSize>::None);
 
     let scale = if let Some(size) = &*elem_size.read() {
-        ((size.width - 150.0) / keyboard_width).min(size.height / keyboard_height)
+        (size.width - 150.0) / keyboard_width
     } else {
         1.0
     };
@@ -50,15 +53,16 @@ pub fn Keyboard(
     rsx! {
         div {
             class: "w-full flex justify-center max-w-[80rem]",
-            onresize: move |evt| elem_size.set(evt.data().get_content_box_size().ok()),
+            onresize: move |evt| { elem_size.set(evt.data().get_content_box_size().ok()) },
             div {
                 width: format!("{}px", keyboard_width * scale),
                 height: format!("{}px", keyboard_height * scale),
-                div { class: "flex gap-2",
-                    div { class: "flex flex-col gap-2",
+                div { class: "flex gap-2 h-full",
+                    div { class: "flex flex-col gap-2 justify-center pr-2",
                         for (l , _) in keymap.iter().enumerate() {
                             button {
                                 class: "btn btn-square btn-sm rounded-sm",
+                                class: if *layer.read() == l { "btn-primary" },
                                 onclick: move |_| layer.set(l),
                                 "{l}"
                             }
@@ -77,6 +81,7 @@ pub fn Keyboard(
                                         row,
                                         col,
                                         select_signal,
+                                        changed: keymap_changes.read().contains_key(&(*layer.read() as u8, row as u8, col as u8)),
                                     }
                                 }
                             }
@@ -95,12 +100,14 @@ pub fn Key(
     row: usize,
     col: usize,
     mut select_signal: Signal<Option<(usize, usize)>>,
+    changed: bool,
 ) -> Element {
     rsx! {
         div {
             onclick: move |_| { select_signal.set(Some((row, col))) },
             class: "absolute border-2 p-1 font-bold cursor-pointer hover:bg-gray-500/20 overflow-hidden text-xs",
             class: if Some((row, col)) == *select_signal.read() { "border-accent" } else { "border-primary-content" },
+            class: if changed { "text-red-500" },
             width: format!("{}px", kle_key.width * SIZE_AMP - 2.0),
             height: format!("{}px", kle_key.height * SIZE_AMP - 2.0),
             top: format!("{}px", kle_key.y * SIZE_AMP),
