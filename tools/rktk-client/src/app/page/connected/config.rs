@@ -1,18 +1,28 @@
 use dioxus::prelude::*;
 use rktk_keymanager::state::config::StateConfig;
 
-use crate::app::components::notification::{push_notification, Notification, NotificationLevel};
+use crate::app::{
+    cache::{invalidate_cache, use_cache, with_cache},
+    components::notification::{push_notification, Notification, NotificationLevel},
+};
 
 #[component]
 pub fn Config() -> Element {
-    let mut config_res = use_resource(fetcher::get_config);
+    let cache = use_cache();
+    let mut config_res = use_resource({
+        let cache = cache.clone();
+        move || with_cache(cache.clone(), "get_config", fetcher::get_config())
+    });
 
     match &*config_res.value().read() {
         Some(Ok(config)) => rsx! {
             div { class: "w-full flex justify-center",
                 ConfigInner {
                     initial_config: config.to_owned(),
-                    refetch: Callback::new(move |_| config_res.restart()),
+                    refetch: Callback::new(move |_| {
+                        invalidate_cache(cache.clone(), "get_config");
+                        config_res.restart()
+                    }),
                 }
             }
         },

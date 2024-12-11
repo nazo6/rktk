@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::app::cache::use_cache_context_provider;
+
 mod config;
 mod log;
 mod remap;
@@ -13,6 +15,8 @@ enum Tabs {
 
 #[component]
 pub fn Connected() -> Element {
+    use_cache_context_provider();
+
     let mut tab = use_signal(|| Tabs::Remap);
 
     rsx! {

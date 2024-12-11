@@ -6,6 +6,7 @@ use fetcher::KeymapData;
 use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction};
 
 use crate::app::{
+    cache::{invalidate_cache, use_cache, with_cache},
     components::{
         notification::{push_notification, Notification, NotificationLevel},
         selector::key_action::KeyActionSelector,
@@ -19,7 +20,18 @@ mod keyboard;
 
 #[component]
 pub fn Remap() -> Element {
-    let mut res = use_resource(|| async { (fetcher::get_keymap().await, js_sys::Date::now()) });
+    let cache = use_cache();
+    let mut res = use_resource({
+        let cache = cache.clone();
+        move || {
+            with_cache(cache.clone(), "get_keymap", async {
+                match fetcher::get_keymap().await {
+                    Ok(data) => Ok((data, js_sys::Date::now())),
+                    Err(e) => Err(e),
+                }
+            })
+        }
+    });
 
     let keyboard = CONN
         .read()
@@ -29,7 +41,7 @@ pub fn Remap() -> Element {
         .clone();
 
     match &*res.value().read() {
-        Some((Ok(keymap), time)) => {
+        Some(Ok((keymap, time))) => {
             rsx! {
                 div { class: "h-full",
                     // Using array as re-rendering using key only works for list
@@ -37,7 +49,10 @@ pub fn Remap() -> Element {
                         RemapInner {
                             keyboard,
                             keymap: keymap.to_owned(),
-                            refetch: Callback::new(move |_| res.restart()),
+                            refetch: Callback::new(move |_| {
+                                invalidate_cache(cache.clone(), "get_keymap");
+                                res.restart()
+                            }),
                             key: "{time}",
                         }
                     }].iter()}
@@ -52,7 +67,7 @@ pub fn Remap() -> Element {
                 }
             }
         }
-        Some((Err(e), _)) => {
+        Some(Err(e)) => {
             rsx! {
                 div {
                     h1 { "Error" }

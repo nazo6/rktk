@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use crate::TAILWIND_CSS;
 
+mod cache;
 mod components;
 mod disconnect;
 mod page;
