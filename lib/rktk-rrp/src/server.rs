@@ -37,8 +37,6 @@ impl<
     async fn process_request(&mut self) -> Result<(), TransportError<RT::Error, WT::Error>> {
         let req_header = self.reader.recv_request_header().await?;
 
-        log::error!("r{}", req_header.endpoint_id);
-
         self.handle(req_header).await?;
 
         Ok(())
