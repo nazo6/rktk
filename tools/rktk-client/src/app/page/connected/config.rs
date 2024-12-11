@@ -1,6 +1,8 @@
 use dioxus::prelude::*;
 use rktk_keymanager::state::config::StateConfig;
 
+use crate::app::components::notification::{push_notification, Notification, NotificationLevel};
+
 #[component]
 pub fn Config() -> Element {
     let mut config_res = use_resource(fetcher::get_config);
@@ -96,8 +98,17 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
                     spawn(async move {
                         let result = fetcher::set_config(config).await;
                         if let Err(e) = result {
-                            dioxus::logger::tracing::error!("{:?}", e);
+                            push_notification(Notification {
+                                message: format!("Could not set config: {:?}", e),
+                                level: NotificationLevel::Error,
+                                ..Default::default()
+                            });
                         } else {
+                            push_notification(Notification {
+                                message: "Config updated".to_string(),
+                                level: NotificationLevel::Info,
+                                ..Default::default()
+                            });
                             refetch(());
                         }
                     });

@@ -1,6 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::app::{disconnect::disconnect, state::CONN};
+use crate::app::{
+    components::notification::{push_notification, Notification, NotificationLevel},
+    disconnect::disconnect,
+    state::CONN,
+};
 
 #[component]
 pub fn Topbar() -> Element {
@@ -20,7 +24,11 @@ pub fn Topbar() -> Element {
                                         *CONN.write() = None;
                                     }
                                     Err(e) => {
-                                        dioxus::logger::tracing::info!("{:?}", e);
+                                        push_notification(Notification {
+                                            message: format!("Cannot disconnect from device: {:?}", e),
+                                            level: NotificationLevel::Error,
+                                            ..Default::default()
+                                        });
                                     }
                                 }
                             });

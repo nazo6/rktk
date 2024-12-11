@@ -15,6 +15,7 @@ pub fn App() -> Element {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         document::Title { "RKTK Client" }
+        components::notification::NotificationProvider {}
         div { class: "h-full bg-base flex flex-col",
             components::topbar::Topbar {}
             Home {}

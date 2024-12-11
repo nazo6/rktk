@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::app::state::CONN;
+use crate::app::{
+    components::notification::{push_notification, Notification, NotificationLevel},
+    state::CONN,
+};
 
 #[component]
 pub fn Connect() -> Element {
@@ -20,10 +23,19 @@ pub fn Connect() -> Element {
                         spawn(async move {
                             match conn::connect(hid.clone()).await {
                                 Ok(state) => {
+                                    push_notification(Notification {
+                                        message: format!("Connected to device: {}", state.keyboard.name),
+                                        level: NotificationLevel::Info,
+                                        ..Default::default()
+                                    });
                                     *CONN.write() = Some(state);
                                 }
                                 Err(e) => {
-                                    dioxus::logger::tracing::info!("{:?}", e);
+                                    push_notification(Notification {
+                                        message: format!("Cannot connect to device: {:?}", e),
+                                        level: NotificationLevel::Error,
+                                        ..Default::default()
+                                    });
                                 }
                             }
                         });
@@ -74,8 +86,6 @@ mod conn {
             .map_err(|e| anyhow::anyhow!("Cannot open device: {:?}", e))?;
 
         let client = Client::new(&device);
-
-        web_sys::console::log_1(&device);
 
         let keyboard = client
             .client

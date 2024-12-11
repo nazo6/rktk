@@ -5,7 +5,13 @@ use dioxus::prelude::*;
 use fetcher::KeymapData;
 use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction};
 
-use crate::app::{components::selector::key_action::KeyActionSelector, state::CONN};
+use crate::app::{
+    components::{
+        notification::{push_notification, Notification, NotificationLevel},
+        selector::key_action::KeyActionSelector,
+    },
+    state::CONN,
+};
 
 mod bar;
 mod fetcher;
@@ -47,11 +53,12 @@ pub fn Remap() -> Element {
             }
         }
         Some((Err(e), _)) => {
-            dioxus::logger::tracing::error!("{:?}", e);
             rsx! {
                 div {
                     h1 { "Error" }
                     p { "Failed to load keymap" }
+                    p { "{e:?}" }
+
                 }
             }
         }
@@ -72,8 +79,22 @@ pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData, refetch: Callback<
                 changes: keymap_changes.read().clone(),
                 apply: Callback::new(move |_| {
                     spawn(async move {
-                        if fetcher::set_keymap(&keymap_changes.read()).await.is_ok() {
-                            refetch(());
+                        match fetcher::set_keymap(&keymap_changes.read()).await {
+                            Ok(_) => {
+                                push_notification(Notification {
+                                    message: "Keymap updated".to_string(),
+                                    level: NotificationLevel::Info,
+                                    ..Default::default()
+                                });
+                                refetch(())
+                            }
+                            Err(e) => {
+                                push_notification(Notification {
+                                    message: format!("Cannot connect to device: {:?}", e),
+                                    level: NotificationLevel::Error,
+                                    ..Default::default()
+                                });
+                            }
                         }
                     });
                 }),
