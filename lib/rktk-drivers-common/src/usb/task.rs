@@ -102,7 +102,7 @@ pub async fn rrp<'d, D: Driver<'d>>(
                     continue;
                 };
                 if to_recv_bytes != 32 {
-                    panic!("One read should give one report. Maybe packet size is enough?");
+                    panic!("One read should give one report. Maybe packet size is not enough?");
                 }
 
                 let len = buf[0] as usize;

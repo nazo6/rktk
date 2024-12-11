@@ -10,15 +10,12 @@ repository.workspace = true
 [package.metadata.docs.rs]
 rustc-args = ["--cfg=web_sys_unstable_apis"]
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
-rktk-rrp = { workspace = true, features = ["tsify", "client"] }
-rktk-keymanager = { workspace = true }
+rktk-rrp = { workspace = true, features = ["client"] }
 
 wasm-bindgen = { workspace = true }
-web-sys = { version = "0.3.70", features = [
+wasm-bindgen-futures = { workspace = true }
+web-sys = { workspace = true, features = [
   "Hid",
   "HidCollectionInfo",
   "HidConnectionEvent",
@@ -33,21 +30,15 @@ web-sys = { version = "0.3.70", features = [
   "HiddenPluginEventInit",
   "HidUnitSystem",
 ] }
-wasm-bindgen-futures = "0.4.43"
-console_log = "1.0.0"
 
-serde = { workspace = true }
-serde-wasm-bindgen = "0.6.5"
-
-anyhow = "1.0.86"
 log = { workspace = true }
-futures = { workspace = true, features = ["std"] }
-async-lock = "3.4.0"
-gloo-timers = { version = "0.3.0", features = ["futures"] }
 
-tsify-next = { workspace = true }
+async-lock = "3.4.0"
+
 usbd-hid = { workspace = true }
 ssmarshal = { workspace = true, features = ["std"] }
+
+futures = { workspace = true }
 
 [features]
 _check = []

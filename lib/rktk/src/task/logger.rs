@@ -52,6 +52,10 @@ impl log::Log for RrpLogger {
             line: record.line(),
         });
 
+        if record.level() == log::Level::Error {
+            crate::print!("{}", record.args());
+        }
+
         write!(
             &mut LogWriter,
             "{}\t{}",

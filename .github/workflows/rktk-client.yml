@@ -35,7 +35,7 @@ jobs:
 
     - uses: taiki-e/install-action@v2
       with:
-        tool: wasm-pack
+        tool: wasm-pack,dioxus-cli
 
     - uses: pnpm/action-setup@v4
       name: Setup pnpm
@@ -53,13 +53,13 @@ jobs:
     - name: pnpm install
       run: cd tools/rktk-client && pnpm install
 
-    - name: Type check and build
-      run: cd tools/rktk-client && pnpm build && pnpm tsc --noEmit
+    - name: Build
+      run: cd tools/rktk-client && pnpm build
 
     - name: Deploy
       uses: cloudflare/wrangler-action@v3
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        command: pages deploy ./dist --project-name=rrpc
+        command: pages deploy ../../target/dx/rktk-client/release/web/public --project-name=rktk-client
         workingDirectory: "tools/rktk-client"

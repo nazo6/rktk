@@ -79,11 +79,13 @@ impl<const BUF_SIZE: usize> WriteTransport<BUF_SIZE> for HidWriter {
             let mut data = vec![chunk.len() as u8];
             data.extend_from_slice(chunk);
             data.resize(32, 0);
-            wasm_bindgen_futures::JsFuture::from(
-                self.device.send_report_with_u8_slice(0, &mut data).unwrap(),
-            )
-            .await
-            .map_err(|e| format!("{:?}", e))?;
+            let p = self
+                .device
+                .send_report_with_u8_slice(0, &mut data)
+                .map_err(|e| format!("{:?}", e))?;
+            wasm_bindgen_futures::JsFuture::from(p)
+                .await
+                .map_err(|e| format!("{:?}", e))?;
         }
 
         Ok(buf.len())

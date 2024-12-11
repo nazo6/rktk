@@ -2,7 +2,10 @@ use rktk::keymanager::keycode::*;
 use rktk::keymanager::keycode::{
     key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
 };
-use rktk::keymap_config::{Keymap, Layer, LayerMap};
+use rktk::{
+    keymanager::keymap::TapDanceDefinition,
+    keymap_config::{Keymap, Layer, LayerMap},
+};
 
 const L2ENTER: KeyAction = KeyAction::TapHold(
     KeyCode::Key(Key::Enter),
@@ -40,8 +43,8 @@ const L0: LayerMap = [
 const L1: LayerMap = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
-    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , M_L   ,MO_SCRL, M_R   , _____ , _____ ],
-    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , M_BCK , M_MID , M_FWD , _____ , _____ ],
+    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ ,M_LEFT ,MO_SCRL,M_RIGHT, _____ , _____ ],
+    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ ,M_BACK ,M_MIDDLE,M_FORWARD,_____,_____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
 ];
 
@@ -50,8 +53,8 @@ const L1: LayerMap = [
 const L2: LayerMap = [
     [ _____ , F1    , F2    , F3    , F4    , F5    , _____ , /**/ _____ , F6    , F7    , F8    , F9    , F10   , F11   ],
     [ _____ , _____ , INSERT, HOME  , PGUP  , _____ , _____ , /**/ _____ , LEFT  , DOWN  , UP    , RIGHT , _____ , F12   ],
-    [ _____ , _____ , DELETE, END   , PGDN  , _____ , _____ , /**/ _____ , _____ , M_L   ,MO_SCRL, M_R   , _____ , VOLUP ],
-    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , M_BCK , M_MID , M_FWD , _____ , VOLDN ],
+    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ ,M_LEFT ,MO_SCRL,M_RIGHT, _____ , VOLUP ],
+    [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ ,M_BACK ,M_MIDDLE,M_FORWARD,_____,VOLDN ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ DELETE, _____ , _____ , _____ , _____ , PRTSC , _____ ],
 ];
 
@@ -97,6 +100,19 @@ pub const KEYMAP: Keymap = Keymap {
             arrowmouse: true,
         },
     ],
-    tap_dance: [None, None, None, None],
+    tap_dance: [
+        Some(TapDanceDefinition {
+            tap: [
+                Some(KeyCode::Key(Key::RightBracket)),
+                Some(KeyCode::Layer(LayerOp::Toggle(2))),
+                None,
+                None,
+            ],
+            hold: [None, None, None, None],
+        }),
+        None,
+        None,
+        None,
+    ],
     combo: [None, None, None, None],
 };

@@ -31,11 +31,13 @@ impl TryFrom<u8> for Indicator {
     }
 }
 
+#[derive(Debug)]
 pub struct RequestHeader {
     pub request_id: u8,
     pub endpoint_id: u8,
 }
 
+#[derive(Debug)]
 pub struct ResponseHeader {
     pub request_id: u8,
     /// 0: OK, 1: Error
