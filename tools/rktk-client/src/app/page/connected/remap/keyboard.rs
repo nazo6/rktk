@@ -106,7 +106,7 @@ pub fn Key(
         div {
             onclick: move |_| { select_signal.set(Some((row, col))) },
             class: "absolute border-2 p-1 font-bold cursor-pointer hover:bg-gray-500/20 overflow-hidden text-xs",
-            class: if Some((row, col)) == *select_signal.read() { "border-accent" } else { "border-primary-content" },
+            class: if Some((row, col)) == *select_signal.read() { "border-accent" } else { "border-base-content" },
             class: if changed { "text-red-500" },
             width: format!("{}px", kle_key.width * SIZE_AMP - 2.0),
             height: format!("{}px", kle_key.height * SIZE_AMP - 2.0),

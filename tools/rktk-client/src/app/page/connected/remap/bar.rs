@@ -10,11 +10,22 @@ pub fn Bar(
     discard_all: Callback<()>,
 ) -> Element {
     rsx! {
-        div { class: "text-secondary-content bg-secondary flex w-full h-10 items-center px-2 gap-2",
+        div { class: "bg-base-300 text-secondary-content flex w-full h-10 items-center px-2 gap-2",
+            div { class: "ml-auto p-2" }
             if !changes.is_empty() {
-                div { class: "ml-auto gap-2 p-2", "Changes: {changes.len()}" }
-                button { class: "btn btn-sm", onclick: move |_| apply(()), "Apply" }
-                button { class: "btn btn-sm", onclick: move |_| discard_all(()), "Discard" }
+                div { "Pending changes: {changes.len()}" }
+            }
+            button {
+                disabled: changes.is_empty(),
+                class: "btn btn-sm btn-primary",
+                onclick: move |_| apply(()),
+                "Apply"
+            }
+            button {
+                disabled: changes.is_empty(),
+                class: "btn btn-sm btn-secondary",
+                onclick: move |_| discard_all(()),
+                "Discard"
             }
         }
     }

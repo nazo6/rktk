@@ -28,13 +28,30 @@ pub fn KeySelector<I: Display + PartialEq + Clone + 'static>(
 #[component]
 pub fn LayerKeySelector(selected_key: LayerOp, select_key: Callback<LayerOp>) -> Element {
     rsx! {
-        div {
-            select { class: "select-sm select-bordered w-full",
-                option { selected: matches!(selected_key, LayerOp::Momentary(_)), "Momentary" }
-                option { selected: matches!(selected_key, LayerOp::Toggle(_)), "Toggle" }
+        div { class: "grid grid-cols-3 items-center gap-2",
+            select {
+                class: "col-span-1 select select-sm select-bordered",
+                onchange: move |evt| {
+                    let selected_key = match evt.data().value().as_str() {
+                        "mo" => LayerOp::Momentary(0),
+                        "to" => LayerOp::Toggle(0),
+                        _ => return,
+                    };
+                    select_key(selected_key);
+                },
+                option {
+                    value: "mo",
+                    selected: matches!(selected_key, LayerOp::Momentary(_)),
+                    "Momentary"
+                }
+                option {
+                    value: "to",
+                    selected: matches!(selected_key, LayerOp::Toggle(_)),
+                    "Toggle"
+                }
             }
             input {
-                class: "input w-full",
+                class: "col-span-2 input input-sm input-bordered w-full",
                 r#type: "number",
                 value: match selected_key {
                     LayerOp::Momentary(n) | LayerOp::Toggle(n) => n.to_string(),

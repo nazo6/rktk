@@ -5,7 +5,7 @@ use crate::app::{disconnect::disconnect, state::CONN};
 #[component]
 pub fn Topbar() -> Element {
     rsx! {
-        div { class: "flex bg-primary text-primary-content items-center h-10 px-2",
+        div { class: "flex bg-primary text-primary-content items-center h-12 px-2",
             h1 { class: "text-2xl font-bold", "RKTK Client" }
             div { class: "ml-auto flex gap-2 items-center",
                 if let Some(state) = &*CONN.read() {

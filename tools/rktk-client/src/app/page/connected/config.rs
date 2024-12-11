@@ -40,7 +40,7 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
             rsx! {
                 p { class: "col-span-2", $name}
                 input {
-                    class: "col-span-3 input input-bordered",
+                    class: "col-span-3 input input-bordered input-sm",
                     r#type: "number",
                     value,
                     oninput: move |evt| {
@@ -61,7 +61,7 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
             rsx! {
                 p { class: "col-span-2", $name}
                 input {
-                    class: "col-span-3 checkbox ml-auto mr-auto",
+                    class: "col-span-3 checkbox checkbox-sm ml-auto mr-auto",
                     r#type: "checkbox",
                     checked: value,
                     onchange: move |evt| {
@@ -77,7 +77,7 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
         div { class: "flex flex-col max-w-lg items-center",
             div { class: "grid grid-cols-5 items-center gap-2",
                 h2 { class: "col-span-5 text-lg font-bold", "Mouse" }
-                {number_form!("Auto mouse layer", mouse.auto_mouse_duration)}
+                {number_form!("Auto mouse layer", mouse.auto_mouse_layer)}
                 {number_form!("Auto mouse duration", mouse.auto_mouse_duration)}
                 {number_form!("Auto mouse threshold", mouse.auto_mouse_threshold)}
                 {number_form!("Scroll divider x", mouse.scroll_divider_x)}
@@ -106,8 +106,9 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
             }
             button {
                 class: "btn btn-secondary mt-2 w-full",
+                disabled: initial_config == *config.read(),
                 onclick: move |_| *config.write() = initial_config.clone(),
-                "Reset"
+                "Discard"
             }
         }
     }

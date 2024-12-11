@@ -127,9 +127,20 @@ pub fn KeyActionSelector(
                             }
                         }
                     },
-                    KeyAction::TapDance(_) => rsx! {
-                        div {
-                            input { r#type: "number", class: "join-item btn", "0" }
+                    KeyAction::TapDance(id) => rsx! {
+                        div { class: "flex gap-2 items-center",
+                            "Tap-dance ID"
+                            input {
+                                r#type: "number",
+                                class: "input input-bordered input-sm grow",
+                                value: id,
+                                onchange: move |evt| {
+                                    let Ok(i) = evt.data().value().parse::<u8>() else {
+                                        return;
+                                    };
+                                    select_key_action(KeyAction::TapDance(i))
+                                },
+                            }
                         }
                     },
                 }
