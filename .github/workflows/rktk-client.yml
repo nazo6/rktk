@@ -4,14 +4,14 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'tools/rktk-client-dioxus/**'
+      - 'tools/rktk-client/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rktk-client.yml'
       - '.github/workflows/setup-rust/action.yaml'
   pull_request:
     paths:
-      - 'tools/rktk-client-dioxus/**'
+      - 'tools/rktk-client/**'
       - 'lib/rktk-keymanager/**.rs'
       - 'lib/rktk-rrp/**.rs'
       - '.github/workflows/rktk-client.yml'
@@ -48,18 +48,18 @@ jobs:
       with:
         node-version: 20
         cache: 'pnpm'
-        cache-dependency-path: tools/rktk-client-dioxus/pnpm-lock.yaml
+        cache-dependency-path: tools/rktk-client/pnpm-lock.yaml
 
     - name: pnpm install
-      run: cd tools/rktk-client-dioxus && pnpm install
+      run: cd tools/rktk-client && pnpm install
 
     - name: Build
-      run: cd tools/rktk-client-dioxus && pnpm build
+      run: cd tools/rktk-client && pnpm build
 
     - name: Deploy
       uses: cloudflare/wrangler-action@v3
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        command: pages deploy ../../target/dx/rktk-client-dioxus/release/web/public --project-name=rktk-client
-        workingDirectory: "tools/rktk-client-dioxus"
+        command: pages deploy ../../target/dx/rktk-client/release/web/public --project-name=rktk-client
+        workingDirectory: "tools/rktk-client"

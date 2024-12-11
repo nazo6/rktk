@@ -6,7 +6,7 @@ members = [
   "examples/*",
   "tools/cli",
   "tools/ra-check",
-  "tools/rktk-client-dioxus",
+  "tools/rktk-client",
 ]
 resolver = "2"
 
