@@ -11,6 +11,7 @@ use crate::{
 use super::utils::resolve_entire_key_pos;
 
 pub async fn start(hand: Hand, s2m_rx: S2mRx<'_>) {
+    let slave_hand = hand.other();
     loop {
         s2m_rx.ready_to_receive().await;
         while let Ok(cmd_from_slave) = s2m_rx.try_receive() {
@@ -21,7 +22,7 @@ pub async fn start(hand: Hand, s2m_rx: S2mRx<'_>) {
                         row,
                         pressed: true,
                     };
-                    resolve_entire_key_pos(&mut ev, hand);
+                    resolve_entire_key_pos(&mut ev, slave_hand);
                     KEYBOARD_EVENT_REPORT_CHANNEL.send(ev).await;
                 }
                 SlaveToMaster::Released(row, col) => {
@@ -30,7 +31,7 @@ pub async fn start(hand: Hand, s2m_rx: S2mRx<'_>) {
                         row,
                         pressed: false,
                     };
-                    resolve_entire_key_pos(&mut ev, hand);
+                    resolve_entire_key_pos(&mut ev, slave_hand);
                     KEYBOARD_EVENT_REPORT_CHANNEL.send(ev).await;
                 }
                 SlaveToMaster::Mouse { x, y } => {

@@ -43,7 +43,6 @@ impl<I: UarteInstance, T: TimerInstance> SplitDriver for UartFullDuplexSplitDriv
     }
 
     async fn send(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error> {
-        rktk::print!("Sending: {:?}\n", buf);
         self.uarte
             .write_all(buf)
             .await
