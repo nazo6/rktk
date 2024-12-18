@@ -1,10 +1,10 @@
 mod config;
+mod deploy;
 mod mcu;
 mod profile;
 mod uf2;
 
 use anyhow::Context as _;
-use colored::Colorize as _;
 use config::BuildConfig;
 use mcu::BuildMcuList;
 use profile::{BuildProfileList, PROFILE_CONFIG_TOML};
@@ -211,48 +211,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         )?;
 
         if let Some(deploy_path) = args.deploy_dir {
-            let deploy_path = PathBuf::from(deploy_path).join(uf2_path.file_name().unwrap());
-
-            let bar = indicatif::ProgressBar::new(0)
-                .with_prefix(format!("{} ", " rktk ".on_blue()))
-                .with_style(
-                    indicatif::ProgressStyle::with_template(
-                        "{prefix} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
-                    )
-                    .unwrap(),
-                )
-                .with_position(0);
-
-            'abandoned: {
-                for i in 0..args.deploy_retry_count {
-                    bar.set_message(format!(
-                        "Copying... (attempt {}/{})",
-                        i + 1,
-                        args.deploy_retry_count
-                    ));
-                    match fs_extra::file::copy_with_progress(
-                        &uf2_path,
-                        &deploy_path,
-                        &fs_extra::file::CopyOptions::new(),
-                        |p| {
-                            bar.set_length(p.total_bytes);
-                            bar.set_position(p.copied_bytes);
-                        },
-                    ) {
-                        Ok(_) => {
-                            bar.finish();
-                            break 'abandoned;
-                        }
-                        Err(_e) => {
-                            std::thread::sleep(std::time::Duration::from_millis(500));
-                        }
-                    }
-                }
-                bar.abandon_with_message("Abandoned");
-                anyhow::bail!("Failed to copy the uf2 file to the deploy directory");
-            }
-
-            xprintln!("Uf2 file copied to: {}", deploy_path.display());
+            deploy::deploy(deploy_path, uf2_path, args.deploy_retry_count)?;
         }
     }
 
