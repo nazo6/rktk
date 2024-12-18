@@ -2,7 +2,7 @@ use embassy_futures::join::join3;
 use embassy_time::Timer;
 
 use crate::{
-    config::static_config::SCAN_INTERVAL_MOUSE,
+    config::static_config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::KeyscanDriver,
@@ -56,27 +56,25 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
         },
         async {
             loop {
-                let mut buf = heapless::Vec::<_, 32>::new();
+                Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+
                 keyscan
                     .scan(|event| {
-                        let _ = buf.push(event);
+                        if let Some(debounce) = &mut debounce {
+                            if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
+                                return;
+                            }
+                        }
+
+                        let event = if event.pressed {
+                            SlaveToMaster::Pressed(event.row, event.col)
+                        } else {
+                            SlaveToMaster::Released(event.row, event.col)
+                        };
+
+                        let _ = s2m_tx.try_send(event);
                     })
                     .await;
-                for event in buf {
-                    if let Some(debounce) = &mut debounce {
-                        if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
-                            return;
-                        }
-                    }
-
-                    let event = if event.pressed {
-                        SlaveToMaster::Pressed(event.row, event.col)
-                    } else {
-                        SlaveToMaster::Released(event.row, event.col)
-                    };
-
-                    s2m_tx.send(event).await;
-                }
             }
         },
         async {
