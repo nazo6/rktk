@@ -85,7 +85,7 @@ platforms which have embassy compatible HAL.
 | PMW3360                        | ✅     | -        | -               |
 | PAW3395                        | ✅     | -        | -               |
 | **Encoder**                    | 🟡     | -        | -               |
-| **Debouncer**                  |        | -        | -               |
+| **Debouncer**                  |        |          |                 |
 | Eager debouncer                | 🟡     | -        | -               |
 | **Host communication**         |        |          |                 |
 | USB                            | ✅     | -        | -               |
