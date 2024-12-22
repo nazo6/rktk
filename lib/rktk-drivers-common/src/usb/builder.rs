@@ -58,7 +58,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
         let keyboard_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: KeyboardReport::desc(),
-                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
+                request_handler: None,
                 poll_ms: opts.kb_poll_interval,
                 max_packet_size: 64,
             };
@@ -67,7 +67,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
         let mouse_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: MouseReport::desc(),
-                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
+                request_handler: None,
                 poll_ms: opts.mouse_poll_interval,
                 max_packet_size: 64,
             };
@@ -76,7 +76,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
         let media_key_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: MediaKeyboardReport::desc(),
-                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
+                request_handler: None,
                 poll_ms: opts.kb_poll_interval,
                 max_packet_size: 64,
             };
@@ -86,7 +86,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
         let rrp_hid = {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: RrpReport::desc(),
-                request_handler: Some(singleton!(UsbRequestHandler {}, UsbRequestHandler)),
+                request_handler: None,
                 poll_ms: 1,
                 max_packet_size: 64,
             };

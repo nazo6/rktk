@@ -99,6 +99,8 @@ pub async fn rrp<'d, D: Driver<'d>>(
             loop {
                 let mut buf = [0u8; RRP_HID_BUFFER_SIZE];
                 let Ok(to_recv_bytes) = reader.read(&mut buf).await else {
+                    // NOTE: When usb is suspended, error is returned. We have to wait for a while to avoid busy loop in such case.
+                    embassy_time::Timer::after_millis(300).await;
                     continue;
                 };
                 if to_recv_bytes != 32 {

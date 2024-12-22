@@ -70,7 +70,7 @@ impl ReporterDriver for CommonUsbDriver {
     }
 
     fn wakeup(&self) -> Result<(), Self::Error> {
-        if super::SUSPENDED.load(core::sync::atomic::Ordering::SeqCst) {
+        if super::SUSPENDED.load(core::sync::atomic::Ordering::Acquire) {
             self.wakeup_signal.signal(());
             return Ok(());
         }
