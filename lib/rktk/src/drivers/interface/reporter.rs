@@ -18,5 +18,12 @@ pub trait ReporterDriver {
         Ok(0)
     }
 
-    fn wakeup(&self) -> Result<(), Self::Error>;
+    /// Wake up the device.
+    /// This is used to wake up the device from suspend mode.
+    ///
+    /// # Returns
+    /// - `Ok(true)`: Woke up signal sent successfully.
+    /// - `Ok(false)`: The device is already awake.
+    /// - `Err(_)`: Failed to send the wake up signal or not supported.
+    fn wakeup(&self) -> Result<bool, Self::Error>;
 }

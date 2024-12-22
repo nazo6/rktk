@@ -46,7 +46,7 @@ impl ReporterDriver for NrfBleDriver {
         Err(BleError::NotSupported)
     }
 
-    fn wakeup(&self) -> Result<(), Self::Error> {
+    fn wakeup(&self) -> Result<bool, Self::Error> {
         Err(BleError::NotSupported)
     }
 }

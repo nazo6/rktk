@@ -110,25 +110,30 @@ pub async fn report_task<
             Output::Usb => {
                 crate::utils::display_state!(Output, Output::Usb);
                 if let Some(usb) = &usb {
-                    send_report(usb, state_report);
+                    send_report(usb, state_report).await;
                 }
             }
             Output::Ble => {
                 crate::utils::display_state!(Output, Output::Ble);
                 if let Some(ble) = &ble {
-                    send_report(ble, state_report);
+                    send_report(ble, state_report).await;
                 }
             }
         }
     }
 }
 
-fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) {
+async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) {
     if let Some(report) = state_report.keyboard_report {
+        let report = if let Ok(true) = reporter.wakeup() {
+            usbd_hid::descriptor::KeyboardReport::default()
+        } else {
+            report
+        };
+
         if let Err(e) = reporter.try_send_keyboard_report(report) {
             log::warn!("Failed to send keyboard report: {:?}", e);
         }
-        let _ = reporter.wakeup();
     }
     if let Some(report) = state_report.mouse_report {
         crate::utils::display_state!(MouseMove, (report.x, report.y));

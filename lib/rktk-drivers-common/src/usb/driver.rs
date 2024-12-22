@@ -69,12 +69,12 @@ impl ReporterDriver for CommonUsbDriver {
         Ok(read)
     }
 
-    fn wakeup(&self) -> Result<(), Self::Error> {
+    fn wakeup(&self) -> Result<bool, Self::Error> {
         if super::SUSPENDED.load(core::sync::atomic::Ordering::Acquire) {
             self.wakeup_signal.signal(());
-            return Ok(());
+            return Ok(true);
         }
-        Ok(())
+        Ok(false)
     }
 }
 impl UsbDriver for CommonUsbDriver {

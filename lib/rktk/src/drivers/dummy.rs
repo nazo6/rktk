@@ -61,7 +61,7 @@ impl ReporterDriver for Ble {
         unreachable!()
     }
 
-    fn wakeup(&self) -> Result<(), Self::Error> {
+    fn wakeup(&self) -> Result<bool, Self::Error> {
         unreachable!()
     }
 }
@@ -248,7 +248,7 @@ impl ReporterDriver for Usb {
         unreachable!()
     }
 
-    fn wakeup(&self) -> Result<(), Self::Error> {
+    fn wakeup(&self) -> Result<bool, Self::Error> {
         unreachable!()
     }
 }
