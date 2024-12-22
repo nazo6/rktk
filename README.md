@@ -34,72 +34,70 @@ makes it easy to extend.
 
 ### Core features
 
-| Feature          | Status                          |
-| ---------------- | ------------------------------- |
-| Keyscan          | ✅                              |
-| Mouse            | ✅                              |
-| Encoder          | 🟡                              |
-| Key mapping      | 🟡 (See below table for detail) |
-| Hook system      | 🟡                              |
-| Split keyboard   | ✅                              |
-| Display          | 🟡                              |
-| RGB led          | 🟡                              |
-| USB              | ✅                              |
-| Bluetooth        | 🟡                              |
-| Remapper support | 🟡                              |
-| Double-tap reset | ✅                              |
+| Feature          | Status | Note                       |
+| ---------------- | ------ | -------------------------- |
+| Keyscan          | ✅     |                            |
+| Key mapping      | 🟡     | See below table for detail |
+| Mouse            | ✅     |                            |
+| Encoder          | 🟡     |                            |
+| Hook system      | 🟡     |                            |
+| Split keyboard   | ✅     |                            |
+| Display          | 🟡     |                            |
+| RGB led          | 🟡     |                            |
+| USB              | ✅     |                            |
+| Bluetooth        | 🟡     |                            |
+| Remapper support | 🟡     |                            |
+| Double-tap reset | ✅     |                            |
 
 #### Key mapping features
 
 Key mapping features is implemented in `rktk-keymanager` and this crate does not
-depend on rktk or embassy. Keymap is defined as normal two-dimensional array.
-See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
+depend on rktk or embassy.
 
-| Feature name           | Status | Note                                                  |
-| ---------------------- | ------ | ----------------------------------------------------- |
-| **Key action**         |        |                                                       |
-| Mod-Tap                | ✅     | Unlike QMK, any keycode can be specified as modifier. |
-| Tap-Hold               | ✅     |                                                       |
-| Tap Dance              | ✅     |                                                       |
-| Oneshot key            | ✅     |                                                       |
-| Combo key              | 🟡     |                                                       |
-| **Key code**           |        |                                                       |
-| Normal key             | ✅     |                                                       |
-| Modifier key           | ✅     |                                                       |
-| Media key              | ✅     |                                                       |
-| Mouse key              | ✅     |                                                       |
-| Mouse scroll momentary | ✅     |                                                       |
-| Layer momentary (MO)   | ✅     |                                                       |
-| Layer toggle (TG)      | ✅     |                                                       |
+| Feature name           | Status | Note                                      |
+| ---------------------- | ------ | ----------------------------------------- |
+| **Key action**         |        |                                           |
+| Tap-Hold               | ✅     | Called as `Mod-Tap` or `Layer-Tap` in QMK |
+| Tap Dance              | ✅     |                                           |
+| Oneshot key            | ✅     |                                           |
+| Combo key              | 🟡     |                                           |
+| **Key code**           |        |                                           |
+| Normal key             | ✅     |                                           |
+| Modifier key           | ✅     |                                           |
+| Media key              | ✅     |                                           |
+| Mouse key              | ✅     |                                           |
+| Mouse scroll momentary | ✅     |                                           |
+| Layer momentary (MO)   | ✅     |                                           |
+| Layer toggle (TG)      | ✅     |                                           |
 
 ### Drivers
 
-- Driver that is available in the `rktk-drivers-common` crate is available for
-  all platforms which have embassy compatible HAL.
+Driver that is available in the `rktk-drivers-common` crate is available for all
+platforms which have embassy compatible HAL.
 
 | Driver                         | Common | RP2040   | NRF52840        |
 | ------------------------------ | ------ | -------- | --------------- |
 | **Key scanner**                |        |          |                 |
-| Matrix                         | 🟡     |          |                 |
-| Matrix with shift register     | ✅     |          |                 |
-| (Japanese) Duplex-Matrix       | 🟡     |          |                 |
-| &nbsp;                         |        |          |                 |
+| Matrix                         | 🟡     | -        | -               |
+| Matrix with shift register     | ✅     | -        | -               |
+| (Japanese) Duplex-Matrix       | 🟡     | -        | -               |
 | **Mouse**                      |        |          |                 |
-| PMW3360                        | ✅     |          |                 |
-| PAW3395                        | ✅     |          |                 |
-| &nbsp;                         |        |          |                 |
+| PMW3360                        | ✅     | -        | -               |
+| PAW3395                        | ✅     | -        | -               |
+| **Encoder**                    | 🟡     | -        | -               |
+| **Debouncer**                  |        | -        | -               |
+| Eager debouncer                | 🟡     | -        | -               |
 | **Host communication**         |        |          |                 |
-| USB                            | ✅     |          |                 |
+| USB                            | ✅     | -        | -               |
 | Bluetooth                      |        |          | 🟡 (SoftDevice) |
-| &nbsp;                         |        |          |                 |
-| **Display**                    |        |          |                 |
-| SSD1306                        | ✅     |          |                 |
-| &nbsp;                         |        |          |                 |
-| **Split**                      |        |          |                 |
+| **Split communication**        |        |          |                 |
 | Half-duplex (single wire, TRS) |        | 🟡 (PIO) | 🟡 (UART)       |
 | Full-duplex (dual wire, TRRS)  |        |          | ✅ (UART)       |
 | Bluetooth                      |        |          | 🔴              |
-| &nbsp;                         |        |          |                 |
+| **Display**                    |        |          |                 |
+| SSD1306                        | ✅     | -        | -               |
+| **Storage**                    |        |          |                 |
+| sequential-storage (NorFlash)  | 🟡     | -        | -               |
 | **RGB led**                    |        |          |                 |
 | WS2812                         |        | ✅ (PIO) | ✅ (PWM)        |
 
