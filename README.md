@@ -28,29 +28,26 @@ makes it easy to extend.
 ## Features
 
 - ✅ : Working
-- 🔵 : Almost working
-- 🟡 : Partially working, missing some features
+- 🟡 : Basic implementation only or known bugs.
 - 🔴 : Planned.
-- ❌ : Not planned.
-- (blank): Not needed.
+- (blank): N/A.
 
 ### Core features
 
-| Feature            | Status                          |
-| ------------------ | ------------------------------- |
-| Keyscan            | ✅                              |
-| Mouse              | ✅                              |
-| Encoder            | 🔵                              |
-| Key mapping        | 🟡 (See below table for detail) |
-| Hook system        | 🟡                              |
-| Split keyboard     | ✅                              |
-| Non-Split keyboard | 🔵                              |
-| Display            | 🟡                              |
-| RGB led            | 🟡                              |
-| USB                | ✅                              |
-| Bluetooth          | 🟡                              |
-| Remapper support   | 🟡                              |
-| Double-tap reset   | ✅                              |
+| Feature          | Status                          |
+| ---------------- | ------------------------------- |
+| Keyscan          | ✅                              |
+| Mouse            | ✅                              |
+| Encoder          | 🟡                              |
+| Key mapping      | 🟡 (See below table for detail) |
+| Hook system      | 🟡                              |
+| Split keyboard   | ✅                              |
+| Display          | 🟡                              |
+| RGB led          | 🟡                              |
+| USB              | ✅                              |
+| Bluetooth        | 🟡                              |
+| Remapper support | 🟡                              |
+| Double-tap reset | ✅                              |
 
 #### Key mapping features
 
@@ -66,7 +63,6 @@ See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
 | Tap Dance              | ✅     |                                                       |
 | Oneshot key            | ✅     |                                                       |
 | Combo key              | 🟡     |                                                       |
-| &nbsp;                 |        |                                                       |
 | **Key code**           |        |                                                       |
 | Normal key             | ✅     |                                                       |
 | Modifier key           | ✅     |                                                       |
@@ -78,37 +74,34 @@ See [keyball61's keymap](./keyboards/keyball-common/src/keymap.rs) for example.
 
 ### Drivers
 
-- "Common" means that the driver is implemented in `rktk-drivers-common`.
-  Drivers implemented in `rktk-drivers-common` use embassy traits, so they can
-  be easily ported to various platforms.
+- Driver that is available in the `rktk-drivers-common` crate is available for
+  all platforms which have embassy compatible HAL.
 
-| Driver                     | Common | RP2040    | NRF52840        |
-| -------------------------- | ------ | --------- | --------------- |
-| **Key scanner**            |        |           |                 |
-| Matrix                     | 🔴     | 🔴        | 🔴              |
-| Matrix with shift register | 🔵     | 🔴        | 🔵              |
-| (Japanese) Duplex-Matrix   | ✅     | ✅        | ✅              |
-| &nbsp;                     |        |           |                 |
-| **Mouse**                  |        |           |                 |
-| PMW3360                    | ✅     | ✅        | ✅              |
-| PAW3395                    | ✅     | ✅        | ✅              |
-| &nbsp;                     |        |           |                 |
-| **Host communication**     |        |           |                 |
-| USB                        | ✅     | ✅        | ✅              |
-| Bluetooth                  | ❌     | ❌        | ✅ (SoftDevice) |
-| &nbsp;                     |        |           |                 |
-| **Display**                |        |           |                 |
-| SSD1306                    | ✅     | ✅        | ✅              |
-| &nbsp;                     |        |           |                 |
-| **Split**                  |        |           |                 |
-| Half-duplex single wire    |        | ✅ (PIO)  | ✅ (UART)       |
-| Full-duplex dual wire      |        | 🔴 (UART) | 🔴 (UART)       |
-| Bluetooth                  |        | ❌        | 🔴              |
-| &nbsp;                     |        |           |                 |
-| **RGB led**                |        |           |                 |
-| WS2812                     |        | ✅ (PIO)  | ✅ (PWM)        |
-| &nbsp;                     |        |           |                 |
-| **Double-tap reset**       |        | ✅        |                 |
+| Driver                         | Common | RP2040   | NRF52840        |
+| ------------------------------ | ------ | -------- | --------------- |
+| **Key scanner**                |        |          |                 |
+| Matrix                         | 🟡     |          |                 |
+| Matrix with shift register     | ✅     |          |                 |
+| (Japanese) Duplex-Matrix       | 🟡     |          |                 |
+| &nbsp;                         |        |          |                 |
+| **Mouse**                      |        |          |                 |
+| PMW3360                        | ✅     |          |                 |
+| PAW3395                        | ✅     |          |                 |
+| &nbsp;                         |        |          |                 |
+| **Host communication**         |        |          |                 |
+| USB                            | ✅     |          |                 |
+| Bluetooth                      |        |          | 🟡 (SoftDevice) |
+| &nbsp;                         |        |          |                 |
+| **Display**                    |        |          |                 |
+| SSD1306                        | ✅     |          |                 |
+| &nbsp;                         |        |          |                 |
+| **Split**                      |        |          |                 |
+| Half-duplex (single wire, TRS) |        | 🟡 (PIO) | 🟡 (UART)       |
+| Full-duplex (dual wire, TRRS)  |        |          | ✅ (UART)       |
+| Bluetooth                      |        |          | 🔴              |
+| &nbsp;                         |        |          |                 |
+| **RGB led**                    |        |          |                 |
+| WS2812                         |        | ✅ (PIO) | ✅ (PWM)        |
 
 ## Examples
 
@@ -124,7 +117,6 @@ development.
 You need to install some tools to generate firmware.
 
 - `arm-none-eabi-objcopy`: Required to generate uf2 file.
-- `wasm-pack`: Required to build rktk-client
 
 ### MSRV
 
