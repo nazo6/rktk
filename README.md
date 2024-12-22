@@ -34,20 +34,20 @@ makes it easy to extend.
 
 ### Core features
 
-| Feature          | Status | Note                       |
-| ---------------- | ------ | -------------------------- |
-| Keyscan          | ✅     |                            |
-| Key mapping      | 🟡     | See below table for detail |
-| Mouse            | ✅     |                            |
-| Encoder          | 🟡     |                            |
-| Hook system      | 🟡     |                            |
-| Split keyboard   | ✅     |                            |
-| Display          | 🟡     |                            |
-| RGB led          | 🟡     |                            |
-| USB              | ✅     |                            |
-| Bluetooth        | 🟡     |                            |
-| Remapper support | 🟡     |                            |
-| Double-tap reset | ✅     |                            |
+| Feature                | Status | Note                       |
+| ---------------------- | ------ | -------------------------- |
+| Keyscan                | ✅     |                            |
+| Key mapping            | 🟡     | See below table for detail |
+| Mouse                  | ✅     |                            |
+| Encoder                | 🟡     |                            |
+| Hook system            | 🟡     |                            |
+| USB                    | ✅     |                            |
+| Bluetooth              | 🟡     |                            |
+| Split keyboard         | ✅     |                            |
+| Display                | 🟡     |                            |
+| Storage                | 🟡     |                            |
+| RGB led                | 🟡     |                            |
+| Remapper (rktk-client) | 🟡     |                            |
 
 #### Key mapping features
 
@@ -81,23 +81,31 @@ platforms which have embassy compatible HAL.
 | Matrix                         | 🟡     | -        | -               |
 | Matrix with shift register     | ✅     | -        | -               |
 | (Japanese) Duplex-Matrix       | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
 | **Mouse**                      |        |          |                 |
 | PMW3360                        | ✅     | -        | -               |
 | PAW3395                        | ✅     | -        | -               |
+| &nbsp;                         |        |          |                 |
 | **Encoder**                    | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
 | **Debouncer**                  |        |          |                 |
 | Eager debouncer                | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
 | **Host communication**         |        |          |                 |
 | USB                            | ✅     | -        | -               |
 | Bluetooth                      |        |          | 🟡 (SoftDevice) |
+| &nbsp;                         |        |          |                 |
 | **Split communication**        |        |          |                 |
 | Half-duplex (single wire, TRS) |        | 🟡 (PIO) | 🟡 (UART)       |
 | Full-duplex (dual wire, TRRS)  |        |          | ✅ (UART)       |
 | Bluetooth                      |        |          | 🔴              |
+| &nbsp;                         |        |          |                 |
 | **Display**                    |        |          |                 |
 | SSD1306                        | ✅     | -        | -               |
+| &nbsp;                         |        |          |                 |
 | **Storage**                    |        |          |                 |
 | sequential-storage (NorFlash)  | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
 | **RGB led**                    |        |          |                 |
 | WS2812                         |        | ✅ (PIO) | ✅ (PWM)        |
 
@@ -107,14 +115,9 @@ You can find examples in the `examples` directory.
 
 ## Development
 
-See `cargo rktk --help` and `.vscode/tasks.json` to build firmware and start
-development.
+## Dependencies
 
-### Dependencies
-
-You need to install some tools to generate firmware.
-
-- `arm-none-eabi-objcopy`: Required to generate uf2 file.
+`arm-none-eabi-objcopy` is required to generate uf2 file.
 
 ### MSRV
 
