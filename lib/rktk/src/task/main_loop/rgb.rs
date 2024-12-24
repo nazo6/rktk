@@ -5,9 +5,13 @@ use crate::{
     hooks::interface::RgbHooks,
 };
 
-use super::channels::rgb::RGB_CHANNEL;
+use super::super::channels::{rgb::RGB_CHANNEL, split::M2sTx};
 
-pub async fn start<const LED_COUNT: usize>(mut bl: impl RgbDriver, mut hook: impl RgbHooks) {
+pub async fn start<const LED_COUNT: usize>(
+    mut bl: impl RgbDriver,
+    mut hook: impl RgbHooks,
+    m2s_tx: Option<M2sTx<'_>>,
+) {
     hook.on_rgb_init(&mut bl).await;
 
     loop {
@@ -23,6 +27,14 @@ pub async fn start<const LED_COUNT: usize>(mut bl: impl RgbDriver, mut hook: imp
             },
             RgbCommand::Reset => Some([RGB8::default(); LED_COUNT]),
         };
+
+        if let Some(m2s_tx) = m2s_tx {
+            let _ = m2s_tx
+                .send(crate::drivers::interface::split::MasterToSlave::Rgb(
+                    ctrl.clone(),
+                ))
+                .await;
+        }
 
         hook.on_rgb_process(&mut bl, &ctrl, &mut rgb_data).await;
 

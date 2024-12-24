@@ -26,6 +26,7 @@ use embassy_futures::{
 use embassy_time::{Duration, Timer};
 
 mod master;
+mod rgb;
 mod slave;
 mod split_handler;
 
@@ -62,53 +63,59 @@ pub async fn start<
     let hand = keyscan.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
 
+    if let Some(split) = &mut split {
+        let _ = split.init().await;
+    }
+
+    let usb_available = if let Some(usb) = &usb {
+        match select(
+            usb.wait_ready(),
+            Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
+        )
+        .await
+        {
+            Either::First(_) => true,
+            Either::Second(_) => false,
+        }
+    } else {
+        false
+    };
+
+    let is_master = split.is_none() || usb_available || ble.is_some();
+
+    hooks
+        .common
+        .on_init(hand, &mut keyscan, mouse.as_mut(), storage.as_mut())
+        .await;
+
+    crate::utils::display_state!(Master, Some(is_master));
+
+    let s2m_tx = S2M_CHANNEL.sender();
+    let s2m_rx = S2M_CHANNEL.receiver();
+
+    let m2s_tx = M2S_CHANNEL.sender();
+    let m2s_rx = M2S_CHANNEL.receiver();
+
+    let rgb_m2s_tx = if is_master {
+        Some(M2S_CHANNEL.sender())
+    } else {
+        None
+    };
+
     join(
         async {
             if let Some(rgb) = rgb {
                 match hand {
                     Hand::Right => {
-                        super::rgb::start::<{ KEYBOARD.right_led_count }>(rgb, hooks.rgb).await
+                        rgb::start::<{ KEYBOARD.right_led_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
                     }
                     Hand::Left => {
-                        super::rgb::start::<{ KEYBOARD.left_led_count }>(rgb, hooks.rgb).await
+                        rgb::start::<{ KEYBOARD.left_led_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
                     }
                 }
             }
         },
         async {
-            if let Some(split) = &mut split {
-                let _ = split.init().await;
-            }
-
-            let usb_available = if let Some(usb) = &usb {
-                match select(
-                    usb.wait_ready(),
-                    Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
-                )
-                .await
-                {
-                    Either::First(_) => true,
-                    Either::Second(_) => false,
-                }
-            } else {
-                false
-            };
-
-            let is_master = split.is_none() || usb_available || ble.is_some();
-
-            hooks
-                .common
-                .on_init(hand, &mut keyscan, mouse.as_mut(), storage.as_mut())
-                .await;
-
-            crate::utils::display_state!(Master, Some(is_master));
-
-            let s2m_tx = S2M_CHANNEL.sender();
-            let s2m_rx = S2M_CHANNEL.receiver();
-
-            let m2s_tx = M2S_CHANNEL.sender();
-            let m2s_rx = M2S_CHANNEL.receiver();
-
             if let Some(split) = split {
                 if is_master {
                     join(

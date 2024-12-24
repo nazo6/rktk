@@ -23,7 +23,6 @@ pub(crate) mod channels;
 pub mod display;
 mod logger;
 pub(crate) mod main_loop;
-mod rgb;
 
 /// Receives configs and executes the main process of the keyboard.
 ///
