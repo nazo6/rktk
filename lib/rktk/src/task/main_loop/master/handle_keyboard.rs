@@ -1,7 +1,7 @@
 use embassy_time::Timer;
 
 use crate::{
-    config::static_config::SCAN_INTERVAL_KEYBOARD,
+    config::Config,
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},
@@ -15,9 +15,10 @@ pub async fn start(
     hand: Hand,
     mut keyscan: impl KeyscanDriver,
     mut debounce: Option<impl DebounceDriver>,
+    config: &'static Config,
 ) {
     loop {
-        Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+        Timer::after(config.rktk.scan_interval_keyboard).await;
 
         keyscan
             .scan(|mut event| {

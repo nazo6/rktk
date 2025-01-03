@@ -9,19 +9,21 @@ use rktk_rrp::{
 };
 
 use crate::{
-    config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
+    config::{Config, CONST_CONFIG},
     drivers::interface::{
         ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, usb::UsbDriver,
     },
+    task::module::{logger, storage_config::StorageConfigManager},
 };
 
-use super::{ConfiguredState, SharedState, RKTK_CONFIG};
+use super::{ConfiguredState, SharedState};
 
 pub async fn start(
     usb: &Option<impl UsbDriver>,
     _ble: &Option<impl BleDriver>,
     state: &SharedState,
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
+    static_config: &'static Config,
 ) {
     if let Some(usb) = &usb {
         let mut server = rktk_rrp::server::Server::<_, _, _, 512>::new(
@@ -30,6 +32,7 @@ pub async fn start(
             Handlers {
                 state,
                 storage: config_store.as_ref(),
+                config: static_config,
             },
         );
         server.start().await;
@@ -39,6 +42,7 @@ pub async fn start(
 struct Handlers<'a, S: StorageDriver> {
     pub state: &'a SharedState,
     pub storage: Option<&'a StorageConfigManager<S>>,
+    pub config: &'static Config,
 }
 impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Handlers<'_, S> {
     type Error = &'static str;
@@ -48,9 +52,9 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         _req: (),
     ) -> Result<get_keyboard_info::Response, Self::Error> {
         Ok(get_keyboard_info::Response {
-            name: heapless::String::from(KEYBOARD.name),
-            cols: KEYBOARD.cols,
-            rows: KEYBOARD.rows,
+            name: heapless::String::from(self.config.keyboard.name),
+            cols: CONST_CONFIG.cols,
+            rows: CONST_CONFIG.rows,
             keymap: ConfiguredState::get_keymap_info(),
         })
     }
@@ -60,11 +64,16 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         _req: (),
     ) -> Result<impl Stream<Item = get_layout_json::Response>, Self::Error> {
         Ok(futures::stream::iter(
-            KEYBOARD.layout.as_bytes().chunks(64).map(|chunk| {
-                let mut vec = heapless::Vec::new();
-                vec.extend_from_slice(chunk).unwrap();
-                vec
-            }),
+            self.config
+                .keyboard
+                .layout
+                .as_bytes()
+                .chunks(64)
+                .map(|chunk| {
+                    let mut vec = heapless::Vec::new();
+                    vec.extend_from_slice(chunk).unwrap();
+                    vec
+                }),
         ))
     }
 
@@ -75,9 +84,9 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         let keymap = self.state.lock().await.get_keymap().clone();
         Ok(futures::stream::iter(
             itertools::iproduct!(
-                0..RKTK_CONFIG.layer_count,
-                0..KEYBOARD.rows,
-                0..KEYBOARD.cols
+                0..CONST_CONFIG.layer_count,
+                0..CONST_CONFIG.rows,
+                0..CONST_CONFIG.cols
             )
             .map(move |(layer, row, col)| KeyActionLoc {
                 layer,
@@ -142,7 +151,7 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         _req: get_log::Request,
     ) -> Result<impl Stream<Item = get_log::Response>, Self::Error> {
         Ok(futures::stream::iter(core::iter::from_fn(|| {
-            if let Ok(chunk) = crate::task::logger::LOG_CHANNEL.try_receive() {
+            if let Ok(chunk) = logger::LOG_CHANNEL.try_receive() {
                 Some(chunk)
             } else {
                 None

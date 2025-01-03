@@ -4,25 +4,23 @@ use rktk_keymanager::state::{
 };
 
 use crate::{
-    config::{
-        static_config::{KEYBOARD, KM_CONFIG},
-        storage_config::StorageConfigManager,
-    },
+    config::{Config, CONST_CONFIG},
     drivers::interface::{keyscan::Hand, storage::StorageDriver},
     keymap_config::Keymap,
+    task::module::storage_config::StorageConfigManager,
 };
 
-use super::{ConfiguredState, SharedState, RKTK_CONFIG};
+use super::{ConfiguredState, SharedState};
 
 const SPLIT_RIGHT_SHIFT: u8 = {
-    if let Some(val) = KEYBOARD.split_right_shift {
+    if let Some(val) = CONST_CONFIG.split_right_shift {
         val
     } else {
         assert!(
-            KEYBOARD.cols % 2 == 0,
+            CONST_CONFIG.cols % 2 == 0,
             "Split right shift is not defined, but the keyboard has odd number of columns."
         );
-        KEYBOARD.cols / 2
+        CONST_CONFIG.cols / 2
     }
 };
 
@@ -69,9 +67,10 @@ pub async fn load_state(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
     mut keymap: Keymap,
     initial_output: Output,
+    config: &'static Config,
 ) -> SharedState {
     let (state_config, keymap) = if let Some(storage) = &config_store {
-        for l in 0..RKTK_CONFIG.layer_count {
+        for l in 0..CONST_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
                 keymap.layers[l as usize] = layer;
             }
@@ -85,8 +84,8 @@ pub async fn load_state(
     };
 
     let state_config = state_config.unwrap_or(StateConfig {
-        mouse: KM_CONFIG.mouse,
-        key_resolver: KM_CONFIG.key_resolver,
+        mouse: config.key_manager.mouse.clone(),
+        key_resolver: config.key_manager.key_resolver.clone(),
         initial_output,
     });
 

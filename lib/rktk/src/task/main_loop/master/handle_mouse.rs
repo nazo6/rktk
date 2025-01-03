@@ -1,13 +1,13 @@
 use embassy_time::Timer;
 
-use crate::{config::static_config::SCAN_INTERVAL_MOUSE, drivers::interface::mouse::MouseDriver};
+use crate::{config::Config, drivers::interface::mouse::MouseDriver};
 
 use super::MOUSE_EVENT_REPORT_CHANNEL;
 
-pub async fn start(mut mouse: Option<impl MouseDriver>) {
+pub async fn start(mut mouse: Option<impl MouseDriver>, config: &'static Config) {
     if let Some(mouse) = &mut mouse {
         loop {
-            Timer::after(SCAN_INTERVAL_MOUSE).await;
+            Timer::after(config.rktk.scan_interval_mouse).await;
 
             let mouse_move = match mouse.read().await {
                 Ok(m) => m,

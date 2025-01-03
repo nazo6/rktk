@@ -17,20 +17,19 @@ pub mod rgb {
 }
 
 pub mod split {
-    use crate::{
-        drivers::interface::split::{MasterToSlave, SlaveToMaster},
-        task::RKTK_CONFIG,
-    };
+    use crate::drivers::interface::split::{MasterToSlave, SlaveToMaster};
+
+    const SPLIT_CHANNEL_SIZE: usize = crate::config::CONST_CONFIG.split_channel_size;
 
     use super::*;
 
-    type S2mChannel = Channel<SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
-    pub type S2mRx<'a> = Receiver<'a, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
-    pub type S2mTx<'a> = Sender<'a, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
+    type S2mChannel = Channel<SlaveToMaster, SPLIT_CHANNEL_SIZE>;
+    pub type S2mRx<'a> = Receiver<'a, SlaveToMaster, SPLIT_CHANNEL_SIZE>;
+    pub type S2mTx<'a> = Sender<'a, SlaveToMaster, SPLIT_CHANNEL_SIZE>;
 
-    type M2sChannel = Channel<MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
-    pub type M2sRx<'a> = Receiver<'a, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
-    pub type M2sTx<'a> = Sender<'a, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
+    type M2sChannel = Channel<MasterToSlave, SPLIT_CHANNEL_SIZE>;
+    pub type M2sRx<'a> = Receiver<'a, MasterToSlave, SPLIT_CHANNEL_SIZE>;
+    pub type M2sTx<'a> = Sender<'a, MasterToSlave, SPLIT_CHANNEL_SIZE>;
 
     pub(crate) static M2S_CHANNEL: M2sChannel = Channel::new();
     pub(crate) static S2M_CHANNEL: S2mChannel = Channel::new();

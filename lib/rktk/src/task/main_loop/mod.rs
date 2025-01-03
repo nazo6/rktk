@@ -1,5 +1,5 @@
 use crate::{
-    config::static_config::{KEYBOARD, RKTK_CONFIG},
+    config::{Config, CONST_CONFIG},
     drivers::interface::{
         ble::BleDriver,
         debounce::DebounceDriver,
@@ -59,6 +59,7 @@ pub async fn start<
     rgb: Option<RGB>,
     key_config: Keymap,
     mut hooks: Hooks<CH, MH, SH, BH>,
+    config: &'static Config,
 ) {
     let hand = keyscan.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
@@ -70,7 +71,7 @@ pub async fn start<
     let usb_available = if let Some(usb) = &usb {
         match select(
             usb.wait_ready(),
-            Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
+            Timer::after(Duration::from_millis(config.rktk.split_usb_timeout)),
         )
         .await
         {
@@ -107,10 +108,12 @@ pub async fn start<
             if let Some(rgb) = rgb {
                 match hand {
                     Hand::Right => {
-                        rgb::start::<{ KEYBOARD.right_led_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                        rgb::start::<{ CONST_CONFIG.right_led_count }>(rgb, hooks.rgb, rgb_m2s_tx)
+                            .await
                     }
                     Hand::Left => {
-                        rgb::start::<{ KEYBOARD.left_led_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                        rgb::start::<{ CONST_CONFIG.left_led_count }>(rgb, hooks.rgb, rgb_m2s_tx)
+                            .await
                     }
                 }
             }
@@ -134,13 +137,22 @@ pub async fn start<
                             key_config,
                             hand,
                             hooks.master,
+                            config,
                         ),
                     )
                     .await;
                 } else {
                     join(
                         split_handler::start(split, m2s_tx, s2m_rx, is_master),
-                        slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.slave),
+                        slave::start(
+                            s2m_tx,
+                            m2s_rx,
+                            keyscan,
+                            debounce,
+                            mouse,
+                            hooks.slave,
+                            config,
+                        ),
                     )
                     .await;
                 }
@@ -159,6 +171,7 @@ pub async fn start<
                     key_config,
                     hand,
                     hooks.master,
+                    config,
                 )
                 .await;
             }

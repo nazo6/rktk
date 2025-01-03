@@ -4,7 +4,7 @@ use rktk_keymanager::state::{config::Output, State};
 use utils::{init_storage, load_state};
 
 use crate::{
-    config::static_config::{KEYBOARD, RKTK_CONFIG},
+    config::{Config, CONST_CONFIG},
     drivers::interface::{
         ble::BleDriver,
         debounce::DebounceDriver,
@@ -32,10 +32,10 @@ mod rrp_server;
 mod utils;
 
 type ConfiguredState = State<
-    { RKTK_CONFIG.layer_count as usize },
-    { KEYBOARD.rows as usize },
-    { KEYBOARD.cols as usize },
-    { KEYBOARD.encoder_count as usize },
+    { CONST_CONFIG.layer_count as usize },
+    { CONST_CONFIG.rows as usize },
+    { CONST_CONFIG.cols as usize },
+    { CONST_CONFIG.encoder_count as usize },
 >;
 
 type SharedState = Mutex<ConfiguredState>;
@@ -66,9 +66,10 @@ pub async fn start<
     key_config: Keymap,
     hand: Hand,
     mut master_hooks: MH,
+    config: &'static Config,
 ) {
     let config_store = init_storage(storage).await;
-    let state = load_state(&config_store, key_config, Output::Usb).await;
+    let state = load_state(&config_store, key_config, Output::Usb, config).await;
 
     log::info!("Master side task start");
 
@@ -81,8 +82,8 @@ pub async fn start<
             report::report_task(system, &state, &config_store, &ble, &usb, master_hooks),
             join5(
                 handle_slave::start(hand, s2m_rx),
-                handle_keyboard::start(hand, keyscan, debounce),
-                handle_mouse::start(mouse),
+                handle_keyboard::start(hand, keyscan, debounce, config),
+                handle_mouse::start(mouse, config),
                 async {
                     if let Some(encoder) = &mut encoder {
                         loop {
@@ -100,7 +101,7 @@ pub async fn start<
                 },
             ),
         ),
-        rrp_server::start(&usb, &ble, &state, &config_store),
+        rrp_server::start(&usb, &ble, &state, &config_store, config),
     )
     .await;
 }

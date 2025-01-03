@@ -8,6 +8,7 @@ members = [
   "tools/ra-check",
   "tools/rktk-client",
 ]
+exclude = ["lib/.cargo"]
 resolver = "2"
 
 [workspace.package]

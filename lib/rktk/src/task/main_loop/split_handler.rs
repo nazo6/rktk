@@ -3,7 +3,7 @@ use postcard::{from_bytes_cobs, to_slice_cobs};
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    config::static_config::RKTK_CONFIG,
+    config::CONST_CONFIG,
     drivers::interface::split::SplitDriver,
     utils::{Receiver, Sender},
 };
@@ -20,8 +20,8 @@ pub async fn start<
     S: Serialize + core::fmt::Debug,
 >(
     mut split: SP,
-    received_sender: Sender<'a, R, { RKTK_CONFIG.split_channel_size }>,
-    to_send_receiver: Receiver<'a, S, { RKTK_CONFIG.split_channel_size }>,
+    received_sender: Sender<'a, R, { CONST_CONFIG.split_channel_size }>,
+    to_send_receiver: Receiver<'a, S, { CONST_CONFIG.split_channel_size }>,
     is_master: bool,
 ) {
     let mut send_id: usize = 0;
