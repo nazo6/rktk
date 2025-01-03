@@ -1,5 +1,4 @@
 use anyhow::Context as _;
-use std::io::Write as _;
 
 fn main() -> anyhow::Result<()> {
     main_inner()?;
