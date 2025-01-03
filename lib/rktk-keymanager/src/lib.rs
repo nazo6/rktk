@@ -18,7 +18,3 @@ mod time;
 
 #[cfg(any(test, feature = "state"))]
 pub mod state;
-#[cfg(not(any(test, feature = "state")))]
-pub mod state {
-    pub mod config;
-}

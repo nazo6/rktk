@@ -1,7 +1,7 @@
 //! Debounce driver implementations.
 
 use rktk::{
-    config::static_config::CONFIG, drivers::interface::debounce::DebounceDriver,
+    config::CONST_CONFIG, drivers::interface::debounce::DebounceDriver,
     keymanager::state::KeyChangeEvent,
 };
 
@@ -11,15 +11,14 @@ use rktk::{
 /// Ignores all events related to a key for a certain period of time after that event is reported.
 /// ref: [Debouncing | ZMK](https://zmk.dev/docs/features/debouncing#eager-debouncing)
 pub struct EagerDebounceDriver {
-    last: [[Option<embassy_time::Instant>; CONFIG.keyboard.cols as usize];
-        CONFIG.keyboard.rows as usize],
+    last: [[Option<embassy_time::Instant>; CONST_CONFIG.cols as usize]; CONST_CONFIG.rows as usize],
     debounce_time: embassy_time::Duration,
 }
 
 impl EagerDebounceDriver {
     pub fn new(debounce_time: embassy_time::Duration) -> Self {
         Self {
-            last: [[None; CONFIG.keyboard.cols as usize]; CONFIG.keyboard.rows as usize],
+            last: [[None; CONST_CONFIG.cols as usize]; CONST_CONFIG.rows as usize],
             debounce_time,
         }
     }

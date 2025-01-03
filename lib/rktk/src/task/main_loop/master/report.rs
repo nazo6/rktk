@@ -1,15 +1,20 @@
 use embassy_futures::select::{select3, Either3};
-use rktk_keymanager::state::{config::Output, Event, StateReport};
+use rktk_keymanager::{
+    config::Output,
+    state::{Event, StateReport},
+};
 
 use crate::{
-    config::storage_config::StorageConfigManager,
     drivers::interface::{
         ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, system::SystemDriver,
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
-    task::channels::report::{
-        ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL,
+    task::{
+        channels::report::{
+            ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL,
+        },
+        module::storage_config::StorageConfigManager,
     },
 };
 

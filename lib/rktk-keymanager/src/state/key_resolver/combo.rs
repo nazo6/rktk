@@ -1,8 +1,8 @@
 use crate::{
-    config::{MAX_COMBO_COMBINATION_COUNT, MAX_COMBO_KEY_COUNT},
+    config::ComboConfig,
     keycode::KeyCode,
     keymap::{ComboDefinition, ComboDefinitions},
-    state::config::ComboConfig,
+    state::CONST_CONFIG,
     time::{Duration, Instant},
 };
 
@@ -11,8 +11,13 @@ use super::EventType;
 #[derive(Debug)]
 enum ComboUnitState {
     None,
-    Pending((Instant, [bool; MAX_COMBO_COMBINATION_COUNT as usize])),
-    Pressing([bool; MAX_COMBO_COMBINATION_COUNT as usize]),
+    Pending(
+        (
+            Instant,
+            [bool; CONST_CONFIG.max_combo_combination_count as usize],
+        ),
+    ),
+    Pressing([bool; CONST_CONFIG.max_combo_combination_count as usize]),
 }
 
 #[derive(Debug)]
@@ -23,7 +28,7 @@ struct ComboUnit {
 
 #[derive(Debug)]
 pub struct ComboState {
-    state: [ComboUnit; MAX_COMBO_KEY_COUNT as usize],
+    state: [ComboUnit; CONST_CONFIG.max_combo_key_count as usize],
     config: ComboConfig,
 }
 
@@ -68,7 +73,7 @@ impl ComboState {
                                 (EventType::Pressed, ComboUnitState::None) => {
                                     unit.state = ComboUnitState::Pending((
                                         now,
-                                        [false; MAX_COMBO_COMBINATION_COUNT as usize],
+                                        [false; CONST_CONFIG.max_combo_combination_count as usize],
                                     ));
                                     *keycode = KeyCode::None;
                                 }

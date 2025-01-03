@@ -1,15 +1,16 @@
 //! Program entrypoint.
 
 use crate::{
+    config::Config,
     drivers::{interface::system::SystemDriver, Drivers},
     hooks::interface::*,
     keymap_config::Keymap,
 };
 use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
+use static_cell::StaticCell;
 
 use crate::{
-    config::static_config::RKTK_CONFIG,
     drivers::interface::{
         ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
         keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,
@@ -21,8 +22,10 @@ use crate::{
 
 pub(crate) mod channels;
 pub mod display;
-mod logger;
 pub(crate) mod main_loop;
+mod module;
+
+static CONFIG_STORE: StaticCell<Config> = StaticCell::new();
 
 /// Receives configs and executes the main process of the keyboard.
 ///
@@ -69,11 +72,12 @@ pub async fn start<
         UsbBuilder,
         BleBuilder,
     >,
-    key_config: Keymap,
+    keymap: Keymap,
     hooks: Hooks<CH, MH, SH, BH>,
+    config: Config,
 ) {
     critical_section::with(|_| unsafe {
-        let _ = log::set_logger_racy(&logger::RRP_LOGGER);
+        let _ = log::set_logger_racy(&module::logger::RRP_LOGGER);
         log::set_max_level_racy(log::LevelFilter::Info);
     });
 
@@ -89,8 +93,10 @@ pub async fn start<
 
     drivers
         .system
-        .double_reset_usb_boot(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
+        .double_reset_usb_boot(Duration::from_millis(config.rktk.double_tap_threshold))
         .await;
+
+    let config: &'static Config = CONFIG_STORE.init(config);
 
     join(
         async move {
@@ -102,7 +108,7 @@ pub async fn start<
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 match mouse_builder.build().await {
                     Ok(mut mouse) => {
-                        let _ = mouse.set_cpi(RKTK_CONFIG.default_cpi).await;
+                        let _ = mouse.set_cpi(config.rktk.default_cpi).await;
                         Some(mouse)
                     }
                     Err(e) => {
@@ -153,8 +159,9 @@ pub async fn start<
                         drivers.storage,
                         drivers.split,
                         drivers.rgb,
-                        key_config,
+                        keymap,
                         hooks,
+                        config,
                     )
                     .await;
                 },

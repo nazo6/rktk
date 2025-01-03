@@ -40,7 +40,7 @@ pub enum KeyAction {
     Normal2(KeyCode, KeyCode),
     /// Tap-Hold key (tap, hold)
     ///
-    /// If key is pressed and released in [`tap_threshold`](crate::state::config::KeyResolverConfig::tap_threshold), tap key is sent.
+    /// If key is pressed and released in [`tap_threshold`](crate::config::KeyResolverConfig::tap_threshold), tap key is sent.
     /// If key is pressed and held longer, hold key is sent. Also, `rktk-keymanager` emulates qmk's `HOLD_ON_OTHER_KEY_PRESS` feature.
     /// If another key is pressed while holding this key, even before `tap_threshold`, hold key is sent.
     TapHold(KeyCode, KeyCode),
@@ -50,7 +50,7 @@ pub enum KeyAction {
     OneShot(KeyCode),
     /// Tap-dance (id)
     ///
-    /// Execute tap-dance with specified id. TapDance can be configured in [`KeyResolverConfig`](crate::state::config::KeyResolverConfig).
+    /// Execute tap-dance with specified id. TapDance can be configured in [`KeyResolverConfig`](crate::config::KeyResolverConfig).
     TapDance(u8),
 }
 

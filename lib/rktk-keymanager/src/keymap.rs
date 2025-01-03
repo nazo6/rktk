@@ -3,10 +3,7 @@
 use macro_rules_attribute::apply;
 
 use crate::{
-    config::{
-        MAX_COMBO_COMBINATION_COUNT, MAX_COMBO_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
-        MAX_TAP_DANCE_REPEAT_COUNT,
-    },
+    config::CONST_CONFIG,
     keycode::{KeyAction, KeyCode},
     macros::common_derive,
 };
@@ -95,15 +92,16 @@ pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
 /// Tap dance definition
 #[apply(common_derive)]
 pub struct TapDanceDefinition {
-    pub tap: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
-    pub hold: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+    pub tap: [Option<KeyCode>; CONST_CONFIG.max_tap_dance_repeat_count as usize],
+    pub hold: [Option<KeyCode>; CONST_CONFIG.max_tap_dance_repeat_count as usize],
 }
 
-pub type TapDanceDefinitions = [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize];
+pub type TapDanceDefinitions =
+    [Option<TapDanceDefinition>; CONST_CONFIG.max_tap_dance_key_count as usize];
 
 #[apply(common_derive)]
 pub struct ComboDefinition {
-    pub src: [Option<KeyCode>; MAX_COMBO_COMBINATION_COUNT as usize],
+    pub src: [Option<KeyCode>; CONST_CONFIG.max_combo_combination_count as usize],
     pub dst: KeyCode,
 }
-pub type ComboDefinitions = [Option<ComboDefinition>; MAX_COMBO_KEY_COUNT as usize];
+pub type ComboDefinitions = [Option<ComboDefinition>; CONST_CONFIG.max_combo_key_count as usize];

@@ -1,8 +1,8 @@
 use crate::{
-    config::MAX_TAP_DANCE_KEY_COUNT,
+    config::TapDanceConfig,
     keycode::KeyCode,
     keymap::{TapDanceDefinition, TapDanceDefinitions},
-    state::config::TapDanceConfig,
+    state::CONST_CONFIG,
     time::{Duration, Instant},
 };
 
@@ -44,7 +44,7 @@ impl TapDanceUnit {
 }
 
 pub struct TapDanceState {
-    state: [TapDanceUnit; MAX_TAP_DANCE_KEY_COUNT as usize],
+    state: [TapDanceUnit; CONST_CONFIG.max_tap_dance_key_count as usize],
     threshold: Duration,
 }
 

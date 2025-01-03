@@ -1,6 +1,3 @@
-[profile.release]
-lto = true
-
 [profile.dioxus-wasm]
 inherits = "dev"
 opt-level = 2
@@ -13,9 +10,6 @@ inherits = "dev"
 
 [alias]
 rktk = "run -p rktk-cli --"
-
-[env]
-RKTK_CONFIG_PATH = { value = "rktk.dev.json", relative = true }
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]

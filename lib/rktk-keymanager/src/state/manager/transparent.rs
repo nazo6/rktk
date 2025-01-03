@@ -4,8 +4,9 @@
 //! `crate::keycode::special::Special::FlashClear` is one of example.
 
 use crate::{
+    config::Output,
     keycode::{special::Special, KeyCode},
-    state::{config::Output, interface::TransparentReport, key_resolver::EventType},
+    state::{interface::TransparentReport, key_resolver::EventType},
 };
 
 pub struct TransparentState {
@@ -62,7 +63,6 @@ impl TransparentLocalState {
             OutputBle output: Output::Ble,
             OutputUsb output: Output::Usb,
             PowerOff power_off: true
-
         }
     }
 

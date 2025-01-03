@@ -48,7 +48,9 @@ async fn main(_spawner: Spawner) {
         encoder: none_driver!(Encoder),
     };
 
-    rktk::task::start(drivers, keymap::KEYMAP, create_empty_hooks()).await;
+    let config = rktk::config::Config::default();
+
+    rktk::task::start(drivers, keymap::KEYMAP, create_empty_hooks(), config).await;
 }
 
 #[panic_handler]

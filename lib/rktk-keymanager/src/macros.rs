@@ -57,7 +57,6 @@ attribute_alias! {
             feature = "postcard",
             derive(postcard::experimental::max_size::MaxSize)
         )]
-        #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
         #[derive(PartialEq, Eq, Clone, Debug)]
     ;
 }

@@ -40,19 +40,20 @@ pub use rktk_keymanager as keymanager;
 
 /// Keymap configuration types.
 pub mod keymap_config {
-    use crate::config::static_config::{KEYBOARD, RKTK_CONFIG};
-    use crate::keymanager;
+    use crate::{config::CONST_CONFIG, keymanager};
 
     pub type Keymap = keymanager::keymap::Keymap<
-        { RKTK_CONFIG.layer_count as usize },
-        { KEYBOARD.rows as usize },
-        { KEYBOARD.cols as usize },
-        { KEYBOARD.encoder_count as usize },
+        { CONST_CONFIG.layer_count as usize },
+        { CONST_CONFIG.rows as usize },
+        { CONST_CONFIG.cols as usize },
+        { CONST_CONFIG.encoder_count as usize },
     >;
 
     pub type Layer =
-        keymanager::keymap::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+        keymanager::keymap::Layer<{ CONST_CONFIG.rows as usize }, { CONST_CONFIG.cols as usize }>;
 
-    pub type LayerMap =
-        keymanager::keymap::LayerMap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+    pub type LayerMap = keymanager::keymap::LayerMap<
+        { CONST_CONFIG.rows as usize },
+        { CONST_CONFIG.cols as usize },
+    >;
 }
