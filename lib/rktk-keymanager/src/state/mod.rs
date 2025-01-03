@@ -3,13 +3,11 @@
 #![allow(clippy::let_unit_value)]
 #![allow(clippy::single_match)]
 
-use crate::config::{MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE};
+use crate::config::{KeymapInfo, StateConfig, CONST_CONFIG};
 use crate::keymap::Keymap;
-use config::{KeymapInfo, StateConfig};
 use key_resolver::EventType;
 use manager::{GlobalManagerState, LocalManagerState};
 
-pub mod config;
 mod interface;
 mod key_resolver;
 mod manager;
@@ -99,9 +97,9 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     pub fn get_keymap_info() -> KeymapInfo {
         KeymapInfo {
             layer_count: LAYER as u8,
-            max_tap_dance_key_count: MAX_TAP_DANCE_KEY_COUNT,
-            max_tap_dance_repeat_count: MAX_TAP_DANCE_REPEAT_COUNT,
-            oneshot_state_size: ONESHOT_STATE_SIZE,
+            max_tap_dance_key_count: CONST_CONFIG.max_tap_dance_key_count,
+            max_tap_dance_repeat_count: CONST_CONFIG.max_tap_dance_repeat_count,
+            oneshot_state_size: CONST_CONFIG.one_shot_state_size,
         }
     }
 }

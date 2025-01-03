@@ -17,15 +17,15 @@ usbd-hid = { workspace = true, optional = true }
 paste = { workspace = true }
 macro_rules_attribute = { workspace = true }
 
-strum = { workspace = true, features = ["derive"] }
 serde = { workspace = true, optional = true, features = ["derive"] }
 serde_with = { workspace = true, features = ["macros"], optional = true }
 postcard = { workspace = true, optional = true, features = [
   "experimental-derive",
 ] }
+strum = { workspace = true, features = ["derive"] }
+konst = { workspace = true }
 
 wasm-bindgen = { workspace = true, optional = true }
-schemars = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -40,8 +40,7 @@ state = ["dep:usbd-hid"]
 serde = ["dep:serde", "dep:serde_with"]
 # Enables serialization with postcard.
 postcard = ["dep:postcard", "serde"]
-schemars = ["dep:schemars", "serde", "std"]
 
 std = []
 
-_check = ["state", "schemars", "ssmarshal/std"]
+_check = ["state", "ssmarshal/std"]

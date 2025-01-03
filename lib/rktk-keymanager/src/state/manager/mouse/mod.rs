@@ -1,8 +1,9 @@
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
+    config::MouseConfig,
     keycode::{key::Key, special::Special, KeyCode},
-    state::{config::MouseConfig, key_resolver::EventType, shared::SharedState},
+    state::{key_resolver::EventType, shared::SharedState},
     time::Duration,
 };
 

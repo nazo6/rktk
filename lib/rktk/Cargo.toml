@@ -25,9 +25,9 @@ heapless = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 
 paste = { workspace = true }
+konst = { workspace = true }
 itertools = { version = "0.13.0", default-features = false }
 futures = { workspace = true }
-konst = "0.3.16"
 
 rktk-keymanager = { workspace = true, features = ["state"] }
 rktk-rrp = { workspace = true, features = ["server"] }

@@ -1,6 +1,6 @@
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use crate::state::config::Output;
+use crate::config::Output;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TransparentReport {

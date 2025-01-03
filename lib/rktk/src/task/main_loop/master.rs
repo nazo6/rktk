@@ -1,6 +1,6 @@
 use embassy_futures::join::{join, join5};
 use embassy_time::Timer;
-use rktk_keymanager::state::{config::Output, State};
+use rktk_keymanager::{config::Output, state::State};
 use utils::{init_storage, load_state};
 
 use crate::{

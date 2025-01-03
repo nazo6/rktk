@@ -1,11 +1,10 @@
-use crate::keymap::{ComboDefinitions, Keymap, TapDanceDefinitions};
-use crate::time::Instant;
-
-use super::shared::LayerActive;
-use super::KeyChangeEvent;
-use crate::keycode::{KeyAction, KeyCode};
-
-use super::config::KeyResolverConfig;
+use super::{shared::LayerActive, KeyChangeEvent};
+use crate::{
+    config::KeyResolverConfig,
+    keycode::{KeyAction, KeyCode},
+    keymap::{ComboDefinitions, Keymap, TapDanceDefinitions},
+    time::Instant,
+};
 
 mod combo;
 mod normal;

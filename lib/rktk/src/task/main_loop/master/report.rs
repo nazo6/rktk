@@ -1,5 +1,8 @@
 use embassy_futures::select::{select3, Either3};
-use rktk_keymanager::state::{config::Output, Event, StateReport};
+use rktk_keymanager::{
+    config::Output,
+    state::{Event, StateReport},
+};
 
 use crate::{
     drivers::interface::{

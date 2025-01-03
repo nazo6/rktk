@@ -1,8 +1,8 @@
 use crate::{
+    config::TapHoldConfig,
     keycode::KeyCode,
-    state::{config::TapHoldConfig, KeyChangeEvent},
-    time::Duration,
-    time::Instant,
+    state::KeyChangeEvent,
+    time::{Duration, Instant},
 };
 
 use super::EventType;

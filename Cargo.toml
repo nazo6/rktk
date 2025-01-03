@@ -76,8 +76,7 @@ paste = "1.0.15"
 macro_rules_attribute = "0.2.0"
 thiserror = { version = "2.0.3", default-features = false }
 strum = { version = "0.26.3", default-features = false }
-
-schemars = "0.8.21"
+konst = "0.3.16"
 
 log = "0.4.22"
 

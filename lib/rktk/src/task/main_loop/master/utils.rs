@@ -1,6 +1,6 @@
-use rktk_keymanager::state::{
+use rktk_keymanager::{
     config::{Output, StateConfig},
-    KeyChangeEvent,
+    state::KeyChangeEvent,
 };
 
 use crate::{

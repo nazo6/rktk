@@ -44,7 +44,7 @@ pub struct KeyActionLoc {
 
 pub mod get_keyboard_info {
     use macro_rules_attribute::apply;
-    use rktk_keymanager::state::config::KeymapInfo;
+    use rktk_keymanager::config::KeymapInfo;
 
     #[apply(super::common_derive)]
     pub struct KeyboardInfo {
@@ -86,10 +86,10 @@ pub mod get_now {
 
 pub mod get_keymap_config {
     pub type Request = ();
-    pub type Response = rktk_keymanager::state::config::StateConfig;
+    pub type Response = rktk_keymanager::config::StateConfig;
 }
 pub mod set_keymap_config {
-    pub type Request = rktk_keymanager::state::config::StateConfig;
+    pub type Request = rktk_keymanager::config::StateConfig;
     pub type Response = ();
 }
 

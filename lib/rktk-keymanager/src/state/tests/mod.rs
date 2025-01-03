@@ -12,18 +12,17 @@ mod prelude {
 
     pub(super) use super::super::{KeyChangeEvent, State, StateReport};
     pub(super) use super::keymap::EMPTY_KEYMAP;
-    use crate::config::MAX_TAP_DANCE_REPEAT_COUNT;
-    use crate::keymap::TapDanceDefinition;
-    use crate::state::config::{ComboConfig, TapHoldConfig};
+    use crate::{
+        config::{
+            ComboConfig, KeyResolverConfig, MouseConfig, Output, TapDanceConfig, TapHoldConfig,
+        },
+        keymap::{Keymap, TapDanceDefinition},
+    };
     pub(super) use crate::{
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
         state::Event,
         state::TransparentReport,
         time::Instant,
-    };
-    use crate::{
-        keymap::Keymap,
-        state::config::{KeyResolverConfig, MouseConfig, Output, TapDanceConfig},
     };
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
