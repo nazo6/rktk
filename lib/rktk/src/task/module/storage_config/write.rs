@@ -6,6 +6,7 @@ use crate::{drivers::interface::storage::StorageDriver, keymap_config::Layer};
 
 use super::{ConfigKey, StorageConfigManager};
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum ConfigWriteError<E: Debug> {
     WriteError(E),
