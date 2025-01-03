@@ -9,7 +9,7 @@ use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
 
-use crate::usb::handler::{UsbDeviceHandler, UsbRequestHandler};
+use crate::usb::handler::UsbDeviceHandler;
 
 use super::driver::CommonUsbDriver;
 use super::{task::*, ReadySignal};

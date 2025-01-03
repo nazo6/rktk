@@ -23,7 +23,7 @@ impl<'d, I: UarteInstance, T: TimerInstance> UartFullDuplexSplitDriver<'d, I, T>
 impl<I: UarteInstance, T: TimerInstance> SplitDriver for UartFullDuplexSplitDriver<'_, I, T> {
     type Error = UartFullDuplexSplitDriverError;
 
-    async fn wait_recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<(), Self::Error> {
+    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         let mut i = 0;
         loop {
             let mut byte = [0];
@@ -42,7 +42,7 @@ impl<I: UarteInstance, T: TimerInstance> SplitDriver for UartFullDuplexSplitDriv
         Ok(())
     }
 
-    async fn send(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error> {
+    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         self.uarte
             .write_all(buf)
             .await

@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use dioxus::prelude::*;
 
+#[allow(dead_code)]
 #[derive(Default)]
 pub enum NotificationLevel {
     #[default]
@@ -35,7 +36,7 @@ struct NotificationData {
     record: Notification,
 }
 
-static NOTFICATIONS: GlobalSignal<Vec<NotificationData>> = GlobalSignal::new(|| vec![]);
+static NOTFICATIONS: GlobalSignal<Vec<NotificationData>> = GlobalSignal::new(Vec::new);
 static NOTIFICATION_ID: GlobalSignal<usize> = GlobalSignal::new(|| 0);
 
 pub fn push_notification(notification: Notification) {
