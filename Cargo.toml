@@ -25,7 +25,6 @@ rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.1.0" }
 rktk = { path = "lib/rktk", version = "0.1.0" }
 rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.1.0" }
 rktk-rrp = { path = "lib/rktk-rrp", version = "0.1.0" }
-rktk-rrp-client-webhid = { path = "lib/rktk-rrp-client-webhid", version = "0.1.0" }
 
 # embedded core libraries
 embedded-hal = "1.0.0"

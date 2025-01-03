@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 rktk-rrp = { workspace = true }
-rktk-rrp-client-webhid = { workspace = true }
+rktk-rrp-client-webhid = { path = "../rktk-rrp-client-webhid", version = "0.1.0" }
 rktk-keymanager = { workspace = true }
 
 dioxus = { version = "0.6.0", features = [] }
