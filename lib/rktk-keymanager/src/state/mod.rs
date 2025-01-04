@@ -3,34 +3,92 @@
 #![allow(clippy::let_unit_value)]
 #![allow(clippy::single_match)]
 
-use crate::config::{MAX_TAP_DANCE_KEY_COUNT, MAX_TAP_DANCE_REPEAT_COUNT, ONESHOT_STATE_SIZE};
-use crate::keymap::Keymap;
-use config::{KeymapInfo, StateConfig};
+use crate::{
+    interface::{
+        report::StateReport,
+        state::{config::StateConfig, event::Event, KeymapInfo},
+    },
+    keymap::Keymap,
+};
 use key_resolver::EventType;
 use manager::{GlobalManagerState, LocalManagerState};
 
-pub mod config;
-mod interface;
 mod key_resolver;
 mod manager;
 mod shared;
 
-pub use interface::*;
+// TODO: Delete these generics hell in some day...
 
 /// Represents the state of the keyboard.
-pub struct State<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
-{
-    key_resolver: key_resolver::KeyResolver,
-    shared: shared::SharedState<LAYER, ROW, COL, ENCODER_COUNT>,
+pub struct State<
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const ONESHOT_STATE_SIZE: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+> {
+    key_resolver: key_resolver::KeyResolver<
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >,
+    shared: shared::SharedState<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >,
     config: StateConfig,
     manager: GlobalManagerState,
 }
 
-impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
-    State<LAYER, ROW, COL, ENCODER_COUNT>
+impl<
+        const LAYER: usize,
+        const ROW: usize,
+        const COL: usize,
+        const ENCODER_COUNT: usize,
+        const ONESHOT_STATE_SIZE: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
+    >
+    State<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >
 {
     /// Creates a new state with the given keymap and configuration.
-    pub fn new(keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>, config: StateConfig) -> Self {
+    pub fn new(
+        keymap: Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
+        config: StateConfig,
+    ) -> Self {
         Self {
             config: config.clone(),
             key_resolver: key_resolver::KeyResolver::new(
@@ -88,7 +146,18 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
         lms.report(&mut self.shared, &mut self.manager)
     }
 
-    pub fn get_keymap(&self) -> &Keymap<LAYER, ROW, COL, ENCODER_COUNT> {
+    pub fn get_keymap(
+        &self,
+    ) -> &Keymap<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    > {
         &self.shared.keymap
     }
 
@@ -99,9 +168,9 @@ impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT
     pub fn get_keymap_info() -> KeymapInfo {
         KeymapInfo {
             layer_count: LAYER as u8,
-            max_tap_dance_key_count: MAX_TAP_DANCE_KEY_COUNT,
-            max_tap_dance_repeat_count: MAX_TAP_DANCE_REPEAT_COUNT,
-            oneshot_state_size: ONESHOT_STATE_SIZE,
+            max_tap_dance_key_count: TAP_DANCE_MAX_DEFINITIONS as u8,
+            max_tap_dance_repeat_count: TAP_DANCE_MAX_REPEATS as u8,
+            oneshot_state_size: ONESHOT_STATE_SIZE as u8,
         }
     }
 }

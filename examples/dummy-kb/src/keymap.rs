@@ -111,8 +111,6 @@ pub const KEYMAP: Keymap = Keymap {
             hold: [None, None, None, None],
         }),
         None,
-        None,
-        None,
     ],
-    combo: [None, None, None, None],
+    combo: [None, None],
 };

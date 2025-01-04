@@ -1,4 +1,4 @@
-use rktk_keymanager::state::config::{
+use rktk_keymanager::interface::state::config::{
     ComboConfig, KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
 };
 
@@ -182,6 +182,19 @@ pub struct RktkConfig {
 pub struct KeyManagerConfig {
     pub mouse: MouseConfig,
     pub key_resolver: KeyResolverConfig,
+    pub constant: KeymanagerConstantConfig,
+}
+
+#[cfg_attr(
+    not(no_build),
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
+pub struct KeymanagerConstantConfig {
+    pub oneshot_state_size: usize,
+    pub tap_dance_max_definitions: usize,
+    pub tap_dance_max_repeats: usize,
+    pub combo_key_max_definitions: usize,
+    pub combo_key_max_sources: usize,
 }
 
 impl Default for KeyManagerConfig {
@@ -201,6 +214,13 @@ impl Default for KeyManagerConfig {
                 },
                 tap_dance: TapDanceConfig { threshold: 100 },
                 combo: ComboConfig { threshold: 20 },
+            },
+            constant: KeymanagerConstantConfig {
+                oneshot_state_size: 5,
+                tap_dance_max_definitions: 2,
+                tap_dance_max_repeats: 4,
+                combo_key_max_definitions: 2,
+                combo_key_max_sources: 4,
             },
         }
     }

@@ -1,10 +1,7 @@
 use super::{pressed::Pressed, HandDetector};
 use embedded_hal::{digital::InputPin, spi::Operation};
 use embedded_hal_async::spi::SpiDevice;
-use rktk::{
-    drivers::interface::keyscan::{Hand, KeyscanDriver},
-    keymanager::state::KeyChangeEvent,
-};
+use rktk::drivers::interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver};
 
 /// Matrix scanner using spi-like shift register such as 74HC595 as output pin.
 ///

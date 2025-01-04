@@ -1,10 +1,10 @@
 use embassy_futures::join::{join, join5};
 use embassy_time::Timer;
-use rktk_keymanager::state::{config::Output, State};
+use rktk_keymanager::{interface::Output, state::State};
 use utils::{init_storage, load_state};
 
 use crate::{
-    config::static_config::{KEYBOARD, RKTK_CONFIG},
+    config::static_config::{KEYBOARD, KM_CONFIG, RKTK_CONFIG},
     drivers::interface::{
         ble::BleDriver,
         debounce::DebounceDriver,
@@ -36,6 +36,11 @@ type ConfiguredState = State<
     { KEYBOARD.rows as usize },
     { KEYBOARD.cols as usize },
     { KEYBOARD.encoder_count as usize },
+    { KM_CONFIG.constant.oneshot_state_size },
+    { KM_CONFIG.constant.tap_dance_max_definitions },
+    { KM_CONFIG.constant.tap_dance_max_repeats },
+    { KM_CONFIG.constant.combo_key_max_definitions },
+    { KM_CONFIG.constant.combo_key_max_sources },
 >;
 
 type SharedState = Mutex<ConfiguredState>;

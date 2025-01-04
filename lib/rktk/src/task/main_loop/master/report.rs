@@ -1,5 +1,5 @@
 use embassy_futures::select::{select3, Either3};
-use rktk_keymanager::state::{config::Output, Event, StateReport};
+use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
 
 use crate::{
     config::storage_config::StorageConfigManager,

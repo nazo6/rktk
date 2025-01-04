@@ -4,8 +4,9 @@
 //! `crate::keycode::special::Special::FlashClear` is one of example.
 
 use crate::{
+    interface::{report::TransparentReport, Output},
     keycode::{special::Special, KeyCode},
-    state::{config::Output, interface::TransparentReport, key_resolver::EventType},
+    state::key_resolver::EventType,
 };
 
 pub struct TransparentState {

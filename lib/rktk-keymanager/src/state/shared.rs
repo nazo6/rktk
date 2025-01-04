@@ -9,16 +9,58 @@ pub(super) struct SharedState<
     const ROW: usize,
     const COL: usize,
     const ENCODER_COUNT: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
 > {
-    pub keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>,
+    pub keymap: Keymap<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >,
     pub layer_active: LayerActive<LAYER>,
     pub now: Instant,
 }
 
-impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
-    SharedState<LAYER, ROW, COL, ENCODER_COUNT>
+impl<
+        const LAYER: usize,
+        const ROW: usize,
+        const COL: usize,
+        const ENCODER_COUNT: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
+    >
+    SharedState<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >
 {
-    pub fn new(keymap: Keymap<LAYER, ROW, COL, ENCODER_COUNT>) -> Self {
+    pub fn new(
+        keymap: Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
+    ) -> Self {
         Self {
             keymap,
             layer_active: [false; LAYER],

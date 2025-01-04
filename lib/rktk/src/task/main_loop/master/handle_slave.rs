@@ -1,4 +1,4 @@
-use rktk_keymanager::state::KeyChangeEvent;
+use rktk_keymanager::interface::state::event::KeyChangeEvent;
 
 use crate::{
     drivers::interface::{keyscan::Hand, split::SlaveToMaster},

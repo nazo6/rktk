@@ -11,7 +11,7 @@ use embedded_graphics::{
     prelude::{Dimensions, DrawTarget, Point},
     Pixel,
 };
-use rktk_keymanager::state::EncoderDirection;
+use rktk_keymanager::interface::state::event::{EncoderDirection, KeyChangeEvent};
 
 use crate::drivers::interface::{
     ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
@@ -95,11 +95,7 @@ impl BackgroundTask for BleTask {
 // Debounce
 pub enum Debounce {}
 impl DebounceDriver for Debounce {
-    fn should_ignore_event(
-        &mut self,
-        _: &rktk_keymanager::state::KeyChangeEvent,
-        _: embassy_time::Instant,
-    ) -> bool {
+    fn should_ignore_event(&mut self, _: &KeyChangeEvent, _: embassy_time::Instant) -> bool {
         unreachable!()
     }
 }

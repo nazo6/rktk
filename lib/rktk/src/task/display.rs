@@ -1,7 +1,7 @@
 use core::fmt::Write as _;
 
 use embassy_futures::select::{select, Either};
-use rktk_keymanager::state::config::Output;
+use rktk_keymanager::interface::Output;
 
 use crate::{
     drivers::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder},

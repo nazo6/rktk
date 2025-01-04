@@ -1,10 +1,7 @@
 use super::{pressed::Pressed, HandDetector};
 use embedded_hal::digital::{InputPin, OutputPin};
 use embedded_hal_async::digital::Wait;
-use rktk::{
-    drivers::interface::keyscan::{Hand, KeyscanDriver},
-    keymanager::state::KeyChangeEvent,
-};
+use rktk::drivers::interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver};
 
 /// Matrix scanner
 ///

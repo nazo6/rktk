@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 use postcard::experimental::max_size::MaxSize as _;
-use rktk_keymanager::state::config::StateConfig;
+use rktk_keymanager::interface::state::config::StateConfig;
 
 use crate::{drivers::interface::storage::StorageDriver, keymap_config::Layer};
 

@@ -34,6 +34,13 @@
       "properties": {
         "key_manager": {
           "default": {
+            "constant": {
+              "combo_key_max_definitions": 2,
+              "combo_key_max_sources": 4,
+              "oneshot_state_size": 5,
+              "tap_dance_max_definitions": 2,
+              "tap_dance_max_repeats": 4
+            },
             "key_resolver": {
               "combo": {
                 "threshold": 20
@@ -83,6 +90,20 @@
       "description": "Configs passed to [`rktk_keymanager`]",
       "type": "object",
       "properties": {
+        "constant": {
+          "default": {
+            "combo_key_max_definitions": 2,
+            "combo_key_max_sources": 4,
+            "oneshot_state_size": 5,
+            "tap_dance_max_definitions": 2,
+            "tap_dance_max_repeats": 4
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/KeymanagerConstantConfig"
+            }
+          ]
+        },
         "key_resolver": {
           "default": {
             "combo": {
@@ -195,6 +216,43 @@
             "null"
           ],
           "format": "uint8",
+          "minimum": 0.0
+        }
+      }
+    },
+    "KeymanagerConstantConfig": {
+      "type": "object",
+      "required": [
+        "combo_key_max_definitions",
+        "combo_key_max_sources",
+        "oneshot_state_size",
+        "tap_dance_max_definitions",
+        "tap_dance_max_repeats"
+      ],
+      "properties": {
+        "combo_key_max_definitions": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "combo_key_max_sources": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "oneshot_state_size": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "tap_dance_max_definitions": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "tap_dance_max_repeats": {
+          "type": "integer",
+          "format": "uint",
           "minimum": 0.0
         }
       }

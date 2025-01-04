@@ -1,6 +1,9 @@
-use crate::keycode::KeyCode;
+use crate::{
+    interface::{state::config::MouseConfig, Output},
+    keycode::KeyCode,
+};
 
-use super::{config::MouseConfig, key_resolver::EventType, shared::SharedState, StateReport};
+use super::{key_resolver::EventType, shared::SharedState, StateReport};
 
 mod keyboard;
 mod layer;
@@ -16,7 +19,7 @@ pub struct GlobalManagerState {
 }
 
 impl GlobalManagerState {
-    pub fn new(mouse_config: MouseConfig, initial_output: super::config::Output) -> Self {
+    pub fn new(mouse_config: MouseConfig, initial_output: Output) -> Self {
         GlobalManagerState {
             mouse: mouse::MouseState::new(mouse_config),
             keyboard: keyboard::KeyboardState::new(),
@@ -76,9 +79,22 @@ impl LocalManagerState {
         const ROW: usize,
         const COL: usize,
         const ENCODER_COUNT: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
     >(
         mut self,
-        shared_state: &mut SharedState<LAYER, ROW, COL, ENCODER_COUNT>,
+        shared_state: &mut SharedState<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
         global_state: &mut GlobalManagerState,
     ) -> StateReport {
         self.mouse

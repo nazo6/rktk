@@ -1,8 +1,9 @@
 use usbd_hid::descriptor::MouseReport;
 
 use crate::{
+    interface::state::config::MouseConfig,
     keycode::{key::Key, special::Special, KeyCode},
-    state::{config::MouseConfig, key_resolver::EventType, shared::SharedState},
+    state::{key_resolver::EventType, shared::SharedState},
     time::Duration,
 };
 
@@ -90,9 +91,22 @@ impl MouseLocalState {
         const ROW: usize,
         const COL: usize,
         const ENCODER_COUNT: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
     >(
         &mut self,
-        common_state: &mut SharedState<LAYER, ROW, COL, ENCODER_COUNT>,
+        common_state: &mut SharedState<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
         common_local_state: &mut SharedLocalManagerState,
         global_mouse_state: &mut MouseState,
         highest_layer: usize,

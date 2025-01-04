@@ -3,16 +3,10 @@
 use macro_rules_attribute::apply;
 
 use crate::{
-    config::{
-        MAX_COMBO_COMBINATION_COUNT, MAX_COMBO_KEY_COUNT, MAX_TAP_DANCE_KEY_COUNT,
-        MAX_TAP_DANCE_REPEAT_COUNT,
-    },
+    interface::state::event::EncoderDirection,
     keycode::{KeyAction, KeyCode},
     macros::common_derive,
 };
-
-#[cfg(feature = "state")]
-use crate::state::EncoderDirection;
 
 /// Root keymap type
 ///
@@ -23,16 +17,37 @@ pub struct Keymap<
     const ROW: usize,
     const COL: usize,
     const ENCODER_COUNT: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
 > {
     pub layers: [Layer<ROW, COL>; LAYER],
     pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
-    pub tap_dance: TapDanceDefinitions,
-    pub combo: ComboDefinitions,
+    pub tap_dance: TapDanceDefinitions<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
+    pub combo: ComboDefinitions<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
 }
 
-#[cfg(feature = "state")]
-impl<const LAYER: usize, const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
-    Keymap<LAYER, ROW, COL, ENCODER_COUNT>
+impl<
+        const LAYER: usize,
+        const ROW: usize,
+        const COL: usize,
+        const ENCODER_COUNT: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
+    >
+    Keymap<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >
 {
     pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
         if let Some(layer) = self.layers.get(layer) {
@@ -94,16 +109,43 @@ pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
 
 /// Tap dance definition
 #[apply(common_derive)]
-pub struct TapDanceDefinition {
-    pub tap: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
-    pub hold: [Option<KeyCode>; MAX_TAP_DANCE_REPEAT_COUNT as usize],
+pub struct TapDanceDefinition<const MAX_REPEATS: usize> {
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<[serde_with::Same; MAX_REPEATS]>")
+    )]
+    #[cfg_attr(
+        feature = "schemars",
+        schemars(with = "crate::generic_array_schema::GenericArray<Option<KeyCode>, MAX_REPEATS>")
+    )]
+    pub tap: [Option<KeyCode>; MAX_REPEATS],
+
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<[serde_with::Same; MAX_REPEATS]>")
+    )]
+    #[cfg_attr(
+        feature = "schemars",
+        schemars(with = "crate::generic_array_schema::GenericArray<Option<KeyCode>, MAX_REPEATS>")
+    )]
+    pub hold: [Option<KeyCode>; MAX_REPEATS],
 }
 
-pub type TapDanceDefinitions = [Option<TapDanceDefinition>; MAX_TAP_DANCE_KEY_COUNT as usize];
+pub type TapDanceDefinitions<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize> =
+    [Option<TapDanceDefinition<MAX_REPEATS>>; MAX_DEFINITIONS];
 
 #[apply(common_derive)]
-pub struct ComboDefinition {
-    pub src: [Option<KeyCode>; MAX_COMBO_COMBINATION_COUNT as usize],
+pub struct ComboDefinition<const MAX_SOURCES: usize> {
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<[serde_with::Same; MAX_SOURCES]>")
+    )]
+    #[cfg_attr(
+        feature = "schemars",
+        schemars(with = "crate::generic_array_schema::GenericArray<Option<KeyCode>, MAX_SOURCES>")
+    )]
+    pub src: [Option<KeyCode>; MAX_SOURCES],
     pub dst: KeyCode,
 }
-pub type ComboDefinitions = [Option<ComboDefinition>; MAX_COMBO_KEY_COUNT as usize];
+pub type ComboDefinitions<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize> =
+    [Option<ComboDefinition<MAX_SOURCES>>; MAX_DEFINITIONS];

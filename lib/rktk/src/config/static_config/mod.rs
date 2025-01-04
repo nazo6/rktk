@@ -12,7 +12,7 @@
 
 mod schema;
 
-use rktk_keymanager::state::config::*;
+use rktk_keymanager::interface::state::config::*;
 
 use embassy_time::Duration;
 

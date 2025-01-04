@@ -40,7 +40,7 @@ pub use rktk_keymanager as keymanager;
 
 /// Keymap configuration types.
 pub mod keymap_config {
-    use crate::config::static_config::{KEYBOARD, RKTK_CONFIG};
+    use crate::config::static_config::{KEYBOARD, KM_CONFIG, RKTK_CONFIG};
     use crate::keymanager;
 
     pub type Keymap = keymanager::keymap::Keymap<
@@ -48,6 +48,10 @@ pub mod keymap_config {
         { KEYBOARD.rows as usize },
         { KEYBOARD.cols as usize },
         { KEYBOARD.encoder_count as usize },
+        { KM_CONFIG.constant.tap_dance_max_definitions },
+        { KM_CONFIG.constant.tap_dance_max_repeats },
+        { KM_CONFIG.constant.combo_key_max_definitions },
+        { KM_CONFIG.constant.combo_key_max_sources },
     >;
 
     pub type Layer =

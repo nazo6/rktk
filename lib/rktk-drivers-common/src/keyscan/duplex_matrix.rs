@@ -5,10 +5,7 @@ use super::{
     pressed::Pressed,
     HandDetector,
 };
-use rktk::{
-    drivers::interface::keyscan::{Hand, KeyscanDriver},
-    keymanager::state::KeyChangeEvent,
-};
+use rktk::drivers::interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver};
 
 /// Implementation of keyscan driver for [duplex matrix](https://kbd.news/The-Japanese-duplex-matrix-1391.html).
 pub struct DuplexMatrixScanner<

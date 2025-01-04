@@ -14,7 +14,7 @@ pub const EMPTY_LAYER: LayerMap<ROWS, COLS> = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
 ];
 
-pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT> = Keymap {
+pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> = Keymap {
     layers: [
         Layer {
             map: EMPTY_LAYER,
@@ -54,16 +54,12 @@ pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT> = Keymap {
             ],
         }),
         None,
-        None,
-        None,
     ],
     combo: [
         Some(ComboDefinition {
             src: [Some(KeyCode::Key(Key::G)), Some(KeyCode::Key(Key::H)), None],
             dst: KeyCode::Key(Key::I),
         }),
-        None,
-        None,
         None,
     ],
 };

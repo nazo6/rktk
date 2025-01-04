@@ -36,6 +36,7 @@ usbd-hid = { workspace = true }
 [features]
 # Enables state management.
 state = ["dep:usbd-hid"]
+
 # Enables serialization.
 serde = ["dep:serde", "dep:serde_with"]
 # Enables serialization with postcard.

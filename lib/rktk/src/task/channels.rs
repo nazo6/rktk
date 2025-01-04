@@ -37,7 +37,8 @@ pub mod split {
 }
 
 pub mod report {
-    use rktk_keymanager::state::{EncoderDirection, KeyChangeEvent};
+
+    use rktk_keymanager::interface::state::event::{EncoderDirection, KeyChangeEvent};
 
     use super::*;
 

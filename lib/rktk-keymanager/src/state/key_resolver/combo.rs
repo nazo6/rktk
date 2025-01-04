@@ -1,34 +1,35 @@
 use crate::{
-    config::{MAX_COMBO_COMBINATION_COUNT, MAX_COMBO_KEY_COUNT},
+    interface::state::config::ComboConfig,
     keycode::KeyCode,
     keymap::{ComboDefinition, ComboDefinitions},
-    state::config::ComboConfig,
     time::{Duration, Instant},
 };
 
 use super::EventType;
 
 #[derive(Debug)]
-enum ComboUnitState {
+enum ComboUnitState<const MAX_SOURCES: usize> {
     None,
-    Pending((Instant, [bool; MAX_COMBO_COMBINATION_COUNT as usize])),
-    Pressing([bool; MAX_COMBO_COMBINATION_COUNT as usize]),
+    Pending((Instant, [bool; MAX_SOURCES])),
+    Pressing([bool; MAX_SOURCES]),
 }
 
 #[derive(Debug)]
-struct ComboUnit {
-    state: ComboUnitState,
-    def: Option<ComboDefinition>,
+struct ComboUnit<const MAX_SOURCES: usize> {
+    state: ComboUnitState<MAX_SOURCES>,
+    def: Option<ComboDefinition<MAX_SOURCES>>,
 }
 
 #[derive(Debug)]
-pub struct ComboState {
-    state: [ComboUnit; MAX_COMBO_KEY_COUNT as usize],
+pub struct ComboState<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize> {
+    state: [ComboUnit<MAX_SOURCES>; MAX_DEFINITIONS],
     config: ComboConfig,
 }
 
-impl ComboState {
-    pub fn new(def: ComboDefinitions, config: ComboConfig) -> Self {
+impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
+    ComboState<MAX_DEFINITIONS, MAX_SOURCES>
+{
+    pub fn new(def: ComboDefinitions<MAX_DEFINITIONS, MAX_SOURCES>, config: ComboConfig) -> Self {
         Self {
             state: def.map(|def| ComboUnit {
                 state: ComboUnitState::None,
@@ -66,10 +67,8 @@ impl ComboState {
 
                             match (event_type, &unit.state) {
                                 (EventType::Pressed, ComboUnitState::None) => {
-                                    unit.state = ComboUnitState::Pending((
-                                        now,
-                                        [false; MAX_COMBO_COMBINATION_COUNT as usize],
-                                    ));
+                                    unit.state =
+                                        ComboUnitState::Pending((now, [false; MAX_SOURCES]));
                                     *keycode = KeyCode::None;
                                 }
                                 (

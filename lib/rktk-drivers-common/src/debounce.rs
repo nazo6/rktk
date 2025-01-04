@@ -1,8 +1,8 @@
 //! Debounce driver implementations.
 
 use rktk::{
-    config::static_config::CONFIG, drivers::interface::debounce::DebounceDriver,
-    keymanager::state::KeyChangeEvent,
+    config::static_config::CONFIG,
+    drivers::interface::debounce::{DebounceDriver, KeyChangeEvent},
 };
 
 /// Debounce driver that implements `Eager debouncing`

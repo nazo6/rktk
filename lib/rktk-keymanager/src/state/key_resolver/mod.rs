@@ -1,11 +1,10 @@
+use crate::interface::state::config::KeyResolverConfig;
+use crate::interface::state::event::KeyChangeEvent;
 use crate::keymap::{ComboDefinitions, Keymap, TapDanceDefinitions};
 use crate::time::Instant;
 
 use super::shared::LayerActive;
-use super::KeyChangeEvent;
 use crate::keycode::{KeyAction, KeyCode};
-
-use super::config::KeyResolverConfig;
 
 mod combo;
 mod normal;
@@ -14,12 +13,18 @@ mod tap_dance;
 mod tap_hold;
 
 /// Handles layer related events and resolve physical key position to keycode.
-pub struct KeyResolver {
+pub struct KeyResolver<
+    const ONESHOT_BUFFER_SIZE: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+> {
     normal_state: normal::NormalState,
-    tap_dance: tap_dance::TapDanceState,
-    oneshot: oneshot::OneshotState,
+    tap_dance: tap_dance::TapDanceState<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
+    oneshot: oneshot::OneshotState<ONESHOT_BUFFER_SIZE>,
     tap_hold: tap_hold::TapHoldState,
-    combo: combo::ComboState,
+    combo: combo::ComboState<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -29,11 +34,25 @@ pub enum EventType {
     Released,
 }
 
-impl KeyResolver {
+impl<
+        const ONESHOT_BUFFER_SIZE: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
+    >
+    KeyResolver<
+        ONESHOT_BUFFER_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >
+{
     pub fn new(
         config: KeyResolverConfig,
-        tap_dance_def: TapDanceDefinitions,
-        combo_def: ComboDefinitions,
+        tap_dance_def: TapDanceDefinitions<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
+        combo_def: ComboDefinitions<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
     ) -> Self {
         Self {
             normal_state: normal::NormalState::new(),
@@ -51,7 +70,16 @@ impl KeyResolver {
         const ENCODER_COUNT: usize,
     >(
         &mut self,
-        keymap: &Keymap<LAYER, ROW, COL, ENCODER_COUNT>,
+        keymap: &Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
         layer_state: &mut LayerActive<LAYER>,
         event: Option<&KeyChangeEvent>,
         now: Instant,

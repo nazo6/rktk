@@ -1,8 +1,7 @@
 use crate::{
-    config::MAX_TAP_DANCE_KEY_COUNT,
+    interface::state::config::TapDanceConfig,
     keycode::KeyCode,
     keymap::{TapDanceDefinition, TapDanceDefinitions},
-    state::config::TapDanceConfig,
     time::{Duration, Instant},
 };
 
@@ -24,12 +23,12 @@ enum TapDanceKeyState {
     },
 }
 
-struct TapDanceUnit {
+struct TapDanceUnit<const MAX_REPEATS: usize> {
     state: TapDanceKeyState,
-    config: Option<TapDanceDefinition>,
+    config: Option<TapDanceDefinition<MAX_REPEATS>>,
 }
 
-impl TapDanceUnit {
+impl<const MAX_REPEATS: usize> TapDanceUnit<MAX_REPEATS> {
     fn get_tap_key(&self, tap_count: u8) -> Option<KeyCode> {
         self.config
             .as_ref()
@@ -43,13 +42,18 @@ impl TapDanceUnit {
     }
 }
 
-pub struct TapDanceState {
-    state: [TapDanceUnit; MAX_TAP_DANCE_KEY_COUNT as usize],
+pub struct TapDanceState<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize> {
+    state: [TapDanceUnit<MAX_REPEATS>; MAX_DEFINITIONS],
     threshold: Duration,
 }
 
-impl TapDanceState {
-    pub fn new(def: TapDanceDefinitions, config: TapDanceConfig) -> Self {
+impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
+    TapDanceState<MAX_DEFINITIONS, MAX_REPEATS>
+{
+    pub fn new(
+        def: TapDanceDefinitions<MAX_DEFINITIONS, MAX_REPEATS>,
+        config: TapDanceConfig,
+    ) -> Self {
         Self {
             state: def.map(|def| TapDanceUnit {
                 state: TapDanceKeyState::None,

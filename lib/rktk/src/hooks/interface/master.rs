@@ -1,4 +1,7 @@
-use rktk_keymanager::state::{EncoderDirection, KeyChangeEvent, StateReport};
+use rktk_keymanager::interface::{
+    report::StateReport,
+    state::event::{EncoderDirection, KeyChangeEvent},
+};
 
 use crate::drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver};
 
