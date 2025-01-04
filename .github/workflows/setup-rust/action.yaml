@@ -16,7 +16,7 @@ runs:
   - uses: dtolnay/rust-toolchain@master
     id: toolchain
     with:
-      toolchain: "nightly-2024-11-12"
+      toolchain: "nightly-2025-01-05"
       components: "${{ inputs.components }}"
       targets: "${{ inputs.target }}"
 
