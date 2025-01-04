@@ -146,16 +146,16 @@ impl<S: SpiDevice> Paw3395<S> {
         //combine the register values
         let data = BurstData {
             op_mode: buf[0] & 0b11,
-            lift_stat: buf[0] >> 3 & 1 == 1,
-            mot: buf[0] >> 7 & 1 == 1,
+            lift_stat: (buf[0] >> 3) & 1 == 1,
+            mot: (buf[0] >> 7) & 1 == 1,
             observation: buf[1],
-            dx: (buf[3] as i16) << 8 | (buf[2] as i16),
-            dy: (buf[5] as i16) << 8 | (buf[4] as i16),
+            dx: ((buf[3] as i16) << 8) | (buf[2] as i16),
+            dy: ((buf[5] as i16) << 8) | (buf[4] as i16),
             surface_quality: buf[6],
             raw_data_sum: buf[7],
             max_raw_data: buf[8],
             min_raw_data: buf[9],
-            shutter: (buf[11] as u16) << 8 | (buf[10] as u16),
+            shutter: ((buf[11] as u16) << 8) | (buf[10] as u16),
         };
 
         Ok(data)

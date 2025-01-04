@@ -151,13 +151,13 @@ impl<S: SpiDevice> Pmw3360<S> {
         let data = BurstData {
             motion: (data[0] & 0x80) != 0,
             on_surface: (data[0] & 0x08) == 0,
-            dx: (data[3] as i16) << 8 | (data[2] as i16),
-            dy: (data[5] as i16) << 8 | (data[4] as i16),
+            dx: ((data[3] as i16) << 8) | (data[2] as i16),
+            dy: ((data[5] as i16) << 8) | (data[4] as i16),
             surface_quality: data[6],
             raw_data_sum: data[7],
             max_raw_data: data[8],
             min_raw_data: data[9],
-            shutter: (data[11] as u16) << 8 | (data[10] as u16),
+            shutter: ((data[11] as u16) << 8) | (data[10] as u16),
         };
 
         Ok(data)
