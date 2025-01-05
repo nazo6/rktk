@@ -75,5 +75,9 @@ pub enum KeyCode {
 
 /// Inherit key: `KeyAction::Inherit`
 pub const _____: KeyAction = KeyAction::Inherit;
+pub const ____: KeyAction = KeyAction::Inherit;
+pub const ___: KeyAction = KeyAction::Inherit;
+pub const __: KeyAction = KeyAction::Inherit;
+
 /// None key: `KeyAction::Normal(KeyCode::None)`
 pub const XXXXX: KeyAction = KeyAction::Normal(KeyCode::None);

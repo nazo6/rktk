@@ -193,7 +193,7 @@
       "type": "object",
       "properties": {
         "auto_mouse_duration": {
-          "default": 100,
+          "default": 500,
           "type": "integer",
           "format": "uint32",
           "minimum": 0.0

@@ -46,7 +46,7 @@ struct MouseConfig {
     #[default(1)]
     pub auto_mouse_layer: u8,
 
-    #[default(100)]
+    #[default(500)]
     pub auto_mouse_duration: u32,
 
     #[default(0)]
