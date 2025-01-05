@@ -131,7 +131,28 @@
       },
       "additionalProperties": false
     },
-    "KeyboardLayout": true,
+    "KeyboardLayout": {
+      "type": "object",
+      "required": [
+        "keymap"
+      ],
+      "properties": {
+        "keymap": {
+          "description": "Keymap json data.\n\nThis is basically kle's json but logical key location data is added as legend."
+        },
+        "labels": {
+          "description": "Currently, this is unused in rktk.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "KeymanagerConstantConfig": {
       "type": "object",
       "properties": {
@@ -289,7 +310,8 @@
           "format": "uint64",
           "minimum": 0.0
         }
-      }
+      },
+      "additionalProperties": false
     },
     "TapDanceConfig": {
       "type": "object",

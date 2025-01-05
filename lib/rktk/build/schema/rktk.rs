@@ -1,7 +1,5 @@
-#[derive(
-    serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst, smart_default::SmartDefault,
-)]
-#[inherit_doc]
+#[macro_rules_attribute::apply(crate::schema::common_derive)]
+#[derive(smart_default::SmartDefault)]
 #[serde(default)]
 pub struct RktkConfig {
     /// The number of layers in the keyboard.

@@ -4,11 +4,12 @@
 
 use smart_default::SmartDefault;
 
-/// Config for key manager.
-///
-/// Note that these values are "default value" expect for `constant` fields. If storage is enabled in your firmware, these
-/// values can be overwritten by the values stored in the storage.
-#[allow(private_interfaces)]
+#[doc = r#"
+Config for key manager.
+
+Note that these values are "default value" expect for `constant` fields. If storage is enabled in your firmware, these
+values can be overwritten by the values stored in the storage.
+"#]
 #[macro_rules_attribute::apply(crate::schema::common_derive)]
 #[derive(Default)]
 #[serde(default)]

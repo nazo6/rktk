@@ -1,3 +1,5 @@
+#![allow(private_interfaces)]
+
 use macro_rules_attribute::attribute_alias;
 
 pub mod key_manager;
@@ -8,7 +10,7 @@ attribute_alias! {
     #[apply(common_derive)] =
         #[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
         #[serde(deny_unknown_fields)]
-        #[inherit_doc]
+        #[inherit_docs]
     ;
 }
 
@@ -16,7 +18,7 @@ attribute_alias! {
 ///
 /// JSON schema of config is available at `schema.json`.
 #[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
-#[inherit_doc]
+#[inherit_docs]
 pub struct Config {
     pub keyboard: keyboard::Keyboard,
     #[serde(default)]
