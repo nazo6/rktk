@@ -24,5 +24,5 @@ pub type Keymap = rktk_keymanager::keymap::Keymap<
 pub type Layer =
     rktk_keymanager::keymap::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
 
-pub type LayerMap =
-    rktk_keymanager::keymap::LayerMap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+pub type LayerKeymap =
+    rktk_keymanager::keymap::LayerKeymap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;

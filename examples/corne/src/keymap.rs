@@ -3,7 +3,7 @@ use rktk::config::keymap::{
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
         keymap::TapDanceDefinition,
     },
-    Keymap, Layer, LayerMap,
+    Keymap, Layer, LayerKeymap,
 };
 
 const L2ENTER: KeyAction = KeyAction::TapHold(
@@ -29,7 +29,7 @@ const L4GRV: KeyAction = KeyAction::TapHold(
 const FL_CLR: KeyAction = KeyAction::Normal(KeyCode::Special(Special::FlashClear));
 
 #[rustfmt::skip]
-const L0: LayerMap = [
+const L0: LayerKeymap = [
     [ L4GRV , D1    , D2    , D3    , D4    , D5    , _____ , /**/ _____ , D6    , D7    , D8    , D9    , D0   , EQUAL ],
     [  TAB  , Q     , W     , E     , R     , T     , _____ , /**/ _____ , Y     , U     , I     , O     , P    , MINUS],
     [  ESC  , A     , S     , D     , F     , G     , _____ , /**/ _____ , H     , J     , K     , L     , SCLN , QUOTE],
@@ -39,7 +39,7 @@ const L0: LayerMap = [
 
 #[rustfmt::skip]
 /// Auto mouse layer
-const L1: LayerMap = [
+const L1: LayerKeymap = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ ,M_LEFT ,MO_SCRL,M_RIGHT, _____ , _____ ],
@@ -49,7 +49,7 @@ const L1: LayerMap = [
 
 #[rustfmt::skip]
 /// Mouse layer
-const L2: LayerMap = [
+const L2: LayerKeymap = [
     [ _____ , F1    , F2    , F3    , F4    , F5    , _____ , /**/ _____ , F6    , F7    , F8    , F9    , F10   , F11   ],
     [ _____ , _____ , INSERT, HOME  , PGUP  , _____ , _____ , /**/ _____ , LEFT  , DOWN  , UP    , RIGHT , _____ , F12   ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ ,M_LEFT ,MO_SCRL,M_RIGHT, _____ , VOLUP ],
@@ -58,7 +58,7 @@ const L2: LayerMap = [
 ];
 
 #[rustfmt::skip]
-const L3: LayerMap = [
+const L3: LayerKeymap = [
     [ FL_CLR, _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , KP7   , KP8   , KP9   , _____ , _____ , /**/ _____ , SF(D1), SF(D2), SF(D3), SF(D4), SF(D5), _____ ],
     [ _____ , _____ , KP4   , KP5   , KP6   , _____ , _____ , /**/ _____ , SF(D6), SF(D7), SF(D8), SF(D9), SF(D0), _____ ],
@@ -67,7 +67,7 @@ const L3: LayerMap = [
 ];
 
 #[rustfmt::skip]
-const L4: LayerMap = [
+const L4: LayerKeymap = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
@@ -79,23 +79,23 @@ pub const KEYMAP: Keymap = Keymap {
     encoder_keys: [],
     layers: [
         Layer {
-            map: L0,
+            keymap: L0,
             arrowmouse: false,
         },
         Layer {
-            map: L1,
+            keymap: L1,
             arrowmouse: false,
         },
         Layer {
-            map: L2,
+            keymap: L2,
             arrowmouse: false,
         },
         Layer {
-            map: L3,
+            keymap: L3,
             arrowmouse: true,
         },
         Layer {
-            map: L4,
+            keymap: L4,
             arrowmouse: true,
         },
     ],

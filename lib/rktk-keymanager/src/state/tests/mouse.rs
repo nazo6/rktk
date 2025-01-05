@@ -29,7 +29,7 @@ pub fn aml() {
 #[test]
 pub fn aml_reset() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::Normal(KeyCode::Special(Special::AmlReset));
+    keymap.layers[0].keymap[0][0] = KeyAction::Normal(KeyCode::Special(Special::AmlReset));
 
     let mut state = new_state(keymap);
 

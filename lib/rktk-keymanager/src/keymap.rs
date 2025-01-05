@@ -51,7 +51,7 @@ impl<
 {
     pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
         if let Some(layer) = self.layers.get(layer) {
-            if let Some(row) = layer.map.get(row) {
+            if let Some(row) = layer.keymap.get(row) {
                 if let Some(key) = row.get(col) {
                     return Some(key);
                 }
@@ -83,23 +83,23 @@ pub struct Layer<const ROW: usize, const COL: usize> {
         feature = "serde",
         serde(with = "serde_with::As::<[[serde_with::Same; COL]; ROW]>")
     )]
-    pub map: LayerMap<ROW, COL>,
+    pub keymap: LayerKeymap<ROW, COL>,
     pub arrowmouse: bool,
 }
 
 impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
     fn default() -> Self {
         Self {
-            map: [[KeyAction::default(); COL]; ROW],
+            keymap: [[KeyAction::default(); COL]; ROW],
             arrowmouse: false,
         }
     }
 }
 
-/// Type alias for layer map
+/// Keymap of single layer
 ///
 /// Type that represents keymap for each layer.
-pub type LayerMap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
+pub type LayerKeymap<const ROW: usize, const COL: usize> = [[KeyAction; COL]; ROW];
 
 /// Tap dance definition
 #[apply(common_derive)]

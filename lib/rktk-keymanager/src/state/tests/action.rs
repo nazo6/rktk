@@ -6,7 +6,7 @@ mod tap_dance;
 #[test]
 fn normal_action() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::Normal(KeyCode::Key(Key::A));
+    keymap.layers[0].keymap[0][0] = KeyAction::Normal(KeyCode::Key(Key::A));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -20,7 +20,7 @@ fn normal_action() {
 #[test]
 fn normal2_action() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::Normal2(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
+    keymap.layers[0].keymap[0][0] = KeyAction::Normal2(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -37,7 +37,7 @@ fn normal2_action() {
 #[test]
 fn taphold_action_hold() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
+    keymap.layers[0].keymap[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -68,7 +68,7 @@ fn taphold_action_hold() {
 #[test]
 fn taphold_action_tap() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
+    keymap.layers[0].keymap[0][0] = KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -93,9 +93,9 @@ fn taphold_action_tap() {
 #[test]
 fn taphold_action_other_key_press() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] =
+    keymap.layers[0].keymap[0][0] =
         KeyAction::TapHold(KeyCode::Key(Key::A), KeyCode::Layer(LayerOp::Momentary(1)));
-    keymap.layers[1].map[0][1] = KeyAction::Normal(KeyCode::Key(Key::C));
+    keymap.layers[1].keymap[0][1] = KeyAction::Normal(KeyCode::Key(Key::C));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -121,9 +121,9 @@ fn taphold_action_other_key_press() {
 #[test]
 fn oneshot_action_mod() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::OneShot(KeyCode::Modifier(Modifier::LCtrl));
-    keymap.layers[0].map[0][1] = KeyAction::Normal(KeyCode::Key(Key::A));
-    keymap.layers[0].map[0][2] = KeyAction::Normal(KeyCode::Key(Key::B));
+    keymap.layers[0].keymap[0][0] = KeyAction::OneShot(KeyCode::Modifier(Modifier::LCtrl));
+    keymap.layers[0].keymap[0][1] = KeyAction::Normal(KeyCode::Key(Key::A));
+    keymap.layers[0].keymap[0][2] = KeyAction::Normal(KeyCode::Key(Key::B));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));

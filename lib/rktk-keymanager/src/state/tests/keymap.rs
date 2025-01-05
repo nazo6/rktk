@@ -1,12 +1,12 @@
 //! common keymap for test
 
-use crate::keymap::{ComboDefinition, Keymap, Layer, LayerMap, TapDanceDefinition};
+use crate::keymap::{ComboDefinition, Keymap, Layer, LayerKeymap, TapDanceDefinition};
 
 use super::prelude::*;
 
 #[rustfmt::skip]
 /// Auto mouse layer
-pub const EMPTY_LAYER: LayerMap<ROWS, COLS> = [
+pub const EMPTY_LAYER: LayerKeymap<ROWS, COLS> = [
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
     [ _____ , _____ , _____ , _____ , _____ , _____ , _____ , /**/ _____ , _____ , _____ , _____ , _____ , _____ , _____ ],
@@ -17,23 +17,23 @@ pub const EMPTY_LAYER: LayerMap<ROWS, COLS> = [
 pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> = Keymap {
     layers: [
         Layer {
-            map: EMPTY_LAYER,
+            keymap: EMPTY_LAYER,
             arrowmouse: false,
         },
         Layer {
-            map: EMPTY_LAYER,
+            keymap: EMPTY_LAYER,
             arrowmouse: false,
         },
         Layer {
-            map: EMPTY_LAYER,
+            keymap: EMPTY_LAYER,
             arrowmouse: false,
         },
         Layer {
-            map: EMPTY_LAYER,
+            keymap: EMPTY_LAYER,
             arrowmouse: false,
         },
         Layer {
-            map: EMPTY_LAYER,
+            keymap: EMPTY_LAYER,
             arrowmouse: true,
         },
     ],

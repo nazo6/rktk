@@ -4,7 +4,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn tap_dance_tap1() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapDance(0);
+    keymap.layers[0].keymap[0][0] = KeyAction::TapDance(0);
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -41,7 +41,7 @@ fn tap_dance_tap1() {
 #[test]
 fn tap_dance_hold1() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapDance(0);
+    keymap.layers[0].keymap[0][0] = KeyAction::TapDance(0);
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -69,7 +69,7 @@ fn tap_dance_hold1() {
 #[test]
 fn tap_dance_tap2() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapDance(0);
+    keymap.layers[0].keymap[0][0] = KeyAction::TapDance(0);
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -113,7 +113,7 @@ fn tap_dance_tap2() {
 #[test]
 fn tap_dance_hold2() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapDance(0);
+    keymap.layers[0].keymap[0][0] = KeyAction::TapDance(0);
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -130,7 +130,7 @@ fn tap_dance_hold2() {
 #[test]
 fn tap_dance_tap3() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::TapDance(0);
+    keymap.layers[0].keymap[0][0] = KeyAction::TapDance(0);
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));

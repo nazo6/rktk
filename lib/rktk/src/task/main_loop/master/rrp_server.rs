@@ -87,7 +87,7 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
                 layer,
                 row,
                 col,
-                key: keymap.layers[layer as usize].map[row as usize][col as usize],
+                key: keymap.layers[layer as usize].keymap[row as usize][col as usize],
             }),
         ))
     }
@@ -104,7 +104,7 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         };
 
         while let Some(Ok(key)) = req.next().await {
-            keymap.layers[key.layer as usize].map[key.row as usize][key.col as usize] = key.key;
+            keymap.layers[key.layer as usize].keymap[key.row as usize][key.col as usize] = key.key;
             if let Some(storage) = self.storage {
                 if let Err(_e) = storage
                     .write_keymap(key.layer, &keymap.layers[key.layer as usize])

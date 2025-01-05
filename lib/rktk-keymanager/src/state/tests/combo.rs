@@ -4,8 +4,8 @@ use pretty_assertions::assert_eq;
 #[test]
 fn combo() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::Normal(KeyCode::Key(Key::G));
-    keymap.layers[0].map[0][1] = KeyAction::Normal(KeyCode::Key(Key::H));
+    keymap.layers[0].keymap[0][0] = KeyAction::Normal(KeyCode::Key(Key::G));
+    keymap.layers[0].keymap[0][1] = KeyAction::Normal(KeyCode::Key(Key::H));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
@@ -37,7 +37,7 @@ fn combo() {
 #[test]
 fn combo_sideeffect() {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.layers[0].map[0][0] = KeyAction::Normal(KeyCode::Key(Key::G));
+    keymap.layers[0].keymap[0][0] = KeyAction::Normal(KeyCode::Key(Key::G));
 
     let mut state = new_state(keymap);
     let _ = update!(state, time(0));
