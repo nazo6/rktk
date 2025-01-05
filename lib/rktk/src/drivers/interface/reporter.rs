@@ -4,6 +4,13 @@ pub trait ReporterDriver {
     type Error: core::error::Error;
 
     async fn wait_ready(&self) {}
+
+    /// Read a keyboard report from the device and return leds data.
+    async fn read_keyboard_report(&self) -> Result<u8, Self::Error> {
+        let _: () = core::future::pending().await;
+        unreachable!()
+    }
+
     fn try_send_keyboard_report(&self, _report: KeyboardReport) -> Result<(), Self::Error>;
 
     fn try_send_media_keyboard_report(
@@ -15,7 +22,7 @@ pub trait ReporterDriver {
     async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), Self::Error>;
     async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
         let _: () = core::future::pending().await;
-        Ok(0)
+        unreachable!()
     }
 
     /// Wake up the device.

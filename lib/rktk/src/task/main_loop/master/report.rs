@@ -1,4 +1,4 @@
-use embassy_futures::select::{select3, Either3};
+use embassy_futures::select::{select4, Either4};
 use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
 
 use crate::{
@@ -30,15 +30,19 @@ pub async fn report_task<
     mut master_hooks: MH,
 ) {
     let mut prev_update_time = embassy_time::Instant::now();
+
+    let mut current_output = state.lock().await.get_config().initial_output;
+
     loop {
-        let event = match select3(
+        let event = match select4(
             MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
             KEYBOARD_EVENT_REPORT_CHANNEL.receive(),
             ENCODER_EVENT_REPORT_CHANNEL.receive(),
+            read_keyboard_report(usb, ble, current_output),
         )
         .await
         {
-            Either3::First(_) => {
+            Either4::First(_) => {
                 let mut mouse_move: (i8, i8) = (0, 0);
                 while let Ok((x, y)) = MOUSE_EVENT_REPORT_CHANNEL.try_receive() {
                     mouse_move.0 += x;
@@ -51,19 +55,27 @@ pub async fn report_task<
 
                 Event::Mouse(mouse_move)
             }
-            Either3::Second(mut event) => {
+            Either4::Second(mut event) => {
                 if !master_hooks.on_keyboard_event(&mut event).await {
                     continue;
                 }
 
                 Event::Key(event)
             }
-            Either3::Third((mut id, mut dir)) => {
+            Either4::Third((mut id, mut dir)) => {
                 if !master_hooks.on_encoder_event(&mut id, &mut dir).await {
                     continue;
                 }
 
                 Event::Encoder((id, dir))
+            }
+            Either4::Fourth(report) => {
+                if let Ok(report) = report {
+                    crate::utils::display_state!(NumLock, (report & 1) == 1);
+                    crate::utils::display_state!(CapsLock, (report & 2) == 2);
+                }
+
+                continue;
             }
         };
 
@@ -106,6 +118,7 @@ pub async fn report_task<
             system.power_off().await;
         }
 
+        current_output = state_report.transparent_report.output;
         match state_report.transparent_report.output {
             Output::Usb => {
                 crate::utils::display_state!(Output, Output::Usb);
@@ -146,4 +159,35 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) 
             log::warn!("Failed to send media keyboard report: {:?}", e);
         }
     }
+}
+
+async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
+    usb: &Option<USB>,
+    ble: &Option<BLE>,
+    output: Output,
+) -> Result<u8, ()> {
+    let report = match output {
+        Output::Usb => {
+            if let Some(usb) = usb {
+                usb.read_keyboard_report().await.map_err(|e| {
+                    log::warn!("Failed to read keyboard report: {:?}", e);
+                })?
+            } else {
+                let _: () = core::future::pending().await;
+                unreachable!()
+            }
+        }
+        Output::Ble => {
+            if let Some(usb) = ble {
+                usb.read_keyboard_report().await.map_err(|e| {
+                    log::warn!("Failed to read keyboard report: {:?}", e);
+                })?
+            } else {
+                let _: () = core::future::pending().await;
+                unreachable!()
+            }
+        }
+    };
+
+    Ok(report)
 }

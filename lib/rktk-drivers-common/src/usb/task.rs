@@ -1,11 +1,13 @@
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
+use embassy_futures::join::join4;
 use embassy_futures::join::{join, join3};
 use embassy_sync::pipe::Pipe;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
 use embassy_usb::UsbDevice;
 use rktk::drivers::interface::BackgroundTask;
+use rktk::utils::Signal;
 use rktk::utils::{Channel, RawMutex};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
@@ -16,6 +18,7 @@ pub static HID_MOUSE_CHANNEL: Channel<MouseReport, 8> = Channel::new();
 pub static HID_MEDIA_KEYBOARD_CHANNEL: Channel<MediaKeyboardReport, 8> = Channel::new();
 pub static RRP_SEND_PIPE: Pipe<RawMutex, 128> = Pipe::new();
 pub static RRP_RECV_PIPE: Pipe<RawMutex, 128> = Pipe::new();
+pub static KEYBOARD_LED_SIGNAL: Signal<u8> = Signal::new();
 
 pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub device: UsbDevice<'d, D>,
@@ -64,13 +67,24 @@ pub async fn hid<'d, D: Driver<'d>>(
     ready_signal: &'static ReadySignal,
 ) {
     keyboard_hid.ready().await;
+    let (mut keyboard_reader, mut keyboard_writer) = keyboard_hid.split();
+
     ready_signal.signal(());
 
-    join3(
+    join4(
         async move {
             loop {
                 let report = HID_KEYBOARD_CHANNEL.receive().await;
-                let _ = keyboard_hid.write_serialize(&report).await;
+                let _ = keyboard_writer.write_serialize(&report).await;
+            }
+        },
+        async move {
+            loop {
+                let mut buf = [0];
+                let Ok(_) = keyboard_reader.read(&mut buf).await else {
+                    continue;
+                };
+                KEYBOARD_LED_SIGNAL.signal(buf[0]);
             }
         },
         async move {

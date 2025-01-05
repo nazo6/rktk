@@ -1,7 +1,7 @@
 use super::{
     task::{
-        HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL, HID_MOUSE_CHANNEL, RRP_RECV_PIPE,
-        RRP_SEND_PIPE,
+        HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL, HID_MOUSE_CHANNEL, KEYBOARD_LED_SIGNAL,
+        RRP_RECV_PIPE, RRP_SEND_PIPE,
     },
     ReadySignal, RemoteWakeupSignal,
 };
@@ -25,6 +25,10 @@ impl ReporterDriver for CommonUsbDriver {
 
     async fn wait_ready(&self) {
         self.ready_signal.wait().await;
+    }
+
+    async fn read_keyboard_report(&self) -> Result<u8, Self::Error> {
+        Ok(KEYBOARD_LED_SIGNAL.wait().await)
     }
 
     fn try_send_keyboard_report(

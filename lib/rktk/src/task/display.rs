@@ -17,6 +17,8 @@ pub enum DisplayMessage {
     Output(Output),
     HighestLayer(u8),
     Hand(Option<Hand>),
+    NumLock(bool),
+    CapsLock(bool),
 }
 
 pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
@@ -97,6 +99,19 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
                     let mut str = heapless::String::<12>::new();
                     write!(str, "[{:3},{:3}]", x, y).unwrap();
                     let _ = display.update_text(&str, D::calculate_point(8, 1)).await;
+                }
+
+                // (18,1): num lock
+                DisplayMessage::NumLock(num_lock) => {
+                    let _ = display
+                        .update_text(if num_lock { "N" } else { "n" }, D::calculate_point(18, 1))
+                        .await;
+                }
+                // (19,1): caps lock
+                DisplayMessage::CapsLock(caps_lock) => {
+                    let _ = display
+                        .update_text(if caps_lock { "C" } else { "c" }, D::calculate_point(19, 1))
+                        .await;
                 }
             },
             Either::Second(str) => {
