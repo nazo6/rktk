@@ -16,12 +16,14 @@
 //! - [`hooks`]: Hooks that can be used to customize the behavior of the application.
 //! - [`config`]: Configuration of the keyboard.
 //!
-//! Basically, by passing [`drivers::Drivers`], [`hooks::Hooks`] and [`keymap_config::KeyConfig`] to [`task::start`], you can start the keyboard firmware.
+//! Basically, by passing [`drivers::Drivers`], [`hooks::Hooks`] and [`keymap_config::Keymap`] to [`task::start`], you can start the keyboard firmware.
 //!
-//! ## Note about static configured value
-//! You may see some type has hard-coded const generics (ex: [`keymap_config::Keymap`]).
-//! These types are not actually hardcoded, but are configurable using the `rktk.json` file.
+//! ## Note about statically configured value
+//! You may see hard-coded values is used in some places (ex: [`keymap_config::Keymap`]).
+//! These types are actually not hardcoded, but are configurable using json file.
 //! Just a random value is provided because it is required to generate docs.
+//!
+//! For more detail, see [`config::static_config`].
 
 #![no_std]
 

@@ -12,10 +12,10 @@ attribute_alias! {
     ;
 }
 
-#[macro_rules_attribute::apply(common_derive)]
+/// Root configuration struct
+#[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
+#[inherit_doc]
 pub struct Config {
-    #[serde(rename = "$schema")]
-    pub schema: Option<String>,
     pub keyboard: keyboard::Keyboard,
     #[serde(default)]
     pub rktk: rktk::RktkConfig,

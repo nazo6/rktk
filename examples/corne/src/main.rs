@@ -8,7 +8,7 @@ use core::panic::PanicInfo;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::{Input, Level, Output, Pull};
 use rktk::{
-    config::static_config::KEYBOARD,
+    config::static_config::CONFIG,
     drivers::{interface::keyscan::Hand, Drivers},
     hooks::empty_hooks::create_empty_hooks,
     none_driver,
@@ -43,7 +43,14 @@ async fn main(_spawner: Spawner) {
     ];
 
     let drivers = Drivers {
-        keyscan: Matrix::<_, _, 6, 4, { KEYBOARD.cols as usize }, { KEYBOARD.rows as usize }>::new(
+        keyscan: Matrix::<
+            _,
+            _,
+            6,
+            4,
+            { CONFIG.keyboard.cols as usize },
+            { CONFIG.keyboard.rows as usize },
+        >::new(
             outputs,
             [
                 Input::new(p.PIN_7, Pull::Down),  // ROW0

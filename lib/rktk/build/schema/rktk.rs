@@ -35,4 +35,16 @@ pub struct RktkConfig {
     /// The size of the split channel. Usually, you don't need to change this value.
     #[default(64)]
     pub split_channel_size: usize,
+
+    #[default(64)]
+    pub log_channel_size: usize,
+
+    #[default(4)]
+    pub mouse_event_buffer_size: usize,
+
+    #[default(4)]
+    pub keyboard_event_buffer_size: usize,
+
+    #[default(4)]
+    pub encoder_event_buffer_size: usize,
 }

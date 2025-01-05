@@ -1,17 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Config",
+  "description": "Root configuration struct",
   "type": "object",
   "required": [
     "keyboard"
   ],
   "properties": {
-    "$schema": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "key_manager": {
       "$ref": "#/definitions/KeyManagerConfig"
     },
@@ -22,7 +17,6 @@
       "$ref": "#/definitions/RktkConfig"
     }
   },
-  "additionalProperties": false,
   "definitions": {
     "ComboConfig": {
       "type": "object",
@@ -231,11 +225,35 @@
           "format": "uint64",
           "minimum": 0.0
         },
+        "encoder_event_buffer_size": {
+          "default": 4,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "keyboard_event_buffer_size": {
+          "default": 4,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
         "layer_count": {
           "description": "The number of layers in the keyboard.",
           "default": 5,
           "type": "integer",
           "format": "uint8",
+          "minimum": 0.0
+        },
+        "log_channel_size": {
+          "default": 64,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "mouse_event_buffer_size": {
+          "default": 4,
+          "type": "integer",
+          "format": "uint",
           "minimum": 0.0
         },
         "scan_interval_keyboard": {
