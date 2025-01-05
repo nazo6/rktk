@@ -7,6 +7,7 @@ pub mod report;
 pub mod state;
 
 #[apply(common_derive)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[derive(Copy)]
 pub enum Output {
     Usb,

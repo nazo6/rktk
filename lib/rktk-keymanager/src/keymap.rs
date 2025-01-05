@@ -75,13 +75,7 @@ impl<
 /// Layer definition
 ///
 /// This structure holds information about layer. This contains keymap and arrowmouse flag.
-#[cfg_attr(feature = "serde", serde_with::serde_as)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(
-    feature = "postcard",
-    derive(postcard::experimental::max_size::MaxSize)
-)]
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[apply(common_derive)]
 pub struct Layer<const ROW: usize, const COL: usize> {
     // NOTE: This is workaround for issue that serde_as cannot be used with cfg-attr.
     // ref: https://github.com/jonasbb/serde_with/issues/355
@@ -114,19 +108,11 @@ pub struct TapDanceDefinition<const MAX_REPEATS: usize> {
         feature = "serde",
         serde(with = "serde_with::As::<[serde_with::Same; MAX_REPEATS]>")
     )]
-    #[cfg_attr(
-        feature = "schemars",
-        schemars(with = "crate::generic_array_schema::GenericArray<Option<KeyCode>, MAX_REPEATS>")
-    )]
     pub tap: [Option<KeyCode>; MAX_REPEATS],
 
     #[cfg_attr(
         feature = "serde",
         serde(with = "serde_with::As::<[serde_with::Same; MAX_REPEATS]>")
-    )]
-    #[cfg_attr(
-        feature = "schemars",
-        schemars(with = "crate::generic_array_schema::GenericArray<Option<KeyCode>, MAX_REPEATS>")
     )]
     pub hold: [Option<KeyCode>; MAX_REPEATS],
 }
@@ -139,10 +125,6 @@ pub struct ComboDefinition<const MAX_SOURCES: usize> {
     #[cfg_attr(
         feature = "serde",
         serde(with = "serde_with::As::<[serde_with::Same; MAX_SOURCES]>")
-    )]
-    #[cfg_attr(
-        feature = "schemars",
-        schemars(with = "crate::generic_array_schema::GenericArray<Option<KeyCode>, MAX_SOURCES>")
     )]
     pub src: [Option<KeyCode>; MAX_SOURCES],
     pub dst: KeyCode,

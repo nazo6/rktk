@@ -16,6 +16,7 @@ pub mod config {
 
     /// Configuration to initialize the keyboard state.
     #[apply(common_derive)]
+    #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
     pub struct StateConfig {
         pub mouse: MouseConfig,
         pub key_resolver: KeyResolverConfig,
@@ -23,6 +24,7 @@ pub mod config {
     }
 
     #[apply(common_derive)]
+    #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
     pub struct MouseConfig {
         pub auto_mouse_layer: u8,
         pub auto_mouse_duration: u32,
@@ -32,6 +34,7 @@ pub mod config {
     }
 
     #[apply(common_derive)]
+    #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
     pub struct KeyResolverConfig {
         pub tap_hold: TapHoldConfig,
         pub tap_dance: TapDanceConfig,
@@ -39,17 +42,20 @@ pub mod config {
     }
 
     #[apply(common_derive)]
+    #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
     pub struct TapHoldConfig {
         pub threshold: u32,
         pub hold_on_other_key: bool,
     }
 
     #[apply(common_derive)]
+    #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
     pub struct TapDanceConfig {
         pub threshold: u32,
     }
 
     #[apply(common_derive)]
+    #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
     pub struct ComboConfig {
         pub threshold: u32,
     }
