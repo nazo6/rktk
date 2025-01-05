@@ -32,19 +32,23 @@ pub struct RktkConfig {
     #[default(5)]
     pub scan_interval_mouse: u64,
 
-    /// The size of the split channel. Usually, you don't need to change this value.
+    /// Size of the split channel buffer
     #[default(64)]
     pub split_channel_size: usize,
 
+    /// Size of the log channel buffer
     #[default(64)]
     pub log_channel_size: usize,
 
+    /// Size of the mouse event buffer
     #[default(4)]
     pub mouse_event_buffer_size: usize,
 
+    /// Size of the keyboard event buffer
     #[default(4)]
     pub keyboard_event_buffer_size: usize,
 
+    /// Size of the encoder event buffer
     #[default(4)]
     pub encoder_event_buffer_size: usize,
 }

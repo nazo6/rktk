@@ -1,13 +1,11 @@
 {
   "$schema": "../../lib/rktk/schema.json",
   "keyboard": {
+    "name": "corne",
     "cols": 12,
     "rows": 4,
-
-    "right_led_count": 27,
-    "left_led_count": 27,
-
-    "name": "corne",
+    "right_rgb_count": 27,
+    "left_rgb_count": 27,
     "layout": {
       "labels": [
         ["Ball availability", "Right", "Left"]

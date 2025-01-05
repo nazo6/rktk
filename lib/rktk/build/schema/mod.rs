@@ -13,6 +13,8 @@ attribute_alias! {
 }
 
 /// Root configuration struct
+///
+/// JSON schema of config is available at `schema.json`.
 #[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
 #[inherit_doc]
 pub struct Config {

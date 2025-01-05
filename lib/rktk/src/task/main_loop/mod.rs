@@ -107,10 +107,10 @@ pub async fn start<
             if let Some(rgb) = rgb {
                 match hand {
                     Hand::Right => {
-                        rgb::start::<{ KEYBOARD.right_led_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                        rgb::start::<{ KEYBOARD.right_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
                     }
                     Hand::Left => {
-                        rgb::start::<{ KEYBOARD.left_led_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                        rgb::start::<{ KEYBOARD.left_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
                     }
                 }
             }
