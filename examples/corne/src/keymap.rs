@@ -1,10 +1,9 @@
-use rktk::keymanager::keycode::*;
-use rktk::keymanager::keycode::{
-    key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*,
-};
-use rktk::{
-    keymanager::keymap::TapDanceDefinition,
-    keymap_config::{Keymap, Layer, LayerMap},
+use rktk::config::keymap::{
+    key_manager::{
+        keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
+        keymap::TapDanceDefinition,
+    },
+    Keymap, Layer, LayerMap,
 };
 
 const L2ENTER: KeyAction = KeyAction::TapHold(

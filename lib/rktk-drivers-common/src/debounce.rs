@@ -1,7 +1,7 @@
 //! Debounce driver implementations.
 
 use rktk::{
-    config::static_config::CONFIG,
+    config::constant::CONFIG,
     drivers::interface::debounce::{DebounceDriver, KeyChangeEvent},
 };
 

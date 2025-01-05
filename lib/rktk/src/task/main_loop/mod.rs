@@ -1,5 +1,8 @@
 use crate::{
-    config::static_config::{KEYBOARD, RKTK_CONFIG},
+    config::{
+        constant::{KEYBOARD, RKTK_CONFIG},
+        keymap::Keymap,
+    },
     drivers::interface::{
         ble::BleDriver,
         debounce::DebounceDriver,
@@ -16,7 +19,6 @@ use crate::{
         interface::{CommonHooks, MasterHooks, RgbHooks, SlaveHooks},
         Hooks,
     },
-    keymap_config::Keymap,
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
 };
 use embassy_futures::{

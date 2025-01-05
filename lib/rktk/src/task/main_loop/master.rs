@@ -4,7 +4,10 @@ use rktk_keymanager::{interface::Output, state::State};
 use utils::{init_storage, load_state};
 
 use crate::{
-    config::static_config::{KEYBOARD, KM_CONFIG, RKTK_CONFIG},
+    config::{
+        constant::{KEYBOARD, KM_CONFIG, RKTK_CONFIG},
+        keymap::Keymap,
+    },
     drivers::interface::{
         ble::BleDriver,
         debounce::DebounceDriver,
@@ -16,7 +19,6 @@ use crate::{
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
-    keymap_config::Keymap,
     task::channels::{
         report::{ENCODER_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
         split::{M2sTx, S2mRx},

@@ -9,7 +9,7 @@ use rktk_rrp::{
 };
 
 use crate::{
-    config::{static_config::KEYBOARD, storage_config::StorageConfigManager},
+    config::{constant::KEYBOARD, storage::StorageConfigManager},
     drivers::interface::{
         ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, usb::UsbDriver,
     },

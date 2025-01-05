@@ -37,28 +37,3 @@ pub mod utils;
 pub mod reexports {
     pub use heapless;
 }
-
-pub use rktk_keymanager as keymanager;
-
-/// Keymap configuration types.
-pub mod keymap_config {
-    use crate::config::static_config::{KEYBOARD, KM_CONFIG, RKTK_CONFIG};
-    use crate::keymanager;
-
-    pub type Keymap = keymanager::keymap::Keymap<
-        { RKTK_CONFIG.layer_count as usize },
-        { KEYBOARD.rows as usize },
-        { KEYBOARD.cols as usize },
-        { KEYBOARD.encoder_count as usize },
-        { KM_CONFIG.constant.tap_dance_max_definitions },
-        { KM_CONFIG.constant.tap_dance_max_repeats },
-        { KM_CONFIG.constant.combo_key_max_definitions },
-        { KM_CONFIG.constant.combo_key_max_sources },
-    >;
-
-    pub type Layer =
-        keymanager::keymap::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
-
-    pub type LayerMap =
-        keymanager::keymap::LayerMap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
-}

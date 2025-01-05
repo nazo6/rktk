@@ -1,6 +1,6 @@
 use embassy_time::Timer;
 
-use crate::{config::static_config::SCAN_INTERVAL_MOUSE, drivers::interface::mouse::MouseDriver};
+use crate::{config::constant::SCAN_INTERVAL_MOUSE, drivers::interface::mouse::MouseDriver};
 
 use super::MOUSE_EVENT_REPORT_CHANNEL;
 

@@ -5,11 +5,11 @@ use rktk_keymanager::interface::{
 
 use crate::{
     config::{
-        static_config::{KEYBOARD, KM_CONFIG},
-        storage_config::StorageConfigManager,
+        constant::{KEYBOARD, KM_CONFIG},
+        keymap::Keymap,
+        storage::StorageConfigManager,
     },
     drivers::interface::{keyscan::Hand, storage::StorageDriver},
-    keymap_config::Keymap,
 };
 
 use super::{ConfiguredState, SharedState, RKTK_CONFIG};

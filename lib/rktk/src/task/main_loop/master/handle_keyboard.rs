@@ -1,7 +1,7 @@
 use embassy_time::Timer;
 
 use crate::{
-    config::static_config::SCAN_INTERVAL_KEYBOARD,
+    config::constant::SCAN_INTERVAL_KEYBOARD,
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::{Hand, KeyscanDriver},

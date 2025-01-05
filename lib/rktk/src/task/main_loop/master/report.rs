@@ -2,7 +2,7 @@ use embassy_futures::select::{select3, Either3};
 use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
 
 use crate::{
-    config::storage_config::StorageConfigManager,
+    config::storage::StorageConfigManager,
     drivers::interface::{
         ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, system::SystemDriver,
         usb::UsbDriver,

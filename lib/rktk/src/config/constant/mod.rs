@@ -1,4 +1,4 @@
-//! Static configuration of the firmware.
+//! Constant(static) configuration of the firmware.
 //!
 //! These values are read from a json file set in the environment variable `RKTK_CONFIG_PATH`
 //! and set at build time.

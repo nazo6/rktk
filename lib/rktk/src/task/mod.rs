@@ -1,15 +1,15 @@
 //! Program entrypoint.
 
 use crate::{
+    config::keymap::Keymap,
     drivers::{interface::system::SystemDriver, Drivers},
     hooks::interface::*,
-    keymap_config::Keymap,
 };
 use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
 
 use crate::{
-    config::static_config::RKTK_CONFIG,
+    config::constant::RKTK_CONFIG,
     drivers::interface::{
         ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
         keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,

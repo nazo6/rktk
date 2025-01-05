@@ -2,7 +2,7 @@ use embassy_futures::join::join3;
 use embassy_time::Timer;
 
 use crate::{
-    config::static_config::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
+    config::constant::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::KeyscanDriver,
