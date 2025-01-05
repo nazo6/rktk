@@ -25,7 +25,6 @@ postcard = { workspace = true, optional = true, features = [
 ] }
 
 wasm-bindgen = { workspace = true, optional = true }
-schemars = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -41,8 +40,7 @@ state = ["dep:usbd-hid"]
 serde = ["dep:serde", "dep:serde_with"]
 # Enables serialization with postcard.
 postcard = ["dep:postcard", "serde"]
-schemars = ["dep:schemars", "serde", "std"]
 
 std = []
 
-_check = ["state", "schemars", "ssmarshal/std"]
+_check = ["state", "ssmarshal/std"]

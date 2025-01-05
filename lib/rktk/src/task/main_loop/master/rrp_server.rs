@@ -59,13 +59,17 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         &mut self,
         _req: (),
     ) -> Result<impl Stream<Item = get_layout_json::Response>, Self::Error> {
-        Ok(futures::stream::iter(
-            KEYBOARD.layout.as_bytes().chunks(64).map(|chunk| {
-                let mut vec = heapless::Vec::new();
-                vec.extend_from_slice(chunk).unwrap();
-                vec
-            }),
-        ))
+        if let Some(layout) = KEYBOARD.layout {
+            Ok(futures::stream::iter(layout.as_bytes().chunks(64).map(
+                |chunk| {
+                    let mut vec = heapless::Vec::new();
+                    vec.extend_from_slice(chunk).unwrap();
+                    vec
+                },
+            )))
+        } else {
+            Err("Layout is not defined")
+        }
     }
 
     async fn get_keymaps(

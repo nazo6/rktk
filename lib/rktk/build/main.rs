@@ -1,55 +1,71 @@
+use std::{env, fs, path::Path};
+
+use const_gen::*;
 use schemars::schema_for;
 
 mod rktk_json_docsrs;
-mod ser_codegen;
-
-include!("../src/config/static_config/schema.rs");
+mod schema;
 
 fn main() {
-    let config_path = if std::env::var("DOCS_RS").is_ok() {
-        // in docs.rs rktk.json cannot be loaded.
-        String::new()
-    } else {
-        std::env::var("RKTK_CONFIG_PATH").expect("RKTK_CONFIG_PATH is not set")
-    };
-
-    // println!("cargo:warning=Using config: {}", config_path);
-    // println!("cargo:warning=current_time:{:?}", std::time::Instant::now());
-
     println!("cargo:rerun-if-env-changed=RKTK_CONFIG_PATH");
     println!("cargo:rerun-if-env-changed=DOCS_RS");
-    println!("cargo:rerun-if-changed={}", config_path);
     println!("cargo:rerun-if-changed=src/config/static_config/schema.rs");
 
-    println!("cargo:rustc-cfg=no_build");
-
-    if std::env::var("DOCS_RS").is_err() {
-        let schema = schema_for!(StaticConfig);
-        std::fs::write(
-            std::path::Path::new(std::env::var("CARGO_MANIFEST_DIR").unwrap().as_str())
-                .join("schema.json"),
-            serde_json::to_string_pretty(&schema).expect("Failed to serialize schema"),
-        )
-        .expect("Failed to write schema.json");
-    }
+    let schema = schema_for!(schema::Config);
 
     let config = if std::env::var("DOCS_RS").is_ok() {
-        // in docs.rs use demo config insted.
+        // In docs.rs rktk.json cannot be loaded. So, loads pre-defined value.
+        // Also, writing file is not allowed, so schema.json generation is also skipped.
         println!("cargo:warning=Using demo json for docs.rs");
         rktk_json_docsrs::RKTK_JSON_DOCSRS.to_string()
     } else {
-        std::fs::read_to_string(config_path).expect("Failed to read config file")
+        fs::write(
+            Path::new(env::var("CARGO_MANIFEST_DIR").unwrap().as_str()).join("schema.json"),
+            serde_json::to_string_pretty(&schema).expect("Failed to serialize schema"),
+        )
+        .expect("Failed to write schema.json");
+
+        let config_path = env::var("RKTK_CONFIG_PATH").expect("RKTK_CONFIG_PATH is not set");
+        println!("cargo:rerun-if-changed={}", config_path);
+        fs::read_to_string(config_path).expect("Failed to read config file")
     };
 
-    let config: StaticConfig = serde_json::from_str(&config).expect("Failed to parse config file");
-
-    let code = format!(
-        "pub use schema::*;pub const CONFIG: StaticConfig = {};",
-        ser_codegen::to_string(&config).unwrap()
-    );
-
-    let gen_path = std::path::Path::new(std::env::var("OUT_DIR").unwrap().as_str()).join("gen.rs");
-    std::fs::write(&gen_path, code).expect("Failed to write generated code");
+    let out = generate(&config).unwrap();
+    let gen_path = Path::new(env::var("OUT_DIR").unwrap().as_str()).join("config.rs");
+    fs::write(&gen_path, out).expect("Failed to write generated code");
+    std::process::Command::new("rustfmt")
+        .arg(&gen_path)
+        .output()
+        .expect("Failed to run rustfmt");
 
     // println!("cargo:warning=Wrote generated code to {:?}", gen_path);
+}
+
+macro_rules! definitions {
+    ($vec:tt, $($path:path),* ) => {
+        $(
+            $vec.push(const_definition!(#[derive(Debug, serde::Serialize)] pub $path));
+        )*
+    };
+}
+
+pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let config: schema::Config = serde_json::from_str(value)?;
+
+    let mut text = vec!["use rktk_keymanager::interface::state::config::*;".to_string()];
+
+    definitions!(
+        text,
+        schema::Config,
+        schema::keyboard::Keyboard,
+        schema::rktk::RktkConfig,
+        schema::key_manager::KeyManagerConfig,
+        schema::key_manager::KeymanagerConstantConfig
+    );
+    text.push(const_declaration!(
+        #[doc = "Config generated from json"]
+        pub CONFIG = config
+    ));
+
+    Ok(text.join("\n"))
 }

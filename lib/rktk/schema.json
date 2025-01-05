@@ -1,151 +1,59 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "StaticConfig",
+  "title": "Config",
   "type": "object",
   "required": [
-    "config",
     "keyboard"
   ],
   "properties": {
-    "config": {
-      "$ref": "#/definitions/Config"
+    "$schema": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "key_manager": {
+      "$ref": "#/definitions/KeyManagerConfig"
     },
     "keyboard": {
       "$ref": "#/definitions/Keyboard"
+    },
+    "rktk": {
+      "$ref": "#/definitions/RktkConfig"
     }
   },
+  "additionalProperties": false,
   "definitions": {
     "ComboConfig": {
       "type": "object",
-      "required": [
-        "threshold"
-      ],
       "properties": {
         "threshold": {
+          "default": 50,
           "type": "integer",
           "format": "uint32",
           "minimum": 0.0
         }
-      }
-    },
-    "Config": {
-      "description": "Configuration for the firmware.",
-      "type": "object",
-      "properties": {
-        "key_manager": {
-          "default": {
-            "constant": {
-              "combo_key_max_definitions": 2,
-              "combo_key_max_sources": 4,
-              "oneshot_state_size": 5,
-              "tap_dance_max_definitions": 2,
-              "tap_dance_max_repeats": 4
-            },
-            "key_resolver": {
-              "combo": {
-                "threshold": 20
-              },
-              "tap_dance": {
-                "threshold": 100
-              },
-              "tap_hold": {
-                "hold_on_other_key": true,
-                "threshold": 500
-              }
-            },
-            "mouse": {
-              "auto_mouse_duration": 500,
-              "auto_mouse_layer": 1,
-              "auto_mouse_threshold": 1,
-              "scroll_divider_x": 20,
-              "scroll_divider_y": -12
-            }
-          },
-          "allOf": [
-            {
-              "$ref": "#/definitions/KeyManagerConfig"
-            }
-          ]
-        },
-        "rktk": {
-          "default": {
-            "default_auto_mouse_duration": 500,
-            "default_cpi": 600,
-            "double_tap_threshold": 500,
-            "layer_count": 5,
-            "scan_interval_keyboard": 5,
-            "scan_interval_mouse": 5,
-            "split_channel_size": 64,
-            "split_usb_timeout": 1000
-          },
-          "allOf": [
-            {
-              "$ref": "#/definitions/RktkConfig"
-            }
-          ]
-        }
-      }
+      },
+      "additionalProperties": false
     },
     "KeyManagerConfig": {
-      "description": "Configs passed to [`rktk_keymanager`]",
+      "description": "Config for key manager.\n\nNote that these values are \"default value\" expect for `constant` fields. If storage is enabled in your firmware, these values can be overwritten by the values stored in the storage.",
       "type": "object",
       "properties": {
         "constant": {
-          "default": {
-            "combo_key_max_definitions": 2,
-            "combo_key_max_sources": 4,
-            "oneshot_state_size": 5,
-            "tap_dance_max_definitions": 2,
-            "tap_dance_max_repeats": 4
-          },
-          "allOf": [
-            {
-              "$ref": "#/definitions/KeymanagerConstantConfig"
-            }
-          ]
+          "$ref": "#/definitions/KeymanagerConstantConfig"
         },
         "key_resolver": {
-          "default": {
-            "combo": {
-              "threshold": 20
-            },
-            "tap_dance": {
-              "threshold": 100
-            },
-            "tap_hold": {
-              "hold_on_other_key": true,
-              "threshold": 500
-            }
-          },
-          "allOf": [
-            {
-              "$ref": "#/definitions/KeyResolverConfig"
-            }
-          ]
+          "$ref": "#/definitions/KeyResolverConfig"
         },
         "mouse": {
-          "default": {
-            "auto_mouse_duration": 500,
-            "auto_mouse_layer": 1,
-            "auto_mouse_threshold": 1,
-            "scroll_divider_x": 20,
-            "scroll_divider_y": -12
-          },
-          "allOf": [
-            {
-              "$ref": "#/definitions/MouseConfig"
-            }
-          ]
+          "$ref": "#/definitions/MouseConfig"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "KeyResolverConfig": {
       "type": "object",
-      "required": [
-        "combo",
-        "tap_dance",
-        "tap_hold"
-      ],
       "properties": {
         "combo": {
           "$ref": "#/definitions/ComboConfig"
@@ -156,14 +64,13 @@
         "tap_hold": {
           "$ref": "#/definitions/TapHoldConfig"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "Keyboard": {
-      "description": "Keyboard layout and informations.\n\nThis struct is used to - Defines keyboard basic informations (ex: name, cols, rows, ...) - Defines keyboard physical layout which is used by remapper (layout property)\n\n# Coordination of the keyboard matrix\n\nThe rktk coordinate system has the top left as (0,0), and the coordinate values increase toward the bottom right.\n\n## Split keyboard coordinates For `col` in keyboard config, specify the coordinates of the entire keyboard. In other words, for a split keyboard with 7 columns on the left hand side and 7 columns on the right hand side, specify 14.\n\nInternally, the key scan driver returns the coordinates of \"only one hand.\" In other words, in this case, x=0-6. Therefore, it is necessary to convert the coordinates received from the key scan driver into the coordinates of both hands, and for this purpose the `split_right_shift` property is used.\n\nBelow is an example of a split keyboard with 14 columns and 4 rows. ```ignored [    Left    ]   [     Right     ] 0 1 2 3 4 5 6    0 1 2  3  4  5  6 ← One-handed coordinates ↓ split_right_shift=7 (or None) col=14 →   0 1 2 3 4 5 6    7 8 9 10 11 12 13 ← Two-handed coordinates 0 _ Q W E R T _    _ Y U  I  O  P  _ 1 ... 2 ... 3 ... ↑ row=4 ```",
       "type": "object",
       "required": [
         "cols",
-        "layout",
         "name",
         "rows"
       ],
@@ -182,7 +89,15 @@
           "minimum": 0.0
         },
         "layout": {
-          "description": "Defines the layout of the keyboard used in the remapper.\n\nThis is a JSON object that represents the layout of the keyboard and compatible with via's json layout format."
+          "description": "Defines the layout of the keyboard used in the remapper.\n\nThis is a JSON object that represents the layout of the keyboard and compatible with via's json layout format.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/KeyboardLayout"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "left_led_count": {
           "description": "RGB led count for left side. This is also used for non-split keyboard.",
@@ -218,82 +133,81 @@
           "format": "uint8",
           "minimum": 0.0
         }
-      }
+      },
+      "additionalProperties": false
     },
+    "KeyboardLayout": true,
     "KeymanagerConstantConfig": {
       "type": "object",
-      "required": [
-        "combo_key_max_definitions",
-        "combo_key_max_sources",
-        "oneshot_state_size",
-        "tap_dance_max_definitions",
-        "tap_dance_max_repeats"
-      ],
       "properties": {
         "combo_key_max_definitions": {
+          "default": 2,
           "type": "integer",
           "format": "uint",
           "minimum": 0.0
         },
         "combo_key_max_sources": {
+          "default": 3,
           "type": "integer",
           "format": "uint",
           "minimum": 0.0
         },
         "oneshot_state_size": {
+          "default": 4,
           "type": "integer",
           "format": "uint",
           "minimum": 0.0
         },
         "tap_dance_max_definitions": {
+          "default": 2,
           "type": "integer",
           "format": "uint",
           "minimum": 0.0
         },
         "tap_dance_max_repeats": {
+          "default": 4,
           "type": "integer",
           "format": "uint",
           "minimum": 0.0
         }
-      }
+      },
+      "additionalProperties": false
     },
     "MouseConfig": {
       "type": "object",
-      "required": [
-        "auto_mouse_duration",
-        "auto_mouse_layer",
-        "auto_mouse_threshold",
-        "scroll_divider_x",
-        "scroll_divider_y"
-      ],
       "properties": {
         "auto_mouse_duration": {
+          "default": 100,
           "type": "integer",
           "format": "uint32",
           "minimum": 0.0
         },
         "auto_mouse_layer": {
+          "default": 1,
           "type": "integer",
           "format": "uint8",
           "minimum": 0.0
         },
         "auto_mouse_threshold": {
+          "default": 0,
           "type": "integer",
           "format": "uint8",
           "minimum": 0.0
         },
         "scroll_divider_x": {
+          "default": 20,
           "type": "integer",
           "format": "int8"
         },
         "scroll_divider_y": {
+          "default": -12,
           "type": "integer",
           "format": "int8"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "RktkConfig": {
-      "description": "RKTK behavior configuration.\n\nMainly keymap related configurations are defined in this struct.",
       "type": "object",
       "properties": {
         "default_auto_mouse_duration": {
@@ -356,33 +270,31 @@
     },
     "TapDanceConfig": {
       "type": "object",
-      "required": [
-        "threshold"
-      ],
       "properties": {
         "threshold": {
+          "default": 200,
           "type": "integer",
           "format": "uint32",
           "minimum": 0.0
         }
-      }
+      },
+      "additionalProperties": false
     },
     "TapHoldConfig": {
       "type": "object",
-      "required": [
-        "hold_on_other_key",
-        "threshold"
-      ],
       "properties": {
         "hold_on_other_key": {
+          "default": true,
           "type": "boolean"
         },
         "threshold": {
+          "default": 200,
           "type": "integer",
           "format": "uint32",
           "minimum": 0.0
         }
-      }
+      },
+      "additionalProperties": false
     }
   }
 }

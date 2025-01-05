@@ -10,17 +10,17 @@
 //! ```
 //! See the examples folder for an example of this json.
 
-mod schema;
-
-use rktk_keymanager::interface::state::config::*;
-
 use embassy_time::Duration;
 
-include!(concat!(env!("OUT_DIR"), "/gen.rs"));
+mod schema {
+    include!(concat!(env!("OUT_DIR"), "/config.rs"));
+}
+
+pub use schema::CONFIG;
 
 pub const KEYBOARD: schema::Keyboard = CONFIG.keyboard;
-pub(crate) const RKTK_CONFIG: schema::RktkConfig = CONFIG.config.rktk;
-pub(crate) const KM_CONFIG: schema::KeyManagerConfig = CONFIG.config.key_manager;
+pub(crate) const RKTK_CONFIG: schema::RktkConfig = CONFIG.rktk;
+pub(crate) const KM_CONFIG: schema::KeyManagerConfig = CONFIG.key_manager;
 
 pub const SCAN_INTERVAL_KEYBOARD: Duration =
     Duration::from_millis(RKTK_CONFIG.scan_interval_keyboard);
