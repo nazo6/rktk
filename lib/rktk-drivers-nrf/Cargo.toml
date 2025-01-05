@@ -55,14 +55,16 @@ log = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-default = ["nrf52840", "softdevice-s140", "ble"]
+default = ["ble"]
 
 softdevice = ["dep:nrf-softdevice"]
 
 ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
-nrf52840 = ["embassy-nrf/nrf52840", "nrf-softdevice/s140"]
-softdevice-s140 = ["nrf-softdevice/nrf52840"]
 
 nightly = ["embassy-executor/nightly"]
 
-_check = ["embassy-nrf/nrf52840"]
+_check = [
+  "embassy-nrf/nrf52840",
+  "nrf-softdevice/nrf52840",
+  "nrf-softdevice/s140",
+]
