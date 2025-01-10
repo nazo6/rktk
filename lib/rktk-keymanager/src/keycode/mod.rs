@@ -27,6 +27,11 @@ pub mod mouse;
 pub mod special;
 pub mod utils;
 
+/// Convenient prelude of keycodes for defining keymaps
+pub mod prelude {
+    pub use super::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *};
+}
+
 /// Represents key action.
 #[apply(common_derive)]
 #[derive(Copy, Default)]

@@ -1,8 +1,5 @@
 use rktk::config::keymap::{
-    key_manager::{
-        keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
-        keymap::TapDanceDefinition,
-    },
+    key_manager::{keycode::prelude::*, keymap::TapDanceDefinition},
     Keymap, Layer, LayerKeymap,
 };
 
