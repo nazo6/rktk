@@ -82,6 +82,7 @@ pub async fn hid<'d, D: Driver<'d>>(
             loop {
                 let mut buf = [0];
                 let Ok(_) = keyboard_reader.read(&mut buf).await else {
+                    embassy_time::Timer::after_millis(300).await;
                     continue;
                 };
                 KEYBOARD_LED_SIGNAL.signal(buf[0]);
