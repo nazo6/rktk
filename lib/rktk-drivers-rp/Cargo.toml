@@ -23,7 +23,6 @@ embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-rp = { workspace = true, features = [
-  "unstable-pac",
   "time-driver",
   "critical-section-impl",
 ] }
@@ -42,4 +41,4 @@ static_cell = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-_check = []
+_check = ["embassy-rp/rp2040"]

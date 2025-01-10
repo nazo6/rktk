@@ -1,7 +1,4 @@
-use embassy_nrf::{
-    gpio::{Level, Output},
-    pac::POWER,
-};
+use embassy_nrf::gpio::{Level, Output};
 use rktk::{drivers::interface::system::SystemDriver, utils::Mutex};
 
 pub struct NrfSystemDriver<'d> {
@@ -17,9 +14,8 @@ impl<'d> NrfSystemDriver<'d> {
 }
 
 impl SystemDriver for NrfSystemDriver<'_> {
+    #[cfg(feature = "power")]
     async fn power_off(&self) {
-        let power: POWER = unsafe { core::mem::transmute(()) };
-
         {
             if let Some(vcc_cutoff) = &self.vcc_cutoff {
                 let mut out = vcc_cutoff.lock().await;
@@ -29,10 +25,7 @@ impl SystemDriver for NrfSystemDriver<'_> {
             }
         }
 
-        power.systemoff.write(|w| {
-            w.systemoff().enter();
-            w
-        });
+        embassy_nrf::power::set_system_off();
         cortex_m::asm::udf();
     }
 }

@@ -26,11 +26,7 @@ embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-embassy-nrf = { workspace = true, features = [
-  "gpiote",
-  "time-driver-rtc1",
-  "unstable-pac",
-] }
+embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
 nrf-softdevice = { optional = true, workspace = true, features = [
   "ble-peripheral",
 ] }
@@ -55,9 +51,12 @@ log = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-default = ["ble"]
+default = ["ble", "power"]
 
 softdevice = ["dep:nrf-softdevice"]
+
+# Enables system power off feature. This is supported only on some chips like nRF52840.
+power = []
 
 ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
 
