@@ -29,7 +29,7 @@ pub struct HidService {
     #[characteristic(
         uuid = "2A4C", // CONTROL_POINT
         security = "justworks",
-        read,
+        write_without_response,
         value = "[0u8]"
     )]
     pub control_point: u8,
@@ -38,6 +38,7 @@ pub struct HidService {
         uuid = "2A4E", // PROTOCOL_MODE
         security = "justworks",
         read,
+        write_without_response,
         value = "[1u8]"
     )]
     pub protocl_mode: u8,
@@ -56,7 +57,9 @@ pub struct HidService {
     #[characteristic(
         uuid = "2A4D", // HID_REPORT
         security = "justworks",
+        read,
         write,
+        write_without_response,
         value = "[0u8, 1u8]",
         // HID_REPORT_REF, Keyboard, output
         descriptor(uuid = "2908", security = "justworks", value = "[BleHidReportKind::Keyboard as u8, 2u8]"), 
