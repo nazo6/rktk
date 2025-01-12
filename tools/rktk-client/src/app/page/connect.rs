@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use web_sys::Hid;
 
 use crate::app::{
     components::notification::{push_notification, Notification, NotificationLevel},
@@ -12,36 +13,32 @@ pub fn Connect() -> Element {
 
     rsx! {
         div { class: "flex flex-col items-center justify-center h-full",
-            if hid.is_falsy() {
-                h1 { "WebHID not supported" }
-            } else {
-                h1 { "Connect to RKTK" }
-                button {
-                    class: "btn btn-primary",
-                    onclick: move |_| {
-                        let hid = hid.clone();
-                        spawn(async move {
-                            match conn::connect(hid.clone()).await {
-                                Ok(state) => {
-                                    push_notification(Notification {
-                                        message: format!("Connected to device: {}", state.keyboard.name),
-                                        level: NotificationLevel::Info,
-                                        ..Default::default()
-                                    });
-                                    *CONN.write() = Some(state);
-                                }
-                                Err(e) => {
-                                    push_notification(Notification {
-                                        message: format!("Cannot connect to device: {:?}", e),
-                                        level: NotificationLevel::Error,
-                                        ..Default::default()
-                                    });
-                                }
+            h1 { "Connect to RKTK" }
+            button {
+                class: "btn btn-primary",
+                onclick: move |_| {
+                    let hid = hid.clone();
+                    spawn(async move {
+                        match conn::connect(hid.clone()).await {
+                            Ok(state) => {
+                                push_notification(Notification {
+                                    message: format!("Connected to device: {}", state.keyboard.name),
+                                    level: NotificationLevel::Info,
+                                    ..Default::default()
+                                });
+                                *CONN.write() = Some(state);
                             }
-                        });
-                    },
-                    "Connect"
-                }
+                            Err(e) => {
+                                push_notification(Notification {
+                                    message: format!("Cannot connect to device: {:?}", e),
+                                    level: NotificationLevel::Error,
+                                    ..Default::default()
+                                });
+                            }
+                        }
+                    });
+                },
+                "Connect"
             }
         }
     }

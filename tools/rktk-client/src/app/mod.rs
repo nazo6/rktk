@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use js_sys::wasm_bindgen::{prelude::Closure, JsCast as _};
 
 use crate::TAILWIND_CSS;
 
@@ -26,11 +27,36 @@ pub fn App() -> Element {
 
 #[component]
 fn Home() -> Element {
-    rsx! {
-        if state::CONN.read().is_some() {
-            page::connected::Connected {}
+    use_effect(|| {
+        let window = web_sys::window().expect("Missing Window");
+        let hid = window.navigator().hid();
+        if hid.is_falsy() {
+            return;
         } else {
-            page::connect::Connect {}
+            let cb = Closure::wrap(Box::new(move || {
+                spawn_forever(async move {
+                    disconnect::disconnect().await;
+                });
+            }) as Box<dyn FnMut()>);
+
+            hid.set_ondisconnect(Some(cb.as_ref().unchecked_ref()));
+
+            cb.forget();
+        }
+    });
+
+    let window = web_sys::window().expect("Missing Window");
+    let hid = window.navigator().hid();
+
+    rsx! {
+        if hid.is_falsy() {
+            h1 { "WebHID not supported" }
+        } else {
+            if state::CONN.read().is_some() {
+                page::connected::Connected {}
+            } else {
+                page::connect::Connect {}
+            }
         }
     }
 }

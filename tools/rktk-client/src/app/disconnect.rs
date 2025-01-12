@@ -1,7 +1,10 @@
 use dioxus::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
-use super::state::CONN;
+use super::{
+    components::notification::{push_notification, Notification, NotificationLevel},
+    state::CONN,
+};
 
 pub async fn disconnect() -> anyhow::Result<()> {
     {
@@ -12,6 +15,12 @@ pub async fn disconnect() -> anyhow::Result<()> {
             .await
             .map_err(|e| anyhow::anyhow!("Failed to close device: {:?}", e))?;
     }
+
+    push_notification(Notification {
+        message: "Disconnected from device".to_string(),
+        level: NotificationLevel::Info,
+        ..Default::default()
+    });
 
     *CONN.write() = None;
 
