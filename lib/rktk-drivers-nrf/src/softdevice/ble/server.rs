@@ -1,6 +1,6 @@
 use nrf_softdevice::{
     ble::{
-        gatt_server::{self, RegisterError, WriteOp},
+        gatt_server::{self, RegisterError, Service as _, WriteOp},
         Connection,
     },
     Softdevice,
@@ -9,7 +9,7 @@ use nrf_softdevice::{
 use super::services::{
     battery::BatteryService,
     device_information::{DeviceInformation, DeviceInformationService, PnPID, VidSource},
-    hid::HidService,
+    hid::{HidService, HidServiceEvent},
 };
 
 pub struct Server {
@@ -47,18 +47,24 @@ impl Server {
     }
 }
 
+pub enum ServerEvent {
+    Hid(HidServiceEvent),
+}
+
 impl gatt_server::Server for Server {
-    type Event = ();
+    type Event = ServerEvent;
 
     fn on_write(
         &self,
-        conn: &Connection,
+        _conn: &Connection,
         handle: u16,
         _op: WriteOp,
         _offset: usize,
         data: &[u8],
     ) -> Option<Self::Event> {
-        self.hid.on_write(conn, handle, data);
+        if let Some(e) = self.hid.on_write(handle, data) {
+            return Some(Self::Event::Hid(e));
+        };
         self.bas.on_write(handle, data);
         None
     }

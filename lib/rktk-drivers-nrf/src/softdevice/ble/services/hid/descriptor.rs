@@ -58,7 +58,7 @@ use usbd_hid::descriptor::generator_prelude::*;
     },
 )]
 #[allow(dead_code)]
-pub struct BleKeyboardReport {
+pub struct BleHidReport {
     pub modifier: u8,
     pub reserved: u8,
     pub leds: u8,
@@ -76,7 +76,7 @@ pub struct BleKeyboardReport {
 
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum BleCompositeReportType {
+pub(crate) enum BleHidReportKind {
     Keyboard = 0x01,
     Mouse = 0x02,
     Media = 0x03,
