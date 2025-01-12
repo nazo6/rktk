@@ -38,7 +38,6 @@ impl<I: UarteInstance, T: TimerInstance> SplitDriver for UartFullDuplexSplitDriv
                 i += 1;
             }
         }
-        log::info!("Received: {:?}", buf);
         Ok(())
     }
 
