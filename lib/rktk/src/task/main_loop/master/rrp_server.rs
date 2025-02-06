@@ -146,11 +146,7 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         _req: get_log::Request,
     ) -> Result<impl Stream<Item = get_log::Response>, Self::Error> {
         Ok(futures::stream::iter(core::iter::from_fn(|| {
-            if let Ok(chunk) = crate::task::logger::LOG_CHANNEL.try_receive() {
-                Some(chunk)
-            } else {
-                None
-            }
+            crate::task::logger::LOG_CHANNEL.try_receive().ok()
         })))
     }
 

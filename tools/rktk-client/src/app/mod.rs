@@ -30,12 +30,10 @@ fn Home() -> Element {
     use_effect(|| {
         let window = web_sys::window().expect("Missing Window");
         let hid = window.navigator().hid();
-        if hid.is_falsy() {
-            return;
-        } else {
+        if !hid.is_falsy() {
             let cb = Closure::wrap(Box::new(move || {
                 spawn_forever(async move {
-                    disconnect::disconnect().await;
+                    let _ = disconnect::disconnect().await;
                 });
             }) as Box<dyn FnMut()>);
 

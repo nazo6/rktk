@@ -37,12 +37,12 @@ impl<
     /// - `rows`: Row pins of the matrix.
     /// - `cols`: Column pins of the matrix.
     /// - `output_awaitable`: Whether the output pins can be awaited for high/low.
-    ///    In rp2040, wait_for_{low,high} can be used for output mode.
-    ///    On the other hand, in nrf, this doesn't work and never returns.
-    ///    In such case, set this to false and will be fallback to just wait some time
+    ///   In rp2040, wait_for_{low,high} can be used for output mode.
+    ///   On the other hand, in nrf, this doesn't work and never returns.
+    ///   In such case, set this to false and will be fallback to just wait some time
     /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
     /// - `translate_key_position`: Function to translate key position from pin number and scan direction to key
-    ///    (scan direction, row, col) -> Option<(row, col)>
+    ///   (scan direction, row, col) -> Option<(row, col)>
     pub fn new(
         rows: [F; ROW_PIN_COUNT],
         cols: [F; COL_PIN_COUNT],

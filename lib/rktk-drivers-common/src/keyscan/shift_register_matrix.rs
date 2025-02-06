@@ -40,8 +40,8 @@ impl<
     /// - `input_pins`: Input pins to read the matrix.
     /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
     /// - `map_key`: Function to map key position from pin number. This function must return
-    ///    position within specified `COLS` and `ROWS`.
-    ///    Signature: (row, col) -> Option<(row, col)>
+    ///   position within specified `COLS` and `ROWS`.
+    ///   Signature: (row, col) -> Option<(row, col)>
     pub fn new(
         row_shift_register: S,
         input_pins: [IP; INPUT_PIN_COUNT],

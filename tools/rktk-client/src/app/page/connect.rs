@@ -1,5 +1,4 @@
 use dioxus::prelude::*;
-use web_sys::Hid;
 
 use crate::app::{
     components::notification::{push_notification, Notification, NotificationLevel},
