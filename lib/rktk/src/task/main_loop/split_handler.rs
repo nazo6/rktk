@@ -48,12 +48,13 @@ impl CobsReceiver {
                 if end {
                     let _ = self.remained.push_back(*b);
                 } else {
-                    idx += 1;
                     if let Some(buf_slot) = buf.get_mut(idx) {
                         *buf_slot = *b;
+                        idx += 1;
                     } else {
                         return Err("Buffer overflow");
                     }
+
                     if *b == 0 {
                         end = true;
                     }
