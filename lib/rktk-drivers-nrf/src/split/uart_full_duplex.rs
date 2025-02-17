@@ -1,7 +1,7 @@
 use embassy_nrf::buffered_uarte::BufferedUarte;
 use embassy_nrf::timer::Instance as TimerInstance;
 use embassy_nrf::uarte::Instance as UarteInstance;
-use embedded_io_async::{Read, Write as _};
+use embedded_io_async::Write as _;
 use rktk::drivers::interface::split::SplitDriver;
 
 #[derive(Debug, thiserror::Error)]

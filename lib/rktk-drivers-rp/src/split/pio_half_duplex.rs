@@ -156,7 +156,7 @@ impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
         Ok(())
     }
 
-    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {
         let _permit = loop {
             let (start, end, data) = self.recv_byte().await;
 
@@ -169,23 +169,23 @@ impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
             buf[0] = data;
 
             if end {
-                return Ok(());
+                return Ok(0);
             }
 
             break permit;
         };
 
-        for b in buf.iter_mut().skip(1) {
+        for (i, b) in buf.iter_mut().skip(1).enumerate() {
             let (_start, end, data) = self.recv_byte().await;
 
             *b = data;
 
             if end {
-                break;
+                return Ok(i);
             }
         }
 
-        Ok(())
+        Err(Self::Error::GeneralError("Buffer overflow"))
     }
 
     async fn send_all(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
