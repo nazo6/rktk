@@ -105,7 +105,7 @@ pub async fn start<
         None
     };
 
-    sjoin::join(
+    sjoin::join!(
         async {
             if let Some(split) = split {
                 if is_master {
@@ -165,7 +165,6 @@ pub async fn start<
                     }
                 }
             }
-        },
-    )
-    .await;
+        }
+    );
 }

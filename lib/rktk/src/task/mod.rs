@@ -92,7 +92,7 @@ pub async fn start<
         .double_reset_usb_boot(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
         .await;
 
-    sjoin::join(
+    sjoin::join!(
         async move {
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 match mouse_builder.build().await {
@@ -125,7 +125,7 @@ pub async fn start<
                 (None, None)
             };
 
-            sjoin::join3(
+            sjoin::join!(
                 async {
                     main_loop::start(
                         &drivers.system,
@@ -152,15 +152,13 @@ pub async fn start<
                     if let Some(ble_task) = ble_task {
                         ble_task.run().await
                     }
-                },
-            )
-            .await;
+                }
+            );
         },
         async move {
             if let Some(display_builder) = drivers.display_builder {
                 display::start(display_builder).await;
             }
-        },
-    )
-    .await;
+        }
+    );
 }

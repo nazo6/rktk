@@ -44,32 +44,28 @@ pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;
 
 /// sjoin or "spawn or join"
 pub mod sjoin {
-    use core::future::Future;
-
-    macro_rules! join_or_spawn {
-        ($name:ident, $f1:ident: $f1t:ident, $($fs:ident: $fst:ident),* ) => {
-            pub async fn $name<O, $f1t: Future<Output = O>, $($fst: Future + 'static),*>($f1: $f1t, $($fs: $fst),*) -> O {
-                #[cfg(feature = "alloc")]
+    macro_rules! join {
+        ($f1:expr, $($future:expr),* ) => {
+            #[cfg(feature = "alloc")]
+            {
+                use alloc::boxed::Box;
                 {
-                    use alloc::boxed::Box;
-
                     let ex = embassy_executor::Spawner::for_current_executor().await;
-                    $(
-                        let ts = Box::leak(Box::new(embassy_executor::raw::TaskStorage::new()));
-                        let st = ts.spawn(|| $fs);
-                        ex.spawn(st)
-                            .unwrap();
-                    )*
-                    $f1.await
+                    {
+                        $(
+                            let ts = Box::leak(Box::new(embassy_executor::raw::TaskStorage::new()));
+                            let st = ts.spawn(|| $future);
+                            ex.spawn(st).unwrap();
+                        )*
+                    }
                 }
 
-                #[cfg(not(feature = "alloc"))]
-                embassy_futures::join::$name($f1, $($fs),*).await.0
-            }
+                $f1.await
+            };
+
+            #[cfg(not(feature = "alloc"))]
+            futures::join::join!($f1, $($future:ident),* ).await;
         };
     }
-
-    join_or_spawn!(join, f1: F1, f2: F2);
-    join_or_spawn!(join3, f1: F1, f2: F2, f3: F3);
-    join_or_spawn!(join4, f1: F1, f2: F2, f3: F3, f4: F4);
+    pub(crate) use join;
 }
