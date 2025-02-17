@@ -120,12 +120,12 @@ impl SoftdeviceBleCentralSplitDriver {
 impl SplitDriver for SoftdeviceBleCentralSplitDriver {
     type Error = core::convert::Infallible;
 
-    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         RX_PIPE.read(buf).await;
         Ok(())
     }
 
-    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn send_all(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         TX_PIPE.write_all(buf).await;
         Ok(())
     }

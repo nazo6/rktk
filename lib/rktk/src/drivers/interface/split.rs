@@ -8,8 +8,8 @@ pub trait SplitDriver {
     async fn init(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
-    async fn wait_recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<(), Self::Error>;
-    async fn send(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
+    async fn recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<(), Self::Error>;
+    async fn send_all(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
 }
 
 #[derive(Deserialize, Serialize, Debug)]

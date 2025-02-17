@@ -100,7 +100,7 @@ impl<
 {
     type Error = UartHalfDuplexSplitDriverError;
 
-    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
@@ -134,7 +134,7 @@ impl<
         Ok(())
     }
 
-    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn send_all(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         let mut config = embassy_nrf::uarte::Config::default();
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;

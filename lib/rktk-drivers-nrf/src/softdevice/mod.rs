@@ -67,6 +67,7 @@ pub fn init_softdevice(ble_gap_name: &'static str) -> &'static mut Softdevice {
     Softdevice::enable(&config)
 }
 
+/// Starts softdevice task
 pub async fn start_softdevice(sd: &'static Softdevice) {
     let spawner = embassy_executor::Spawner::for_current_executor().await;
     spawner.spawn(softdevice_task(sd)).unwrap();

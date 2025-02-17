@@ -23,7 +23,7 @@ pub enum HidReport {
 
 static REPORT_CHAN: Channel<HidReport, 8> = Channel::new();
 
-pub async fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> Server {
+pub fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> Server {
     unsafe {
         raw::sd_ble_gap_appearance_set(raw::BLE_APPEARANCE_HID_KEYBOARD as u16);
     }
@@ -39,7 +39,7 @@ pub struct NrfBleDriverBuilder {
 }
 
 impl NrfBleDriverBuilder {
-    pub async fn new(
+    pub fn new(
         sd: &'static Softdevice,
         server: Server,
         name: &'static str,

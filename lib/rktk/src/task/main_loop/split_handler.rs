@@ -32,7 +32,7 @@ pub async fn start<
         let mut recv_buf = [0u8; MAX_DATA_SIZE];
 
         match select(
-            split.wait_recv(&mut recv_buf, is_master),
+            split.recv(&mut recv_buf, is_master),
             to_send_receiver.receive(),
         )
         .await
@@ -68,7 +68,7 @@ pub async fn start<
             Either::Second(send_data) => {
                 let mut send_buf = [0u8; MAX_DATA_SIZE];
                 if let Ok(bytes) = to_slice_cobs(&(send_id, send_data), &mut send_buf) {
-                    if let Err(e) = split.send(bytes, is_master).await {
+                    if let Err(e) = split.send_all(bytes, is_master).await {
                         log::error!("Split send error: {:?}", e)
                     }
                     send_id += 1;

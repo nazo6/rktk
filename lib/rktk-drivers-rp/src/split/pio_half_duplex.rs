@@ -156,7 +156,7 @@ impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
         Ok(())
     }
 
-    async fn wait_recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
         let _permit = loop {
             let (start, end, data) = self.recv_byte().await;
 
@@ -188,7 +188,7 @@ impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
         Ok(())
     }
 
-    async fn send(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn send_all(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         let _permit = COMM_SEMAPHORE.acquire(1).await;
 
         self.enter_tx().await;
