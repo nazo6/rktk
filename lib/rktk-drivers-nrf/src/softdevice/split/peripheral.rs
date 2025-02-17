@@ -2,10 +2,8 @@ use core::marker::PhantomData;
 
 use embassy_futures::join::join;
 use embassy_sync::pipe::Pipe;
-use log::info;
 use nrf_softdevice::{
     ble::{
-        self,
         advertisement_builder::{
             Flag, LegacyAdvertisementBuilder, LegacyAdvertisementPayload, ServiceList,
         },
@@ -103,9 +101,9 @@ impl SoftdeviceBlePeripheralSplitDriver {
 impl SplitDriver for SoftdeviceBlePeripheralSplitDriver {
     type Error = core::convert::Infallible;
 
-    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
-        RX_PIPE.read(buf).await;
-        Ok(())
+    async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {
+        let size = RX_PIPE.read(buf).await;
+        Ok(size)
     }
 
     async fn send_all(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {

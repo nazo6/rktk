@@ -10,6 +10,65 @@ use crate::{
 
 pub const MAX_DATA_SIZE: usize = 16;
 
+pub struct CobsReceiver {
+    remained: heapless::Deque<u8, 64>,
+}
+impl CobsReceiver {
+    fn new() -> Self {
+        Self {
+            remained: heapless::Deque::new(),
+        }
+    }
+
+    #[inline(always)]
+    async fn recv_until_zero<D: SplitDriver>(
+        &mut self,
+        driver: &mut D,
+        buf: &mut [u8],
+        is_master: bool,
+    ) -> Result<usize, &'static str> {
+        let mut idx = 0;
+
+        while let Some(b) = self.remained.pop_front() {
+            buf[idx] = b;
+            idx += 1;
+            if b == 0 {
+                return Ok(idx);
+            }
+        }
+
+        loop {
+            let mut tmp_buf = [0u8; 64];
+            let size = driver
+                .recv(&mut tmp_buf, is_master)
+                .await
+                .map_err(|_e| "recv error")?;
+            let mut end = false;
+            for b in tmp_buf[..size].iter() {
+                if end {
+                    let _ = self.remained.push_back(*b);
+                } else {
+                    idx += 1;
+                    if let Some(buf_slot) = buf.get_mut(idx) {
+                        *buf_slot = *b;
+                    } else {
+                        return Err("Buffer overflow");
+                    }
+                    if *b == 0 {
+                        end = true;
+                    }
+                }
+            }
+
+            if end {
+                break;
+            }
+        }
+
+        Ok(idx)
+    }
+}
+
 /// Starts background task for master side that
 /// - send data from slave to m2s channel.
 /// - receive data from s2m channel and send it to slave.
@@ -28,11 +87,13 @@ pub async fn start<
     let mut recv_id: usize = 0;
     let mut recv_err: usize = 0;
 
+    let mut recv = CobsReceiver::new();
+
     loop {
         let mut recv_buf = [0u8; MAX_DATA_SIZE];
 
         match select(
-            split.recv(&mut recv_buf, is_master),
+            recv.recv_until_zero(&mut split, &mut recv_buf, is_master),
             to_send_receiver.receive(),
         )
         .await
