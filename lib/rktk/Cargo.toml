@@ -28,7 +28,7 @@ serde = { workspace = true, features = ["derive"] }
 
 paste = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
-futures = { workspace = true }
+futures = { workspace = true, features = ["async-await"] }
 
 
 rktk-keymanager = { workspace = true, features = ["state"] }

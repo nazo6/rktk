@@ -64,7 +64,7 @@ pub mod sjoin {
             };
 
             #[cfg(not(feature = "alloc"))]
-            futures::join::join!($f1, $($future:ident),* ).await;
+            futures::join!($f1, $($future),* );
         };
     }
     pub(crate) use join;
