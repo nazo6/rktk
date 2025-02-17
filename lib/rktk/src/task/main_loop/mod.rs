@@ -20,6 +20,7 @@ use crate::{
         Hooks,
     },
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
+    utils::sjoin,
 };
 use embassy_futures::{
     join::join,
@@ -40,14 +41,14 @@ pub async fn start<
     EN: EncoderDriver,
     M: MouseDriver,
     SP: SplitDriver,
-    RGB: RgbDriver,
+    RGB: RgbDriver + 'static,
     Ble: BleDriver,
     Usb: UsbDriver,
     S: StorageDriver,
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
-    BH: RgbHooks,
+    BH: RgbHooks + 'static,
 >(
     system: &Sys,
     ble: Option<Ble>,
@@ -104,19 +105,7 @@ pub async fn start<
         None
     };
 
-    join(
-        async {
-            if let Some(rgb) = rgb {
-                match hand {
-                    Hand::Right => {
-                        rgb::start::<{ KEYBOARD.right_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
-                    }
-                    Hand::Left => {
-                        rgb::start::<{ KEYBOARD.left_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
-                    }
-                }
-            }
-        },
+    sjoin::join!(
         async {
             if let Some(split) = split {
                 if is_master {
@@ -165,6 +154,17 @@ pub async fn start<
                 .await;
             }
         },
-    )
-    .await;
+        async move {
+            if let Some(rgb) = rgb {
+                match hand {
+                    Hand::Right => {
+                        rgb::start::<{ KEYBOARD.right_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                    }
+                    Hand::Left => {
+                        rgb::start::<{ KEYBOARD.left_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                    }
+                }
+            }
+        }
+    );
 }

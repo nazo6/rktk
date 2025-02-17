@@ -28,6 +28,7 @@ macro_rules! display_state {
         let _ = DISPLAY_CONTROLLER.try_send(DisplayMessage::$mes_type($val));
     }};
 }
+
 pub(crate) use display_state;
 
 #[cfg(target_arch = "arm")]
@@ -40,3 +41,31 @@ pub type Channel<T, const N: usize> = embassy_sync::channel::Channel<RawMutex, T
 pub type Sender<'a, T, const N: usize> = embassy_sync::channel::Sender<'a, RawMutex, T, N>;
 pub type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<'a, RawMutex, T, N>;
 pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;
+
+/// sjoin or "spawn or join"
+pub mod sjoin {
+    macro_rules! join {
+        ($f1:expr, $($future:expr),* ) => {
+            #[cfg(feature = "alloc")]
+            {
+                use alloc::boxed::Box;
+                {
+                    let ex = embassy_executor::Spawner::for_current_executor().await;
+                    {
+                        $(
+                            let ts = Box::leak(Box::new(embassy_executor::raw::TaskStorage::new()));
+                            let st = ts.spawn(|| $future);
+                            ex.spawn(st).unwrap();
+                        )*
+                    }
+                }
+
+                $f1.await
+            };
+
+            #[cfg(not(feature = "alloc"))]
+            futures::join!($f1, $($future),* );
+        };
+    }
+    pub(crate) use join;
+}

@@ -4,8 +4,8 @@ use crate::{
     config::keymap::Keymap,
     drivers::{interface::system::SystemDriver, Drivers},
     hooks::interface::*,
+    utils::sjoin,
 };
-use embassy_futures::join::{join, join3};
 use embassy_time::Duration;
 
 use crate::{
@@ -38,19 +38,19 @@ pub async fn start<
     Ble: BleDriver,
     Usb: UsbDriver,
     Split: SplitDriver,
-    Rgb: RgbDriver,
+    Rgb: RgbDriver + 'static,
     System: SystemDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
     Display: DisplayDriver,
     MouseBuilder: DriverBuilder<Output = Mouse>,
-    DisplayBuilder: DriverBuilder<Output = Display>,
+    DisplayBuilder: DriverBuilder<Output = Display> + 'static,
     UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
     BleBuilder: DriverBuilderWithTask<Driver = Ble>,
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
-    BH: RgbHooks,
+    BH: RgbHooks + 'static,
 >(
     drivers: Drivers<
         KeyScan,
@@ -92,13 +92,8 @@ pub async fn start<
         .double_reset_usb_boot(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
         .await;
 
-    join(
+    sjoin::join!(
         async move {
-            if let Some(display_builder) = drivers.display_builder {
-                display::start(display_builder).await;
-            }
-        },
-        async {
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 match mouse_builder.build().await {
                     Ok(mut mouse) => {
@@ -130,17 +125,7 @@ pub async fn start<
                 (None, None)
             };
 
-            join3(
-                async {
-                    if let Some(usb_task) = usb_task {
-                        usb_task.run().await
-                    }
-                },
-                async {
-                    if let Some(ble_task) = ble_task {
-                        ble_task.run().await
-                    }
-                },
+            sjoin::join!(
                 async {
                     main_loop::start(
                         &drivers.system,
@@ -158,9 +143,22 @@ pub async fn start<
                     )
                     .await;
                 },
-            )
-            .await;
+                async {
+                    if let Some(usb_task) = usb_task {
+                        usb_task.run().await
+                    }
+                },
+                async {
+                    if let Some(ble_task) = ble_task {
+                        ble_task.run().await
+                    }
+                }
+            );
         },
-    )
-    .await;
+        async move {
+            if let Some(display_builder) = drivers.display_builder {
+                display::start(display_builder).await;
+            }
+        }
+    );
 }

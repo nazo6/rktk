@@ -13,6 +13,7 @@ readme = "../../README.md"
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
+embassy-executor = { workspace = true }
 embedded-io-async = { workspace = true }
 
 usbd-hid = { workspace = true }
@@ -27,7 +28,7 @@ serde = { workspace = true, features = ["derive"] }
 
 paste = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
-futures = { workspace = true }
+futures = { workspace = true, features = ["async-await"] }
 
 
 rktk-keymanager = { workspace = true, features = ["state"] }
@@ -54,4 +55,5 @@ schemars = "0.8.21"
 macro_rules_attribute = { workspace = true }
 
 [features]
-_check = []
+_check = ["alloc"]
+alloc = []
