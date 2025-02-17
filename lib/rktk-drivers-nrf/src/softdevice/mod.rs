@@ -7,11 +7,22 @@ use nrf_softdevice::{raw, Softdevice};
 #[cfg(feature = "ble")]
 pub mod ble;
 pub mod flash;
+#[cfg(feature = "ble")]
+pub mod split;
 
 /// Initialize the softdevice and return the instance.
-/// After softdevice usage ends, spawn softdevice task.
+///
+/// # Usage
+/// This function enables softdevice, but doesn't start. To start softdevice, call `start_softdevice`.
+///
+/// ```
+/// let sd = init_softdevice(...);  // <-- Get mutable reference to softdevice
+/// start_server(sd).await;         // <-- Use softdevice for function which requires mutable reference to softdevice.
+/// start_softdevice(sd).await;     // <-- Starts softdevice. This function borrows softdevice forever, so from this point, you can only use immutable reference to softdevice.
+/// get_flash(sd).await;            // <-- get_flash does not require mutable reference to softdevice, so you can use this after starting softdevice;
+/// ```
 #[allow(clippy::mut_from_ref)]
-pub fn init_sd(ble_gap_name: &'static str) -> &'static mut Softdevice {
+pub fn init_softdevice(ble_gap_name: &'static str) -> &'static mut Softdevice {
     let config = nrf_softdevice::Config {
         clock: Some(raw::nrf_clock_lf_cfg_t {
             source: raw::NRF_CLOCK_LF_SRC_RC as u8,
@@ -43,12 +54,20 @@ pub fn init_sd(ble_gap_name: &'static str) -> &'static mut Softdevice {
                 raw::BLE_GATTS_VLOC_STACK as u8,
             ),
         }),
+        conn_l2cap: Some(raw::ble_l2cap_conn_cfg_t {
+            ch_count: 1,
+            rx_mps: 247,
+            tx_mps: 247,
+            rx_queue_size: 10,
+            tx_queue_size: 10,
+        }),
         ..Default::default()
     };
 
     Softdevice::enable(&config)
 }
 
+/// Starts softdevice task
 pub async fn start_softdevice(sd: &'static Softdevice) {
     let spawner = embassy_executor::Spawner::for_current_executor().await;
     spawner.spawn(softdevice_task(sd)).unwrap();

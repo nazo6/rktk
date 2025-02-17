@@ -191,10 +191,10 @@ pub enum Split {}
 impl SplitDriver for Split {
     type Error = Infallible;
 
-    async fn wait_recv(&mut self, _buf: &mut [u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn recv(&mut self, _buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {
         unreachable!()
     }
-    async fn send(&mut self, _buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
+    async fn send_all(&mut self, _buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         unreachable!()
     }
 }

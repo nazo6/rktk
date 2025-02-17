@@ -8,8 +8,15 @@ pub trait SplitDriver {
     async fn init(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
-    async fn wait_recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<(), Self::Error>;
-    async fn send(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
+    /// Receive data from the other side and return the number of bytes received.
+    ///
+    /// If there is no data, this function should wait until data is received.
+    async fn recv(&mut self, buf: &mut [u8], is_master: bool) -> Result<usize, Self::Error>;
+
+    /// Send data to the other side.
+    ///
+    /// Implemention should wait until the *all* data is sent.
+    async fn send_all(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
 }
 
 #[derive(Deserialize, Serialize, Debug)]
