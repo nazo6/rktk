@@ -13,6 +13,7 @@ readme = "../../README.md"
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
+embassy-executor = { workspace = true }
 embedded-io-async = { workspace = true }
 
 usbd-hid = { workspace = true }
@@ -54,4 +55,5 @@ schemars = "0.8.21"
 macro_rules_attribute = { workspace = true }
 
 [features]
-_check = []
+_check = ["alloc"]
+alloc = []

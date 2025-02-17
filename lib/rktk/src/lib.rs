@@ -27,6 +27,9 @@
 
 #![no_std]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 pub mod config;
 pub mod drivers;
 pub mod hooks;

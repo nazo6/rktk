@@ -23,7 +23,7 @@ pub trait DriverBuilder {
 pub trait DriverBuilderWithTask {
     type Driver;
     type Error: core::fmt::Debug;
-    async fn build(self) -> Result<(Self::Driver, impl BackgroundTask), Self::Error>;
+    async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error>;
 }
 
 pub trait BackgroundTask {

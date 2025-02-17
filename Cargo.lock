@@ -4861,6 +4861,7 @@ dependencies = [
  "const-gen",
  "critical-section",
  "display-interface",
+ "embassy-executor",
  "embassy-futures",
  "embassy-sync",
  "embassy-time",
