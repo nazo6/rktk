@@ -21,6 +21,7 @@ pub struct Matrix<
     pressed: Pressed<COLS, ROWS>,
     hand_detector: HandDetector,
     map_key: fn(usize, usize) -> Option<(usize, usize)>,
+    scan_delay: embassy_time::Duration,
 }
 
 impl<
@@ -41,11 +42,15 @@ impl<
     /// - `map_key`: Function to map key position from pin index. This function must return
     ///   position within specified `COLS` and `ROWS`.
     ///   Signature: (input_pin_idx, output_pin_idx) -> Option<(row, col)>
+    /// * `scan_delay`: Delay between output pin change and input read. This is executed for each
+    ///   col/row so, this should be short enough to scan the matrix in a reasonable time.
+    ///   Default: 5us
     pub fn new(
         output_pins: [OP; OUTPUT_PIN_COUNT],
         input_pins: [IP; INPUT_PIN_COUNT],
         hand_detector: HandDetector,
         map_key: fn(usize, usize) -> Option<(usize, usize)>,
+        scan_delay: Option<embassy_time::Duration>,
     ) -> Self {
         Self {
             output_pins,
@@ -53,6 +58,7 @@ impl<
             hand_detector,
             pressed: Pressed::new(),
             map_key,
+            scan_delay: scan_delay.unwrap_or(embassy_time::Duration::from_micros(5)),
         }
     }
 }
@@ -71,7 +77,7 @@ impl<
         for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self.output_pins[output_idx].set_high();
 
-            embassy_time::Timer::after_micros(10).await;
+            embassy_time::Timer::after(self.scan_delay).await;
 
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
                 if let Some((row, col)) = (self.map_key)(input_idx, output_idx) {

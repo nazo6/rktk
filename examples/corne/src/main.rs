@@ -69,6 +69,7 @@ async fn main(_spawner: Spawner) {
                 }
             }),
             |row, col| Some((row, col)),
+            None,
         ),
         system: RpSystemDriver,
         mouse_builder: none_driver!(MouseBuilder),

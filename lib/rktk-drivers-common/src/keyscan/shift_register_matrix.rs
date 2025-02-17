@@ -19,6 +19,7 @@ pub struct ShiftRegisterMatrix<
     pressed: Pressed<COLS, ROWS>,
     hand_detector: HandDetector,
     map_key: fn(usize, usize) -> Option<(usize, usize)>,
+    scan_delay: embassy_time::Duration,
 }
 
 impl<
@@ -30,23 +31,27 @@ impl<
         const ROWS: usize,
     > ShiftRegisterMatrix<S, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
-    /// Detect the hand and initialize the scanner.
+    /// Initialize the scanner.
     ///
     /// WARNING: Shift register is not actually spi so you should set proper spi mode.
     /// Also, the scan direction can be different depending spi mode.
     ///
     /// # Arguments
-    /// - `row_shift_register`: SPI bus for the shift register used as output pin.
-    /// - `input_pins`: Input pins to read the matrix.
-    /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
-    /// - `map_key`: Function to map key position from pin number. This function must return
+    /// * `row_shift_register`: SPI bus for the shift register used as output pin.
+    /// * `input_pins`: Input pins to read the matrix.
+    /// * `left_detect_key`: The (logical, not pin index) key position to detect the hand.
+    /// * `map_key`: Function to map key position from pin number. This function must return
     ///   position within specified `COLS` and `ROWS`.
     ///   Signature: (row, col) -> Option<(row, col)>
+    /// * `scan_delay`: Delay between output pin change and input read. This is executed for each
+    ///   col/row so, this should be short enough to scan the matrix in a reasonable time.
+    ///   Default: 5us
     pub fn new(
         row_shift_register: S,
         input_pins: [IP; INPUT_PIN_COUNT],
         hand_detector: HandDetector,
         map_key: fn(usize, usize) -> Option<(usize, usize)>,
+        scan_delay: Option<embassy_time::Duration>,
     ) -> Self {
         Self {
             row_shift_register,
@@ -54,6 +59,7 @@ impl<
             hand_detector,
             pressed: Pressed::new(),
             map_key,
+            scan_delay: scan_delay.unwrap_or(embassy_time::Duration::from_micros(5)),
         }
     }
 }
@@ -78,7 +84,7 @@ impl<
                 ])
                 .await;
 
-            embassy_time::Timer::after_nanos(100).await;
+            embassy_time::Timer::after(self.scan_delay).await;
 
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
                 if let Some((row, col)) = (self.map_key)(input_idx, output_idx) {
