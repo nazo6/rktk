@@ -10,41 +10,38 @@ build = "build/main.rs"
 readme = "../../README.md"
 
 [dependencies]
+rktk-keymanager = { workspace = true, features = ["state"] }
+rktk-rrp = { workspace = true, features = ["server"] }
+
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-executor = { workspace = true }
 embedded-io-async = { workspace = true }
 
+critical-section = { workspace = true }
 usbd-hid = { workspace = true }
 
 embedded-graphics = { workspace = true }
 display-interface = { workspace = true }
-
 smart-leds = { workspace = true }
 
 heapless = { workspace = true }
 static_cell = "2.1.0"
-serde = { workspace = true, features = ["derive"] }
-
 paste = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
 futures = { workspace = true, features = ["async-await"] }
-
-
-rktk-keymanager = { workspace = true, features = ["state"] }
-rktk-rrp = { workspace = true, features = ["server"] }
+serde = { workspace = true, features = ["derive"] }
 postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
 
 log = { workspace = true }
-critical-section = { version = "1.1.3" }
 
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver"] }
-critical-section = { version = "1.1.2", features = ["std"] }
+critical-section = { workspace = true, features = ["std"] }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }

@@ -28,7 +28,7 @@ wasm-bindgen = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
 
 [dev-dependencies]
-critical-section = { version = "1.1.2", features = ["std"] }
+critical-section = { workspace = true, features = ["std"] }
 pretty_assertions = "1.4.0"
 usbd-hid = { workspace = true }
 
