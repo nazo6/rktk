@@ -12,7 +12,7 @@ pub async fn start(mut mouse: Option<impl MouseDriver>) {
             let mouse_move = match mouse.read().await {
                 Ok(m) => m,
                 Err(e) => {
-                    log::warn!("Failed to read mouse: {:?}", e);
+                    rktk_log::warn!("Failed to read mouse: {:?}", e);
                     crate::print!("{:?}", e);
                     continue;
                 }

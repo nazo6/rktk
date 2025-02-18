@@ -1,5 +1,6 @@
 use embassy_futures::select::{select4, Either4};
 use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
+use rktk_log::helper::Debug2Format;
 
 use crate::{
     config::storage::StorageConfigManager,
@@ -97,12 +98,12 @@ pub async fn report_task<
             if let Some(ref storage) = config_store {
                 match storage.storage.format().await {
                     Ok(_) => {
-                        log::info!("Storage formatted by report");
+                        rktk_log::info!("Storage formatted by report");
                         crate::print!("Storage formatted")
                     }
                     Err(e) => {
-                        log::error!("Failed to format storage: {:?}", e);
-                        crate::print!("Failed to format storage: {:?}", e)
+                        rktk_log::error!("Failed to format storage: {:?}", Debug2Format(&e));
+                        crate::print!("Failed to format storage: {:?}", Debug2Format(&e));
                     }
                 }
             }
@@ -145,18 +146,18 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) 
         };
 
         if let Err(e) = reporter.try_send_keyboard_report(report) {
-            log::warn!("Failed to send keyboard report: {:?}", e);
+            rktk_log::warn!("Failed to send keyboard report: {:?}", e);
         }
     }
     if let Some(report) = state_report.mouse_report {
         crate::utils::display_state!(MouseMove, (report.x, report.y));
         if let Err(e) = reporter.try_send_mouse_report(report) {
-            log::warn!("Failed to send mouse report: {:?}", e);
+            rktk_log::warn!("Failed to send mouse report: {:?}", e);
         }
     }
     if let Some(report) = state_report.media_keyboard_report {
         if let Err(e) = reporter.try_send_media_keyboard_report(report) {
-            log::warn!("Failed to send media keyboard report: {:?}", e);
+            rktk_log::warn!("Failed to send media keyboard report: {:?}", e);
         }
     }
 }
@@ -170,7 +171,7 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
         Output::Usb => {
             if let Some(usb) = usb {
                 usb.read_keyboard_report().await.map_err(|e| {
-                    log::warn!("Failed to read keyboard report: {:?}", e);
+                    rktk_log::warn!("Failed to read keyboard report: {:?}", e);
                 })?
             } else {
                 let _: () = core::future::pending().await;
@@ -180,7 +181,7 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
         Output::Ble => {
             if let Some(usb) = ble {
                 usb.read_keyboard_report().await.map_err(|e| {
-                    log::warn!("Failed to read keyboard report: {:?}", e);
+                    rktk_log::warn!("Failed to read keyboard report: {:?}", e);
                 })?
             } else {
                 let _: () = core::future::pending().await;

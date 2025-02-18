@@ -9,7 +9,6 @@ use embassy_usb::UsbDevice;
 use rktk::drivers::interface::BackgroundTask;
 use rktk::utils::Signal;
 use rktk::utils::{Channel, RawMutex};
-use rktk_log::warn;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{ReadySignal, RemoteWakeupSignal};
@@ -48,7 +47,7 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
                 #[cfg(feature = "defmtusb")]
                 {
                     let (sender, _) = self.defmt_usb.split();
-                    rktk_log::defmtusb::logger(sender, 64).await
+                    super::defmtusb::logger(sender, 64).await
                 }
             },
         )
@@ -63,7 +62,7 @@ async fn usb<'d, D: Driver<'d>>(mut device: UsbDevice<'d, D>, signal: &'static R
             embassy_futures::select::Either::First(_) => {}
             embassy_futures::select::Either::Second(_) => {
                 if let Err(e) = device.remote_wakeup().await {
-                    // warn!("Failed to send remote wakeup: {:?}", e);
+                    rktk_log::warn!("Failed to send remote wakeup: {:?}", e);
                 }
             }
         }

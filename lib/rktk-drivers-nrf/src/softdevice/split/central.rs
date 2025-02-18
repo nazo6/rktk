@@ -40,7 +40,7 @@ async fn ble_split_central_task(sd: &'static Softdevice) {
             let value = &data[2..len + 1];
 
             if value == RKTK_SPLIT_SERVICE_ID {
-                info!("{:X}:{:X}", key, &value);
+                // info!("{:X}:{:X?}", key, &value);
                 return Some(Address::from_raw(params.peer_addr));
             }
             data = &data[len + 1..];

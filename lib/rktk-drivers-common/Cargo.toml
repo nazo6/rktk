@@ -10,7 +10,11 @@ repository.workspace = true
 [dependencies]
 rktk = { workspace = true }
 
-critical-section = { workspace = true }
+rktk-log = { workspace = true }
+log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
+
+critical-section = { workspace = true, optional = true }
 embassy-executor = { workspace = true }
 embedded-hal-async = { workspace = true }
 embedded-hal = { workspace = true }
@@ -36,8 +40,10 @@ embedded-graphics = { workspace = true }
 heapless = { workspace = true }
 thiserror = { workspace = true }
 
-rktk-log = { workspace = true }
-
 [features]
-_check = ["defmtusb"]
-defmtusb = ["rktk-log/defmtusb"]
+_check = ["defmtusb", "log", "defmt"]
+
+defmtusb = ["defmt", "dep:critical-section"]
+
+defmt = ["dep:defmt", "embassy-usb/defmt"]
+log = ["dep:log"]

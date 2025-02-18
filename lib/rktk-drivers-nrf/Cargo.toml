@@ -18,7 +18,10 @@ default-target = "thumbv7em-none-eabihf"
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
+
 rktk-log = { workspace = true }
+log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
 
 cortex-m = { workspace = true }
 embassy-embedded-hal = { workspace = true }
@@ -54,19 +57,24 @@ thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
 [features]
-default = ["ble", "power"]
-
-softdevice = ["dep:nrf-softdevice"]
-
-# Enables system power off feature. This is supported only on some chips like nRF52840.
-power = []
-
-ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
-
-nightly = ["embassy-executor/nightly"]
-
 _check = [
   "embassy-nrf/nrf52840",
   "nrf-softdevice/nrf52840",
   "nrf-softdevice/s140",
 ]
+
+default = ["ble", "power"]
+
+softdevice = ["dep:nrf-softdevice"]
+# Enables system power off feature. This is supported only on some chips like nRF52840.
+power = []
+ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
+nightly = ["embassy-executor/nightly"]
+
+defmt = [
+  "dep:defmt",
+  "nrf-softdevice/defmt",
+  "embassy-nrf/defmt",
+  "heapless/defmt-impl",
+]
+log = ["dep:log"]

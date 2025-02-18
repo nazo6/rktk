@@ -1,10 +1,7 @@
-pub struct Debug2Format<'a, T: core::fmt::Debug + ?Sized>(pub &'a T);
+pub trait FormatOrDebug {}
 
-impl<T: core::fmt::Debug + ?Sized> core::fmt::Debug for Debug2Format<'_, T> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        self.0.fmt(f)
-    }
-}
+#[derive(Debug)]
+pub struct Debug2Format<'a, T: core::fmt::Debug + ?Sized>(pub &'a T);
 
 #[cfg(feature = "defmt")]
 impl<T: core::fmt::Debug + ?Sized> defmt::Format for Debug2Format<'_, T> {
@@ -17,7 +14,7 @@ pub struct Display2Format<'a, T: core::fmt::Display + ?Sized>(pub &'a T);
 
 impl<T: core::fmt::Display + ?Sized> core::fmt::Display for Display2Format<'_, T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        self.0.fmt(f)
+        core::fmt::Display::fmt(&self.0, f)
     }
 }
 

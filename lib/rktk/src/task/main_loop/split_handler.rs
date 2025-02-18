@@ -1,5 +1,6 @@
 use embassy_futures::select::{select, Either};
 use postcard::{from_bytes_cobs, to_slice_cobs};
+use rktk_log::helper::Debug2Format;
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
@@ -112,7 +113,7 @@ pub async fn start<
                             let _ = received_sender.try_send(data);
                             if id - recv_id > 1 {
                                 recv_err += 1;
-                                log::warn!(
+                                rktk_log::warn!(
                                     "Split communication loss detected: id:{}, err count:{}",
                                     id,
                                     recv_err
@@ -121,17 +122,17 @@ pub async fn start<
                             recv_id = id;
                         }
                         Err(e) => {
-                            log::warn!("Split data decode failed: {:?}", e);
+                            rktk_log::warn!("Split data decode failed: {:?}", e);
                         }
                     },
-                    Err(e) => log::warn!("Failed to receive split data: {:?}", e),
+                    Err(e) => rktk_log::warn!("Failed to receive split data: {:?}", e),
                 }
             }
             Either::Second(send_data) => {
                 let mut send_buf = [0u8; MAX_DATA_SIZE];
                 if let Ok(bytes) = to_slice_cobs(&(send_id, send_data), &mut send_buf) {
                     if let Err(e) = split.send_all(bytes, is_master).await {
-                        log::error!("Split send error: {:?}", e)
+                        rktk_log::error!("Split send error: {:?}", Debug2Format(&e))
                     }
                     send_id += 1;
                 }

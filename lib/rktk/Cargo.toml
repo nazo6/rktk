@@ -12,7 +12,10 @@ readme = "../../README.md"
 [dependencies]
 rktk-keymanager = { workspace = true, features = ["state"] }
 rktk-rrp = { workspace = true, features = ["server"] }
+
 rktk-log = { workspace = true }
+log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
 
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
@@ -20,7 +23,7 @@ embassy-futures = { workspace = true }
 embassy-executor = { workspace = true }
 embedded-io-async = { workspace = true }
 
-critical-section = { workspace = true }
+critical-section = { workspace = true, optional = true }
 usbd-hid = { workspace = true }
 
 embedded-graphics = { workspace = true }
@@ -37,7 +40,6 @@ postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
-log = { workspace = true }
 
 [dev-dependencies]
 embassy-time = { workspace = true, features = ["mock-driver"] }
@@ -53,5 +55,9 @@ schemars = "0.8.21"
 macro_rules_attribute = { workspace = true }
 
 [features]
-_check = ["alloc"]
+_check = ["alloc", "log", "defmt"]
+
 alloc = []
+
+defmt = ["dep:defmt", "rktk-log/defmt"]
+log = ["dep:log", "dep:critical-section", "rktk-log/log"]

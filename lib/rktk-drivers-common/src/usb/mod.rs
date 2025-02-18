@@ -3,6 +3,8 @@
 use core::sync::atomic::AtomicBool;
 
 mod builder;
+#[cfg(feature = "defmtusb")]
+mod defmtusb;
 mod driver;
 mod handler;
 mod rrp;

@@ -8,21 +8,9 @@ repository.workspace = true
 
 [dependencies]
 rktk-log-macros = { path = "../rktk-log-macros/" }
-
-critical-section = { workspace = true, optional = true }
-embassy-time = { workspace = true, optional = true }
-embassy-usb = { workspace = true, optional = true }
-
-defmt = { version = "0.3.10", optional = true }
-log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
 
 [features]
-_check = ["defmtusb", "log"]
-defmt = ["dep:defmt", "rktk-log-macros/_defmt"]
-defmtusb = [
-  "defmt",
-  "dep:critical-section",
-  "dep:embassy-time",
-  "dep:embassy-usb",
-]
-log = ["dep:log", "rktk-log-macros/_log"]
+_check = ["defmt", "log"]
+defmt = ["dep:defmt"]
+log = []

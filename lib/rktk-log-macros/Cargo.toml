@@ -16,5 +16,3 @@ proc-macro = true
 
 [features]
 _check = []
-_defmt = []
-_log = []

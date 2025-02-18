@@ -22,26 +22,17 @@ macro_rules! intern {
         #[cfg(not(feature = "defmt"))]
         $s
         #[cfg(feature = "defmt")]
-        {
-            pub use $crate::__reexports::defmt as defmt;
-            $crate::__reexports::defmt::intern!($s)
-        }
+        ::defmt::intern!($s)
     };
 }
 
-#[cfg(feature = "defmt")]
-#[macro_export]
-macro_rules! unwrap {
-    ($($x:tt)*) => {{
-        pub use $crate::__reexports::defmt as defmt;
-        $crate::__reexports::defmt::unwrap!($($x)*)
-    }};
-}
-
-#[cfg(not(feature = "defmt"))]
 #[macro_export]
 macro_rules! unwrap {
     ($arg:expr) => {
+        #[cfg(feature = "defmt")]
+        ::defmt::unwrap!($arg)
+
+        #[cfg(not(feature = "defmt"))]
         match $crate::macros::unwrap_helper::Try::into_result($arg) {
             ::core::result::Result::Ok(t) => t,
             ::core::result::Result::Err(e) => {
@@ -50,6 +41,10 @@ macro_rules! unwrap {
         }
     };
     ($arg:expr, $($msg:expr),+ $(,)? ) => {
+        #[cfg(feature = "defmt")]
+        ::defmt::unwrap!($arg:expr, $($msg:expr),+)
+
+        #[cfg(not(feature = "defmt"))]
         match $crate::macros::unwrap_helper::Try::into_result($arg) {
             ::core::result::Result::Ok(t) => t,
             ::core::result::Result::Err(e) => {
@@ -59,7 +54,6 @@ macro_rules! unwrap {
     }
 }
 
-#[cfg(not(feature = "defmt"))]
 pub mod unwrap_helper {
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct NoneError;

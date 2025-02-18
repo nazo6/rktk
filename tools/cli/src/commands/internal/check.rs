@@ -3,7 +3,40 @@ use duct::cmd;
 
 use crate::utils::{xprintln, METADATA};
 
-const CHECK_ARGS: &[&str] = &["clippy", "--features", "_check"];
+use super::config::CRATES_CONFIG;
+
+fn build_args(crate_name: &str) -> Vec<String> {
+    let mut args = vec!["hack".to_string(), "check".to_string()];
+
+    let mut skip = CRATES_CONFIG.check_skip_global.clone().unwrap_or_default();
+
+    if let Some(config) = CRATES_CONFIG.crates.get(crate_name) {
+        if !config.check_no_powerset {
+            args.push("--feature-powerset".to_string());
+
+            if let Some(at_least_one_of) = &config.check_at_least_one_of {
+                args.push("--at-least-one-of".to_string());
+                args.push(at_least_one_of.join(","));
+            }
+
+            if let Some(skip_features) = &config.check_skip {
+                skip = skip_features.clone();
+            }
+
+            if !skip.is_empty() {
+                args.push("--skip".to_string());
+                args.push(skip.join(","));
+            }
+        }
+
+        if let Some(features) = &config.check_features {
+            args.push("--features".to_string());
+            args.push(features.join(","));
+        }
+    }
+
+    args
+}
 
 pub fn start(name: String) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
@@ -27,7 +60,9 @@ pub fn start(name: String) -> anyhow::Result<()> {
 
             let now = std::time::Instant::now();
 
-            let res = cmd("cargo", CHECK_ARGS).dir(crate_path).run();
+            let res = cmd("cargo", build_args(&package.name))
+                .dir(crate_path)
+                .run();
             let is_err = res.is_err();
 
             let elapsed = now.elapsed();
@@ -81,7 +116,8 @@ pub fn start(name: String) -> anyhow::Result<()> {
         let dir = package.manifest_path.parent().context("no parent dir")?;
 
         xprintln!("Checking crate `{}` ({})", package.name, dir);
-        cmd("cargo", CHECK_ARGS)
+
+        let res = cmd("cargo", build_args(&package.name))
             .dir(dir)
             .run()
             .with_context(|| format!("Failed to run clippy for crate: {}", dir))?;

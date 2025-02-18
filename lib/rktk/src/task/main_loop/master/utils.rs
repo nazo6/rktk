@@ -2,6 +2,7 @@ use rktk_keymanager::interface::{
     state::{config::StateConfig, event::KeyChangeEvent},
     Output,
 };
+use rktk_log::helper::Debug2Format;
 
 use crate::{
     config::{
@@ -41,11 +42,11 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 
         match s.read_version().await {
             Ok(1) => {
-                log::info!("Storage version matched");
+                rktk_log::info!("Storage version matched");
                 config_storage = Some(s);
             }
             Ok(i) => {
-                log::warn!("Storage version matched");
+                rktk_log::warn!("Storage version matched");
                 crate::print!("Storage version mismatch: {}", i);
             }
             Err(_e) => match s.write_version(1).await {
@@ -53,7 +54,10 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
                     config_storage = Some(s);
                 }
                 Err(e) => {
-                    log::error!("Storage to write version to storage: {:?}", e);
+                    rktk_log::error!(
+                        "Storage to write version to storage: {:?}",
+                        Debug2Format(&e)
+                    );
                     crate::print!("Failed to access storage: {:?}", e);
                 }
             },
