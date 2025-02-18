@@ -2,17 +2,20 @@ use nrf_softdevice::{
     ble::{Address, EncryptionInfo, IdentityKey, IdentityResolutionKey, MasterId},
     raw::ble_gap_irk_t,
 };
+use rktk_log::derive_format_and_debug;
 use serde::{Deserialize, Serialize};
 
 use super::MAX_PEER_COUNT;
 
+#[derive_format_and_debug]
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "MasterId")]
-struct MasterIdDef {
+pub struct MasterIdDef {
     pub ediv: u16,
     pub rand: [u8; 8],
 }
 
+#[derive_format_and_debug]
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "EncryptionInfo")]
 pub struct EncryptionInfoDef {
@@ -20,6 +23,7 @@ pub struct EncryptionInfoDef {
     pub flags: u8,
 }
 
+#[derive_format_and_debug]
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "Address")]
 pub struct AddressDef {
@@ -27,6 +31,7 @@ pub struct AddressDef {
     pub bytes: [u8; 6],
 }
 
+#[derive_format_and_debug]
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "IdentityResolutionKey")]
 pub struct IdentityResolutionKeyDef {
@@ -44,6 +49,7 @@ impl From<IdentityResolutionKeyDef> for IdentityResolutionKey {
     }
 }
 
+#[derive_format_and_debug]
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "IdentityKey")]
 pub struct IdentityKeyDef {
@@ -53,7 +59,8 @@ pub struct IdentityKeyDef {
     pub addr: Address,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive_format_and_debug]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct DeviceData {
     #[serde(with = "IdentityKeyDef")]
     pub peer_id: IdentityKey,

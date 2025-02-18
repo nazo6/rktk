@@ -7,6 +7,7 @@ use nrf_softdevice::ble::{
     security::{IoCapabilities, SecurityHandler},
     Connection, EncryptionInfo, IdentityKey, MasterId,
 };
+use rktk_log::{info, warn};
 use storage::{bonder_save_task, BOND_SAVE};
 
 use crate::softdevice::flash::SharedFlash;
@@ -61,7 +62,7 @@ impl SecurityHandler for Bonder {
             devices.push(data).unwrap();
         }
 
-        log::info!("Bonded: {:?}", master_id.ediv);
+        info!("Bonded: {:?}", master_id.ediv);
 
         BOND_SAVE.signal(devices.clone());
     }
@@ -71,11 +72,9 @@ impl SecurityHandler for Bonder {
             let mut data = self.devices.borrow_mut();
 
             let Some(device) = data.iter_mut().find(|d| d.master_id == master_id) else {
-                log::info!("Key not found: {:?}", master_id);
+                info!("Key not found: {:?}", master_id);
                 return None;
             };
-
-            log::debug!("Got key: {:?}", master_id);
 
             device.encryption_info
         };
@@ -107,10 +106,10 @@ impl SecurityHandler for Bonder {
                 device.sys_attrs = Some(sys_attrs);
                 BOND_SAVE.signal(devices.clone());
             } else {
-                log::info!("Got empty sys_attrs. skipping save.");
+                info!("Got empty sys_attrs. skipping save.");
             }
         } else {
-            log::warn!("Failed to save sys_attrs");
+            warn!("Failed to save sys_attrs");
         }
     }
 
@@ -124,7 +123,7 @@ impl SecurityHandler for Bonder {
         {
             Some(Some(sys_attrs)) => set_sys_attrs(conn, Some(sys_attrs.as_slice())),
             _ => {
-                log::warn!("No sys_attrs to load");
+                warn!("No sys_attrs to load");
                 set_sys_attrs(conn, None)
             }
         };
@@ -140,7 +139,7 @@ pub async fn init_bonder(flash: &'static SharedFlash) -> &'static Bonder {
 
     let bond_map = storage::read_bond_map(flash).await.unwrap_or_default();
 
-    log::info!("Loaded {} bond info", bond_map.iter().count());
+    info!("Loaded {} bond info", bond_map.iter().count());
 
     SEC.init(Bonder {
         devices: RefCell::new(bond_map),

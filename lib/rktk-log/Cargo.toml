@@ -15,7 +15,6 @@ embassy-usb = { workspace = true, optional = true }
 
 defmt = { version = "0.3.10", optional = true }
 log = { workspace = true, optional = true }
-tt-call = "1.0"
 
 [features]
 _check = ["defmtusb", "log"]

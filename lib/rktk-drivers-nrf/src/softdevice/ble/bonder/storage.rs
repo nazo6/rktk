@@ -1,5 +1,6 @@
 use embassy_futures::join::join;
 use rktk::utils::Signal;
+use rktk_log::{info, warn};
 use sequential_storage::cache::NoCache;
 
 use crate::softdevice::flash::SharedFlash;
@@ -45,7 +46,7 @@ pub async fn bonder_save_task(flash: &'static SharedFlash) {
 
                 if let Some(prev_data) = &prev_data {
                     if *prev_data == data {
-                        log::info!("Bond data save is skipped");
+                        info!("Bond data save is skipped");
                     }
                 }
 
@@ -67,7 +68,7 @@ pub async fn bonder_save_task(flash: &'static SharedFlash) {
                 .await
                 {
                     Ok(_) => {
-                        log::info!("Bond map stored");
+                        info!("Bond map stored");
                         prev_data = Some(data);
                     }
                     Err(e) => {
@@ -95,13 +96,13 @@ pub async fn read_bond_map(flash: &SharedFlash) -> Option<Devices> {
     )
     .await
     else {
-        log::warn!("Failed to read bond map");
+        warn!("Failed to read bond map");
         return None;
     };
 
     let data = postcard::from_bytes(data)
         .inspect_err(|e| {
-            log::warn!("Failed to deserialize bond map: {:?}", e);
+            warn!("Failed to deserialize bond map: {:?}", e);
         })
         .ok()?;
 

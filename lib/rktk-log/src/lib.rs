@@ -1,6 +1,6 @@
 #![no_std]
 
-pub use rktk_log_macros::{derive_format_or_debug, maybe_derive_debug, maybe_derive_format};
+pub use rktk_log_macros::{derive_format_and_debug, maybe_derive_format};
 
 #[cfg(feature = "defmtusb")]
 pub mod defmtusb;
@@ -17,5 +17,4 @@ pub mod __reexports {
     pub use log;
 
     pub use rktk_log_macros;
-    pub use tt_call;
 }

@@ -12,6 +12,7 @@ readme = "../../README.md"
 [dependencies]
 rktk-keymanager = { workspace = true, features = ["state"] }
 rktk-rrp = { workspace = true, features = ["server"] }
+rktk-log = { workspace = true }
 
 embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
@@ -36,7 +37,6 @@ postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
-
 log = { workspace = true }
 
 [dev-dependencies]

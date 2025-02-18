@@ -18,6 +18,7 @@ default-target = "thumbv7em-none-eabihf"
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
+rktk-log = { workspace = true }
 
 cortex-m = { workspace = true }
 embassy-embedded-hal = { workspace = true }
@@ -49,7 +50,6 @@ bitvec = { version = "1.0.1", default-features = false }
 ssmarshal = { workspace = true }
 smart-leds = { workspace = true }
 usbd-hid = { workspace = true }
-log = { workspace = true }
 thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 

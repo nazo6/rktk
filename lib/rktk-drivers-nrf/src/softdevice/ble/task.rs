@@ -8,6 +8,7 @@ use nrf_softdevice::ble::{
 };
 use nrf_softdevice::Softdevice;
 use rktk::drivers::interface::BackgroundTask;
+use rktk_log::{info, warn};
 
 use crate::softdevice::ble::REPORT_CHAN;
 use crate::softdevice::flash::SharedFlash;
@@ -74,13 +75,13 @@ impl BackgroundTask for SoftdeviceBleTask {
             select(
                 async {
                     let e = gatt_server::run(&conn, &self.server, |_| {}).await;
-                    log::info!("Server exited: {:?}", e);
+                    info!("Server exited: {:?}", e);
                 },
                 async {
                     loop {
                         let report = REPORT_CHAN.receive().await;
                         if let Err(e) = self.server.hid.send_report(&conn, report) {
-                            log::warn!("BLE hid failed: {:?}", e);
+                            warn!("BLE hid failed: {:?}", e);
                         };
                     }
                 },

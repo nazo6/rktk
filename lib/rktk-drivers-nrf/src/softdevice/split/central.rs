@@ -3,11 +3,11 @@ use core::slice;
 
 use embassy_futures::join::join;
 use embassy_sync::pipe::Pipe;
-use log::info;
 use nrf_softdevice::ble::{central, l2cap, Address, TxPower};
 use nrf_softdevice::Softdevice;
 use rktk::drivers::interface::split::SplitDriver;
 use rktk::utils::RawMutex;
+use rktk_log::{error, info};
 
 use super::packet::Packet;
 use super::{PSM, RKTK_SPLIT_SERVICE_ID};
@@ -18,7 +18,7 @@ static RX_PIPE: Pipe<RawMutex, 128> = Pipe::new();
 #[embassy_executor::task]
 async fn ble_split_central_task(sd: &'static Softdevice) {
     embassy_time::Timer::after_secs(3).await;
-    log::error!("Scanning for peer...");
+    error!("Scanning for peer...");
 
     let config = central::ScanConfig {
         whitelist: None,
@@ -40,7 +40,7 @@ async fn ble_split_central_task(sd: &'static Softdevice) {
             let value = &data[2..len + 1];
 
             if value == RKTK_SPLIT_SERVICE_ID {
-                info!("{:X}:{:X?}", key, &value);
+                info!("{:X}:{:X}", key, &value);
                 return Some(Address::from_raw(params.peer_addr));
             }
             data = &data[len + 1..];
@@ -59,7 +59,7 @@ async fn ble_split_central_task(sd: &'static Softdevice) {
     let conn = match central::connect(sd, &config).await {
         Ok(conn) => conn,
         Err(e) => {
-            log::error!("connect failed: {:?}", e);
+            error!("connect failed: {:?}", e);
             return;
         }
     };
@@ -69,7 +69,7 @@ async fn ble_split_central_task(sd: &'static Softdevice) {
     let ch = match l.setup(&conn, &config, PSM).await {
         Ok(ch) => ch,
         Err(e) => {
-            log::error!("l2cap connect failed: {:?}", e);
+            error!("l2cap connect failed: {:?}", e);
             return;
         }
     };
