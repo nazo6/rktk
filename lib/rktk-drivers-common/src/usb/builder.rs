@@ -27,16 +27,9 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
-    pub fn new(mut opts: UsbOpts<D>) -> Self {
+    pub fn new(opts: UsbOpts<D>) -> Self {
         let wakeup_signal = singleton!(RemoteWakeupSignal::new(), RemoteWakeupSignal);
         let ready_signal = singleton!(ReadySignal::new(), ReadySignal);
-
-        // Required for windows compatibility.
-        // https://developer.nordicsemi.com/nRF_Connect_SDK/doc/1.9.1/kconfig/CONFIG_CDC_ACM_IAD.html#help
-        opts.config.device_class = 0xEF;
-        opts.config.device_sub_class = 0x02;
-        opts.config.device_protocol = 0x01;
-        opts.config.composite_with_iads = true;
 
         let mut builder = Builder::new(
             opts.driver,
