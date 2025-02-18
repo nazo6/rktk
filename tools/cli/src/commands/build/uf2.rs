@@ -26,7 +26,11 @@ pub fn elf2uf2(
     )
     .run()
     .context("Failed to convert to bin. Is arm-none-eabi-objcopy installed?")?;
-    xprintln!("Bin file generated at: {}", bin_path.display());
+    xprintln!(
+        "Bin file generated at: {} ({})",
+        bin_path.display(),
+        get_bytes(&bin_path)
+    );
 
     let uf2_path = artifact_dir.join(format!("{}.uf2", artifact_name));
     let uf2_data = uf2::bin_to_uf2(&std::fs::read(bin_path)?, family_id, target_addr)?;

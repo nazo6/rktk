@@ -117,7 +117,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
 
         xprintln!("Checking crate `{}` ({})", package.name, dir);
 
-        let res = cmd("cargo", build_args(&package.name))
+        cmd("cargo", build_args(&package.name))
             .dir(dir)
             .run()
             .with_context(|| format!("Failed to run clippy for crate: {}", dir))?;
