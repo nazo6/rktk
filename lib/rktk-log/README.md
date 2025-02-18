@@ -5,17 +5,25 @@ logger for rktk
 ## Credits
 
 - Most code are from [defmt-or-log](https://github.com/t-moe/defmt-or-log).
-- defmtusb code are from [defmtusb](https://github.com/micro-rust/defmtusb).
 
 ## About
 
-This crate unifies rktk logs and allows flexible switching between log and defmt
-using feature flag.
+crate which uses macro in this crate must add below deps and features to
+Cargo.toml to work correctly.
 
-Also, this crate provides `defmtusb` feature, which provides
-`defmt::global_logger` to send defmt log via usb. This feature does not work
-without usb driver implementations. To use it, enable `defmtusb` feature of
-`rktk-drivers-common` crate.
+```toml
+[dependencies]
+rktk-log = { version = "" }
+log = { version="", optional = true }
+defmt = { version="", optional = true }
+
+[features]
+defmt = ["dep:defmt", "rktk-log/defmt"]
+log = ["dep:log", "rktk-log/log"]
+```
+
+Also you should consider to modify defmt to feature if your depedency provides
+feature for defmt.
 
 ## Viewing defmtusb log
 
