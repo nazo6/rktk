@@ -6,7 +6,7 @@ use crate::utils::{xprintln, METADATA};
 use super::config::CRATES_CONFIG;
 
 fn build_args(crate_name: &str) -> Vec<String> {
-    let mut args = vec!["hack".to_string(), "check".to_string()];
+    let mut args = vec!["hack".to_string(), "clippy".to_string()];
 
     let mut skip = CRATES_CONFIG.check_skip_global.clone().unwrap_or_default();
 
