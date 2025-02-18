@@ -34,6 +34,10 @@ jobs:
         components: "clippy,rust-src"
         target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-hack
+
     - uses: r7kamura/rust-problem-matchers@v1
 
     - name: Run rust check
