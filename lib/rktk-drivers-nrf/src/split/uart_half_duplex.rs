@@ -87,14 +87,14 @@ impl<
 
 impl<
         UARTE: Instance,
-        UARTEP: Peripheral<P = UARTE>,
-        IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone,
+        UARTEP: Peripheral<P = UARTE> + 'static,
+        IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone + 'static,
         TIMER: embassy_nrf::timer::Instance,
-        TIMERP: Peripheral<P = TIMER>,
+        TIMERP: Peripheral<P = TIMER> + 'static,
         CH1: embassy_nrf::ppi::ConfigurableChannel,
-        CH1P: Peripheral<P = CH1>,
+        CH1P: Peripheral<P = CH1> + 'static,
         CH2: embassy_nrf::ppi::ConfigurableChannel,
-        CH2P: Peripheral<P = CH2>,
+        CH2P: Peripheral<P = CH2> + 'static,
     > SplitDriver
     for UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
 {

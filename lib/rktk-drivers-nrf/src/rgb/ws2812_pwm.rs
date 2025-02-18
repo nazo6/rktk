@@ -29,16 +29,24 @@ const T1H: u16 = 0x8000 | 13;
 const T0H: u16 = 0x8000 | 6;
 const RES: u16 = 0x8000;
 
-impl<PWM: Instance, PWMP: Peripheral<P = PWM>, DATA: Pin, DATAP: Peripheral<P = DATA>>
-    Ws2812Pwm<PWM, PWMP, DATA, DATAP>
+impl<
+        PWM: Instance + 'static,
+        PWMP: Peripheral<P = PWM> + 'static,
+        DATA: Pin,
+        DATAP: Peripheral<P = DATA> + 'static,
+    > Ws2812Pwm<PWM, PWMP, DATA, DATAP>
 {
     pub fn new(pwm: PWMP, data: DATAP) -> Self {
         Self { pwm, pin: data }
     }
 }
 
-impl<PWM: Instance, PWMP: Peripheral<P = PWM>, DATA: Pin, DATAP: Peripheral<P = DATA>> RgbDriver
-    for Ws2812Pwm<PWM, PWMP, DATA, DATAP>
+impl<
+        PWM: Instance + 'static,
+        PWMP: Peripheral<P = PWM> + 'static,
+        DATA: Pin,
+        DATAP: Peripheral<P = DATA> + 'static,
+    > RgbDriver for Ws2812Pwm<PWM, PWMP, DATA, DATAP>
 {
     type Error = Infallible;
 

@@ -38,7 +38,7 @@ pub async fn start<
     Ble: BleDriver,
     Usb: UsbDriver,
     Split: SplitDriver,
-    Rgb: RgbDriver + 'static,
+    Rgb: RgbDriver,
     System: SystemDriver,
     Storage: StorageDriver,
     Mouse: MouseDriver,
@@ -50,7 +50,7 @@ pub async fn start<
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
-    BH: RgbHooks + 'static,
+    BH: RgbHooks,
 >(
     drivers: Drivers<
         KeyScan,

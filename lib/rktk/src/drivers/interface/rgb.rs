@@ -20,7 +20,7 @@ pub enum RgbMode {
 }
 
 /// Driver for controlling the RGB leds.
-pub trait RgbDriver {
+pub trait RgbDriver: 'static {
     type Error: core::error::Error;
 
     /// Write provided colors to leds.

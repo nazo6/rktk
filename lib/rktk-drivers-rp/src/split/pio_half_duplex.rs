@@ -148,7 +148,7 @@ pub enum Error {
     GeneralError(&'static str),
 }
 
-impl<I: Instance> SplitDriver for PioHalfDuplexSplitDriver<'_, I> {
+impl<I: Instance + 'static> SplitDriver for PioHalfDuplexSplitDriver<'static, I> {
     type Error = Error;
 
     async fn init(&mut self) -> Result<(), Self::Error> {

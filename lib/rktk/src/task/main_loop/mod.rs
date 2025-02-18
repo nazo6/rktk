@@ -22,10 +22,7 @@ use crate::{
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
     utils::sjoin,
 };
-use embassy_futures::{
-    join::join,
-    select::{select, Either},
-};
+use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Timer};
 
 mod master;
@@ -41,14 +38,14 @@ pub async fn start<
     EN: EncoderDriver,
     M: MouseDriver,
     SP: SplitDriver,
-    RGB: RgbDriver + 'static,
+    RGB: RgbDriver,
     Ble: BleDriver,
     Usb: UsbDriver,
     S: StorageDriver,
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
-    BH: RgbHooks + 'static,
+    BH: RgbHooks,
 >(
     system: &Sys,
     ble: Option<Ble>,
@@ -106,36 +103,8 @@ pub async fn start<
     };
 
     sjoin::join!(
-        async {
-            if let Some(split) = split {
-                if is_master {
-                    join(
-                        split_handler::start(split, s2m_tx, m2s_rx, is_master),
-                        master::start(
-                            m2s_tx,
-                            s2m_rx,
-                            system,
-                            ble,
-                            usb,
-                            keyscan,
-                            debounce,
-                            encoder,
-                            storage,
-                            mouse,
-                            key_config,
-                            hand,
-                            hooks.master,
-                        ),
-                    )
-                    .await;
-                } else {
-                    join(
-                        split_handler::start(split, m2s_tx, s2m_rx, is_master),
-                        slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.slave),
-                    )
-                    .await;
-                }
-            } else {
+        async move {
+            if is_master {
                 master::start(
                     m2s_tx,
                     s2m_rx,
@@ -152,6 +121,17 @@ pub async fn start<
                     hooks.master,
                 )
                 .await;
+            } else {
+                slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.slave).await;
+            }
+        },
+        async move {
+            if let Some(split) = split {
+                if is_master {
+                    split_handler::start(split, s2m_tx, m2s_rx, is_master).await;
+                } else {
+                    split_handler::start(split, m2s_tx, s2m_rx, is_master).await;
+                }
             }
         },
         async move {

@@ -86,7 +86,7 @@ impl<'a, I: Instance> Ws2812Pio<'a, I> {
     }
 }
 
-impl<I: Instance> RgbDriver for Ws2812Pio<'_, I> {
+impl<I: Instance + 'static> RgbDriver for Ws2812Pio<'static, I> {
     type Error = Infallible;
 
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error> {

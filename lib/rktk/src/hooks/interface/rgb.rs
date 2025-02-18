@@ -2,7 +2,7 @@ use crate::drivers::interface::rgb::{RgbCommand, RgbDriver};
 
 pub use smart_leds::RGB8;
 
-pub trait RgbHooks {
+pub trait RgbHooks: 'static {
     async fn on_rgb_init(&mut self, _driver: &mut impl RgbDriver) {}
     async fn on_rgb_process<const N: usize>(
         &mut self,

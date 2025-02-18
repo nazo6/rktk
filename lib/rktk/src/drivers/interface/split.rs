@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::rgb::RgbCommand;
 
-pub trait SplitDriver {
+pub trait SplitDriver: 'static {
     type Error: core::error::Error;
 
     async fn init(&mut self) -> Result<(), Self::Error> {

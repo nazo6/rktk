@@ -1,5 +1,6 @@
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
+use rktk::singleton;
 
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
@@ -14,13 +15,6 @@ use crate::usb::handler::UsbDeviceHandler;
 use super::driver::CommonUsbDriver;
 use super::{task::*, ReadySignal};
 use super::{RemoteWakeupSignal, UsbOpts};
-
-macro_rules! singleton {
-    ($val:expr, $type:ty) => {{
-        static STATIC_CELL: ::static_cell::StaticCell<$type> = ::static_cell::StaticCell::new();
-        STATIC_CELL.init($val)
-    }};
-}
 
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,

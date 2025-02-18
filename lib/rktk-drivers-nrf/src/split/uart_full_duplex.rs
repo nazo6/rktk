@@ -10,17 +10,19 @@ pub enum UartFullDuplexSplitDriverError {
     GeneralError(&'static str),
 }
 
-pub struct UartFullDuplexSplitDriver<'d, I: UarteInstance, T: TimerInstance> {
-    uarte: BufferedUarte<'d, I, T>,
+pub struct UartFullDuplexSplitDriver<I: UarteInstance + 'static, T: TimerInstance + 'static> {
+    uarte: BufferedUarte<'static, I, T>,
 }
 
-impl<'d, I: UarteInstance, T: TimerInstance> UartFullDuplexSplitDriver<'d, I, T> {
-    pub fn new(uarte: BufferedUarte<'d, I, T>) -> Self {
+impl<I: UarteInstance + 'static, T: TimerInstance + 'static> UartFullDuplexSplitDriver<I, T> {
+    pub fn new(uarte: BufferedUarte<'static, I, T>) -> Self {
         Self { uarte }
     }
 }
 
-impl<I: UarteInstance, T: TimerInstance> SplitDriver for UartFullDuplexSplitDriver<'_, I, T> {
+impl<I: UarteInstance + 'static, T: TimerInstance + 'static> SplitDriver
+    for UartFullDuplexSplitDriver<I, T>
+{
     type Error = UartFullDuplexSplitDriverError;
 
     async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {

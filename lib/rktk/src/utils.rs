@@ -69,3 +69,12 @@ pub mod sjoin {
     }
     pub(crate) use join;
 }
+
+#[macro_export]
+macro_rules! singleton {
+    ($val:expr, $type:ty) => {{
+        static STATIC_CELL: $crate::reexports::static_cell::StaticCell<$type> =
+            $crate::reexports::static_cell::StaticCell::new();
+        STATIC_CELL.init($val)
+    }};
+}

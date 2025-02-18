@@ -4882,6 +4882,7 @@ dependencies = [
  "smart-default",
  "smart-leds",
  "ssmarshal",
+ "static_cell",
  "usbd-hid",
 ]
 
@@ -4947,7 +4948,6 @@ dependencies = [
  "rktk",
  "sequential-storage",
  "ssd1306",
- "static_cell",
  "thiserror 2.0.11",
  "usbd-hid",
 ]

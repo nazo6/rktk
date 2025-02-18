@@ -39,4 +39,5 @@ pub mod utils;
 #[doc(hidden)]
 pub mod reexports {
     pub use heapless;
+    pub use static_cell;
 }

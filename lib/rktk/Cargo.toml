@@ -24,6 +24,7 @@ display-interface = { workspace = true }
 smart-leds = { workspace = true }
 
 heapless = { workspace = true }
+static_cell = "2.1.0"
 serde = { workspace = true, features = ["derive"] }
 
 paste = { workspace = true }
