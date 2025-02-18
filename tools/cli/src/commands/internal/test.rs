@@ -3,9 +3,29 @@ use duct::cmd;
 
 use crate::utils::{xprintln, METADATA};
 
-pub const TEST_WHITELIST: &[&str] = &["rktk-keymanager", "rktk-rrp"];
+use super::config::CRATES_CONFIG;
 
-const TEST_ARGS: &[&str] = &["test", "--features", "_check"];
+fn build_args(crate_name: &str) -> Option<Vec<String>> {
+    if let Some(c) = CRATES_CONFIG.crates.get(crate_name) {
+        if c.test_enabled {
+            let mut args = vec!["test".to_string()];
+
+            let features = CRATES_CONFIG
+                .test_features_global
+                .clone()
+                .unwrap_or_default()
+                .join(",");
+            if !features.is_empty() {
+                args.push("--features".to_string());
+                args.push(features);
+            }
+
+            return Some(args);
+        }
+    }
+
+    None
+}
 
 pub fn start(name: String) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
@@ -13,29 +33,30 @@ pub fn start(name: String) -> anyhow::Result<()> {
     };
 
     if &name == "all" {
+        xprintln!("Testing crates...");
+
         let mut crates = Vec::new();
         for package in metadata.workspace_packages() {
-            if TEST_WHITELIST.contains(&package.name.as_str()) {
-                crates.push((
-                    package.manifest_path.parent().context("no parent dir")?,
-                    package,
-                ));
-            }
+            crates.push((
+                package.manifest_path.parent().context("no parent dir")?,
+                package,
+            ));
         }
-        xprintln!("Testing {} crates...", crates.len());
 
         let mut results = Vec::new();
         for (crate_path, package) in crates {
-            eprintln!();
-            xprintln!("Checking crate `{}` ({})", package.name, crate_path);
+            if let Some(args) = build_args(&package.name) {
+                eprintln!();
+                xprintln!("Checking crate `{}` ({})", package.name, crate_path);
 
-            let now = std::time::Instant::now();
+                let now = std::time::Instant::now();
 
-            let res = cmd("cargo", TEST_ARGS).dir(crate_path).run();
+                let res = cmd("cargo", args).dir(crate_path).run();
 
-            let elapsed = now.elapsed();
+                let elapsed = now.elapsed();
 
-            results.push((crate_path, package, res, elapsed));
+                results.push((crate_path, package, res, elapsed));
+            }
         }
 
         let mut failed = Vec::new();
@@ -72,22 +93,23 @@ pub fn start(name: String) -> anyhow::Result<()> {
             anyhow::bail!(msg);
         }
     } else {
-        let package = metadata
-            .workspace_packages()
-            .into_iter()
-            .find(|p| p.name == name)
-            .context("no such crate")?;
-        let dir = package.manifest_path.parent().context("no parent dir")?;
-
-        if !TEST_WHITELIST.contains(&package.name.as_str()) {
-            anyhow::bail!("Crate `{}` is not whitelisted for testing", package.name);
-        }
-
-        xprintln!("Testing crate `{}` ({})", package.name, dir);
-        cmd("cargo", TEST_ARGS)
-            .dir(dir)
-            .run()
-            .with_context(|| format!("Failed to run test for crate: {}", dir))?;
+        panic!("Not supported");
+        // let package = metadata
+        //     .workspace_packages()
+        //     .into_iter()
+        //     .find(|p| p.name == name)
+        //     .context("no such crate")?;
+        // let dir = package.manifest_path.parent().context("no parent dir")?;
+        //
+        // if !TEST_WHITELIST.contains(&package.name.as_str()) {
+        //     anyhow::bail!("Crate `{}` is not whitelisted for testing", package.name);
+        // }
+        //
+        // xprintln!("Testing crate `{}` ({})", package.name, dir);
+        // cmd("cargo", TEST_ARGS)
+        //     .dir(dir)
+        //     .run()
+        //     .with_context(|| format!("Failed to run test for crate: {}", dir))?;
     }
 
     Ok(())

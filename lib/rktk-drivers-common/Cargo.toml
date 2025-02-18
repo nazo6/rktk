@@ -10,13 +10,18 @@ repository.workspace = true
 [dependencies]
 rktk = { workspace = true }
 
+rktk-log = { workspace = true }
+log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
+
+critical-section = { workspace = true, optional = true }
 embassy-executor = { workspace = true }
 embedded-hal-async = { workspace = true }
 embedded-hal = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true, features = [
-  "max-handler-count-5",
-  "max-interface-count-5",
+  "max-handler-count-6",
+  "max-interface-count-6",
 ] }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
@@ -33,8 +38,12 @@ display-interface = { workspace = true }
 embedded-graphics = { workspace = true }
 
 heapless = { workspace = true }
-log = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-_check = []
+_check = ["defmtusb", "log", "defmt"]
+
+defmtusb = ["defmt", "dep:critical-section"]
+
+defmt = ["dep:defmt", "embassy-usb/defmt"]
+log = ["dep:log"]

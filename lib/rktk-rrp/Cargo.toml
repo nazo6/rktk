@@ -18,7 +18,6 @@ postcard = { workspace = true, features = ["experimental-derive"] }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 macro_rules_attribute = { workspace = true }
-log = { workspace = true }
 thiserror = { workspace = true }
 
 # server deps

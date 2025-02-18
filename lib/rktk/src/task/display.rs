@@ -2,6 +2,7 @@ use core::fmt::Write as _;
 
 use embassy_futures::select::{select, Either};
 use rktk_keymanager::interface::Output;
+use rktk_log::error;
 
 use crate::{
     drivers::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder},
@@ -28,7 +29,7 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
     let mut display = match display_builder.build().await {
         Ok(display) => display,
         Err(_e) => {
-            log::error!("Failed to initialize display");
+            error!("Failed to initialize display");
             return;
         }
     };

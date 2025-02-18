@@ -1,6 +1,7 @@
 use embassy_futures::join::{join, join5};
 use embassy_time::Timer;
 use rktk_keymanager::{interface::Output, state::State};
+use rktk_log::info;
 use utils::{init_storage, load_state};
 
 use crate::{
@@ -77,7 +78,7 @@ pub async fn start<
     let config_store = init_storage(storage).await;
     let state = load_state(&config_store, key_config, Output::Usb).await;
 
-    log::info!("Master side task start");
+    info!("Master side task start");
 
     master_hooks
         .on_master_init(&mut keyscan, mouse.as_mut())

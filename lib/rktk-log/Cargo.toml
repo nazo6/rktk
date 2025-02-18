@@ -1,0 +1,16 @@
+[package]
+name = "rktk-log"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
+rktk-log-macros = { path = "../rktk-log-macros/" }
+defmt = { workspace = true, optional = true }
+
+[features]
+_check = ["defmt", "log"]
+defmt = ["dep:defmt"]
+log = []

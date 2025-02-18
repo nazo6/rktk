@@ -1,0 +1,20 @@
+check_skip_global = ["_check"]
+test_features_global = ["_check"]
+
+[crates.rktk-rrp]
+check_at_least_one_of = ["server", "client"]
+test_enabled = true
+
+[crates.rktk-drivers-nrf]
+check_features = ["_check", "nightly", "power"]
+check_skip = []
+
+[crates.rktk-drivers-rp]
+check_features = ["_check"]
+check_skip = []
+
+[crates.rktk-keymanager]
+test_enabled = true
+
+[crates.example-corne]
+check_no_powerset = true

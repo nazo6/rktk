@@ -1,7 +1,7 @@
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
+use embassy_futures::join::join;
 use embassy_futures::join::join4;
-use embassy_futures::join::{join, join3};
 use embassy_sync::pipe::Pipe;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
@@ -28,11 +28,13 @@ pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub media_key_hid: HidWriter<'d, D, 8>,
     pub mouse_hid: HidWriter<'d, D, 8>,
     pub rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
+    #[cfg(feature = "defmtusb")]
+    pub defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>,
 }
 
 impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
     async fn run(self) {
-        join3(
+        join4(
             usb(self.device, self.signal),
             hid(
                 self.keyboard_hid,
@@ -41,6 +43,13 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
                 self.ready_signal,
             ),
             rrp(self.rrp_hid),
+            async move {
+                #[cfg(feature = "defmtusb")]
+                {
+                    let (sender, _) = self.defmt_usb.split();
+                    super::defmtusb::logger(sender, 64).await
+                }
+            },
         )
         .await;
     }
@@ -53,7 +62,7 @@ async fn usb<'d, D: Driver<'d>>(mut device: UsbDevice<'d, D>, signal: &'static R
             embassy_futures::select::Either::First(_) => {}
             embassy_futures::select::Either::Second(_) => {
                 if let Err(e) = device.remote_wakeup().await {
-                    log::warn!("Failed to send remote wakeup: {:?}", e);
+                    rktk_log::warn!("Failed to send remote wakeup: {:?}", e);
                 }
             }
         }

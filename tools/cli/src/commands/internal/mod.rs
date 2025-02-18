@@ -1,6 +1,7 @@
 use clap::Subcommand;
 
 mod check;
+mod config;
 mod release;
 mod test;
 

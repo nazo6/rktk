@@ -34,8 +34,5 @@ tracing-log = { version = "0.2.0", features = ["log-tracer"] }
 kle-serial = { version = "0.3.1" }
 
 [features]
-default = ["web"]
-web = ["dioxus/web"]
-desktop = ["dioxus/desktop"]
-mobile = ["dioxus/mobile"]
+default = ["dioxus/web"]
 _check = []

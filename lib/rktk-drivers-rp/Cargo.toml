@@ -14,6 +14,10 @@ repository.workspace = true
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
 
+rktk-log = { workspace = true }
+log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
+
 embedded-storage-async = { workspace = true }
 
 embassy-embedded-hal = { workspace = true }
@@ -42,3 +46,6 @@ thiserror = { workspace = true }
 
 [features]
 _check = ["embassy-rp/rp2040"]
+
+defmt = ["dep:defmt"]
+log = ["dep:log"]

@@ -13,6 +13,7 @@ use nrf_softdevice::{
 };
 use rktk::drivers::interface::split::SplitDriver;
 use rktk::utils::RawMutex;
+use rktk_log::error;
 
 use super::packet::Packet;
 use super::PSM;
@@ -23,7 +24,7 @@ static RX_PIPE: Pipe<RawMutex, 128> = Pipe::new();
 #[embassy_executor::task]
 async fn ble_split_peripheral_task(sd: &'static Softdevice) {
     embassy_time::Timer::after_secs(3).await;
-    log::error!("ble split start");
+    error!("ble split start");
 
     static ADV_DATA: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
         .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])

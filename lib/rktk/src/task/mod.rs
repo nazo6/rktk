@@ -1,14 +1,6 @@
 //! Program entrypoint.
 
 use crate::{
-    config::keymap::Keymap,
-    drivers::{interface::system::SystemDriver, Drivers},
-    hooks::interface::*,
-    utils::sjoin,
-};
-use embassy_time::Duration;
-
-use crate::{
     config::constant::RKTK_CONFIG,
     drivers::interface::{
         ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
@@ -18,9 +10,17 @@ use crate::{
     },
     hooks::Hooks,
 };
+use crate::{
+    config::keymap::Keymap,
+    drivers::{interface::system::SystemDriver, Drivers},
+    hooks::interface::*,
+    utils::sjoin,
+};
+use embassy_time::Duration;
 
 pub(crate) mod channels;
 pub mod display;
+#[cfg(feature = "log")]
 mod logger;
 pub(crate) mod main_loop;
 
@@ -72,12 +72,15 @@ pub async fn start<
     key_config: Keymap,
     hooks: Hooks<CH, MH, SH, BH>,
 ) {
-    critical_section::with(|_| unsafe {
-        let _ = log::set_logger_racy(&logger::RRP_LOGGER);
-        log::set_max_level_racy(log::LevelFilter::Info);
-    });
+    #[cfg(feature = "log")]
+    {
+        critical_section::with(|_| unsafe {
+            let _ = log::set_logger_racy(&logger::RRP_LOGGER);
+            log::set_max_level_racy(log::LevelFilter::Info);
+        });
+    }
 
-    log::info!(
+    rktk_log::info!(
         "RKTK Starting... (rgb: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
         drivers.rgb.is_some(),
         drivers.ble_builder.is_some(),
@@ -101,7 +104,7 @@ pub async fn start<
                         Some(mouse)
                     }
                     Err(e) => {
-                        log::warn!("Failed to build mouse driver: {:?}", e);
+                        rktk_log::warn!("Failed to build mouse driver: {:?}", e);
                         None
                     }
                 }

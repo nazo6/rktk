@@ -1,5 +1,7 @@
 use core::fmt::{self, Formatter};
 
+use rktk_log::warn;
+
 pub struct Pressed<const COLS: usize, const ROWS: usize>([[bool; COLS]; ROWS]);
 
 impl<const COLS: usize, const ROWS: usize> Pressed<COLS, ROWS> {
@@ -11,7 +13,7 @@ impl<const COLS: usize, const ROWS: usize> Pressed<COLS, ROWS> {
     /// Returns Some(false) if the key is changed to released.
     pub fn set_pressed(&mut self, pressed: bool, row: usize, col: usize) -> Option<bool> {
         let Some(Some(prev_pressed)) = self.0.get_mut(row).map(|r| r.get_mut(col)) else {
-            log::warn!("Invalid key position: row={}, col={}", row, col);
+            warn!("Invalid key position: row={}, col={}", row, col);
             return None;
         };
 

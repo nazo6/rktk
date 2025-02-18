@@ -23,6 +23,7 @@ rktk-drivers-nrf = { path = "lib/rktk-drivers-nrf", version = "0.1.0" }
 rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.1.0" }
 rktk = { path = "lib/rktk", version = "0.1.0" }
 rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.1.0" }
+rktk-log = { path = "lib/rktk-log", version = "0.1.0" }
 rktk-rrp = { path = "lib/rktk-rrp", version = "0.1.0" }
 rktk-rrp-client-webhid = { path = "lib/rktk-rrp-client-webhid", version = "0.1.0" }
 
@@ -75,9 +76,7 @@ postcard = "1.0.8"
 paste = "1.0.15"
 macro_rules_attribute = "0.2.0"
 thiserror = { version = "2.0.3", default-features = false }
-strum = { version = "0.26.3", default-features = false }
-
-log = "0.4.22"
+strum = { version = "0.27.1", default-features = false }
 
 # cli tools
 duct = "0.13.7"
@@ -87,6 +86,9 @@ anyhow = "1.0.90"
 web-sys = { version = "0.3.70" }
 wasm-bindgen = "0.2.99"
 wasm-bindgen-futures = "0.4.49"
+
+defmt = "0.3.10"
+log = "0.4.25"
 
 [profile]
 
