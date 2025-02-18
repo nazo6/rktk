@@ -1,11 +1,14 @@
 {
   "rust-analyzer.check.overrideCommand": [
     "cargo",
-    "run",
-    "-p",
-    "ra-check",
-    "--",
-    "$saved_file"
+    "check-delta",
+    "-l",
+    "file",
+    "-s",
+    "clippy",
+    "--message-format=json",
+    "--features",
+    "_check"
   ],
   "rust-analyzer.cargo.features": ["_check"]
 }
