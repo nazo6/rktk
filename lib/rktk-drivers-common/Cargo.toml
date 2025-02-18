@@ -16,8 +16,8 @@ embedded-hal-async = { workspace = true }
 embedded-hal = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true, features = [
-  "max-handler-count-5",
-  "max-interface-count-5",
+  "max-handler-count-6",
+  "max-interface-count-6",
 ] }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }

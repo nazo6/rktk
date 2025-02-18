@@ -35,7 +35,7 @@ unsafe impl defmt::Logger for USBLogger {
             // Check for reentries.
             if TAKEN {
                 defmt::error!("defmt logger taken reentrantly");
-                panic!();
+                defmt::panic!();
             }
 
             // Set the taken flag.
@@ -59,6 +59,8 @@ unsafe impl defmt::Logger for USBLogger {
         // Get the restore state of the critical section.
         let restore = RESTORE;
 
+        controller::CONTROLLER.swap();
+
         // Restore the critical section.
         critical_section::release(restore);
     }
@@ -68,7 +70,7 @@ unsafe impl defmt::Logger for USBLogger {
     }
 
     unsafe fn write(bytes: &[u8]) {
-        ENCODER.write(bytes, inner)
+        ENCODER.write(bytes, inner);
     }
 }
 
