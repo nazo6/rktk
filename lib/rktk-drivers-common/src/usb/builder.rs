@@ -24,6 +24,8 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     wakeup_signal: &'static RemoteWakeupSignal,
     ready_signal: &'static ReadySignal,
     rrp_hid: HidReaderWriter<'static, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
+    #[cfg(feature = "defmtusb")]
+    defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'static, D>,
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
@@ -84,6 +86,16 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             )
         };
 
+        #[cfg(feature = "defmtusb")]
+        let defmt_usb = embassy_usb::class::cdc_acm::CdcAcmClass::new(
+            &mut builder,
+            singleton!(
+                embassy_usb::class::cdc_acm::State::new(),
+                embassy_usb::class::cdc_acm::State
+            ),
+            64,
+        );
+
         Self {
             builder,
             keyboard_hid,
@@ -92,6 +104,8 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             rrp_hid,
             wakeup_signal,
             ready_signal,
+            #[cfg(feature = "defmtusb")]
+            defmt_usb,
         }
     }
 }
@@ -117,6 +131,8 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
                 media_key_hid: self.media_key_hid,
                 mouse_hid: self.mouse_hid,
                 rrp_hid: self.rrp_hid,
+                #[cfg(feature = "defmtusb")]
+                defmt_usb: self.defmt_usb,
             },
         ))
     }
