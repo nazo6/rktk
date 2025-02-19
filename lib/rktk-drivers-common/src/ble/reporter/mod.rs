@@ -7,17 +7,35 @@ mod driver;
 mod server;
 mod task;
 
-pub struct TroubleReporterBuilder<C: Controller + 'static> {
+pub struct TroubleReporterBuilder<
+    C: Controller + 'static,
+    const CONNECTIONS_MAX: usize,
+    const L2CAP_CHANNELS_MAX: usize,
+    const L2CAP_MTU: usize,
+> {
     controller: C,
 }
 
-impl<C: Controller + 'static> TroubleReporterBuilder<C> {
+impl<
+        C: Controller + 'static,
+        const CONNECTIONS_MAX: usize,
+        const L2CAP_CHANNELS_MAX: usize,
+        const L2CAP_MTU: usize,
+    > TroubleReporterBuilder<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+{
     pub fn new(controller: C) -> Self {
         Self { controller }
     }
 }
 
-impl<C: Controller + 'static> DriverBuilderWithTask for TroubleReporterBuilder<C> {
+impl<
+        C: Controller + 'static,
+        const CONNECTIONS_MAX: usize,
+        const L2CAP_CHANNELS_MAX: usize,
+        const L2CAP_MTU: usize,
+    > DriverBuilderWithTask
+    for TroubleReporterBuilder<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+{
     type Driver = TroubleReporter;
 
     type Error = ();
@@ -25,7 +43,7 @@ impl<C: Controller + 'static> DriverBuilderWithTask for TroubleReporterBuilder<C
     async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
         Ok((
             TroubleReporter {},
-            TroubleReporterTask {
+            TroubleReporterTask::<_, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU> {
                 controller: self.controller,
             },
         ))

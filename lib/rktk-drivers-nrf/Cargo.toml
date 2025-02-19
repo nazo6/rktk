@@ -56,26 +56,42 @@ usbd-hid = { workspace = true }
 thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
+nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc.git", version = "0.1.0", default-features = false, optional = true, features = [
+  "peripheral",
+  "central",
+] }
+nrf-mpsl = { git = "https://github.com/alexmoon/nrf-sdc.git", version = "0.1.0", default-features = false, optional = true, features = [
+  "critical-section-impl",
+] }
+
 [features]
 _check = [
   "embassy-nrf/nrf52840",
   "nrf-softdevice/nrf52840",
   "nrf-softdevice/s140",
+  "nrf-sdc/nrf52840",
+  "sdc",
+  "ble",
+  "defmt",
+  "log",
 ]
 
-default = ["ble", "power"]
+default = ["power"]
 
 softdevice = ["dep:nrf-softdevice"]
 # Enables system power off feature. This is supported only on some chips like nRF52840.
 power = []
 ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
 nightly = ["embassy-executor/nightly"]
+sdc = ["dep:nrf-sdc", "dep:nrf-mpsl"]
 
 defmt = [
   "dep:defmt",
-  "nrf-softdevice/defmt",
+  "nrf-softdevice?/defmt",
   "embassy-nrf/defmt",
   "heapless/defmt-impl",
   "postcard/use-defmt",
+  "nrf-sdc?/defmt",
+  "nrf-mpsl?/defmt",
 ]
 log = ["dep:log"]

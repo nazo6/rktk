@@ -11,15 +11,22 @@ use trouble_host::{
 
 use super::server::Server;
 
-const CONNECTIONS_MAX: usize = 1;
-const L2CAP_CHANNELS_MAX: usize = 2;
-const L2CAP_MTU: usize = 64;
-
-pub struct TroubleReporterTask<C: Controller + 'static> {
+pub struct TroubleReporterTask<
+    C: Controller + 'static,
+    const CONNECTIONS_MAX: usize,
+    const L2CAP_CHANNELS_MAX: usize,
+    const L2CAP_MTU: usize,
+> {
     pub controller: C,
 }
 
-impl<C: Controller + 'static> BackgroundTask for TroubleReporterTask<C> {
+impl<
+        C: Controller + 'static,
+        const CONNECTIONS_MAX: usize,
+        const L2CAP_CHANNELS_MAX: usize,
+        const L2CAP_MTU: usize,
+    > BackgroundTask for TroubleReporterTask<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+{
     async fn run(self) {
         let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
         info!("Our address = {:?}", address);
