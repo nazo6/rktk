@@ -20,5 +20,8 @@ check_group_features = [["defmt", "defmt-timestamp"]]
 [crates.rktk-keymanager]
 test_enabled = true
 
+[crates.rktk-client]
+check_no_powerset = true
+
 [crates.example-corne]
 check_no_powerset = true
