@@ -28,6 +28,7 @@ impl<
     > BackgroundTask for TroubleReporterTask<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
     async fn run(self) {
+        rktk::print!("BLE start");
         let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
         info!("Our address = {:?}", address);
 
@@ -44,28 +45,35 @@ impl<
         let server = Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
             name: "TrouBLE",
             appearance: &appearance::power_device::GENERIC_POWER_DEVICE,
-        }))
-        .unwrap();
-        let _ = join(ble_task(runner), async {
-            loop {
-                match advertise("Trouble Example", &mut peripheral).await {
-                    Ok(conn) => {
-                        // set up tasks when the connection is established to a central, so they don't run when no one is connected.
-                        let a = gatt_events_task(&server, &conn);
-                        let b = custom_task(&server, &conn, &stack);
-                        // run until any task ends (usually because the connection has been closed),
-                        // then return to advertising state.
-                        select(a, b).await;
+        }));
+        match server {
+            Ok(server) => {
+                let _ = join(ble_task(runner), async {
+                    loop {
+                        match advertise("Trouble Example", &mut peripheral).await {
+                            Ok(conn) => {
+                                // set up tasks when the connection is established to a central, so they don't run when no one is connected.
+                                let a = gatt_events_task(&server, &conn);
+                                let b = custom_task(&server, &conn, &stack);
+                                // run until any task ends (usually because the connection has been closed),
+                                // then return to advertising state.
+                                select(a, b).await;
+                            }
+                            Err(e) => {
+                                #[cfg(feature = "defmt")]
+                                let e = defmt::Debug2Format(&e);
+                                rktk_log::error!("[adv] error: {:?}", e);
+                                return;
+                            }
+                        }
                     }
-                    Err(e) => {
-                        #[cfg(feature = "defmt")]
-                        let e = defmt::Debug2Format(&e);
-                        panic!("[adv] error: {:?}", e);
-                    }
-                }
+                })
+                .await;
             }
-        })
-        .await;
+            Err(e) => {
+                rktk_log::error!("[gatt] error: {:?}", e);
+            }
+        }
     }
 }
 
@@ -74,7 +82,8 @@ async fn ble_task<C: Controller>(mut runner: Runner<'_, C>) {
         if let Err(e) = runner.run().await {
             #[cfg(feature = "defmt")]
             let e = defmt::Debug2Format(&e);
-            panic!("[ble_task] error: {:?}", e);
+            rktk_log::error!("{:?}", e);
+            return;
         }
     }
 }

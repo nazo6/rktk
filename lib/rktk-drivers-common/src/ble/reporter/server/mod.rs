@@ -7,6 +7,7 @@ mod hid;
 pub(super) struct Server {
     pub battery_service: BatteryService,
     pub dis: DeviceInformationService,
+    pub hid_service: HidService,
 }
 
 /// Battery service
