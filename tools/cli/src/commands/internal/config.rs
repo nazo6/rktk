@@ -8,7 +8,7 @@ pub struct InternalCmdConfig {
     pub test_features_global: Option<Vec<String>>,
 }
 
-#[derive(Default, serde::Deserialize)]
+#[derive(Default, serde::Deserialize, Clone)]
 #[serde(default)]
 pub struct CrateConfig {
     /// Disables feature powerset check
@@ -16,8 +16,8 @@ pub struct CrateConfig {
     /// Features to check (these features will be always added).
     pub check_features: Option<Vec<String>>,
     pub check_at_least_one_of: Option<Vec<String>>,
+    pub check_group_features: Option<Vec<Vec<String>>>,
     /// Features to skip check (these features will be never added.). This overrides global skip.
-    ///
     pub check_skip: Option<Vec<String>>,
     pub test_enabled: bool,
 }

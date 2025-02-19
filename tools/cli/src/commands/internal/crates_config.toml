@@ -14,6 +14,9 @@ check_skip = []
 check_features = ["_check"]
 check_skip = []
 
+[crates.rktk-drivers-common]
+check_group_features = [["defmt", "defmt-timestamp"]]
+
 [crates.rktk-keymanager]
 test_enabled = true
 

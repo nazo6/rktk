@@ -11,29 +11,38 @@ fn build_args(crate_name: &str) -> Vec<String> {
 
     let mut skip = CRATES_CONFIG.check_skip_global.clone().unwrap_or_default();
 
-    if let Some(config) = CRATES_CONFIG.crates.get(crate_name) {
-        if !config.check_no_powerset {
-            args.push("--feature-powerset".to_string());
+    let config = CRATES_CONFIG
+        .crates
+        .get(crate_name)
+        .cloned()
+        .unwrap_or_default();
+    if !config.check_no_powerset {
+        args.push("--feature-powerset".to_string());
 
-            if let Some(at_least_one_of) = &config.check_at_least_one_of {
-                args.push("--at-least-one-of".to_string());
-                args.push(at_least_one_of.join(","));
-            }
+        if let Some(at_least_one_of) = &config.check_at_least_one_of {
+            args.push("--at-least-one-of".to_string());
+            args.push(at_least_one_of.join(","));
+        }
 
-            if let Some(skip_features) = &config.check_skip {
-                skip = skip_features.clone();
-            }
-
-            if !skip.is_empty() {
-                args.push("--skip".to_string());
-                args.push(skip.join(","));
+        if let Some(group_features) = &config.check_group_features {
+            for group in group_features {
+                args.push("--group-features".to_string());
+                args.push(group.join(","));
             }
         }
 
-        if let Some(features) = &config.check_features {
-            args.push("--features".to_string());
-            args.push(features.join(","));
+        if let Some(skip_features) = &config.check_skip {
+            skip = skip_features.clone();
         }
+        if !skip.is_empty() {
+            args.push("--skip".to_string());
+            args.push(skip.join(","));
+        }
+    }
+
+    if let Some(features) = &config.check_features {
+        args.push("--features".to_string());
+        args.push(features.join(","));
     }
 
     args
@@ -49,10 +58,14 @@ fn run_check(package: &Package) -> (&Utf8Path, Result<std::process::Output, std:
         .unwrap();
 
     let mut cmd = cmd("cargo", build_args(&package.name));
+
+    eprintln!("command: {:?}, envs: {:?}", cmd, envs);
+
     for (key, value) in envs {
         cmd = cmd.env(key, value);
     }
     let cmd = cmd.dir(crate_path);
+
     let res = cmd.run();
 
     (crate_path, res)
