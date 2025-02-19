@@ -1,11 +1,16 @@
 use driver::TroubleReporter;
-use rktk::drivers::interface::{BackgroundTask, DriverBuilderWithTask};
+use rktk::{
+    drivers::interface::{BackgroundTask, DriverBuilderWithTask},
+    utils::Channel,
+};
 use task::TroubleReporterTask;
 use trouble_host::Controller;
 
 mod driver;
 mod server;
 mod task;
+
+static OUTPUT_CHANNEL: Channel<usbd_hid::descriptor::KeyboardReport, 4> = Channel::new();
 
 pub struct TroubleReporterBuilder<
     C: Controller + 'static,
@@ -42,9 +47,12 @@ impl<
 
     async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
         Ok((
-            TroubleReporter {},
+            TroubleReporter {
+                output_tx: OUTPUT_CHANNEL.sender(),
+            },
             TroubleReporterTask::<_, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU> {
                 controller: self.controller,
+                output_rx: OUTPUT_CHANNEL.receiver(),
             },
         ))
     }

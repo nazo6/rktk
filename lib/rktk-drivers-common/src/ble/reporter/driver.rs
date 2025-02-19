@@ -1,16 +1,23 @@
 use core::convert::Infallible;
 
-use rktk::drivers::interface::{ble::BleDriver, reporter::ReporterDriver};
+use rktk::{
+    drivers::interface::{ble::BleDriver, reporter::ReporterDriver},
+    utils::Sender,
+};
+use usbd_hid::descriptor::KeyboardReport;
 
-pub struct TroubleReporter {}
+pub struct TroubleReporter {
+    pub(super) output_tx: Sender<'static, KeyboardReport, 4>,
+}
 
 impl ReporterDriver for TroubleReporter {
     type Error = Infallible;
 
     fn try_send_keyboard_report(
         &self,
-        _report: usbd_hid::descriptor::KeyboardReport,
+        report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), Self::Error> {
+        self.output_tx.try_send(report);
         Ok(())
     }
 

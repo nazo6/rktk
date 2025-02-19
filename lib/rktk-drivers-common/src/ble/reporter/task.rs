@@ -1,13 +1,14 @@
 use embassy_futures::{join::join, select::select};
-use embassy_time::Timer;
-use rktk::drivers::interface::BackgroundTask;
-use rktk_log::{info, warn};
+use rktk::{drivers::interface::BackgroundTask, utils::Receiver};
+use rktk_log::{helper::Debug2Format, info, warn};
+use ssmarshal::serialize;
 use trouble_host::{
     gap::{GapConfig, PeripheralConfig},
     gatt::GattEvent,
     prelude::*,
     Address, Controller, Error, Host, HostResources,
 };
+use usbd_hid::descriptor::KeyboardReport;
 
 use super::server::Server;
 
@@ -17,7 +18,8 @@ pub struct TroubleReporterTask<
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
 > {
-    pub controller: C,
+    pub(super) controller: C,
+    pub(super) output_rx: Receiver<'static, KeyboardReport, 4>,
 }
 
 impl<
@@ -54,7 +56,7 @@ impl<
                             Ok(conn) => {
                                 // set up tasks when the connection is established to a central, so they don't run when no one is connected.
                                 let a = gatt_events_task(&server, &conn);
-                                let b = custom_task(&server, &conn, &stack);
+                                let b = hid_task(&server, &conn, &stack, &self.output_rx);
                                 // run until any task ends (usually because the connection has been closed),
                                 // then return to advertising state.
                                 select(a, b).await;
@@ -89,7 +91,6 @@ async fn ble_task<C: Controller>(mut runner: Runner<'_, C>) {
 }
 
 async fn gatt_events_task(server: &Server<'_>, conn: &Connection<'_>) -> Result<(), Error> {
-    let level = server.battery_service.level;
     loop {
         match conn.next().await {
             ConnectionEvent::Disconnected { reason } => {
@@ -106,35 +107,14 @@ async fn gatt_events_task(server: &Server<'_>, conn: &Connection<'_>) -> Result<
                 // the protocol details
                 match data.process(server).await {
                     // Server processing emits
-                    Ok(Some(event)) => {
-                        match &event {
-                            GattEvent::Read(event) => {
-                                if event.handle() == level.handle {
-                                    let value = server.get(&level);
-                                    info!("[gatt] Read Event to Level Characteristic: {:?}", value);
-                                }
-                            }
-                            GattEvent::Write(event) => {
-                                if event.handle() == level.handle {
-                                    info!(
-                                        "[gatt] Write Event to Level Characteristic: {:?}",
-                                        event.data()
-                                    );
-                                }
-                            }
+                    Ok(Some(event)) => match event.accept() {
+                        Ok(reply) => {
+                            reply.send().await;
                         }
-
-                        // This step is also performed at drop(), but writing it explicitly is necessary
-                        // in order to ensure reply is sent.
-                        match event.accept() {
-                            Ok(reply) => {
-                                reply.send().await;
-                            }
-                            Err(e) => {
-                                warn!("[gatt] error sending response: {:?}", e);
-                            }
+                        Err(e) => {
+                            warn!("[gatt] error sending response: {:?}", e);
                         }
-                    }
+                    },
                     Ok(_) => {}
                     Err(e) => {
                         warn!("[gatt] error processing event: {:?}", e);
@@ -156,7 +136,11 @@ async fn advertise<'a, C: Controller>(
     AdStructure::encode_slice(
         &[
             AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-            AdStructure::ServiceUuids16(&[Uuid::Uuid16([0x0f, 0x18])]),
+            AdStructure::ServiceUuids16(&[
+                Uuid::Uuid16([0x0f, 0x18]),
+                Uuid::Uuid16([0x0a, 0x18]),
+                Uuid::Uuid16([0x12, 0x18]),
+            ]),
             AdStructure::CompleteLocalName(name.as_bytes()),
         ],
         &mut advertiser_data[..],
@@ -176,27 +160,36 @@ async fn advertise<'a, C: Controller>(
     Ok(conn)
 }
 
-async fn custom_task<C: Controller>(
+async fn hid_task<C: Controller>(
     server: &Server<'_>,
     conn: &Connection<'_>,
-    stack: &Stack<'_, C>,
+    _stack: &Stack<'_, C>,
+    output_rx: &Receiver<'static, KeyboardReport, 4>,
 ) {
-    let mut tick: u8 = 0;
-    let level = server.battery_service.level;
     loop {
-        tick = tick.wrapping_add(1);
-        info!("[custom_task] notifying connection of tick {}", tick);
-        if level.notify(server, conn, &tick).await.is_err() {
-            info!("[custom_task] error notifying connection");
-            break;
-        };
-        // read RSSI (Received Signal Strength Indicator) of the connection.
-        if let Ok(rssi) = conn.rssi(stack).await {
-            info!("[custom_task] RSSI: {:?}", rssi);
-        } else {
-            info!("[custom_task] error getting RSSI");
-            break;
-        };
-        Timer::after_secs(2).await;
+        let report = output_rx.receive().await;
+        rktk_log::info!("got report to send");
+
+        let mut buf = [0u8; 8];
+        match serialize(&mut buf, &report) {
+            Ok(n) => {
+                match server
+                    .hid_service
+                    .output_keyboard
+                    .notify(server, conn, &buf)
+                    .await
+                {
+                    Ok(_) => {
+                        rktk_log::info!("sent report");
+                    }
+                    Err(e) => {
+                        rktk_log::error!("failed to send report: {:?}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                rktk_log::error!("failed to serialize report: {:?}", Debug2Format(&e));
+            }
+        }
     }
 }

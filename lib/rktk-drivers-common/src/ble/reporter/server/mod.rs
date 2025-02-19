@@ -18,12 +18,12 @@ pub(super) struct BatteryService {
     #[descriptor(uuid = descriptors::MEASUREMENT_DESCRIPTION, read, value = "Battery Level")]
     #[characteristic(uuid = characteristic::BATTERY_LEVEL, read, notify, value = 10)]
     pub level: u8,
-    #[characteristic(uuid = "408813df-5dd4-1f87-ec11-cdb001100000", write, read, notify)]
-    pub status: bool,
+    // #[characteristic(uuid = "408813df-5dd4-1f87-ec11-cdb001100000", write, read, notify)]
+    // pub status: bool,
 }
 
 #[gatt_service(uuid = service::DEVICE_INFORMATION)]
-struct DeviceInformationService {
+pub(super) struct DeviceInformationService {
     #[characteristic(uuid = characteristic::MANUFACTURER_NAME_STRING, read)]
     manufacturer_name: &'static str,
     #[characteristic(uuid = characteristic::MODEL_NUMBER_STRING, read)]
@@ -44,16 +44,16 @@ mod hid_uuid {
 }
 
 #[gatt_service(uuid = hid_uuid::HID_SERVICE)]
-struct HidService {
+pub(super) struct HidService {
     #[characteristic(uuid = hid_uuid::HID_INFO, read)]
-    hid_info: u16,
+    pub hid_info: u16,
     #[characteristic(uuid = hid_uuid::REPORT_MAP, read, value = hid::const_desc())]
-    report_map: hid::Desc,
+    pub report_map: hid::Desc,
     #[characteristic(uuid = hid_uuid::HID_CONTROL_POINT, write_without_response)]
-    control_point: u16,
+    pub control_point: u16,
     #[characteristic(uuid = hid_uuid::PROTOCOL_MODE, read, write_without_response)]
-    protocol_mode: u16,
+    pub protocol_mode: u16,
     #[characteristic(uuid = hid_uuid::HID_REPORT, read, notify)]
     #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Keyboard as u8, 2u8])]
-    output_keyboard: u16,
+    pub output_keyboard: [u8; 8],
 }

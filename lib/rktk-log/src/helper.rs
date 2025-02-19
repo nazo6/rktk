@@ -1,7 +1,12 @@
 pub trait FormatOrDebug {}
 
-#[derive(Debug)]
 pub struct Debug2Format<'a, T: core::fmt::Debug + ?Sized>(pub &'a T);
+
+impl<T: core::fmt::Debug + ?Sized> core::fmt::Debug for Debug2Format<'_, T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        core::fmt::Debug::fmt(&self.0, f)
+    }
+}
 
 #[cfg(feature = "defmt")]
 impl<T: core::fmt::Debug + ?Sized> defmt::Format for Debug2Format<'_, T> {

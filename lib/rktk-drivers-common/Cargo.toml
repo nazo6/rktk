@@ -37,15 +37,23 @@ maybe-async-cfg = { version = "=0.2.4" }
 display-interface = { workspace = true }
 embedded-graphics = { workspace = true }
 static_cell = { workspace = true }
+ssmarshal = { workspace = true, optional = true }
 
 heapless = { workspace = true }
 thiserror = { workspace = true }
 trouble-host = { git = "https://github.com/embassy-rs/trouble/", version = "0.1.0" }
 
 [features]
-_check = ["defmtusb", "log", "defmt", "defmt-timestamp"]
+_check = ["defmtusb", "log", "defmt", "defmt-timestamp", "trouble-ble"]
 
 defmtusb = ["defmt", "dep:critical-section"]
 defmt-timestamp = ["defmt"]
-defmt = ["dep:defmt", "embassy-usb/defmt", "trouble-host/defmt"]
-log = ["dep:log"]
+defmt = [
+  "rktk-log/defmt",
+  "dep:defmt",
+  "embassy-usb/defmt",
+  "trouble-host/defmt",
+  "usbd-hid/defmt",
+]
+log = ["rktk-log/log", "dep:log"]
+trouble-ble = ["dep:ssmarshal"]
