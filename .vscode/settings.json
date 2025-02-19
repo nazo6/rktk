@@ -10,5 +10,8 @@
     "--features",
     "_check"
   ],
-  "rust-analyzer.cargo.features": ["_check"]
+  "rust-analyzer.cargo.features": ["_check"],
+  "rust-analyzer.check.extraEnv": {
+    "DEFMT_LOG": "trace"
+  }
 }

@@ -26,6 +26,7 @@ postcard = { workspace = true, optional = true, features = [
 
 wasm-bindgen = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
 
 [dev-dependencies]
 critical-section = { workspace = true, features = ["std"] }
@@ -33,6 +34,8 @@ pretty_assertions = "1.4.0"
 usbd-hid = { workspace = true }
 
 [features]
+_check = ["state", "ssmarshal/std", "defmt"]
+
 # Enables state management.
 state = ["dep:usbd-hid"]
 
@@ -43,4 +46,5 @@ postcard = ["dep:postcard", "serde"]
 
 std = []
 
-_check = ["state", "ssmarshal/std"]
+
+defmt = ["dep:defmt"]

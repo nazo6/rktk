@@ -1,4 +1,5 @@
 check_skip_global = ["_check"]
+check_env = { DEFMT_LOG = "trace" }
 test_features_global = ["_check"]
 
 [crates.rktk-rrp]

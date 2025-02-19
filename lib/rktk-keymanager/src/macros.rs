@@ -58,6 +58,7 @@ attribute_alias! {
             derive(postcard::experimental::max_size::MaxSize)
         )]
         #[derive(PartialEq, Eq, Clone, Debug)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
     ;
 }
 

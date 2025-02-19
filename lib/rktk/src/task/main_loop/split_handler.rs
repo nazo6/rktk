@@ -122,10 +122,12 @@ pub async fn start<
                             recv_id = id;
                         }
                         Err(e) => {
-                            rktk_log::warn!("Split data decode failed: {:?}", e);
+                            rktk_log::warn!("Split data decode failed: {:?}", Debug2Format(&e));
                         }
                     },
-                    Err(e) => rktk_log::warn!("Failed to receive split data: {:?}", e),
+                    Err(e) => {
+                        rktk_log::warn!("Failed to receive split data: {:?}", Debug2Format(&e))
+                    }
                 }
             }
             Either::Second(send_data) => {

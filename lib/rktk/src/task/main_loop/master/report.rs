@@ -146,18 +146,21 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) 
         };
 
         if let Err(e) = reporter.try_send_keyboard_report(report) {
-            rktk_log::warn!("Failed to send keyboard report: {:?}", e);
+            rktk_log::warn!("Failed to send keyboard report: {:?}", Debug2Format(&e));
         }
     }
     if let Some(report) = state_report.mouse_report {
         crate::utils::display_state!(MouseMove, (report.x, report.y));
         if let Err(e) = reporter.try_send_mouse_report(report) {
-            rktk_log::warn!("Failed to send mouse report: {:?}", e);
+            rktk_log::warn!("Failed to send mouse report: {:?}", Debug2Format(&e));
         }
     }
     if let Some(report) = state_report.media_keyboard_report {
         if let Err(e) = reporter.try_send_media_keyboard_report(report) {
-            rktk_log::warn!("Failed to send media keyboard report: {:?}", e);
+            rktk_log::warn!(
+                "Failed to send media keyboard report: {:?}",
+                Debug2Format(&e)
+            );
         }
     }
 }
@@ -171,7 +174,7 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
         Output::Usb => {
             if let Some(usb) = usb {
                 usb.read_keyboard_report().await.map_err(|e| {
-                    rktk_log::warn!("Failed to read keyboard report: {:?}", e);
+                    rktk_log::warn!("Failed to read keyboard report: {:?}", Debug2Format(&e));
                 })?
             } else {
                 let _: () = core::future::pending().await;
@@ -181,7 +184,7 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
         Output::Ble => {
             if let Some(usb) = ble {
                 usb.read_keyboard_report().await.map_err(|e| {
-                    rktk_log::warn!("Failed to read keyboard report: {:?}", e);
+                    rktk_log::warn!("Failed to read keyboard report: {:?}", Debug2Format(&e));
                 })?
             } else {
                 let _: () = core::future::pending().await;

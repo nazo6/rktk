@@ -4,6 +4,7 @@ use std::{collections::HashMap, sync::LazyLock};
 pub struct InternalCmdConfig {
     pub crates: HashMap<String, CrateConfig>,
     pub check_skip_global: Option<Vec<String>>,
+    pub check_env: HashMap<String, String>,
     pub test_features_global: Option<Vec<String>>,
 }
 

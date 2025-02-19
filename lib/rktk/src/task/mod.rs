@@ -17,6 +17,7 @@ use crate::{
     utils::sjoin,
 };
 use embassy_time::Duration;
+use rktk_log::helper::Debug2Format;
 
 pub(crate) mod channels;
 pub mod display;
@@ -104,7 +105,7 @@ pub async fn start<
                         Some(mouse)
                     }
                     Err(e) => {
-                        rktk_log::warn!("Failed to build mouse driver: {:?}", e);
+                        rktk_log::warn!("Failed to build mouse driver: {:?}", Debug2Format(&e));
                         None
                     }
                 }

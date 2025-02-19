@@ -60,6 +60,7 @@ pub mod event {
     ///
     /// Used generically to indicate that the state of a physical key has changed
     #[derive(Debug)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
     pub struct KeyChangeEvent {
         pub col: u8,
         pub row: u8,
@@ -68,12 +69,14 @@ pub mod event {
 
     /// Represents the direction of an encoder
     #[derive(Debug)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
     pub enum EncoderDirection {
         Clockwise,
         CounterClockwise,
     }
 
     #[derive(Debug)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
     pub enum Event {
         Key(KeyChangeEvent),
         Mouse((i8, i8)),

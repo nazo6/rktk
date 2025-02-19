@@ -1,4 +1,5 @@
 use anyhow::Context;
+use cargo_metadata::{camino::Utf8Path, Package};
 use duct::cmd;
 
 use crate::utils::{xprintln, METADATA};
@@ -38,31 +39,47 @@ fn build_args(crate_name: &str) -> Vec<String> {
     args
 }
 
+fn run_check(package: &Package) -> (&Utf8Path, Result<std::process::Output, std::io::Error>) {
+    let envs = CRATES_CONFIG.check_env.clone();
+
+    let crate_path = package
+        .manifest_path
+        .parent()
+        .context("no parent dir")
+        .unwrap();
+
+    let mut cmd = cmd("cargo", build_args(&package.name));
+    for (key, value) in envs {
+        cmd = cmd.env(key, value);
+    }
+    let cmd = cmd.dir(crate_path);
+    let res = cmd.run();
+
+    (crate_path, res)
+}
+
 pub fn start(name: String) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
         anyhow::bail!("No metadata found. Are you running this command from a workspace?");
     };
 
     if &name == "all" {
-        let mut crates = Vec::new();
-        for package in metadata.workspace_packages() {
-            crates.push((
-                package.manifest_path.parent().context("no parent dir")?,
-                package,
-            ));
-        }
-        xprintln!("Checking all {} crates...", crates.len());
+        let packages = metadata.workspace_packages();
+        xprintln!("Checking all {} crates...", packages.len());
 
         let mut results = Vec::new();
-        for (crate_path, package) in crates {
+        for package in packages {
             eprintln!();
-            xprintln!("Checking crate `{}` ({})", package.name, crate_path);
+            xprintln!(
+                "Checking crate `{}` ({})",
+                package.name,
+                package.manifest_path
+            );
 
             let now = std::time::Instant::now();
 
-            let res = cmd("cargo", build_args(&package.name))
-                .dir(crate_path)
-                .run();
+            let (crate_path, res) = run_check(package);
+
             let is_err = res.is_err();
 
             let elapsed = now.elapsed();
@@ -117,9 +134,8 @@ pub fn start(name: String) -> anyhow::Result<()> {
 
         xprintln!("Checking crate `{}` ({})", package.name, dir);
 
-        cmd("cargo", build_args(&package.name))
-            .dir(dir)
-            .run()
+        run_check(package)
+            .1
             .with_context(|| format!("Failed to run clippy for crate: {}", dir))?;
     }
 
