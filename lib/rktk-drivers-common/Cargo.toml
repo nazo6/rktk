@@ -36,14 +36,16 @@ ssd1306 = { workspace = true }
 maybe-async-cfg = { version = "=0.2.4" }
 display-interface = { workspace = true }
 embedded-graphics = { workspace = true }
+static_cell = { workspace = true }
 
 heapless = { workspace = true }
 thiserror = { workspace = true }
+trouble-host = { git = "https://github.com/embassy-rs/trouble/", version = "0.1.0" }
 
 [features]
 _check = ["defmtusb", "log", "defmt", "defmt-timestamp"]
 
 defmtusb = ["defmt", "dep:critical-section"]
 defmt-timestamp = ["defmt"]
-defmt = ["dep:defmt", "embassy-usb/defmt"]
+defmt = ["dep:defmt", "embassy-usb/defmt", "trouble-host/defmt"]
 log = ["dep:log"]

@@ -31,7 +31,7 @@ display-interface = { workspace = true }
 smart-leds = { workspace = true }
 
 heapless = { workspace = true }
-static_cell = "2.1.0"
+static_cell = { workspace = true }
 paste = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
 futures = { workspace = true, features = ["async-await"] }
