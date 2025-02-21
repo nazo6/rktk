@@ -8,7 +8,8 @@
     "clippy",
     "--message-format=json",
     "--features",
-    "_check"
+    "_check",
+    "--all-targets"
   ],
   "rust-analyzer.cargo.features": ["_check"],
   "rust-analyzer.check.extraEnv": {

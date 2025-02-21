@@ -18,6 +18,8 @@ check_skip = []
 check_group_features = [["defmt", "defmt-timestamp"]]
 
 [crates.rktk-keymanager]
+check_group_features = [["serde", "postcard"]]
+check_all_targets = true
 test_enabled = true
 
 [crates.rktk-client]

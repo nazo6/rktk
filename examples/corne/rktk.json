@@ -7,9 +7,7 @@
     "right_rgb_count": 27,
     "left_rgb_count": 27,
     "layout": {
-      "labels": [
-        ["Ball availability", "Right", "Left"]
-      ],
+      "labels": [],
       "keymap": [
         [{ "y": 1, "x": 3.5 }, "0,3", { "x": 7.5 }, "4,3"],
         [

@@ -47,7 +47,7 @@ critical-section = { workspace = true, features = ["std"] }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }
-smart-default = "0.7.1"
+smart-default = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 const-gen = "1.6.5"

@@ -1,6 +1,6 @@
 use rktk::config::keymap::{
     key_manager::{keycode::prelude::*, keymap::TapDanceDefinition},
-    Keymap, Layer, LayerKeymap,
+    Keymap, LayerKeymap,
 };
 
 const L2SPC: KeyAction = KeyAction::TapHold(
@@ -51,29 +51,7 @@ const L4: LayerKeymap = [
 ];
 
 pub const KEYMAP: Keymap = Keymap {
-    encoder_keys: [],
-    layers: [
-        Layer {
-            keymap: L0,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: L1,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: L2,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: L3,
-            arrowmouse: true,
-        },
-        Layer {
-            keymap: L4,
-            arrowmouse: true,
-        },
-    ],
+    layers: [L0, L1, L2, L3, L4],
     tap_dance: [
         Some(TapDanceDefinition {
             tap: [
@@ -86,5 +64,5 @@ pub const KEYMAP: Keymap = Keymap {
         }),
         None,
     ],
-    combo: [None, None],
+    ..Keymap::const_default()
 };

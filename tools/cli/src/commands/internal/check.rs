@@ -45,6 +45,10 @@ fn build_args(crate_name: &str) -> Vec<String> {
         args.push(features.join(","));
     }
 
+    if config.check_all_targets.unwrap_or(false) {
+        args.push("--all-targets".to_string());
+    }
+
     args
 }
 

@@ -1,6 +1,6 @@
 //! common keymap for test
 
-use crate::keymap::{ComboDefinition, Keymap, Layer, LayerKeymap, TapDanceDefinition};
+use crate::keymap::{ComboDefinition, Keymap, LayerKeymap, TapDanceDefinition};
 
 use super::prelude::*;
 
@@ -15,28 +15,7 @@ pub const EMPTY_LAYER: LayerKeymap<ROWS, COLS> = [
 ];
 
 pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> = Keymap {
-    layers: [
-        Layer {
-            keymap: EMPTY_LAYER,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            arrowmouse: false,
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            arrowmouse: true,
-        },
-    ],
+    layers: [EMPTY_LAYER; LAYER_COUNT],
     encoder_keys: [(KeyCode::None, KeyCode::None)],
     tap_dance: [
         Some(TapDanceDefinition {
@@ -62,4 +41,5 @@ pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> =
         }),
         None,
     ],
+    ..Keymap::const_default()
 };

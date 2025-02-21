@@ -2,7 +2,7 @@ use core::fmt::Debug;
 use postcard::experimental::max_size::MaxSize as _;
 use rktk_keymanager::interface::state::config::StateConfig;
 
-use crate::{config::keymap::Layer, drivers::interface::storage::StorageDriver};
+use crate::{config::keymap::LayerKeymap, drivers::interface::storage::StorageDriver};
 
 use super::{ConfigKey, StorageConfigManager};
 
@@ -43,14 +43,14 @@ impl<S: StorageDriver> StorageConfigManager<S> {
     pub async fn write_keymap(
         &self,
         layer: u8,
-        data: &Layer,
+        data: &LayerKeymap,
     ) -> Result<(), ConfigWriteError<S::Error>> {
         let key = u64::from_le_bytes([ConfigKey::StateKeymap as u8, layer, 0, 0, 0, 0, 0, 0]);
 
-        let mut buf = [0; Layer::POSTCARD_MAX_SIZE];
+        let mut buf = [0; LayerKeymap::POSTCARD_MAX_SIZE];
         let _slice = postcard::to_slice(data, &mut buf).map_err(ConfigWriteError::EncodeError)?;
         self.storage
-            .write::<{ Layer::POSTCARD_MAX_SIZE }>(key, &buf)
+            .write::<{ LayerKeymap::POSTCARD_MAX_SIZE }>(key, &buf)
             .await?;
         Ok(())
     }

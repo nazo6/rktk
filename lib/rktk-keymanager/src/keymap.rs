@@ -22,10 +22,11 @@ pub struct Keymap<
     const COMBO_KEY_MAX_DEFINITIONS: usize,
     const COMBO_KEY_MAX_SOURCES: usize,
 > {
-    pub layers: [Layer<ROW, COL>; LAYER],
+    pub layers: [LayerKeymap<ROW, COL>; LAYER],
     pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
     pub tap_dance: TapDanceDefinitions<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
     pub combo: ComboDefinitions<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
+    pub arrow_mouse: [bool; LAYER],
 }
 
 impl<
@@ -49,9 +50,19 @@ impl<
         COMBO_KEY_MAX_SOURCES,
     >
 {
+    pub const fn const_default() -> Self {
+        Self {
+            layers: [[[KeyAction::Inherit; COL]; ROW]; LAYER],
+            encoder_keys: [(KeyCode::None, KeyCode::None); ENCODER_COUNT],
+            tap_dance: [const { None }; TAP_DANCE_MAX_DEFINITIONS],
+            combo: [const { None }; COMBO_KEY_MAX_DEFINITIONS],
+            arrow_mouse: [false; LAYER],
+        }
+    }
+
     pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
         if let Some(layer) = self.layers.get(layer) {
-            if let Some(row) = layer.keymap.get(row) {
+            if let Some(row) = layer.get(row) {
                 if let Some(key) = row.get(col) {
                     return Some(key);
                 }
@@ -68,30 +79,6 @@ impl<
             }
         } else {
             None
-        }
-    }
-}
-
-/// Layer definition
-///
-/// This structure holds information about layer. This contains keymap and arrowmouse flag.
-#[apply(common_derive)]
-pub struct Layer<const ROW: usize, const COL: usize> {
-    // NOTE: This is workaround for issue that serde_as cannot be used with cfg-attr.
-    // ref: https://github.com/jonasbb/serde_with/issues/355
-    #[cfg_attr(
-        feature = "serde",
-        serde(with = "serde_with::As::<[[serde_with::Same; COL]; ROW]>")
-    )]
-    pub keymap: LayerKeymap<ROW, COL>,
-    pub arrowmouse: bool,
-}
-
-impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
-    fn default() -> Self {
-        Self {
-            keymap: [[KeyAction::default(); COL]; ROW],
-            arrowmouse: false,
         }
     }
 }

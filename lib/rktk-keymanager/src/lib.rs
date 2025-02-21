@@ -16,5 +16,5 @@ pub mod keymap;
 mod macros;
 mod time;
 
-#[cfg(any(test, feature = "state"))]
+#[cfg(feature = "state")]
 pub mod state;
