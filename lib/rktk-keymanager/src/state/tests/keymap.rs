@@ -18,23 +18,23 @@ pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> =
     layers: [
         Layer {
             keymap: EMPTY_LAYER,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrowmouse: true,
+            arrow_mouse: true,
         },
     ],
     encoder_keys: [(KeyCode::None, KeyCode::None)],

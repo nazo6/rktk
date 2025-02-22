@@ -93,14 +93,14 @@ pub struct Layer<const ROW: usize, const COL: usize> {
         serde(with = "serde_with::As::<[[serde_with::Same; COL]; ROW]>")
     )]
     pub keymap: LayerKeymap<ROW, COL>,
-    pub arrowmouse: bool,
+    pub arrow_mouse: bool,
 }
 
 impl<const ROW: usize, const COL: usize> Layer<ROW, COL> {
     pub const fn const_default() -> Self {
         Self {
             keymap: [[KeyAction::const_default(); COL]; ROW],
-            arrowmouse: false,
+            arrow_mouse: false,
         }
     }
 }

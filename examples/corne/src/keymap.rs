@@ -55,23 +55,23 @@ pub const KEYMAP: Keymap = Keymap {
     layers: [
         Layer {
             keymap: L0,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: L1,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: L2,
-            arrowmouse: false,
+            arrow_mouse: false,
         },
         Layer {
             keymap: L3,
-            arrowmouse: true,
+            arrow_mouse: true,
         },
         Layer {
             keymap: L4,
-            arrowmouse: true,
+            arrow_mouse: true,
         },
     ],
     tap_dance: [

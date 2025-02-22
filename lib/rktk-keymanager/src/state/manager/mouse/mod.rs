@@ -19,7 +19,7 @@ pub struct MouseState {
     scroll_mode: bool,
     reporter: reporter::MouseReportGenerator,
     aml: Aml,
-    arrowball_move: (i8, i8),
+    arrow_mouse_move: (i8, i8),
     auto_mouse_layer: usize,
 }
 
@@ -35,7 +35,7 @@ impl MouseState {
                 config.scroll_divider_x,
                 config.scroll_divider_y,
             ),
-            arrowball_move: (0, 0),
+            arrow_mouse_move: (0, 0),
             auto_mouse_layer: config.auto_mouse_layer as usize,
         }
     }
@@ -111,30 +111,30 @@ impl MouseLocalState {
         global_mouse_state: &mut MouseState,
         highest_layer: usize,
     ) {
-        if common_state.keymap.layers[highest_layer].arrowmouse {
-            global_mouse_state.arrowball_move.0 += self.mouse_event.0;
-            global_mouse_state.arrowball_move.1 += self.mouse_event.1;
+        if common_state.keymap.layers[highest_layer].arrow_mouse {
+            global_mouse_state.arrow_mouse_move.0 += self.mouse_event.0;
+            global_mouse_state.arrow_mouse_move.1 += self.mouse_event.1;
 
             let mut reset = true;
-            if global_mouse_state.arrowball_move.1 > 50 {
+            if global_mouse_state.arrow_mouse_move.1 > 50 {
                 let _ = common_local_state.keycodes.insert(Key::Right as u8);
-            } else if global_mouse_state.arrowball_move.1 < -50 {
+            } else if global_mouse_state.arrow_mouse_move.1 < -50 {
                 let _ = common_local_state.keycodes.insert(Key::Left as u8);
-            } else if global_mouse_state.arrowball_move.0 > 50 {
+            } else if global_mouse_state.arrow_mouse_move.0 > 50 {
                 let _ = common_local_state.keycodes.insert(Key::Down as u8);
-            } else if global_mouse_state.arrowball_move.0 < -50 {
+            } else if global_mouse_state.arrow_mouse_move.0 < -50 {
                 let _ = common_local_state.keycodes.insert(Key::Up as u8);
             } else {
                 reset = false;
             }
 
             if reset {
-                global_mouse_state.arrowball_move = (0, 0);
+                global_mouse_state.arrow_mouse_move = (0, 0);
             }
 
             self.mouse_event = (0, 0);
         } else {
-            global_mouse_state.arrowball_move = (0, 0);
+            global_mouse_state.arrow_mouse_move = (0, 0);
             let (enabled, changed) = global_mouse_state.aml.enabled_changed(
                 common_state.now,
                 self.mouse_event,
