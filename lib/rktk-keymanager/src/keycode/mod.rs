@@ -34,10 +34,9 @@ pub mod prelude {
 
 /// Represents key action.
 #[apply(common_derive)]
-#[derive(Copy, Default)]
+#[derive(Copy)]
 pub enum KeyAction {
     /// Inherit key definition from parent layer.
-    #[default]
     Inherit,
     /// Normal key
     Normal(KeyCode),
@@ -57,6 +56,18 @@ pub enum KeyAction {
     ///
     /// Execute tap-dance with specified id. TapDance can be configured in [`KeyResolverConfig`](crate::state::config::KeyResolverConfig).
     TapDance(u8),
+}
+
+impl KeyAction {
+    pub const fn const_default() -> Self {
+        Self::Inherit
+    }
+}
+
+impl Default for KeyAction {
+    fn default() -> Self {
+        Self::const_default()
+    }
 }
 
 /// Represents each key.

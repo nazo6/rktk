@@ -49,6 +49,15 @@ impl<
         COMBO_KEY_MAX_SOURCES,
     >
 {
+    pub const fn const_default() -> Self {
+        Self {
+            layers: [const { Layer::const_default() }; LAYER],
+            encoder_keys: [(KeyCode::None, KeyCode::None); ENCODER_COUNT],
+            tap_dance: [const { None }; TAP_DANCE_MAX_DEFINITIONS],
+            combo: [const { None }; COMBO_KEY_MAX_DEFINITIONS],
+        }
+    }
+
     pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
         if let Some(layer) = self.layers.get(layer) {
             if let Some(row) = layer.keymap.get(row) {
@@ -87,12 +96,18 @@ pub struct Layer<const ROW: usize, const COL: usize> {
     pub arrowmouse: bool,
 }
 
-impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
-    fn default() -> Self {
+impl<const ROW: usize, const COL: usize> Layer<ROW, COL> {
+    pub const fn const_default() -> Self {
         Self {
-            keymap: [[KeyAction::default(); COL]; ROW],
+            keymap: [[KeyAction::const_default(); COL]; ROW],
             arrowmouse: false,
         }
+    }
+}
+
+impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
+    fn default() -> Self {
+        Self::const_default()
     }
 }
 

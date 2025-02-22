@@ -1,5 +1,5 @@
 use rktk::config::keymap::{
-    key_manager::{keycode::prelude::*, keymap::TapDanceDefinition},
+    keymanager::{keycode::prelude::*, keymap::TapDanceDefinition},
     Keymap, Layer, LayerKeymap,
 };
 
@@ -86,5 +86,5 @@ pub const KEYMAP: Keymap = Keymap {
         }),
         None,
     ],
-    combo: [None, None],
+    ..Keymap::const_default()
 };

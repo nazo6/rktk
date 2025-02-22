@@ -1,4 +1,4 @@
-use rktk::config::keymap::{key_manager::keycode::_____, Keymap, Layer, LayerKeymap};
+use rktk::config::keymap::{keymanager::keycode::_____, Keymap, Layer, LayerKeymap};
 
 #[rustfmt::skip]
 const L0: LayerKeymap = [
@@ -10,7 +10,6 @@ const L0: LayerKeymap = [
 ];
 
 pub const KEYMAP: Keymap = Keymap {
-    encoder_keys: [],
     layers: [
         Layer {
             keymap: L0,
@@ -33,6 +32,5 @@ pub const KEYMAP: Keymap = Keymap {
             arrowmouse: true,
         },
     ],
-    tap_dance: [None, None],
-    combo: [None, None],
+    ..Keymap::const_default()
 };

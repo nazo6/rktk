@@ -3,7 +3,7 @@
 /// Re-exports of raw [`rktk_keymanager`] types.
 ///
 /// Use parent module's type if available.
-pub mod key_manager {
+pub mod keymanager {
     pub use rktk_keymanager::keycode;
     pub use rktk_keymanager::keymap;
 }
