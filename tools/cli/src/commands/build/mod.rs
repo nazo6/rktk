@@ -31,12 +31,16 @@ pub struct BuildCommand {
     #[arg(long, short, value_enum, verbatim_doc_comment)]
     pub profile: Option<BuildProfileList>,
 
-    /// Deploy the binary to the specified path
-    /// If this is specified, `--no-uf2` will be ignored.
-    #[arg(long, short, verbatim_doc_comment)]
-    pub deploy_dir: Option<String>,
+    /// Deploy the uf2 binary to the specified path
+    #[arg(long, short, group = "deploy", group = "uf2")]
+    pub deploy_uf2: Option<String>,
+
+    /// Deploys the binary using probe-rs
+    #[arg(long, group = "deploy")]
+    pub deploy_probe: bool,
+
     /// Doesn't generate uf2 file.
-    #[arg(long)]
+    #[arg(long, group = "uf2")]
     pub no_uf2: bool,
     /// Retry count for deploying the binary.
     #[arg(long, default_value_t = 40)]
@@ -184,35 +188,40 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         executable: String,
     }
 
-    let mut artifact_path = None;
+    let mut elf_path = None;
     for line in stdout.lines().rev() {
         if let Ok(val) = serde_json::from_str::<CargoBuildCompilerArtifactLog>(line) {
             if val.reason == "compiler-artifact" {
-                artifact_path = Some(val.executable);
+                elf_path = Some(val.executable);
                 break;
             }
         }
     }
-    let Some(artifact_path) = artifact_path else {
+    let Some(elf_path) = elf_path else {
         anyhow::bail!("Failed to find the artifact path in the cargo output");
     };
-
     xprintln!(
-        "Binary file generated at: {} ({})",
-        artifact_path,
-        get_bytes(&artifact_path)
+        "ELF file generated at: {} ({})",
+        elf_path,
+        get_bytes(&elf_path)
     );
 
-    if !args.no_uf2 || args.deploy_dir.is_some() {
+    let elf_path = PathBuf::from(elf_path);
+
+    if !args.no_uf2 || args.deploy_uf2.is_some() {
         let uf2_path = uf2::elf2uf2(
-            &PathBuf::from(artifact_path),
+            &elf_path,
             mcu_config.uf2_family_id,
             mcu_config.uf2_start_addr,
         )?;
 
-        if let Some(deploy_path) = args.deploy_dir {
-            deploy::deploy(deploy_path, uf2_path, args.deploy_retry_count)?;
+        if let Some(deploy_path) = args.deploy_uf2 {
+            deploy::deploy_uf2(deploy_path, uf2_path, args.deploy_retry_count)?;
         }
+    }
+
+    if args.deploy_probe {
+        deploy::deploy_probe(&elf_path)?;
     }
 
     Ok(())

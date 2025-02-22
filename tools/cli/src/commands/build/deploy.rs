@@ -1,10 +1,16 @@
 use std::path::{Path, PathBuf};
 
 use colored::Colorize as _;
+use duct::cmd;
 
 use crate::utils::xprintln;
 
-pub fn deploy(
+pub fn deploy_probe(elf_path: &PathBuf) -> anyhow::Result<()> {
+    let _ = cmd!("probe-rs", "run", elf_path).run()?;
+    Ok(())
+}
+
+pub fn deploy_uf2(
     deploy_path_args: String,
     uf2_path: PathBuf,
     deploy_retry_count: u32,
@@ -31,7 +37,7 @@ pub fn deploy(
                 deploy_retry_count
             ));
 
-            let Ok(deploy_path) = get_deploy_path(deploy_path_args.clone(), &uf2_path) else {
+            let Ok(deploy_path) = get_uf2_deploy_path(deploy_path_args.clone(), &uf2_path) else {
                 continue;
             };
 
@@ -60,7 +66,7 @@ pub fn deploy(
     Ok(())
 }
 
-fn get_deploy_path(deploy_path: String, uf2_path: &Path) -> anyhow::Result<PathBuf> {
+fn get_uf2_deploy_path(deploy_path: String, uf2_path: &Path) -> anyhow::Result<PathBuf> {
     let deploy_dir = if deploy_path == "auto" {
         // search mount that have "INFO_UF2.txt" file
         let mount_path = PathBuf::from("/mnt");
