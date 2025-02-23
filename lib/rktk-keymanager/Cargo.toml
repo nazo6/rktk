@@ -24,7 +24,6 @@ postcard = { workspace = true, optional = true, features = [
   "experimental-derive",
 ] }
 
-wasm-bindgen = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
 
@@ -45,6 +44,5 @@ serde = ["dep:serde", "dep:serde_with"]
 postcard = ["dep:postcard", "serde"]
 
 std = []
-
 
 defmt = ["dep:defmt"]

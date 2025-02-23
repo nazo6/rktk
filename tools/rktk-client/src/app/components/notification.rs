@@ -2,6 +2,8 @@ use std::time::Duration;
 
 use dioxus::prelude::*;
 
+use crate::utils::sleep;
+
 #[allow(dead_code)]
 #[derive(Default)]
 pub enum NotificationLevel {
@@ -49,12 +51,11 @@ pub fn push_notification(notification: Notification) {
     };
 
     spawn_forever(async move {
-        gloo_timers::future::TimeoutFuture::new(
+        sleep(
             notification
                 .record
                 .duration
-                .unwrap_or_else(|| Duration::from_secs(3))
-                .as_millis() as u32,
+                .unwrap_or_else(|| Duration::from_secs(3)),
         )
         .await;
         NOTFICATIONS.with_mut(|notifications| {

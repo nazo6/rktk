@@ -34,6 +34,19 @@ jobs:
         components: "clippy,rust-src"
         target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
+    - name: Install deps
+      run: |
+        sudo apt update
+        sudo apt install libwebkit2gtk-4.1-dev \
+          build-essential \
+          curl \
+          wget \
+          file \
+          libxdo-dev \
+          libssl-dev \
+          libayatana-appindicator3-dev \
+          librsvg2-dev
+
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-hack

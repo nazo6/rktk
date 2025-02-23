@@ -1,7 +1,11 @@
-use dioxus::prelude::*;
-use js_sys::wasm_bindgen::{prelude::Closure, JsCast as _};
+use std::sync::LazyLock;
 
-use crate::TAILWIND_CSS;
+use dioxus::prelude::*;
+
+use crate::{
+    backend::{Backend, RrpHidBackend as _},
+    TAILWIND_CSS,
+};
 
 mod cache;
 mod components;
@@ -10,6 +14,8 @@ mod page;
 mod state;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
+
+static BACKEND: LazyLock<Backend> = LazyLock::new(Backend::new);
 
 #[component]
 pub fn App() -> Element {
@@ -27,34 +33,25 @@ pub fn App() -> Element {
 
 #[component]
 fn Home() -> Element {
-    use_effect(|| {
-        let window = web_sys::window().expect("Missing Window");
-        let hid = window.navigator().hid();
-        if !hid.is_falsy() {
-            let cb = Closure::wrap(Box::new(move || {
+    use_effect(move || {
+        if Backend::available() {
+            BACKEND.set_ondisconnect(Some(move || {
                 spawn_forever(async move {
                     let _ = disconnect::disconnect().await;
                 });
-            }) as Box<dyn FnMut()>);
-
-            hid.set_ondisconnect(Some(cb.as_ref().unchecked_ref()));
-
-            cb.forget();
+            }));
         }
     });
 
-    let window = web_sys::window().expect("Missing Window");
-    let hid = window.navigator().hid();
-
     rsx! {
-        if hid.is_falsy() {
-            h1 { "WebHID not supported" }
-        } else {
+        if Backend::available() {
             if state::CONN.read().is_some() {
                 page::connected::Connected {}
             } else {
                 page::connect::Connect {}
             }
+        } else {
+            h1 { "WebHID not supported" }
         }
     }
 }

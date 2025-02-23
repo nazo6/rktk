@@ -1,4 +1,3 @@
-
 [package]
 name = "rktk-client"
 version = "0.1.0"
@@ -6,33 +5,61 @@ authors = ["nazo6 <git@nazo6.dev>"]
 edition = "2021"
 
 [dependencies]
-rktk-rrp = { workspace = true }
-rktk-rrp-client-webhid = { workspace = true }
+rktk-rrp = { workspace = true, features = ["client"] }
 rktk-keymanager = { workspace = true }
 
 dioxus = { version = "0.6.0", features = [] }
 
-web-sys = { workspace = true, features = [
-  "Navigator",
-  "Window",
-  "ResizeObserver",
-] }
-js-sys = "0.3"
-wasm-bindgen-futures = { workspace = true }
-serde-wasm-bindgen = { version = "0.6.5" }
-gloo-timers = { version = "0.3.0", features = ["futures"] }
-
 serde = { workspace = true }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
-futures = { workspace = true }
+futures = { workspace = true, features = ["async-await"] }
 strum = { workspace = true }
+jiff = "0.2.1"
 
 log = { workspace = true }
 tracing-log = { version = "0.2.0", features = ["log-tracer"] }
 
 kle-serial = { version = "0.3.1" }
 
+# web deps
+web-sys = { workspace = true, optional = true, features = [
+  "Navigator",
+  "Window",
+  "ResizeObserver",
+  "Hid",
+  "HidCollectionInfo",
+  "HidConnectionEvent",
+  "HidConnectionEventInit",
+  "HidDevice",
+  "HidDeviceFilter",
+  "HidDeviceRequestOptions",
+  "HidInputReportEvent",
+  "HidInputReportEventInit",
+  "HidReportInfo",
+  "HidReportItem",
+  "HiddenPluginEventInit",
+  "HidUnitSystem",
+] }
+js-sys = { version = "0.3", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+serde-wasm-bindgen = { version = "0.6.5", optional = true }
+
+# native deps
+smol = { version = "2.0.2", optional = true }
+async-hid = { git = "https://github.com/sidit77/async-hid", optional = true }
+
 [features]
-default = ["dioxus/web"]
-_check = []
+_check = ["native"]
+
+web = [
+  "dioxus/web",
+  "dep:web-sys",
+  "dep:js-sys",
+  "dep:wasm-bindgen-futures",
+  "dep:serde-wasm-bindgen",
+  "dep:wasm-bindgen",
+  "jiff/js",
+]
+native = ["dioxus/desktop", "dep:smol", "dep:async-hid"]

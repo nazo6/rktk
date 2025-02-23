@@ -13,7 +13,7 @@ use super::RequestHeader;
 use super::ResponseHeader;
 
 #[allow(async_fn_in_trait)]
-pub trait WriteTransport<const BUF_SIZE: usize> {
+pub trait WriteTransport {
     type Error: Display;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error>;
@@ -28,7 +28,7 @@ pub trait WriteTransport<const BUF_SIZE: usize> {
     }
 }
 
-pub trait WriteTransportExt<const BUF_SIZE: usize>: WriteTransport<BUF_SIZE> {
+pub trait WriteTransportExt: WriteTransport {
     #[cfg(feature = "client")]
     // Step 1-3 (client): Send request header
     async fn send_request_header(
@@ -58,7 +58,7 @@ pub trait WriteTransportExt<const BUF_SIZE: usize>: WriteTransport<BUF_SIZE> {
     }
 
     // Step 4-7 (normal): Send body
-    async fn send_body_normal<S: Serialize>(
+    async fn send_body_normal<S: Serialize, const BUF_SIZE: usize>(
         &mut self,
         data: &S,
     ) -> Result<(), SendError<Self::Error>> {
@@ -75,7 +75,7 @@ pub trait WriteTransportExt<const BUF_SIZE: usize>: WriteTransport<BUF_SIZE> {
     }
 
     // Step 4-7 (stream): Send body stream
-    async fn send_body_stream<S: Serialize>(
+    async fn send_body_stream<S: Serialize, const BUF_SIZE: usize>(
         &mut self,
         stream: impl futures::stream::Stream<Item = S>,
     ) -> Result<(), SendError<Self::Error>> {
@@ -109,4 +109,4 @@ pub trait WriteTransportExt<const BUF_SIZE: usize>: WriteTransport<BUF_SIZE> {
     }
 }
 
-impl<T, const BUF_SIZE: usize> WriteTransportExt<BUF_SIZE> for T where T: WriteTransport<BUF_SIZE> {}
+impl<T> WriteTransportExt for T where T: WriteTransport {}

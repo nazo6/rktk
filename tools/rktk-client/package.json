@@ -7,7 +7,7 @@
     "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
     "dev:dioxus": "dx serve -i true",
     "dev": "conc -r -c auto npm:dev:*",
-    "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release"
+    "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release --platform web --features web"
   },
   "keywords": [],
   "author": "",

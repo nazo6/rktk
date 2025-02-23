@@ -26,7 +26,7 @@ pub fn Remap() -> Element {
         move || {
             with_cache(cache.clone(), "get_keymap", async {
                 match fetcher::get_keymap().await {
-                    Ok(data) => Ok((data, js_sys::Date::now())),
+                    Ok(data) => Ok((data, jiff::Zoned::now())),
                     Err(e) => Err(e),
                 }
             })

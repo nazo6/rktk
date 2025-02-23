@@ -7,7 +7,7 @@ use kle_serial::Keyboard;
 use rktk_keymanager::keycode::KeyAction;
 use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, KeyActionLoc};
 
-use crate::app::state::CONN;
+use crate::{app::state::CONN, backend::RrpHidDevice as _};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct KeyData {
@@ -25,7 +25,8 @@ struct LayoutJson {
 pub async fn get_keymap() -> anyhow::Result<KeymapData> {
     let conn = &*CONN.read();
     let conn = conn.as_ref().context("Not connected")?;
-    let mut client = conn.client.client.lock().await;
+    let mut be = conn.device.lock().await;
+    let client = be.get_client();
 
     let json = client.get_layout_json(()).await?;
     let json = json
@@ -104,7 +105,8 @@ fn process_keymap(
 pub async fn set_keymap(changes: &HashMap<(u8, u8, u8), KeyAction>) -> anyhow::Result<()> {
     let conn = &*CONN.read();
     let conn = conn.as_ref().context("Not connected")?;
-    let mut client = conn.client.client.lock().await;
+    let mut d = conn.device.lock().await;
+    let client = d.get_client();
 
     let stream =
         futures::stream::iter(changes.iter().map(|((layer, row, col), key)| KeyActionLoc {

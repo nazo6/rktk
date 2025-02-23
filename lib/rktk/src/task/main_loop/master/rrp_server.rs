@@ -24,7 +24,7 @@ pub async fn start(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
 ) {
     if let Some(usb) = &usb {
-        let mut server = rktk_rrp::server::Server::<_, _, _, 512>::new(
+        let mut server = rktk_rrp::server::Server::<_, _, _>::new(
             ServerTransport::new(usb),
             ServerTransport::new(usb),
             Handlers {
@@ -173,7 +173,7 @@ impl<'a, R: ReporterDriver> ServerTransport<'a, R> {
     }
 }
 
-impl<R: ReporterDriver, const BUF_SIZE: usize> ReadTransport<BUF_SIZE> for ServerTransport<'_, R> {
+impl<R: ReporterDriver> ReadTransport for ServerTransport<'_, R> {
     type Error = &'static str;
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
@@ -183,7 +183,7 @@ impl<R: ReporterDriver, const BUF_SIZE: usize> ReadTransport<BUF_SIZE> for Serve
             .map_err(|_| "Read failed")
     }
 }
-impl<R: ReporterDriver, const BUF_SIZE: usize> WriteTransport<BUF_SIZE> for ServerTransport<'_, R> {
+impl<R: ReporterDriver> WriteTransport for ServerTransport<'_, R> {
     type Error = &'static str;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {

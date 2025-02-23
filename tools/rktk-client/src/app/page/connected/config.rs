@@ -140,21 +140,32 @@ mod fetcher {
     use dioxus::signals::Readable as _;
     use rktk_keymanager::interface::state::config::StateConfig;
 
-    use crate::app::state::CONN;
+    use crate::{app::state::CONN, backend::RrpHidDevice as _};
 
     pub async fn get_config() -> anyhow::Result<StateConfig> {
         let conn = &*CONN.read();
         let conn = conn.as_ref().context("Not connected")?;
-        let mut client = conn.client.client.lock().await;
+        let config = conn
+            .device
+            .lock()
+            .await
+            .get_client()
+            .get_keymap_config(())
+            .await?;
 
-        Ok(client.get_keymap_config(()).await?)
+        Ok(config)
     }
 
     pub async fn set_config(config: StateConfig) -> anyhow::Result<()> {
         let conn = &*CONN.read();
         let conn = conn.as_ref().context("Not connected")?;
-        let mut client = conn.client.client.lock().await;
+        conn.device
+            .lock()
+            .await
+            .get_client()
+            .set_keymap_config(config)
+            .await?;
 
-        Ok(client.set_keymap_config(config).await?)
+        Ok(())
     }
 }
