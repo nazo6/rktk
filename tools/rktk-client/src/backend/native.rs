@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::{collections::VecDeque, sync::Arc};
 
-use hidapi::{HidApi, HidDevice};
+use async_hid::{Device, DeviceInfo};
+use futures::stream::StreamExt;
 use rktk_rrp::transport::{ReadTransport, WriteTransport};
-use smol::lock::Mutex;
 
 use super::{RrpHidBackend, RrpHidDevice};
 
@@ -18,20 +18,30 @@ impl RrpHidBackend for NativeBackend {
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error> {
-        let hid = HidApi::new()?;
-        let Some(device) = hid
-            .device_list()
-            .find(|d| d.usage_page() == usage_page && d.usage() == usage)
-        else {
-            anyhow::bail!("No devices found")
-        };
-        let device = device.open_device(&hid)?;
+        let mut device = None;
+        let mut devices = DeviceInfo::enumerate().await?;
+        while let Some(info) = devices.next().await {
+            if info.usage_page == usage_page && info.usage_id == usage {
+                device = Some(info);
+            }
+        }
 
-        let d = Arc::new(Mutex::new(device));
+        let Some(device) = device else {
+            return Err(anyhow::anyhow!("Device not found"));
+        };
+
+        let device = device.open(async_hid::AccessMode::ReadWrite).await?;
+        let device = Arc::new(device);
+
         Ok(NativeHidDevice {
             client: rktk_rrp::client::Client::new(
-                HidReader { device: d.clone() },
-                HidWriter { device: d },
+                HidReader {
+                    device: device.clone(),
+                    remained: Vec::new(),
+                },
+                HidWriter {
+                    device: device.clone(),
+                },
             ),
         })
     }
@@ -46,7 +56,6 @@ impl RrpHidBackend for NativeBackend {
 pub struct NativeHidDevice {
     client: rktk_rrp::client::Client<HidReader, HidWriter>,
 }
-
 impl RrpHidDevice for NativeHidDevice {
     type Error = anyhow::Error;
 
@@ -66,51 +75,47 @@ impl RrpHidDevice for NativeHidDevice {
 }
 
 pub struct HidReader {
-    device: Arc<Mutex<HidDevice>>,
+    device: Arc<Device>,
+    remained: Vec<u8>,
 }
 
 impl ReadTransport for HidReader {
     type Error = anyhow::Error;
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        let device = self.device.clone();
-        let mut tmp_buf = buf.to_vec();
-        let (tmp_buf, size) = smol::unblock(move || {
-            let device = device.lock_blocking();
-            match device.read(&mut tmp_buf) {
-                Ok(size) => Ok((tmp_buf, size)),
-                Err(e) => Err(e),
-            }
-        })
-        .await?;
-        buf.copy_from_slice(&tmp_buf);
+        while self.remained.len() < buf.len() {
+            // One hid report is consist of
+            // data length: 1byte
+            // data:        31byte
+            let mut tmp_buf = [0; 32];
+            let _ = self.device.read_input_report(&mut tmp_buf).await?;
+            let size = tmp_buf[0] as usize;
+            let read_data = &tmp_buf[1..=size];
+            self.remained.extend_from_slice(read_data);
+        }
 
-        Ok(size)
+        buf.copy_from_slice(&self.remained[..buf.len()]);
+        self.remained.drain(..buf.len());
+
+        Ok(buf.len())
     }
 }
 
 pub struct HidWriter {
-    device: Arc<Mutex<HidDevice>>,
+    device: Arc<Device>,
 }
 
 impl WriteTransport for HidWriter {
     type Error = anyhow::Error;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        let buf_v = buf.to_vec();
-        let device = self.device.clone();
-        smol::unblock(move || {
-            let device = device.lock_blocking();
-            for chunk in buf_v.chunks(31) {
-                let mut data = vec![chunk.len() as u8];
-                data.extend_from_slice(chunk);
-                data.resize(32, 0);
-                device.write(&data)?;
-            }
-
-            Result::<(), anyhow::Error>::Ok(())
-        })
-        .await?;
+        for chunk in buf.chunks(31) {
+            // When sending, first byte is report id.
+            let mut data = vec![0, chunk.len() as u8];
+            data.extend_from_slice(chunk);
+            data.resize(33, 0);
+            self.device.write_output_report(&data).await?;
+        }
 
         Ok(buf.len())
     }

@@ -3,6 +3,8 @@ use std::time::Duration;
 use dioxus::prelude::*;
 use jiff::Zoned;
 
+use crate::utils::sleep;
+
 #[component]
 pub fn Log() -> Element {
     let base_time = use_resource(move || async move {
@@ -18,7 +20,7 @@ pub fn Log() -> Element {
     use_effect(move || {
         spawn(async move {
             loop {
-                gloo_timers::future::TimeoutFuture::new(1000).await;
+                sleep(Duration::from_millis(1000)).await;
                 if *streaming.read() {
                     let Ok(new_logs) = fetcher::get_log().await else {
                         continue;

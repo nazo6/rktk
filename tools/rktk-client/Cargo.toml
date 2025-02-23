@@ -11,12 +11,10 @@ rktk-keymanager = { workspace = true }
 
 dioxus = { version = "0.6.0", features = [] }
 
-gloo-timers = { version = "0.3.0", features = ["futures"] }
-
 serde = { workspace = true }
 serde_json = { workspace = true }
 anyhow = { workspace = true }
-futures = { workspace = true }
+futures = { workspace = true, features = ["async-await"] }
 strum = { workspace = true }
 jiff = "0.2.1"
 
@@ -51,10 +49,10 @@ serde-wasm-bindgen = { version = "0.6.5", optional = true }
 
 # native deps
 smol = { version = "2.0.2", optional = true }
-hidapi = { version = "2.6.3", optional = true }
+async-hid = { git = "https://github.com/sidit77/async-hid", optional = true }
 
 [features]
-default = ["native"]
+default = []
 _check = ["native"]
 
 web = [
@@ -66,4 +64,4 @@ web = [
   "dep:wasm-bindgen",
   "jiff/js",
 ]
-native = ["dioxus/desktop", "dep:smol", "dep:hidapi"]
+native = ["dioxus/desktop", "dep:smol", "dep:async-hid"]
