@@ -14,13 +14,20 @@ pub struct EagerDebounceDriver {
     last: [[Option<embassy_time::Instant>; CONFIG.keyboard.cols as usize];
         CONFIG.keyboard.rows as usize],
     debounce_time: embassy_time::Duration,
+    deboune_only_pressed: bool,
 }
 
 impl EagerDebounceDriver {
-    pub fn new(debounce_time: embassy_time::Duration) -> Self {
+    /// Create a new `EagerDebounceDriver` instance.
+    ///
+    /// # Arguments
+    /// * debounce_time - The debounce time.
+    /// * deboune_only_pressed - If true, only debounce pressed events.
+    pub fn new(debounce_time: embassy_time::Duration, deboune_only_pressed: bool) -> Self {
         Self {
             last: [[None; CONFIG.keyboard.cols as usize]; CONFIG.keyboard.rows as usize],
             debounce_time,
+            deboune_only_pressed,
         }
     }
 }
@@ -28,9 +35,11 @@ impl EagerDebounceDriver {
 impl DebounceDriver for EagerDebounceDriver {
     fn should_ignore_event(&mut self, event: &KeyChangeEvent, now: embassy_time::Instant) -> bool {
         let last = self.last[event.row as usize][event.col as usize];
-        if let Some(last) = last {
-            if now - last < self.debounce_time {
-                return true;
+        if !self.deboune_only_pressed && event.pressed {
+            if let Some(last) = last {
+                if now - last < self.debounce_time {
+                    return true;
+                }
             }
         }
         self.last[event.row as usize][event.col as usize] = Some(now);
