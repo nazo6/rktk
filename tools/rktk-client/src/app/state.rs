@@ -1,11 +1,11 @@
 use dioxus::prelude::*;
+use futures::lock::Mutex;
 use rktk_rrp::endpoints::get_keyboard_info::KeyboardInfo;
-use rktk_rrp_client_webhid::Client;
-use web_sys::HidDevice;
+
+use crate::backend::{Backend, RrpHidBackend};
 
 pub struct ConnectedState {
-    pub client: Client,
-    pub device: HidDevice,
+    pub device: Mutex<<Backend as RrpHidBackend>::HidDevice>,
     pub keyboard: KeyboardInfo,
 }
 

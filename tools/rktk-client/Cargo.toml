@@ -6,20 +6,11 @@ authors = ["nazo6 <git@nazo6.dev>"]
 edition = "2021"
 
 [dependencies]
-rktk-rrp = { workspace = true }
-rktk-rrp-client-webhid = { workspace = true }
+rktk-rrp = { workspace = true, features = ["client"] }
 rktk-keymanager = { workspace = true }
 
 dioxus = { version = "0.6.0", features = [] }
 
-web-sys = { workspace = true, features = [
-  "Navigator",
-  "Window",
-  "ResizeObserver",
-] }
-js-sys = "0.3"
-wasm-bindgen-futures = { workspace = true }
-serde-wasm-bindgen = { version = "0.6.5" }
 gloo-timers = { version = "0.3.0", features = ["futures"] }
 
 serde = { workspace = true }
@@ -33,6 +24,41 @@ tracing-log = { version = "0.2.0", features = ["log-tracer"] }
 
 kle-serial = { version = "0.3.1" }
 
+# web deps
+web-sys = { workspace = true, optional = true, features = [
+  "Navigator",
+  "Window",
+  "ResizeObserver",
+  "Hid",
+  "HidCollectionInfo",
+  "HidConnectionEvent",
+  "HidConnectionEventInit",
+  "HidDevice",
+  "HidDeviceFilter",
+  "HidDeviceRequestOptions",
+  "HidInputReportEvent",
+  "HidInputReportEventInit",
+  "HidReportInfo",
+  "HidReportItem",
+  "HiddenPluginEventInit",
+  "HidUnitSystem",
+] }
+js-sys = { version = "0.3", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+serde-wasm-bindgen = { version = "0.6.5", optional = true }
+jiff = "0.2.1"
+
 [features]
-default = ["dioxus/web"]
+default = ["web"]
 _check = []
+
+web = [
+  "dioxus/web",
+  "dep:web-sys",
+  "dep:js-sys",
+  "dep:wasm-bindgen-futures",
+  "dep:serde-wasm-bindgen",
+  "dep:wasm-bindgen",
+]
+native = []

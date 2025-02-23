@@ -11,7 +11,7 @@ use super::RequestHeader;
 use super::ResponseHeader;
 
 #[allow(async_fn_in_trait)]
-pub trait ReadTransport<const BUF_SIZE: usize> {
+pub trait ReadTransport {
     type Error: Display;
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error>;
@@ -26,7 +26,7 @@ pub trait ReadTransport<const BUF_SIZE: usize> {
     }
 }
 
-pub trait ReadTransportExt<const BUF_SIZE: usize>: ReadTransport<BUF_SIZE> {
+pub trait ReadTransportExt: ReadTransport {
     #[cfg(feature = "server")]
     // Step 1-3 (request, server): Receive request header
     async fn recv_request_header(&mut self) -> Result<RequestHeader, ReceiveError<Self::Error>> {
@@ -60,13 +60,13 @@ pub trait ReadTransportExt<const BUF_SIZE: usize>: ReadTransport<BUF_SIZE> {
     }
 
     // Step 4-7 (normal): Receive body
-    async fn recv_body_normal<D: DeserializeOwned>(
+    async fn recv_body_normal<D: DeserializeOwned, const BUF_SIZE: usize>(
         &mut self,
     ) -> Result<D, ReceiveError<Self::Error>> {
         if self.recv_indicator().await? != Indicator::Continue {
             return Err(ReceiveError::FrameError("Invalid indicator"));
         }
-        let deserialized = self.recv_body().await?;
+        let deserialized = self.recv_body::<_, BUF_SIZE>().await?;
         if self.recv_indicator().await? != Indicator::End {
             return Err(ReceiveError::FrameError("Invalid indicator"));
         }
@@ -74,7 +74,7 @@ pub trait ReadTransportExt<const BUF_SIZE: usize>: ReadTransport<BUF_SIZE> {
     }
 
     // Step 4-7 (stream): Receive body stream
-    async fn recv_body_stream<D: DeserializeOwned>(
+    async fn recv_body_stream<D: DeserializeOwned, const BUF_SIZE: usize>(
         &mut self,
     ) -> impl Stream<Item = Result<D, ReceiveError<Self::Error>>> {
         futures::stream::unfold(self, move |tp| async move {
@@ -83,7 +83,7 @@ pub trait ReadTransportExt<const BUF_SIZE: usize>: ReadTransport<BUF_SIZE> {
                     Some((Err(ReceiveError::FrameError("Invalid indicator")), tp))
                 }
                 Ok(Indicator::Continue) => {
-                    let deserialized = tp.recv_body().await;
+                    let deserialized = tp.recv_body::<_, BUF_SIZE>().await;
                     Some((deserialized, tp))
                 }
                 Ok(Indicator::End) => None,
@@ -105,7 +105,9 @@ pub trait ReadTransportExt<const BUF_SIZE: usize>: ReadTransport<BUF_SIZE> {
     }
 
     // Step 5,6
-    async fn recv_body<R: DeserializeOwned>(&mut self) -> Result<R, ReceiveError<Self::Error>> {
+    async fn recv_body<R: DeserializeOwned, const BUF_SIZE: usize>(
+        &mut self,
+    ) -> Result<R, ReceiveError<Self::Error>> {
         let mut request_size = [0u8; 4];
         self.read_exact(&mut request_size)
             .await
@@ -133,4 +135,4 @@ pub trait ReadTransportExt<const BUF_SIZE: usize>: ReadTransport<BUF_SIZE> {
     }
 }
 
-impl<T, const BUF_SIZE: usize> ReadTransportExt<BUF_SIZE> for T where T: ReadTransport<BUF_SIZE> {}
+impl<T> ReadTransportExt for T where T: ReadTransport {}

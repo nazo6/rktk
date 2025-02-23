@@ -5,21 +5,12 @@ use core::fmt::Display;
 use crate::transport::{ReadTransport, TransportError, WriteTransport};
 
 /// Client to make requests to the rrp server.
-pub struct Client<
-    RT: ReadTransport<BUF_SIZE> + Unpin,
-    WT: WriteTransport<BUF_SIZE> + Unpin,
-    const BUF_SIZE: usize,
-> {
+pub struct Client<RT: ReadTransport + Unpin, WT: WriteTransport + Unpin> {
     pub(crate) reader: RT,
     pub(crate) writer: WT,
 }
 
-impl<
-        RT: ReadTransport<BUF_SIZE> + Unpin,
-        WT: WriteTransport<BUF_SIZE> + Unpin,
-        const BUF_SIZE: usize,
-    > Client<RT, WT, BUF_SIZE>
-{
+impl<RT: ReadTransport + Unpin, WT: WriteTransport + Unpin> Client<RT, WT> {
     pub fn new(reader: RT, writer: WT) -> Self {
         Self { reader, writer }
     }

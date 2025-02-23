@@ -1,11 +1,13 @@
+use std::time::Duration;
+
 use dioxus::prelude::*;
-use js_sys::wasm_bindgen::JsValue;
+use jiff::Zoned;
 
 #[component]
 pub fn Log() -> Element {
     let base_time = use_resource(move || async move {
         Result::<_, anyhow::Error>::Ok(
-            js_sys::Date::now() - fetcher::get_device_time().await? as f64,
+            (&Zoned::now()) - Duration::from_millis(fetcher::get_device_time().await?),
         )
     });
 
@@ -55,9 +57,8 @@ pub fn Log() -> Element {
                     tbody {
                         for (i , log) in logs.read().iter().enumerate().rev() {
                             {
-                                let date = js_sys::Date::new(&JsValue::from_f64(base_time + log.time as f64))
-                                    .to_locale_string("sv", &JsValue::UNDEFINED)
-                                    .to_string();
+                                let date = base_time + Duration::from_millis(log.time);
+                                let date = jiff::fmt::strtime::format("%F %T", &date).unwrap();
                                 rsx! {
                                     tr { key: "{i}",
                                         td { "{date}" }
@@ -89,14 +90,14 @@ mod fetcher {
     use futures::TryStreamExt;
     use rktk_rrp::endpoints::get_log::{LogChunk, LogLevel};
 
-    use crate::app::state::CONN;
+    use crate::{app::state::CONN, backend::RrpHidDevice as _};
 
     pub async fn get_device_time() -> anyhow::Result<u64> {
         let conn = &*CONN.read();
         let conn = conn.as_ref().context("Not connected")?;
-        let mut client = conn.client.client.lock().await;
+        let now = conn.device.lock().await.get_client().get_now(()).await?;
 
-        Ok(client.get_now(()).await?)
+        Ok(now)
     }
 
     pub struct LogRecord {
@@ -109,9 +110,11 @@ mod fetcher {
     pub async fn get_log() -> Result<Vec<LogRecord>, anyhow::Error> {
         let conn = &*CONN.read();
         let conn = conn.as_ref().context("Not connected")?;
-        let mut client = conn.client.client.lock().await;
-
-        let log = client
+        let log = conn
+            .device
+            .lock()
+            .await
+            .get_client()
             .get_log(())
             .await?
             .try_collect::<Vec<LogChunk>>()

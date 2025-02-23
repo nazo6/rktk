@@ -30,20 +30,20 @@ pub(crate) use gen_ep_sig;
 
 macro_rules! recv_request_body {
     (normal, $reader:expr) => {
-        $reader.recv_body_normal().await?
+        $reader.recv_body_normal::<_, BUF_SIZE>().await?
     };
     (stream, $reader:expr) => {
-        $reader.recv_body_stream().await
+        $reader.recv_body_stream::<_, BUF_SIZE>().await
     };
 }
 pub(crate) use recv_request_body;
 
 macro_rules! send_response_body {
     (normal, $writer:expr, $data:expr) => {
-        $writer.send_body_normal(&$data).await
+        $writer.send_body_normal::<_, BUF_SIZE>(&$data).await
     };
     (stream, $writer:expr, $data:expr) => {
-        $writer.send_body_stream($data).await
+        $writer.send_body_stream::<_, BUF_SIZE>($data).await
     };
 }
 pub(crate) use send_response_body;
@@ -72,13 +72,12 @@ macro_rules! generate_server_handlers {
 
         #[forbid(unreachable_patterns)]
         impl<
-                RT: ReadTransport<BUF_SIZE>,
-                WT: WriteTransport<BUF_SIZE>,
+                RT: ReadTransport,
+                WT: WriteTransport,
                 H: ServerHandlers<RT::Error, WT::Error>,
-                const BUF_SIZE: usize,
-            > Server<RT, WT, H, BUF_SIZE>
+            > Server<RT, WT, H>
         {
-            pub(crate) async fn handle(&mut self, header: RequestHeader) -> Result<(), TransportError<RT::Error, WT::Error>> {
+            pub(crate) async fn handle<const BUF_SIZE: usize>(&mut self, header: RequestHeader) -> Result<(), TransportError<RT::Error, WT::Error>> {
                 match header.endpoint_id {
                     $(
                         $endpoint_id => {

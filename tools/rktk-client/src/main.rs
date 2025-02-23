@@ -1,4 +1,5 @@
 mod app;
+mod backend;
 
 use dioxus::prelude::*;
 

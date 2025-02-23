@@ -12,10 +12,10 @@ pub(crate) use res_type;
 
 macro_rules! send_request {
     (normal, $writer:expr, $req:expr) => {
-        $writer.send_body_normal(&$req).await
+        $writer.send_body_normal::<_, BUF_SIZE>(&$req).await
     };
     (stream, $writer:expr, $req:expr) => {
-        $writer.send_body_stream($req).await
+        $writer.send_body_stream::<_, BUF_SIZE>($req).await
     };
 }
 pub(crate) use send_request;
@@ -23,12 +23,12 @@ pub(crate) use send_request;
 macro_rules! recv_response {
     (normal, $reader:expr) => {
         $reader
-            .recv_body_normal()
+            .recv_body_normal::<_, BUF_SIZE>()
             .await
             .map_err(TransportError::RecvError)?
     };
     (stream, $reader:expr) => {
-        $reader.recv_body_stream().await
+        $reader.recv_body_stream::<_, BUF_SIZE>().await
     };
 }
 pub(crate) use recv_response;
@@ -43,13 +43,15 @@ macro_rules! generate_client {
         use $crate::transport::write::WriteTransportExt as _;
 
         impl<
-                RT: ReadTransport<BUF_SIZE> + Unpin,
-                WT: WriteTransport<BUF_SIZE> + Unpin,
-                const BUF_SIZE: usize,
-            > Client<RT, WT, BUF_SIZE>
+                RT: ReadTransport + Unpin,
+                WT: WriteTransport + Unpin,
+            > Client<RT, WT>
         {
             $(
                 pub async fn $endpoint_name(&mut self, req: req_type!($req_kind: $req_type)) -> Result<res_type!($res_kind: $res_type), ClientError<RT::Error, WT::Error>> {
+                    // Actually, BUF_SIZE is not used in client
+                    const BUF_SIZE: usize = 1024;
+
                     self.writer.send_request_header(RequestHeader {
                         request_id: 0,
                         endpoint_id: $endpoint_id,
@@ -58,7 +60,7 @@ macro_rules! generate_client {
 
                     let res_header = self.reader.recv_response_header().await.map_err(TransportError::RecvError)?;
                     if res_header.status != 0 {
-                        let message = self.reader.recv_body_normal().await.map_err(TransportError::RecvError)?;
+                        let message = self.reader.recv_body_normal::<_, BUF_SIZE>().await.map_err(TransportError::RecvError)?;
 
                         return Err(ClientError::Failed { status: res_header.status, message });
                     }
