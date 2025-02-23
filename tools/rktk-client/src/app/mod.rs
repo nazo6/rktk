@@ -33,19 +33,8 @@ pub fn App() -> Element {
 
 #[component]
 fn Home() -> Element {
-    let hid_available = {
-        #[cfg(feature = "web")]
-        {
-            let window = web_sys::window().expect("Missing Window");
-            let hid = window.navigator().hid();
-            !hid.is_falsy()
-        }
-        #[cfg(feature = "native")]
-        true
-    };
-
     use_effect(move || {
-        if hid_available {
+        if Backend::available() {
             BACKEND.lock().unwrap().set_ondisconnect(Some(move || {
                 spawn_forever(async move {
                     let _ = disconnect::disconnect().await;
@@ -55,14 +44,14 @@ fn Home() -> Element {
     });
 
     rsx! {
-        if hid_available {
-            h1 { "WebHID not supported" }
-        } else {
+        if Backend::available() {
             if state::CONN.read().is_some() {
                 page::connected::Connected {}
             } else {
                 page::connect::Connect {}
             }
+        } else {
+            h1 { "WebHID not supported" }
         }
     }
 }

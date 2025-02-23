@@ -18,6 +18,7 @@ serde_json = { workspace = true }
 anyhow = { workspace = true }
 futures = { workspace = true }
 strum = { workspace = true }
+jiff = "0.2.1"
 
 log = { workspace = true }
 tracing-log = { version = "0.2.0", features = ["log-tracer"] }
@@ -47,7 +48,6 @@ js-sys = { version = "0.3", optional = true }
 wasm-bindgen = { version = "0.2", optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
-jiff = "0.2.1"
 
 [features]
 default = ["web"]
@@ -60,5 +60,6 @@ web = [
   "dep:wasm-bindgen-futures",
   "dep:serde-wasm-bindgen",
   "dep:wasm-bindgen",
+  "jiff/js",
 ]
 native = []

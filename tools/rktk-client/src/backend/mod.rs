@@ -16,6 +16,10 @@ pub trait RrpHidBackend: Sized {
 
     fn new() -> Self;
 
+    fn available() -> bool {
+        true
+    }
+
     async fn open_device(
         &mut self,
         usage_page: u16,

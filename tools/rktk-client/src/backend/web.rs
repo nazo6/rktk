@@ -20,7 +20,15 @@ impl RrpHidBackend for WebHidBackend {
     type HidDevice = WebHidDevice;
 
     fn new() -> Self {
-        todo!()
+        Self {}
+    }
+
+    fn available() -> bool {
+        let Some(window) = web_sys::window() else {
+            return false;
+        };
+        let hid = window.navigator().hid();
+        !hid.is_falsy()
     }
 
     async fn open_device(
