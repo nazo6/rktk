@@ -23,7 +23,7 @@ impl EagerDebounceDriver {
     /// # Arguments
     /// * debounce_time - The debounce time.
     /// * deboune_only_pressed - If true, only debounce pressed events.
-    pub fn new(debounce_time: embassy_time::Duration, deboune_only_pressed: bool) -> Self {
+    pub const fn new(debounce_time: embassy_time::Duration, deboune_only_pressed: bool) -> Self {
         Self {
             last: [[None; CONFIG.keyboard.cols as usize]; CONFIG.keyboard.rows as usize],
             debounce_time,
@@ -37,7 +37,7 @@ impl DebounceDriver for EagerDebounceDriver {
         let last = self.last[event.row as usize][event.col as usize];
         if let Some(last) = last {
             if now - last < self.debounce_time {
-                if !self.deboune_only_pressed {
+                if self.deboune_only_pressed {
                     return event.pressed;
                 } else {
                     return true;
@@ -46,5 +46,76 @@ impl DebounceDriver for EagerDebounceDriver {
         }
         self.last[event.row as usize][event.col as usize] = Some(now);
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use embassy_time::{Duration, Instant};
+    use rktk::drivers::interface::{debounce::DebounceDriver as _, keyscan::KeyChangeEvent};
+
+    use super::EagerDebounceDriver;
+
+    #[test]
+    fn eager_debouncer_only_pressed() {
+        // PRESS    Accepted
+        // 5ms
+        // RELEASE  Maybe chatter but accepted
+        // 3ms
+        // PRESS    Ignored
+        // ...
+        // 92ms
+        // ...
+        // PRESS    Accepted
+
+        let mut d = EagerDebounceDriver::new(Duration::from_millis(10), true);
+
+        assert!(
+            !d.should_ignore_event(
+                &KeyChangeEvent {
+                    row: 0,
+                    col: 0,
+                    pressed: true,
+                },
+                Instant::from_millis(0),
+            ),
+            "Key press event should not be ignored"
+        );
+
+        assert!(
+            !d.should_ignore_event(
+                &KeyChangeEvent {
+                    row: 0,
+                    col: 0,
+                    pressed: false,
+                },
+                Instant::from_millis(5),
+            ),
+            "Key release event before debounce_time should not be ignored"
+        );
+
+        assert!(
+            d.should_ignore_event(
+                &KeyChangeEvent {
+                    row: 0,
+                    col: 0,
+                    pressed: true,
+                },
+                Instant::from_millis(8),
+            ),
+            "Key press event before debounce_time should be ignored"
+        );
+
+        assert!(
+            !d.should_ignore_event(
+                &KeyChangeEvent {
+                    row: 0,
+                    col: 0,
+                    pressed: true,
+                },
+                Instant::from_millis(100),
+            ),
+            "Key press event after debounce_time should not be ignored"
+        );
     }
 }

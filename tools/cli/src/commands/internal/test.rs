@@ -47,7 +47,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         for (crate_path, package) in crates {
             if let Some(args) = build_args(&package.name) {
                 eprintln!();
-                xprintln!("Checking crate `{}` ({})", package.name, crate_path);
+                xprintln!("Testing crate `{}` ({})", package.name, crate_path);
 
                 let now = std::time::Instant::now();
 
