@@ -30,6 +30,8 @@ pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
     #[cfg(feature = "defmtusb")]
     pub defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>,
+    #[cfg(feature = "defmtusb")]
+    pub defmt_usb_use_dtr: bool,
 }
 
 impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
@@ -47,7 +49,7 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
                 #[cfg(feature = "defmtusb")]
                 {
                     let (sender, _) = self.defmt_usb.split();
-                    super::defmtusb::logger(sender, 64).await
+                    super::defmtusb::logger(sender, 64, self.defmt_usb_use_dtr).await
                 }
             },
         )

@@ -22,4 +22,6 @@ pub struct UsbOpts<D: embassy_usb::driver::Driver<'static>> {
     pub mouse_poll_interval: u8,
     pub kb_poll_interval: u8,
     pub driver: D,
+    #[cfg(feature = "defmtusb")]
+    pub defmt_usb_use_dtr: bool,
 }

@@ -26,6 +26,8 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     rrp_hid: HidReaderWriter<'static, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
     #[cfg(feature = "defmtusb")]
     defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'static, D>,
+    #[cfg(feature = "defmtusb")]
+    defmt_usb_use_dtr: bool,
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
@@ -106,6 +108,8 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             ready_signal,
             #[cfg(feature = "defmtusb")]
             defmt_usb,
+            #[cfg(feature = "defmtusb")]
+            defmt_usb_use_dtr: opts.defmt_usb_use_dtr,
         }
     }
 }
@@ -133,6 +137,8 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
                 rrp_hid: self.rrp_hid,
                 #[cfg(feature = "defmtusb")]
                 defmt_usb: self.defmt_usb,
+                #[cfg(feature = "defmtusb")]
+                defmt_usb_use_dtr: self.defmt_usb_use_dtr,
             },
         ))
     }
