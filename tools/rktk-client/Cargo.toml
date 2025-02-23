@@ -49,9 +49,13 @@ wasm-bindgen = { version = "0.2", optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 serde-wasm-bindgen = { version = "0.6.5", optional = true }
 
+# native deps
+smol = { version = "2.0.2", optional = true }
+hidapi = { version = "2.6.3", optional = true }
+
 [features]
-default = ["web"]
-_check = []
+default = ["native"]
+_check = ["native"]
 
 web = [
   "dioxus/web",
@@ -62,4 +66,4 @@ web = [
   "dep:wasm-bindgen",
   "jiff/js",
 ]
-native = []
+native = ["dioxus/desktop", "dep:smol", "dep:hidapi"]
