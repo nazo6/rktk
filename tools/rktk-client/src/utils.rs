@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "web")]
 pub async fn sleep(delay: Duration) {
     let mut cb = |resolve: js_sys::Function, reject: js_sys::Function| {
         web_sys::window()
@@ -16,7 +16,7 @@ pub async fn sleep(delay: Duration) {
     wasm_bindgen_futures::JsFuture::from(p).await.unwrap();
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(feature = "native")]
 pub async fn sleep(delay: Duration) {
     smol::Timer::after(delay).await;
 }

@@ -22,7 +22,7 @@ test_enabled = true
 test_enabled = true
 
 [crates.rktk-client]
-check_no_powerset = true
+check_at_least_one_of = ["web", "native"]
 
 [crates.example-corne]
 check_no_powerset = true
