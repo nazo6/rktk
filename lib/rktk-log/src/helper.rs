@@ -1,4 +1,12 @@
-pub trait FormatOrDebug {}
+#[cfg(not(feature = "defmt"))]
+pub trait MaybeFormat: core::fmt::Debug {}
+#[cfg(not(feature = "defmt"))]
+impl<T> MaybeFormat for T where T: core::fmt::Debug {}
+
+#[cfg(feature = "defmt")]
+pub trait MaybeFormat: core::fmt::Debug + defmt::Format {}
+#[cfg(feature = "defmt")]
+impl<T> MaybeFormat for T where T: core::fmt::Debug + defmt::Format {}
 
 #[derive(Debug)]
 pub struct Debug2Format<'a, T: core::fmt::Debug + ?Sized>(pub &'a T);

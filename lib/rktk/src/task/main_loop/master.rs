@@ -1,7 +1,7 @@
 use embassy_futures::join::{join, join5};
 use embassy_time::Timer;
 use rktk_keymanager::{interface::Output, state::State};
-use rktk_log::info;
+use rktk_log::{info, warn};
 use utils::{init_storage, load_state};
 
 use crate::{
@@ -95,7 +95,9 @@ pub async fn start<
                     if let Some(encoder) = &mut encoder {
                         loop {
                             let (id, dir) = encoder.read_wait().await;
-                            let _ = ENCODER_EVENT_REPORT_CHANNEL.try_send((id, dir));
+                            if ENCODER_EVENT_REPORT_CHANNEL.try_send((id, dir)).is_err() {
+                                warn!("enc full");
+                            }
                         }
                     }
                 },
@@ -103,7 +105,9 @@ pub async fn start<
                     // this is dummy task to make time-dependent things work
                     loop {
                         Timer::after_millis(10).await;
-                        let _ = MOUSE_EVENT_REPORT_CHANNEL.try_send((0, 0));
+                        if MOUSE_EVENT_REPORT_CHANNEL.try_send((0, 0)).is_err() {
+                            warn!("mouse full");
+                        }
                     }
                 },
             ),

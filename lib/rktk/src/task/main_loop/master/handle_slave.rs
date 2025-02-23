@@ -1,4 +1,5 @@
 use rktk_keymanager::interface::state::event::KeyChangeEvent;
+use rktk_log::debug;
 
 use crate::{
     drivers::interface::{keyscan::Hand, split::SlaveToMaster},
@@ -11,6 +12,8 @@ use crate::{
 use super::utils::resolve_entire_key_pos;
 
 pub async fn start(hand: Hand, s2m_rx: S2mRx<'_>) {
+    debug!("split recv start");
+
     let slave_hand = hand.other();
     loop {
         s2m_rx.ready_to_receive().await;

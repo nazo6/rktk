@@ -12,7 +12,7 @@ pub struct TransparentReport {
 }
 
 /// Information to be communicated to the outside as a result of a state change
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct StateReport {
     pub keyboard_report: Option<KeyboardReport>,
     pub mouse_report: Option<MouseReport>,

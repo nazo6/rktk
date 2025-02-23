@@ -1,6 +1,6 @@
 use embassy_futures::select::{select4, Either4};
 use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
-use rktk_log::helper::Debug2Format;
+use rktk_log::{debug, helper::Debug2Format};
 
 use crate::{
     config::storage::StorageConfigManager,
@@ -30,6 +30,8 @@ pub async fn report_task<
     usb: &Option<Usb>,
     mut master_hooks: MH,
 ) {
+    debug!("report task start");
+
     let mut prev_update_time = embassy_time::Instant::now();
 
     let mut current_output = state.lock().await.get_config().initial_output;

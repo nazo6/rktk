@@ -1,6 +1,10 @@
 use embassy_futures::select::{select, Either};
 use postcard::{from_bytes_cobs, to_slice_cobs};
-use rktk_log::helper::Debug2Format;
+use rktk_log::{
+    debug,
+    helper::{Debug2Format, MaybeFormat},
+    warn,
+};
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
@@ -77,14 +81,16 @@ impl CobsReceiver {
 pub async fn start<
     'a,
     SP: SplitDriver,
-    R: DeserializeOwned + core::fmt::Debug,
-    S: Serialize + core::fmt::Debug,
+    R: DeserializeOwned + MaybeFormat,
+    S: Serialize + MaybeFormat,
 >(
     mut split: SP,
     received_sender: Sender<'a, R, { RKTK_CONFIG.split_channel_size }>,
     to_send_receiver: Receiver<'a, S, { RKTK_CONFIG.split_channel_size }>,
     is_master: bool,
 ) {
+    debug!("split handler start");
+
     let mut send_id: usize = 0;
     let mut recv_id: usize = 0;
     let mut recv_err: usize = 0;
@@ -110,27 +116,30 @@ pub async fn start<
                 match res {
                     Ok(_) => match from_bytes_cobs::<(usize, R)>(&mut recv_buf.clone()) {
                         Ok((id, data)) => {
-                            let _ = received_sender.try_send(data);
+                            debug!("Split data received: id:{}, data:{:?}", id, data);
+                            if received_sender.try_send(data).is_err() {
+                                warn!("split recv chan full");
+                            }
                             if id - recv_id > 1 {
                                 recv_err += 1;
-                                rktk_log::warn!(
+                                warn!(
                                     "Split communication loss detected: id:{}, err count:{}",
-                                    id,
-                                    recv_err
+                                    id, recv_err
                                 );
                             }
                             recv_id = id;
                         }
                         Err(e) => {
-                            rktk_log::warn!("Split data decode failed: {:?}", Debug2Format(&e));
+                            warn!("Split data decode failed: {:?}", Debug2Format(&e));
                         }
                     },
                     Err(e) => {
-                        rktk_log::warn!("Failed to receive split data: {:?}", Debug2Format(&e))
+                        warn!("Failed to receive split data: {:?}", Debug2Format(&e))
                     }
                 }
             }
             Either::Second(send_data) => {
+                debug!("Split data send: {:?}", send_data);
                 let mut send_buf = [0u8; MAX_DATA_SIZE];
                 if let Ok(bytes) = to_slice_cobs(&(send_id, send_data), &mut send_buf) {
                     if let Err(e) = split.send_all(bytes, is_master).await {

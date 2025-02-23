@@ -1,3 +1,4 @@
+use rktk_log::derive_format_and_debug;
 use serde::{Deserialize, Serialize};
 
 use super::rgb::RgbCommand;
@@ -19,13 +20,15 @@ pub trait SplitDriver: 'static {
     async fn send_all(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive_format_and_debug]
+#[derive(Deserialize, Serialize)]
 pub enum MasterToSlave {
     Rgb(RgbCommand),
     Message(u8),
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive_format_and_debug]
+#[derive(Deserialize, Serialize)]
 pub enum SlaveToMaster {
     Pressed(u8, u8),
     Released(u8, u8),
@@ -33,7 +36,8 @@ pub enum SlaveToMaster {
     Message(u8),
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive_format_and_debug]
+#[derive(Deserialize, Serialize)]
 pub enum KeyChangeType {
     Pressed,
     Released,

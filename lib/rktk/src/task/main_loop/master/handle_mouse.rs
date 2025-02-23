@@ -1,4 +1,5 @@
 use embassy_time::Timer;
+use rktk_log::warn;
 
 use crate::{config::constant::SCAN_INTERVAL_MOUSE, drivers::interface::mouse::MouseDriver};
 
@@ -23,8 +24,8 @@ pub async fn start(mut mouse: Option<impl MouseDriver>) {
 
             if mouse_move == (0, 0) {
                 continue;
-            } else {
-                let _ = MOUSE_EVENT_REPORT_CHANNEL.try_send(mouse_move);
+            } else if MOUSE_EVENT_REPORT_CHANNEL.try_send(mouse_move).is_err() {
+                warn!("Mouse full");
             }
         }
     }

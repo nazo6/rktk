@@ -1,5 +1,6 @@
 use embassy_futures::join::join3;
 use embassy_time::Timer;
+use rktk_log::debug;
 
 use crate::{
     config::constant::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
@@ -33,6 +34,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
     join3(
         async {
             if let Some(mouse) = &mut mouse {
+                debug!("mouse start");
                 loop {
                     let start = embassy_time::Instant::now();
 
@@ -55,13 +57,16 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
             }
         },
         async {
+            debug!("keyscan start");
             loop {
                 Timer::after(SCAN_INTERVAL_KEYBOARD).await;
 
                 keyscan
                     .scan(|event| {
+                        debug!("keyscan event: {:?}", event);
                         if let Some(debounce) = &mut debounce {
                             if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
+                                debug!("keyscan event ignored");
                                 return;
                             }
                         }
@@ -78,8 +83,10 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
             }
         },
         async {
+            debug!("split start");
             loop {
                 let data = m2s_rx.receive().await;
+                debug!("split data recv: {:?}", data);
                 match data {
                     MasterToSlave::Rgb(ctrl) => {
                         let _ = RGB_CHANNEL.try_send(ctrl);

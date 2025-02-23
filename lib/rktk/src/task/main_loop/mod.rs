@@ -24,6 +24,7 @@ use crate::{
 };
 use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Timer};
+use rktk_log::debug;
 
 mod master;
 mod rgb;
@@ -105,6 +106,7 @@ pub async fn start<
     sjoin::join!(
         async move {
             if is_master {
+                debug!("master start");
                 master::start(
                     m2s_tx,
                     s2m_rx,
@@ -122,20 +124,25 @@ pub async fn start<
                 )
                 .await;
             } else {
+                debug!("slave start");
                 slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.slave).await;
             }
         },
         async move {
             if let Some(split) = split {
+                debug!("split init");
                 if is_master {
                     split_handler::start(split, s2m_tx, m2s_rx, is_master).await;
                 } else {
                     split_handler::start(split, m2s_tx, s2m_rx, is_master).await;
                 }
+            } else {
+                debug!("no split");
             }
         },
         async move {
             if let Some(rgb) = rgb {
+                debug!("rgb init");
                 match hand {
                     Hand::Right => {
                         rgb::start::<{ KEYBOARD.right_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
@@ -144,6 +151,8 @@ pub async fn start<
                         rgb::start::<{ KEYBOARD.left_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
                     }
                 }
+            } else {
+                debug!("no rgb");
             }
         }
     );

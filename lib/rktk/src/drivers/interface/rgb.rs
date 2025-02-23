@@ -2,16 +2,19 @@
 
 // TODO: Split backlight and underglow
 
+use rktk_log::derive_format_and_debug;
 use serde::{Deserialize, Serialize};
 use smart_leds::RGB8;
 
-#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
+#[derive_format_and_debug]
+#[derive(Deserialize, Serialize, Clone, Eq, PartialEq)]
 pub enum RgbCommand {
     Start(RgbMode),
     Reset,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
+#[derive_format_and_debug]
+#[derive(Deserialize, Serialize, Clone, Eq, PartialEq)]
 pub enum RgbMode {
     Rainbow,
     Blink,

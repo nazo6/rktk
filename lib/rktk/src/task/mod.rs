@@ -17,7 +17,7 @@ use crate::{
     utils::sjoin,
 };
 use embassy_time::Duration;
-use rktk_log::helper::Debug2Format;
+use rktk_log::{debug, helper::Debug2Format, info};
 
 pub(crate) mod channels;
 pub mod display;
@@ -75,13 +75,14 @@ pub async fn start<
 ) {
     #[cfg(feature = "log")]
     {
+        debug!("log init");
         critical_section::with(|_| unsafe {
             let _ = log::set_logger_racy(&logger::RRP_LOGGER);
             log::set_max_level_racy(log::LevelFilter::Info);
         });
     }
 
-    rktk_log::info!(
+    info!(
         "RKTK Starting... (rgb: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
         drivers.rgb.is_some(),
         drivers.ble_builder.is_some(),
@@ -99,6 +100,7 @@ pub async fn start<
     sjoin::join!(
         async move {
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
+                debug!("Mouse init");
                 match mouse_builder.build().await {
                     Ok(mut mouse) => {
                         let _ = mouse.set_cpi(RKTK_CONFIG.default_cpi).await;
@@ -110,22 +112,27 @@ pub async fn start<
                     }
                 }
             } else {
+                debug!("no mouse");
                 None
             };
 
             crate::utils::display_state!(MouseAvailable, mouse.is_some());
 
             let (ble, ble_task) = if let Some(ble_builder) = drivers.ble_builder {
+                debug!("BLE init");
                 let (ble, ble_task) = ble_builder.build().await.expect("Failed to build ble");
                 (Some(ble), Some(ble_task))
             } else {
+                debug!("no BLE driver");
                 (None, None)
             };
 
             let (usb, usb_task) = if let Some(usb_builder) = drivers.usb_builder {
+                debug!("USB init");
                 let (usb, usb_task) = usb_builder.build().await.expect("Failed to build usb");
                 (Some(usb), Some(usb_task))
             } else {
+                debug!("no USB driver");
                 (None, None)
             };
 

@@ -1,4 +1,5 @@
 use embassy_time::Timer;
+use rktk_log::{debug, warn};
 
 use crate::{
     config::constant::SCAN_INTERVAL_KEYBOARD,
@@ -16,6 +17,7 @@ pub async fn start(
     mut keyscan: impl KeyscanDriver,
     mut debounce: Option<impl DebounceDriver>,
 ) {
+    debug!("keyscan start");
     loop {
         Timer::after(SCAN_INTERVAL_KEYBOARD).await;
 
@@ -23,12 +25,15 @@ pub async fn start(
             .scan(|mut event| {
                 if let Some(debounce) = &mut debounce {
                     if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
+                        debug!("Debounced");
                         return;
                     }
                 }
                 resolve_entire_key_pos(&mut event, hand);
 
-                let _ = KEYBOARD_EVENT_REPORT_CHANNEL.try_send(event);
+                if KEYBOARD_EVENT_REPORT_CHANNEL.try_send(event).is_err() {
+                    warn!("Keyboard full");
+                }
             })
             .await;
     }
