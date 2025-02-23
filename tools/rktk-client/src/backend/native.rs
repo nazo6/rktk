@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, sync::Arc};
+use std::sync::Arc;
 
 use async_hid::{Device, DeviceInfo};
 use futures::stream::StreamExt;
@@ -14,7 +14,7 @@ impl RrpHidBackend for NativeBackend {
     type HidDevice = NativeHidDevice;
 
     async fn open_device(
-        &mut self,
+        &self,
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error> {
@@ -46,7 +46,7 @@ impl RrpHidBackend for NativeBackend {
         })
     }
 
-    fn set_ondisconnect(&mut self, fun: Option<impl FnMut() + 'static>) {}
+    fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>) {}
 
     fn new() -> Self {
         Self {}

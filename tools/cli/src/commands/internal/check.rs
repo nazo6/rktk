@@ -31,6 +31,13 @@ fn build_args(crate_name: &str) -> Vec<String> {
             }
         }
 
+        if let Some(me_features) = &config.check_mutually_exclusive_features {
+            for group in me_features {
+                args.push("--mutually-exclusive-features".to_string());
+                args.push(group.join(","));
+            }
+        }
+
         if let Some(skip_features) = &config.check_skip {
             skip = skip_features.clone();
         }

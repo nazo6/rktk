@@ -32,7 +32,7 @@ impl RrpHidBackend for WebHidBackend {
     }
 
     async fn open_device(
-        &mut self,
+        &self,
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error> {
@@ -68,7 +68,7 @@ impl RrpHidBackend for WebHidBackend {
         Ok(Self::HidDevice { client, device })
     }
 
-    fn set_ondisconnect(&mut self, fun: Option<impl FnMut() + 'static>) {
+    fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>) {
         let window = web_sys::window().expect("Missing Window");
         let hid = window.navigator().hid();
 

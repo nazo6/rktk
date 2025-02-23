@@ -21,12 +21,12 @@ pub trait RrpHidBackend: Sized {
     }
 
     async fn open_device(
-        &mut self,
+        &self,
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error>;
 
-    fn set_ondisconnect(&mut self, fun: Option<impl FnMut() + 'static>);
+    fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>);
 }
 
 pub trait RrpHidDevice {

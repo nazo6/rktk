@@ -1,4 +1,3 @@
-
 [package]
 name = "rktk-client"
 version = "0.1.0"
@@ -52,7 +51,6 @@ smol = { version = "2.0.2", optional = true }
 async-hid = { git = "https://github.com/sidit77/async-hid", optional = true }
 
 [features]
-default = []
 _check = ["native"]
 
 web = [

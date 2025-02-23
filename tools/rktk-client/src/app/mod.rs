@@ -1,4 +1,4 @@
-use std::sync::{LazyLock, Mutex};
+use std::sync::LazyLock;
 
 use dioxus::prelude::*;
 
@@ -15,7 +15,7 @@ mod state;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 
-static BACKEND: LazyLock<Mutex<Backend>> = LazyLock::new(|| Mutex::new(Backend::new()));
+static BACKEND: LazyLock<Backend> = LazyLock::new(Backend::new);
 
 #[component]
 pub fn App() -> Element {
@@ -35,7 +35,7 @@ pub fn App() -> Element {
 fn Home() -> Element {
     use_effect(move || {
         if Backend::available() {
-            BACKEND.lock().unwrap().set_ondisconnect(Some(move || {
+            BACKEND.set_ondisconnect(Some(move || {
                 spawn_forever(async move {
                     let _ = disconnect::disconnect().await;
                 });
