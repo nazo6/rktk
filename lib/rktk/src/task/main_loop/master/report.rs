@@ -88,7 +88,12 @@ pub async fn report_task<
             .update(event, prev_update_time.elapsed().into());
         prev_update_time = embassy_time::Instant::now();
 
-        master_hooks.on_state_update(&mut state_report).await;
+        if !master_hooks
+            .on_state_update(&mut state_report, usb, ble)
+            .await
+        {
+            continue;
+        }
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 

@@ -1,7 +1,8 @@
 use super::{
+    raw_hid::RAW_HID_BUFFER_SIZE,
     task::{
         HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL, HID_MOUSE_CHANNEL, KEYBOARD_LED_SIGNAL,
-        RRP_RECV_PIPE, RRP_SEND_PIPE,
+        RAW_HID_SEND_CHANNEL, RRP_RECV_PIPE, RRP_SEND_PIPE,
     },
     ReadySignal, RemoteWakeupSignal,
 };
@@ -18,6 +19,10 @@ pub enum UsbError {
     ChannelFull(&'static str),
     #[error("Not supported")]
     NotSupported,
+    #[error("Too big")]
+    TooBig,
+    #[error("buf small")]
+    BufSmall,
 }
 
 impl ReporterDriver for CommonUsbDriver {
@@ -71,6 +76,29 @@ impl ReporterDriver for CommonUsbDriver {
     async fn read_rrp_data(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         let read = RRP_RECV_PIPE.read(buf).await;
         Ok(read)
+    }
+
+    async fn send_raw_hid_data(&self, data: &[u8]) -> Result<(), Self::Error> {
+        if data.len() > RAW_HID_BUFFER_SIZE {
+            return Err(Self::Error::TooBig);
+        }
+
+        let mut buf = [0; RAW_HID_BUFFER_SIZE];
+        buf[0..data.len()].copy_from_slice(data);
+
+        RAW_HID_SEND_CHANNEL.send(buf).await;
+        Ok(())
+    }
+
+    async fn read_raw_hid_data(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+        if buf.len() < RAW_HID_BUFFER_SIZE {
+            return Err(Self::Error::BufSmall);
+        }
+
+        let data = RAW_HID_SEND_CHANNEL.receive().await;
+        buf[0..data.len()].copy_from_slice(&data);
+
+        Ok(data.len())
     }
 
     fn wakeup(&self) -> Result<bool, Self::Error> {

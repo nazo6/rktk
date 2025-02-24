@@ -1,7 +1,10 @@
+use super::raw_hid::RawHidReport;
+use super::raw_hid::RAW_HID_BUFFER_SIZE;
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_futures::join::join;
 use embassy_futures::join::join4;
+use embassy_futures::join::join5;
 use embassy_sync::pipe::Pipe;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
@@ -18,6 +21,8 @@ pub static HID_MOUSE_CHANNEL: Channel<MouseReport, 8> = Channel::new();
 pub static HID_MEDIA_KEYBOARD_CHANNEL: Channel<MediaKeyboardReport, 8> = Channel::new();
 pub static RRP_SEND_PIPE: Pipe<RawMutex, 128> = Pipe::new();
 pub static RRP_RECV_PIPE: Pipe<RawMutex, 128> = Pipe::new();
+pub static RAW_HID_SEND_CHANNEL: Channel<[u8; 32], 2> = Channel::new();
+pub static RAW_HID_RECV_CHANNEL: Channel<[u8; 32], 2> = Channel::new();
 pub static KEYBOARD_LED_SIGNAL: Signal<u8> = Signal::new();
 
 pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
@@ -28,6 +33,7 @@ pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub media_key_hid: HidWriter<'d, D, 8>,
     pub mouse_hid: HidWriter<'d, D, 8>,
     pub rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
+    pub raw_hid: HidReaderWriter<'d, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
     #[cfg(feature = "defmtusb")]
     pub defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>,
     #[cfg(feature = "defmtusb")]
@@ -36,7 +42,7 @@ pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
 
 impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
     async fn run(self) {
-        join4(
+        join5(
             usb(self.device, self.signal),
             hid(
                 self.keyboard_hid,
@@ -44,6 +50,7 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
                 self.mouse_hid,
                 self.ready_signal,
             ),
+            raw_hid(self.raw_hid),
             rrp(self.rrp_hid),
             async move {
                 #[cfg(feature = "defmtusb")]
@@ -148,6 +155,42 @@ pub async fn rrp<'d, D: Driver<'d>>(
                 data[0] = to_send_bytes as u8;
                 let _ = writer
                     .write_serialize(&RrpReport {
+                        input_data: data,
+                        output_data: [0; 32],
+                    })
+                    .await;
+            }
+        },
+    )
+    .await;
+}
+
+pub async fn raw_hid<'d, D: Driver<'d>>(
+    raw_hid: HidReaderWriter<'d, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
+) {
+    let (mut reader, mut writer) = raw_hid.split();
+    reader.ready().await;
+
+    join(
+        async {
+            loop {
+                let mut buf = [0u8; RAW_HID_BUFFER_SIZE];
+                let Ok(to_recv_bytes) = reader.read(&mut buf).await else {
+                    // NOTE: When usb is suspended, error is returned. We have to wait for a while to avoid busy loop in such case.
+                    embassy_time::Timer::after_millis(300).await;
+                    continue;
+                };
+                if to_recv_bytes != 32 {
+                    panic!("One read should give one report. Maybe packet size is not enough?");
+                }
+                RAW_HID_RECV_CHANNEL.send(buf).await;
+            }
+        },
+        async {
+            loop {
+                let data = RAW_HID_SEND_CHANNEL.receive().await;
+                let _ = writer
+                    .write_serialize(&RawHidReport {
                         input_data: data,
                         output_data: [0; 32],
                     })

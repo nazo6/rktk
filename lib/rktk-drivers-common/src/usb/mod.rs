@@ -7,6 +7,7 @@ mod builder;
 mod defmtusb;
 mod driver;
 mod handler;
+mod raw_hid;
 mod rrp;
 mod task;
 

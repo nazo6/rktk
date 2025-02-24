@@ -3,7 +3,9 @@ use rktk_keymanager::interface::{
     state::event::{EncoderDirection, KeyChangeEvent},
 };
 
-use crate::drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver};
+use crate::drivers::interface::{
+    keyscan::KeyscanDriver, mouse::MouseDriver, reporter::ReporterDriver,
+};
 
 /// Hooks called for master side
 pub trait MasterHooks {
@@ -53,7 +55,7 @@ pub trait MasterHooks {
 
     /// Called after state update, before report send.
     ///
-    /// WARNING: Mutating the state_report or returning false is not recommended as this can cause
+    /// WARNING: Mutating the state_report or returning false can cause
     /// inconsistent state.
     ///
     /// # Parameters
@@ -61,7 +63,12 @@ pub trait MasterHooks {
     ///
     /// # Returns
     /// If false, this report will be ignored.
-    async fn on_state_update(&mut self, _state_report: &mut StateReport) -> bool {
+    async fn on_state_update(
+        &mut self,
+        _state_report: &mut StateReport,
+        _usb_reporter: &Option<impl ReporterDriver>,
+        _ble_reporter: &Option<impl ReporterDriver>,
+    ) -> bool {
         true
     }
 }

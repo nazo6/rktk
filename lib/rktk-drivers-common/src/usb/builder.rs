@@ -2,6 +2,7 @@ use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 use rktk::singleton;
 
+use super::raw_hid::RAW_HID_BUFFER_SIZE;
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_usb::Builder;
@@ -24,6 +25,7 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     wakeup_signal: &'static RemoteWakeupSignal,
     ready_signal: &'static ReadySignal,
     rrp_hid: HidReaderWriter<'static, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
+    raw_hid: HidReaderWriter<'static, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
     #[cfg(feature = "defmtusb")]
     defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'static, D>,
     #[cfg(feature = "defmtusb")]
@@ -88,6 +90,20 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             )
         };
 
+        let raw_hid = {
+            let config = embassy_usb::class::hid::Config {
+                report_descriptor: RrpReport::desc(),
+                request_handler: None,
+                poll_ms: 1,
+                max_packet_size: 64,
+            };
+            HidReaderWriter::<_, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>::new(
+                &mut builder,
+                singleton!(State::new(), State),
+                config,
+            )
+        };
+
         #[cfg(feature = "defmtusb")]
         let defmt_usb = embassy_usb::class::cdc_acm::CdcAcmClass::new(
             &mut builder,
@@ -110,6 +126,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             defmt_usb,
             #[cfg(feature = "defmtusb")]
             defmt_usb_use_dtr: opts.defmt_usb_use_dtr,
+            raw_hid,
         }
     }
 }
@@ -139,6 +156,7 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
                 defmt_usb: self.defmt_usb,
                 #[cfg(feature = "defmtusb")]
                 defmt_usb_use_dtr: self.defmt_usb_use_dtr,
+                raw_hid: self.raw_hid,
             },
         ))
     }

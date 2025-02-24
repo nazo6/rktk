@@ -25,6 +25,14 @@ pub trait ReporterDriver {
         unreachable!()
     }
 
+    async fn send_raw_hid_data(&self, _data: &[u8]) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    async fn read_raw_hid_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
+        let _: () = core::future::pending().await;
+        unreachable!()
+    }
+
     /// Wake up the device.
     /// This is used to wake up the device from suspend mode.
     ///
