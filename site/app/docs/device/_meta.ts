@@ -1,5 +1,5 @@
 import { MetaRecord } from "nextra";
 
 export default {
-  "guide": "Guide",
+  "keyscan": "Keyscan",
 } satisfies MetaRecord;

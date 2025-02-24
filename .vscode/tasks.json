@@ -20,6 +20,11 @@
       "label": "clean",
       "type": "shell",
       "command": "cargo clean"
+    },
+    {
+      "label": "site dev",
+      "type": "shell",
+      "command": "cd site && pnpm dev"
     }
   ]
 }

@@ -1,0 +1,31 @@
+# Environment setup
+
+First, let's build an environment for using RKTK.
+
+## 1. Install rust
+
+RKTK is built with Rust, so Rust is required; there are various ways to install Rust, but using [rustup](https://rustup.rs/) is recommended.
+
+After install rust, make sure that the `cargo` command is available.
+
+## 2. Install cargo-binutils
+
+Next, install [cargo-binutils](https://github.com/rust-embedded/cargo-binutils). This is needed to generate UF2 files.
+
+```sh
+cargo install cargo-binutils
+# or if you have cargo-binstall
+cargo binstall cargo-binutils
+
+rustup component add llvm-tools
+```
+
+## 3. Install rktk-cli
+
+`rktk-cli` is command line interface for RKTK. It can be installed by cargo.
+
+```sh
+cargo +nightly install rktk-cli --git https://github.com/nazo6/rktk --bin rktk-cli
+```
+
+Note that `rktk-cli` requires nightly toolchain.
