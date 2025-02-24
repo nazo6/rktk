@@ -95,7 +95,9 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
             }
         };
         for package in &metadata.packages {
-            if package.manifest_path == keyboard_crate_dir.join("Cargo.toml") {
+            if std::fs::canonicalize(&package.manifest_path).unwrap()
+                == keyboard_crate_dir.join("Cargo.toml")
+            {
                 crr_package = Some(package);
                 break;
             }
