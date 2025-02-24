@@ -17,15 +17,9 @@ pub fn elf2uf2(
 
     // convert elf to bin
     let bin_path = artifact_dir.join(format!("{}.bin", artifact_name));
-    duct::cmd!(
-        "arm-none-eabi-objcopy",
-        "-O",
-        "binary",
-        &elf_path,
-        &bin_path
-    )
-    .run()
-    .context("Failed to convert to bin. Is arm-none-eabi-objcopy installed?")?;
+    duct::cmd!("rust-objcopy", "-O", "binary", &elf_path, &bin_path)
+        .run()
+        .context("Failed to convert to bin. Is cargo-binutils and llvm-tools installed?")?;
     xprintln!(
         "Bin file generated at: {} ({})",
         bin_path.display(),

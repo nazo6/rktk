@@ -117,7 +117,7 @@ You can find examples in the `examples` directory.
 
 ## Dependencies
 
-`arm-none-eabi-objcopy` is required to generate uf2 file.
+`rust-objcopy` is required to generate uf2 file.
 
 ### MSRV
 

@@ -41,6 +41,8 @@ pub fn deploy_uf2(
                 continue;
             };
 
+            xprintln!("Copying UF2 file to {}", deploy_path.display());
+
             match fs_extra::file::copy_with_progress(
                 &uf2_path,
                 &deploy_path,
@@ -69,14 +71,10 @@ pub fn deploy_uf2(
 fn get_uf2_deploy_path(deploy_path: String, uf2_path: &Path) -> anyhow::Result<PathBuf> {
     let deploy_dir = if deploy_path == "auto" {
         // search mount that have "INFO_UF2.txt" file
-        let mount_path = PathBuf::from("/mnt");
-        if !mount_path.exists() {
-            anyhow::bail!("No /mnt directory found");
-        }
+
         let mut deploy_dir = None;
-        for entry in std::fs::read_dir(&mount_path)? {
-            let entry = entry?;
-            let path = entry.path();
+        for disk in sysinfo::Disks::new_with_refreshed_list().iter() {
+            let path = disk.mount_point().to_path_buf();
             if path.join("INFO_UF2.TXT").exists() {
                 deploy_dir = Some(path);
                 break;

@@ -1,0 +1,48 @@
+# You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
+cargo-features = ["per-package-target"]
+
+[package]
+name = "example-corne-nrf"
+version = "0.1.0"
+edition = "2021"
+publish = false
+forced-target = "thumbv7em-none-eabihf"
+
+# Config used by rktk-cli. For details, see [rktk-cli](https://crates.io/crates/rktk-cli).
+[package.metadata.rktk-cli]
+mcu = "Nrf52840"
+
+[dependencies]
+rktk = { workspace = true }
+rktk-drivers-nrf = { workspace = true }
+rktk-drivers-common = { workspace = true }
+
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+embassy-executor = { workspace = true, features = [
+  "task-arena-size-65536",
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+] }
+
+embassy-nrf = { workspace = true, features = [
+  "gpiote",
+  "time-driver-rtc1",
+  "nrf52840",
+  "nfc-pins-as-gpio",
+] }
+nrf-softdevice = { workspace = true, features = [
+  "critical-section-impl",
+  "s140",
+  "nrf52840",
+] }
+
+[features]
+default = ["right"]
+
+right = []
+left = []
+
+# Remove this line in your project. It's just used in this workspace for check.
+_check = []

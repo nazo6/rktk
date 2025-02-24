@@ -9,7 +9,6 @@ mod schema;
 fn main() {
     println!("cargo:rerun-if-env-changed=RKTK_CONFIG_PATH");
     println!("cargo:rerun-if-env-changed=DOCS_RS");
-    println!("cargo:rerun-if-changed=src/config/static_config/schema.rs");
 
     let schema = schema_for!(schema::Config);
 

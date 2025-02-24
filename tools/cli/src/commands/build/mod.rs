@@ -81,7 +81,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
     let (package, keyboard_crate_dir) = {
         let mut crr_package = None;
         let keyboard_crate_dir = {
-            let mut specified_path = std::path::PathBuf::from(&args.path).canonicalize()?;
+            let mut specified_path = dunce::canonicalize(std::path::PathBuf::from(&args.path))?;
             loop {
                 let cargo_toml_path = specified_path.join("Cargo.toml");
                 if cargo_toml_path.exists() {
@@ -95,7 +95,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
             }
         };
         for package in &metadata.packages {
-            if std::fs::canonicalize(&package.manifest_path).unwrap()
+            if dunce::canonicalize(&package.manifest_path).unwrap()
                 == keyboard_crate_dir.join("Cargo.toml")
             {
                 crr_package = Some(package);
@@ -208,7 +208,7 @@ pub fn start(args: BuildCommand) -> anyhow::Result<()> {
         get_bytes(&elf_path)
     );
 
-    let elf_path = PathBuf::from(elf_path);
+    let elf_path = dunce::canonicalize(PathBuf::from(elf_path))?;
 
     if !args.no_uf2 || args.deploy_uf2.is_some() {
         let uf2_path = uf2::elf2uf2(
