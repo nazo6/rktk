@@ -2,7 +2,7 @@ use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 use rktk::singleton;
 
-use super::raw_hid::RAW_HID_BUFFER_SIZE;
+use super::raw_hid::{RawHidReport, RAW_HID_BUFFER_SIZE};
 use super::rrp::RrpReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
 use embassy_usb::Builder;
@@ -92,7 +92,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
 
         let raw_hid = {
             let config = embassy_usb::class::hid::Config {
-                report_descriptor: RrpReport::desc(),
+                report_descriptor: RawHidReport::desc(),
                 request_handler: None,
                 poll_ms: 1,
                 max_packet_size: 64,
