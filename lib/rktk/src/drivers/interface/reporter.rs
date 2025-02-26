@@ -19,6 +19,19 @@ pub trait ReporterDriver {
     ) -> Result<(), Self::Error>;
     fn try_send_mouse_report(&self, _report: MouseReport) -> Result<(), Self::Error>;
 
+    async fn send_keyboard_report(&mut self, _report: KeyboardReport) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    async fn send_media_keyboard_report(
+        &mut self,
+        _report: MediaKeyboardReport,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+    async fn send_mouse_report(&mut self, _report: MouseReport) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
     async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), Self::Error>;
     async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
         let _: () = core::future::pending().await;

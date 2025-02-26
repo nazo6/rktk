@@ -4,6 +4,7 @@
 pub mod ble;
 pub mod debounce;
 pub mod display;
+pub mod dongle;
 pub mod encoder;
 pub mod keyscan;
 pub mod mouse;

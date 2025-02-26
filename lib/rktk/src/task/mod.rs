@@ -3,10 +3,18 @@
 use crate::{
     config::constant::RKTK_CONFIG,
     drivers::interface::{
-        ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
-        keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,
-        storage::StorageDriver, usb::UsbDriver, BackgroundTask as _, DriverBuilder,
-        DriverBuilderWithTask,
+        ble::BleDriver,
+        debounce::DebounceDriver,
+        display::DisplayDriver,
+        dongle::{DongleData, DongleDriver},
+        encoder::EncoderDriver,
+        keyscan::KeyscanDriver,
+        mouse::MouseDriver,
+        rgb::RgbDriver,
+        split::SplitDriver,
+        storage::StorageDriver,
+        usb::UsbDriver,
+        BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
     },
     hooks::Hooks,
 };
@@ -172,4 +180,21 @@ pub async fn start<
             }
         }
     );
+}
+
+pub async fn dongle_start<Usb: UsbDriver, Dongle: DongleDriver>(usb: Usb, mut dongle: Dongle) {
+    loop {
+        match dongle.recv().await {
+            Ok(DongleData::Keyboard(report)) => {
+                usb.try_send_keyboard_report(report.into());
+            }
+            Ok(DongleData::Mouse(report)) => {
+                usb.try_send_mouse_report(report.into());
+            }
+            Err(_e) => {
+                embassy_time::Timer::after_millis(100).await;
+                continue;
+            }
+        }
+    }
 }

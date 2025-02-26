@@ -56,6 +56,8 @@ usbd-hid = { workspace = true }
 thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
+embassy-nrf-esb = { path = "../../../../../lib/embassy-nrf-esb/" }
+
 [features]
 _check = [
   "embassy-nrf/nrf52840",
