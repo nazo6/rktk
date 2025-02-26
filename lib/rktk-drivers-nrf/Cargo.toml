@@ -73,7 +73,7 @@ nightly = ["embassy-executor/nightly"]
 
 defmt = [
   "dep:defmt",
-  "nrf-softdevice/defmt",
+  "nrf-softdevice?/defmt",
   "embassy-nrf/defmt",
   "heapless/defmt-impl",
   "postcard/use-defmt",
