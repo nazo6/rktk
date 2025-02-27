@@ -2,6 +2,7 @@
 
 #![allow(async_fn_in_trait)]
 
+pub mod dongle;
 pub mod master;
 pub mod rgb;
 

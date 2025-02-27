@@ -182,19 +182,47 @@ pub async fn start<
     );
 }
 
-pub async fn dongle_start<Usb: UsbDriver, Dongle: DongleDriver>(usb: Usb, mut dongle: Dongle) {
-    loop {
-        match dongle.recv().await {
-            Ok(DongleData::Keyboard(report)) => {
-                usb.try_send_keyboard_report(report.into());
-            }
-            Ok(DongleData::Mouse(report)) => {
-                usb.try_send_mouse_report(report.into());
-            }
-            Err(_e) => {
-                embassy_time::Timer::after_millis(100).await;
-                continue;
+pub async fn dongle_start<
+    Usb: UsbDriver,
+    Dongle: DongleDriver,
+    Display: DisplayDriver,
+    DisplayBuilder: DriverBuilder<Output = Display> + 'static,
+>(
+    usb: impl DriverBuilderWithTask<Driver = Usb>,
+    mut dongle: Dongle,
+    mut hooks: impl dongle::DongleHooks,
+    mut display: Option<DisplayBuilder>,
+) {
+    let (usb, task) = usb.build().await.unwrap();
+
+    let main_task = async move {
+        loop {
+            let data = dongle.recv().await;
+            match data {
+                Ok(mut data) => {
+                    if !hooks.on_dongle_data(&mut data).await {
+                        continue;
+                    }
+                    match data {
+                        DongleData::Keyboard(report) => {
+                            usb.try_send_keyboard_report(report.into());
+                        }
+                        DongleData::Mouse(report) => {
+                            usb.try_send_mouse_report(report.into());
+                        }
+                    }
+                }
+                Err(_e) => {
+                    embassy_time::Timer::after_millis(100).await;
+                    continue;
+                }
             }
         }
-    }
+    };
+
+    sjoin::join!(main_task, task.run(), async move {
+        if let Some(display_builder) = display {
+            display::start(display_builder).await;
+        }
+    });
 }

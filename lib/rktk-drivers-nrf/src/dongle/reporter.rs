@@ -4,15 +4,13 @@ use embassy_nrf::radio::Instance;
 use embassy_nrf_esb::ptx::PtxRadio;
 use rktk::{
     drivers::interface::{
-        ble::BleDriver,
-        dongle::{DongleData, KeyboardReport},
-        reporter::ReporterDriver,
-        BackgroundTask, DriverBuilderWithTask,
+        ble::BleDriver, dongle::DongleData, reporter::ReporterDriver, BackgroundTask,
+        DriverBuilderWithTask,
     },
     utils::Channel,
 };
 
-static SEND_CHAN: Channel<DongleData, 32> = Channel::new();
+static SEND_CHAN: Channel<DongleData, 64> = Channel::new();
 
 // -------- Builder ----------
 
@@ -55,6 +53,7 @@ impl<T: Instance> BackgroundTask for Task<T> {
             let data = SEND_CHAN.receive().await;
             let mut buf = [0u8; 64];
             if let Ok(data) = postcard::to_slice(&data, &mut buf) {
+                // rktk::print!("{}:{:?}", data.len(), embassy_time::Instant::now());
                 self.ptx.send(0, data, false).await;
             }
         }
@@ -72,7 +71,8 @@ impl ReporterDriver for EsbReporterDriver {
         &self,
         report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), Self::Error> {
-        SEND_CHAN.send(DongleData::Keyboard(report.into()));
+        SEND_CHAN.try_send(DongleData::Keyboard(report.into()));
+        Ok(())
     }
 
     fn try_send_media_keyboard_report(
@@ -86,7 +86,7 @@ impl ReporterDriver for EsbReporterDriver {
         &self,
         report: usbd_hid::descriptor::MouseReport,
     ) -> Result<(), Self::Error> {
-        SEND_CHAN.send(DongleData::Mouse(report.into()));
+        SEND_CHAN.try_send(DongleData::Mouse(report.into()));
 
         Ok(())
     }

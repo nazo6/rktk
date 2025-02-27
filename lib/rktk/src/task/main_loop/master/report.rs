@@ -36,6 +36,8 @@ pub async fn report_task<
 
     let mut current_output = state.lock().await.get_config().initial_output;
 
+    let mut prev_report = None;
+
     loop {
         let event = match select4(
             MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
@@ -86,7 +88,13 @@ pub async fn report_task<
             .lock()
             .await
             .update(event, prev_update_time.elapsed().into());
+
         prev_update_time = embassy_time::Instant::now();
+        if prev_report == Some(state_report.clone()) {
+            continue;
+        }
+
+        prev_report = Some(state_report.clone());
 
         if !master_hooks
             .on_state_update(&mut state_report, usb, ble)

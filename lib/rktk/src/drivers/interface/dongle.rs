@@ -1,6 +1,8 @@
+use rktk_log::derive_format_and_debug;
 use usbd_hid::descriptor;
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[derive_format_and_debug]
 pub struct KeyboardReport {
     pub modifier: u8,
     pub reserved: u8,
@@ -9,6 +11,7 @@ pub struct KeyboardReport {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[derive_format_and_debug]
 pub struct MouseReport {
     pub buttons: u8,
     pub x: i8,
@@ -63,6 +66,7 @@ impl From<descriptor::MouseReport> for MouseReport {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[derive_format_and_debug]
 pub enum DongleData {
     Keyboard(KeyboardReport),
     Mouse(MouseReport),
