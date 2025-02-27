@@ -2,22 +2,32 @@ use core::convert::Infallible;
 
 use embassy_nrf::radio::Instance;
 use embassy_nrf_esb::ptx::PtxRadio;
-use rktk::drivers::interface::{
-    ble::BleDriver,
-    dongle::{DongleData, KeyboardReport},
-    reporter::ReporterDriver,
-    BackgroundTask, DriverBuilderWithTask,
+use rktk::{
+    drivers::interface::{
+        ble::BleDriver,
+        dongle::{DongleData, KeyboardReport},
+        reporter::ReporterDriver,
+        BackgroundTask, DriverBuilderWithTask,
+    },
+    utils::Channel,
 };
 
-pub struct EsbReporterDriverBuilder<T: Instance>(pub EsbReporterDriver<T>);
+static SEND_CHAN: Channel<DongleData, 32> = Channel::new();
 
-struct DummyTask;
-impl BackgroundTask for DummyTask {
-    async fn run(self) {}
+// -------- Builder ----------
+
+pub struct EsbReporterDriverBuilder<T: Instance> {
+    ptx: PtxRadio<'static, T, 64>,
+}
+
+impl<T: Instance> EsbReporterDriverBuilder<T> {
+    pub fn new(ptx: PtxRadio<'static, T, 64>) -> Self {
+        Self { ptx }
+    }
 }
 
 impl<T: Instance> DriverBuilderWithTask for EsbReporterDriverBuilder<T> {
-    type Driver = EsbReporterDriver<T>;
+    type Driver = EsbReporterDriver;
 
     type Error = ();
 
@@ -30,28 +40,39 @@ impl<T: Instance> DriverBuilderWithTask for EsbReporterDriverBuilder<T> {
         ),
         Self::Error,
     > {
-        Ok((self.0, DummyTask))
+        Ok((EsbReporterDriver {}, Task { ptx: self.ptx }))
     }
 }
 
-pub struct EsbReporterDriver<T: Instance> {
+// --------- Task ----------
+
+struct Task<T: Instance> {
     ptx: PtxRadio<'static, T, 64>,
 }
-
-impl<T: Instance> EsbReporterDriver<T> {
-    pub fn new(ptx: PtxRadio<'static, T, 64>) -> Self {
-        Self { ptx }
+impl<T: Instance> BackgroundTask for Task<T> {
+    async fn run(mut self) {
+        loop {
+            let data = SEND_CHAN.receive().await;
+            let mut buf = [0u8; 64];
+            if let Ok(data) = postcard::to_slice(&data, &mut buf) {
+                self.ptx.send(0, data, false).await;
+            }
+        }
     }
 }
 
-impl<T: Instance> ReporterDriver for EsbReporterDriver<T> {
+// ----------- Driver ------------
+
+pub struct EsbReporterDriver {}
+
+impl ReporterDriver for EsbReporterDriver {
     type Error = Infallible;
 
     fn try_send_keyboard_report(
         &self,
-        _report: usbd_hid::descriptor::KeyboardReport,
+        report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), Self::Error> {
-        Ok(())
+        SEND_CHAN.send(DongleData::Keyboard(report.into()));
     }
 
     fn try_send_media_keyboard_report(
@@ -63,8 +84,10 @@ impl<T: Instance> ReporterDriver for EsbReporterDriver<T> {
 
     fn try_send_mouse_report(
         &self,
-        _report: usbd_hid::descriptor::MouseReport,
+        report: usbd_hid::descriptor::MouseReport,
     ) -> Result<(), Self::Error> {
+        SEND_CHAN.send(DongleData::Mouse(report.into()));
+
         Ok(())
     }
 
@@ -75,39 +98,12 @@ impl<T: Instance> ReporterDriver for EsbReporterDriver<T> {
     fn wakeup(&self) -> Result<bool, Self::Error> {
         Ok(false)
     }
-
-    async fn send_keyboard_report(
-        &mut self,
-        report: usbd_hid::descriptor::KeyboardReport,
-    ) -> Result<(), Self::Error> {
-        let report: KeyboardReport = report.into();
-        let report = DongleData::Keyboard(report);
-        let mut buf = [0u8; 64];
-        if let Ok(data) = postcard::to_slice(&report, &mut buf) {
-            self.ptx.send(0, data, false).await;
-        }
-
-        Ok(())
-    }
-
-    async fn send_mouse_report(
-        &mut self,
-        report: usbd_hid::descriptor::MouseReport,
-    ) -> Result<(), Self::Error> {
-        let report = DongleData::Mouse(report.into());
-        let mut buf = [0u8; 64];
-        if let Ok(data) = postcard::to_slice(&report, &mut buf) {
-            self.ptx.send(0, data, false).await;
-        }
-
-        Ok(())
-    }
 }
 
-impl<T: Instance> BleDriver for EsbReporterDriver<T> {
+impl BleDriver for EsbReporterDriver {
     type Error = Infallible;
 
     async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
-        todo!()
+        Ok(())
     }
 }
