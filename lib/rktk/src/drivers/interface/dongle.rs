@@ -5,9 +5,7 @@ use usbd_hid::descriptor;
 #[derive_format_and_debug]
 pub struct KeyboardReport {
     pub modifier: u8,
-    pub reserved: u8,
-    pub leds: u8,
-    pub keycodes: [u8; 6],
+    pub keycodes: heapless::Vec<u8, 6>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -22,11 +20,14 @@ pub struct MouseReport {
 
 impl From<KeyboardReport> for descriptor::KeyboardReport {
     fn from(value: KeyboardReport) -> Self {
+        let mut keycodes = value.keycodes;
+        keycodes.resize_default(6).unwrap();
+
         Self {
             modifier: value.modifier,
-            reserved: value.reserved,
-            leds: value.leds,
-            keycodes: value.keycodes,
+            reserved: 0,
+            leds: 0,
+            keycodes: keycodes.into_array().unwrap(),
         }
     }
 }
@@ -34,9 +35,7 @@ impl From<descriptor::KeyboardReport> for KeyboardReport {
     fn from(value: descriptor::KeyboardReport) -> Self {
         Self {
             modifier: value.modifier,
-            reserved: value.reserved,
-            leds: value.leds,
-            keycodes: value.keycodes,
+            keycodes: heapless::Vec::from_slice(&value.keycodes).unwrap(),
         }
     }
 }

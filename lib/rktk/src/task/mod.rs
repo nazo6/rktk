@@ -189,11 +189,12 @@ pub async fn dongle_start<
     DisplayBuilder: DriverBuilder<Output = Display> + 'static,
 >(
     usb: impl DriverBuilderWithTask<Driver = Usb>,
-    mut dongle: Dongle,
+    dongle: impl DriverBuilderWithTask<Driver = Dongle>,
     mut hooks: impl dongle::DongleHooks,
-    mut display: Option<DisplayBuilder>,
+    display: Option<DisplayBuilder>,
 ) {
-    let (usb, task) = usb.build().await.unwrap();
+    let (usb, usb_task) = usb.build().await.unwrap();
+    let (mut dongle, dongle_task) = dongle.build().await.unwrap();
 
     let main_task = async move {
         loop {
@@ -205,14 +206,25 @@ pub async fn dongle_start<
                     }
                     match data {
                         DongleData::Keyboard(report) => {
-                            usb.try_send_keyboard_report(report.into());
+                            if let Err(e) = usb.try_send_keyboard_report(report.into()) {
+                                rktk_log::warn!(
+                                    "Failed to send keyboard report: {:?}",
+                                    Debug2Format(&e)
+                                );
+                            }
                         }
                         DongleData::Mouse(report) => {
-                            usb.try_send_mouse_report(report.into());
+                            if let Err(e) = usb.try_send_mouse_report(report.into()) {
+                                rktk_log::warn!(
+                                    "Failed to send mouse report: {:?}",
+                                    Debug2Format(&e)
+                                );
+                            }
                         }
                     }
                 }
-                Err(_e) => {
+                Err(e) => {
+                    rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
                     embassy_time::Timer::after_millis(100).await;
                     continue;
                 }
@@ -220,7 +232,7 @@ pub async fn dongle_start<
         }
     };
 
-    sjoin::join!(main_task, task.run(), async move {
+    sjoin::join!(main_task, usb_task.run(), dongle_task.run(), async move {
         if let Some(display_builder) = display {
             display::start(display_builder).await;
         }

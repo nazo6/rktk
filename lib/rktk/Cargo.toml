@@ -59,5 +59,10 @@ _check = ["alloc", "log", "defmt"]
 
 alloc = []
 
-defmt = ["dep:defmt", "rktk-log/defmt", "rktk-keymanager/defmt"]
+defmt = [
+  "dep:defmt",
+  "rktk-log/defmt",
+  "rktk-keymanager/defmt",
+  "heapless/defmt-impl",
+]
 log = ["dep:log", "dep:critical-section", "rktk-log/log"]

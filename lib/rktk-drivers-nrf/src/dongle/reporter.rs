@@ -49,12 +49,16 @@ struct Task<T: Instance> {
 }
 impl<T: Instance> BackgroundTask for Task<T> {
     async fn run(mut self) {
+        let mut cnt: usize = 0;
         loop {
             let data = SEND_CHAN.receive().await;
             let mut buf = [0u8; 64];
-            if let Ok(data) = postcard::to_slice(&data, &mut buf) {
+            if let Ok(data) = postcard::to_slice(&(cnt, data), &mut buf) {
                 // rktk::print!("{}:{:?}", data.len(), embassy_time::Instant::now());
-                self.ptx.send(0, data, false).await;
+                if let Err(e) = self.ptx.send(0, data, false).await {
+                    rktk_log::warn!("Failed to send data: {:?}", e);
+                }
+                cnt += 1;
             }
         }
     }
@@ -64,14 +68,25 @@ impl<T: Instance> BackgroundTask for Task<T> {
 
 pub struct EsbReporterDriver {}
 
+#[derive(Debug)]
+pub struct ErrorMsg(&'static str);
+impl core::fmt::Display for ErrorMsg {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+impl core::error::Error for ErrorMsg {}
+
 impl ReporterDriver for EsbReporterDriver {
-    type Error = Infallible;
+    type Error = ErrorMsg;
 
     fn try_send_keyboard_report(
         &self,
         report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), Self::Error> {
-        SEND_CHAN.try_send(DongleData::Keyboard(report.into()));
+        SEND_CHAN
+            .try_send(DongleData::Keyboard(report.into()))
+            .map_err(|_| ErrorMsg("kb send full"))?;
         Ok(())
     }
 
@@ -86,7 +101,9 @@ impl ReporterDriver for EsbReporterDriver {
         &self,
         report: usbd_hid::descriptor::MouseReport,
     ) -> Result<(), Self::Error> {
-        SEND_CHAN.try_send(DongleData::Mouse(report.into()));
+        SEND_CHAN
+            .try_send(DongleData::Mouse(report.into()))
+            .map_err(|_| ErrorMsg("ms send full"))?;
 
         Ok(())
     }

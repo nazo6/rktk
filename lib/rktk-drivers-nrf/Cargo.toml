@@ -79,5 +79,6 @@ defmt = [
   "embassy-nrf/defmt",
   "heapless/defmt-impl",
   "postcard/use-defmt",
+  "embassy-nrf-esb/defmt",
 ]
 log = ["dep:log"]
