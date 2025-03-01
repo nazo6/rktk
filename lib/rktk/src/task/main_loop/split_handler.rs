@@ -116,7 +116,6 @@ pub async fn start<
                 match res {
                     Ok(_) => match from_bytes_cobs::<(usize, R)>(&mut recv_buf.clone()) {
                         Ok((id, data)) => {
-                            debug!("Split data received: id:{}, data:{:?}", id, data);
                             if received_sender.try_send(data).is_err() {
                                 warn!("split recv chan full");
                             }

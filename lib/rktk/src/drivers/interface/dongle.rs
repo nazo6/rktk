@@ -1,14 +1,16 @@
+use postcard::experimental::max_size::MaxSize;
 use rktk_log::derive_format_and_debug;
+use serde::{Deserialize, Serialize};
 use usbd_hid::descriptor;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize, MaxSize)]
 #[derive_format_and_debug]
 pub struct KeyboardReport {
     pub modifier: u8,
     pub keycodes: heapless::Vec<u8, 6>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize, MaxSize)]
 #[derive_format_and_debug]
 pub struct MouseReport {
     pub buttons: u8,
@@ -16,6 +18,12 @@ pub struct MouseReport {
     pub y: i8,
     pub wheel: i8,
     pub pan: i8,
+}
+
+#[derive(Serialize, Deserialize, MaxSize)]
+#[derive_format_and_debug]
+pub struct MediaKeyboardReport {
+    pub usage_id: u16,
 }
 
 impl From<KeyboardReport> for descriptor::KeyboardReport {
@@ -51,7 +59,6 @@ impl From<MouseReport> for descriptor::MouseReport {
         }
     }
 }
-
 impl From<descriptor::MouseReport> for MouseReport {
     fn from(value: descriptor::MouseReport) -> Self {
         Self {
@@ -64,11 +71,27 @@ impl From<descriptor::MouseReport> for MouseReport {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+impl From<MediaKeyboardReport> for descriptor::MediaKeyboardReport {
+    fn from(value: MediaKeyboardReport) -> Self {
+        Self {
+            usage_id: value.usage_id,
+        }
+    }
+}
+impl From<descriptor::MediaKeyboardReport> for MediaKeyboardReport {
+    fn from(value: descriptor::MediaKeyboardReport) -> Self {
+        Self {
+            usage_id: value.usage_id,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, MaxSize)]
 #[derive_format_and_debug]
 pub enum DongleData {
     Keyboard(KeyboardReport),
     Mouse(MouseReport),
+    MediaKeyboard(MediaKeyboardReport),
 }
 
 pub trait DongleDriver {

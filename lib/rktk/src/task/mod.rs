@@ -221,10 +221,18 @@ pub async fn dongle_start<
                                 );
                             }
                         }
+                        DongleData::MediaKeyboard(report) => {
+                            if let Err(e) = usb.try_send_media_keyboard_report(report.into()) {
+                                rktk_log::warn!(
+                                    "Failed to send media keyboard report: {:?}",
+                                    Debug2Format(&e)
+                                );
+                            }
+                        }
                     }
                 }
                 Err(e) => {
-                    rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
+                    // rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
                     embassy_time::Timer::after_millis(100).await;
                     continue;
                 }
