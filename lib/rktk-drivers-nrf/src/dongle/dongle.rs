@@ -46,7 +46,7 @@ impl<T: Instance> BackgroundTask for EsbDongleDriverTask<T> {
 
 pub struct EsbDongleDriver {
     prx_interface: PrxInterface,
-    cnt: usize,
+    cnt: u8,
 }
 
 #[derive(Debug)]
@@ -65,11 +65,11 @@ impl DongleDriver for EsbDongleDriver {
             .recv(&mut buf)
             .await
             .map_err(EsbDongleError::Esb)?;
-        let (cnt, data): (usize, DongleData) =
+        let (cnt, data): (u8, DongleData) =
             postcard::from_bytes(&buf[..size]).map_err(EsbDongleError::Deserialization)?;
 
-        if cnt - self.cnt > 1 {
-            rktk_log::warn!("Dropped packets: {} -> {}", self.cnt, cnt);
+        if cnt.wrapping_sub(self.cnt) > 1 {
+            rktk_log::warn!("Packet dropped: {} -> {}", self.cnt, cnt);
         }
         self.cnt = cnt;
 

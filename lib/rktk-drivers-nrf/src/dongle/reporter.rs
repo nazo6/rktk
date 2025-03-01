@@ -44,7 +44,7 @@ impl<T: Instance> DriverBuilderWithTask for EsbReporterDriverBuilder<T> {
         Ok((
             EsbReporterDriver {
                 ptx_interface: self.ptx_interface,
-                cnt: core::sync::atomic::AtomicU32::new(0),
+                cnt: core::sync::atomic::AtomicU8::new(0),
             },
             Task {
                 ptx_task: self.ptx_task,
@@ -68,7 +68,7 @@ impl<T: Instance> BackgroundTask for Task<T> {
 
 pub struct EsbReporterDriver {
     ptx_interface: PtxInterface,
-    cnt: core::sync::atomic::AtomicU32,
+    cnt: core::sync::atomic::AtomicU8,
 }
 
 #[derive(Debug)]
@@ -89,7 +89,7 @@ impl EsbReporterDriver {
         postcard::to_slice(&(cnt, report), &mut buf).map_err(|_| ErrorMsg("ser"))?;
         self.ptx_interface
             .try_send(0, &buf, false)
-            .map_err(|_| ErrorMsg("kb send full"))?;
+            .map_err(|_| ErrorMsg("ch full"))?;
         Ok(())
     }
 }
