@@ -5,7 +5,10 @@ pub struct InternalCmdConfig {
     pub crates: HashMap<String, CrateConfig>,
     pub check_skip_global: Option<Vec<String>>,
     pub check_env: HashMap<String, String>,
+
     pub test_features_global: Option<Vec<String>>,
+
+    pub doc_features_global: Option<Vec<String>>,
 }
 
 #[derive(Default, serde::Deserialize, Clone)]
@@ -21,6 +24,7 @@ pub struct CrateConfig {
     /// Features to skip check (these features will be never added.). This overrides global skip.
     pub check_skip: Option<Vec<String>>,
     pub test_enabled: bool,
+    pub doc_disabled: bool,
 }
 
 pub static CRATES_CONFIG: LazyLock<InternalCmdConfig> = LazyLock::new(|| {

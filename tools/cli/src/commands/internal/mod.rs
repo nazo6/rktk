@@ -2,6 +2,7 @@ use clap::Subcommand;
 
 mod check;
 mod config;
+mod doc;
 mod release;
 mod test;
 
@@ -27,6 +28,7 @@ pub enum InternalCommands {
         #[arg(long)]
         continue_on_error: bool,
     },
+    Doc,
 }
 
 pub fn start(command: InternalCommands) -> anyhow::Result<()> {
@@ -38,6 +40,7 @@ pub fn start(command: InternalCommands) -> anyhow::Result<()> {
             execute,
             continue_on_error,
         } => release::start(crate_name, execute, continue_on_error)?,
+        InternalCommands::Doc => doc::start()?,
     };
 
     Ok(())

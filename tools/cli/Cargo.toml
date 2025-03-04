@@ -23,6 +23,7 @@ paste = "1.0"
 uf2 = "0.1.0"
 dunce = "1.0.5"
 sysinfo = "0.33.1"
+dircpy = "0.3.19"
 
 [features]
 _check = []
