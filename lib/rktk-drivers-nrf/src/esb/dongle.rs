@@ -1,21 +1,23 @@
 use core::{marker::PhantomData, sync::atomic::AtomicBool};
 
 use embassy_nrf::{
-    interrupt,
+    interrupt::{self, typelevel::Binding},
     pac::Interrupt,
     radio::{self},
     timer,
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    bbq2::queue::BBQueue, irq::StatePRX, peripherals::PtrTimer as _, Addresses, ConfigBuilder,
-    EsbApp, EsbBuffer, EsbIrq, IrqTimer,
+    bbq2::queue::BBQueue, irq::StatePRX, peripherals::PtrTimer as _, EsbApp, EsbBuffer, EsbIrq,
+    IrqTimer,
 };
 use rktk::drivers::interface::{
     dongle::{DongleData, DongleDriver},
     BackgroundTask, DriverBuilderWithTask,
 };
 use rktk_log::helper::Debug2Format;
+
+use super::Config;
 
 macro_rules! use_peripheral {
     ($radio:ident, $timer:ident, $esb_timer:ident) => {
@@ -73,14 +75,30 @@ impl interrupt::typelevel::Handler<<DongleRadio as radio::Instance>::Interrupt>
 // ---- Builder -------
 
 pub struct EsbDongleDriverBuilder {
-    pub timer: DongleTimer,
-    pub radio: DongleRadio,
+    _timer: DongleTimer,
+    _radio: DongleRadio,
+    config: Config,
+}
+
+impl EsbDongleDriverBuilder {
+    pub fn new(
+        timer: DongleTimer,
+        radio: DongleRadio,
+        _irqs: impl Binding<<DongleTimer as timer::Instance>::Interrupt, TimerInterruptHandler>,
+        config: Config,
+    ) -> Self {
+        Self {
+            _timer: timer,
+            _radio: radio,
+            config,
+        }
+    }
 }
 
 impl DriverBuilderWithTask for EsbDongleDriverBuilder {
     type Driver = EsbDongleDriver;
 
-    type Error = ();
+    type Error = &'static str;
 
     async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
         static BUFFER: EsbBuffer<1024, 1024> = EsbBuffer {
@@ -88,22 +106,25 @@ impl DriverBuilderWithTask for EsbDongleDriverBuilder {
             radio_to_app_buf: BBQueue::new(),
             timer_flag: AtomicBool::new(false),
         };
-        let addresses = Addresses::default();
-        let config = ConfigBuilder::default()
-            .maximum_transmit_attempts(0)
+        let config = self
+            .config
+            .config
             .max_payload_size(192)
             .check()
-            .unwrap();
+            .map_err(|_| "Invalid config")?;
+        let mut a =super::Addresses::default();
         let (esb_app, esb_irq, esb_timer) = BUFFER
             .try_split(
                 unsafe { DongleTimerEsb::take() },
                 DONGLE_RADIO_PAC,
-                addresses,
+                self.config.addresses,
                 config,
             )
-            .unwrap();
+            .map_err(|_| "Failed to initialize")?;
         let mut esb_irq = esb_irq.into_prx();
-        esb_irq.start_receiving().unwrap();
+        esb_irq
+            .start_receiving()
+            .map_err(|_| "Failed to start receiving")?;
         ESB_IRQ.lock().await.replace(esb_irq);
         IRQ_TIMER.lock().await.replace(esb_timer);
 

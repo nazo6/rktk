@@ -8,8 +8,8 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    bbq2::queue::BBQueue, irq::StatePTX, peripherals::PtrTimer as _, Addresses, ConfigBuilder,
-    EsbApp, EsbBuffer, EsbHeader, EsbIrq, IrqTimer,
+    bbq2::queue::BBQueue, irq::StatePTX, peripherals::PtrTimer as _, EsbApp, EsbBuffer, EsbHeader,
+    EsbIrq, IrqTimer,
 };
 use postcard::experimental::max_size::MaxSize as _;
 use rktk::{
@@ -81,6 +81,7 @@ const MAX_PAYLOAD_SIZE: u8 = 192;
 
 pub struct EsbReporterDriverBuilder {
     _phantom: PhantomData<()>,
+    config: super::Config,
 }
 
 impl EsbReporterDriverBuilder {
@@ -89,9 +90,11 @@ impl EsbReporterDriverBuilder {
         _radio: DongleRadio,
         _irqs: impl Binding<<DongleTimer as timer::Instance>::Interrupt, TimerInterruptHandler>
             + Binding<<DongleRadio as radio::Instance>::Interrupt, EsbInterruptHandler>,
+        config: super::Config,
     ) -> Self {
         Self {
             _phantom: PhantomData,
+            config,
         }
     }
 }
@@ -99,7 +102,7 @@ impl EsbReporterDriverBuilder {
 impl DriverBuilderWithTask for EsbReporterDriverBuilder {
     type Driver = EsbReporterDriver;
 
-    type Error = ();
+    type Error = &'static str;
 
     async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
         static BUFFER: EsbBuffer<1024, 1024> = EsbBuffer {
@@ -107,18 +110,18 @@ impl DriverBuilderWithTask for EsbReporterDriverBuilder {
             radio_to_app_buf: BBQueue::new(),
             timer_flag: AtomicBool::new(false),
         };
-        let addresses = Addresses::default();
-        let config = ConfigBuilder::default()
-            .maximum_transmit_attempts(0)
-            .max_payload_size(MAX_PAYLOAD_SIZE)
+        let config = self
+            .config
+            .config
+            .max_payload_size(192)
             .check()
-            .unwrap();
+            .map_err(|_| "Config error")?;
 
         let (esb_app, esb_irq, esb_timer) = BUFFER
             .try_split(
                 unsafe { DongleTimerEsb::take() },
                 DONGLE_RADIO_PAC,
-                addresses,
+                self.config.addresses,
                 config,
             )
             .unwrap();
