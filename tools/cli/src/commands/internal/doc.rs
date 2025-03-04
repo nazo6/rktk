@@ -11,7 +11,10 @@ use crate::{utils::METADATA, xprintln};
 
 use super::config::CRATES_CONFIG;
 
-fn run_doc(p: &Package, parts_root: &Utf8Path) -> Result<(PathBuf, Utf8PathBuf), anyhow::Error> {
+fn run_doc(
+    p: &Package,
+    parts_root: &Utf8Path,
+) -> Result<(PathBuf, Utf8PathBuf, PathBuf), anyhow::Error> {
     let part_dir = parts_root.join(&p.name);
     let mut args = vec![
         "doc".to_string(),
@@ -77,7 +80,14 @@ fn run_doc(p: &Package, parts_root: &Utf8Path) -> Result<(PathBuf, Utf8PathBuf),
         doc_dir.display()
     );
 
-    Ok((doc_dir.to_path_buf(), part_dir))
+    let src_dir = doc_dir
+        .parent()
+        .unwrap()
+        .join("src")
+        .join(p.name.replace("-", "_"));
+    dbg!(&src_dir);
+
+    Ok((doc_dir.to_path_buf(), part_dir, src_dir))
 }
 
 pub fn start() -> anyhow::Result<()> {
@@ -115,8 +125,8 @@ pub fn start() -> anyhow::Result<()> {
             package.manifest_path
         );
 
-        let (doc_dir, part_dir) = run_doc(package, &parts_root)?;
-        doc_dirs.push((doc_dir, part_dir));
+        let (doc_dir, part_dir, src_dir) = run_doc(package, &parts_root)?;
+        doc_dirs.push((doc_dir, part_dir, src_dir));
     }
 
     let mut args = vec![
@@ -129,12 +139,19 @@ pub fn start() -> anyhow::Result<()> {
         "embassy_sync=https://docs.embassy.dev/embassy-sync/git/default".to_string(),
     ];
 
-    for (doc_dir, part_dir) in doc_dirs {
+    for (doc_dir, part_dir, src_dir) in doc_dirs {
         args.push(format!("--include-parts-dir={}", part_dir));
         let crate_name = doc_dir.file_name().unwrap().to_str().unwrap();
+        // copy doc html
         dircpy::CopyBuilder::new::<&str, &str>(
             doc_dir.to_string_lossy().as_ref(),
             merged_root.join(crate_name).as_ref(),
+        )
+        .run()?;
+        // copy src html
+        dircpy::CopyBuilder::new::<&str, &str>(
+            src_dir.to_string_lossy().as_ref(),
+            merged_root.join("src").join(crate_name).as_ref(),
         )
         .run()?;
     }
