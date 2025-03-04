@@ -8,8 +8,8 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    bbq2::queue::BBQueue, irq::StatePRX, payload::PayloadR, peripherals::PtrTimer as _, EsbApp,
-    EsbBuffer, EsbIrq, IrqTimer,
+    bbq2::queue::BBQueue, irq::StatePRX, peripherals::PtrTimer as _, EsbApp, EsbBuffer, EsbIrq,
+    IrqTimer,
 };
 use rktk::drivers::interface::{
     dongle::{DongleData, DongleDriver},
