@@ -22,7 +22,7 @@ rktk-drivers-common = { workspace = true }
 rktk-log = { workspace = true }
 log = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
-cortex-m.workspace = true
+
 embassy-embedded-hal = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
@@ -44,9 +44,6 @@ embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
 sequential-storage = { workspace = true }
 
-ssd1306 = { workspace = true }
-display-interface = { workspace = true }
-
 serde = { workspace = true }
 postcard = { workspace = true }
 
@@ -59,24 +56,45 @@ usbd-hid = { workspace = true }
 thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
-esb-ng = { git = "https://github.com/jamesmunns/esb", version = "0.1.0" }
-cortex-m-rt = "0.7.5"
+esb-ng = { git = "https://github.com/jamesmunns/esb", version = "0.1.0", optional = true }
+cortex-m = { workspace = true, optional = true }
+
+document-features = { workspace = true }
 
 [features]
+default = ["power"]
+
 _check = [
   "embassy-nrf/nrf52840",
   "nrf-softdevice/nrf52840",
   "nrf-softdevice/s140",
+  "esb",
+  "softdevice-ble",
 ]
 
-default = ["ble", "power"]
-
-softdevice = ["dep:nrf-softdevice"]
-# Enables system power off feature. This is supported only on some chips like nRF52840.
-power = []
-ble = ["softdevice", "nrf-softdevice/ble-gatt-server", "nrf-softdevice/ble-sec"]
+## Use this feature to use embassy-executor's nightly features.
 nightly = ["embassy-executor/nightly"]
 
+## Enables system power off feature. This is supported only on some chips like nRF52840.
+power = []
+
+## Enables wireless dongle driver using esb(Enhanced Shockburst) protocol.
+## This feature is not compatible with softdevice.
+esb = ["dep:esb-ng", "dep:cortex-m"]
+
+#! #### Softdevice
+## Enables softdevice. If this feature is enabled, the softdevice will be included in the build.
+softdevice = ["dep:nrf-softdevice"]
+
+## Enables BLE split and reporter driver using softdevice
+softdevice-ble = [
+  "softdevice",
+  "nrf-softdevice/ble-gatt-server",
+  "nrf-softdevice/ble-sec",
+]
+
+#! #### Logging
+## Enables defmt logging
 defmt = [
   "dep:defmt",
   "rktk/defmt",
@@ -86,4 +104,5 @@ defmt = [
   "heapless/defmt-impl",
   "postcard/use-defmt",
 ]
+## Enables log logging
 log = ["dep:log"]

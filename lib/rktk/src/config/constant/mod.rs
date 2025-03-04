@@ -9,6 +9,8 @@
 //! RKTK_CONFIG_PATH = { value = "rktk.json", relative = true }
 //! ```
 //! See the examples folder for an example of this json.
+//!
+//! For each configuration, see the [`schema`] module.
 
 use embassy_time::Duration;
 

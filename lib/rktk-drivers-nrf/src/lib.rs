@@ -8,12 +8,15 @@
 //!
 //! NOTE: This crate uses unreleased version of `nrf-softdevice` and such dependency is not accepted by crates.io.
 //! So if you want to use `softdevice` feature (needed for BLE), use git version of this crate.
-
+//!
+//! ## Feature flags
+#![doc = document_features::document_features!()]
 #![no_std]
 #![cfg_attr(feature = "nightly", feature(impl_trait_in_assoc_type))]
 #![cfg_attr(doc, feature(doc_auto_cfg))]
 
 pub mod display;
+#[cfg(feature = "esb")]
 pub mod esb;
 pub mod keyscan;
 pub mod mouse;

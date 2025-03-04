@@ -28,5 +28,6 @@ pub struct CrateConfig {
 }
 
 pub static CRATES_CONFIG: LazyLock<InternalCmdConfig> = LazyLock::new(|| {
-    toml::from_str(include_str!("./crates_config.toml")).expect("Failed to parse CratesConfig.toml")
+    toml::from_str(include_str!("../../../../../crates_config.toml"))
+        .expect("Failed to parse CratesConfig.toml")
 });

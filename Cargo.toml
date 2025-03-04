@@ -83,6 +83,8 @@ wasm-bindgen-futures = "0.4.49"
 defmt = "0.3.10"
 log = "0.4.25"
 
+document-features = "0.2.11"
+
 [profile]
 
 [profile.wasm-dev]

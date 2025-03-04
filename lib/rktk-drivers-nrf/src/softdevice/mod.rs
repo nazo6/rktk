@@ -4,10 +4,10 @@ use core::mem;
 
 use nrf_softdevice::{raw, Softdevice};
 
-#[cfg(feature = "ble")]
+#[cfg(feature = "softdevice-ble")]
 pub mod ble;
 pub mod flash;
-#[cfg(feature = "ble")]
+#[cfg(feature = "softdevice-ble")]
 pub mod split;
 
 /// Initialize the softdevice and return the instance.

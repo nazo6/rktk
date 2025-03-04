@@ -27,6 +27,8 @@ postcard = { workspace = true, optional = true, features = [
 ssmarshal = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
 
+document-features = { workspace = true }
+
 [dev-dependencies]
 critical-section = { workspace = true, features = ["std"] }
 pretty_assertions = "1.4.0"
@@ -35,14 +37,16 @@ usbd-hid = { workspace = true }
 [features]
 _check = ["state", "ssmarshal/std", "defmt"]
 
-# Enables state management.
+## Enables state management.
 state = ["dep:usbd-hid"]
 
-# Enables serialization.
+## Enables serialization using serde.
 serde = ["dep:serde", "dep:serde_with"]
-# Enables serialization with postcard.
+## Derives postcard's MaxSize trait
 postcard = ["dep:postcard", "serde"]
 
+## Uses std types instead of heapless types.
 std = []
 
+## Derives defmt's Format trait
 defmt = ["dep:defmt"]

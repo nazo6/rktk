@@ -1,4 +1,7 @@
-check_skip_global = ["_check"]
+# This config is used by internal `cargo rktk` command.
+# For more detail, see `tools/cli/src/commands/internal`
+
+check_skip_global = ["_check", "default"]
 check_env = { DEFMT_LOG = "trace" }
 test_features_global = ["_check"]
 doc_features_global = ["_check"]
@@ -9,7 +12,9 @@ test_enabled = true
 
 [crates.rktk-drivers-nrf]
 check_features = ["_check", "nightly", "power"]
-check_skip = []
+check_group_features = [["softdevice", "softdevice-ble"]]
+check_mutually_exclusive_features = [["softdevice-ble", "esb"]]
+check_skip = ["default"]
 
 [crates.rktk-drivers-rp]
 check_features = ["_check"]
@@ -27,6 +32,13 @@ check_at_least_one_of = ["web", "native"]
 check_mutually_exclusive_features = [["web", "native"]]
 doc_disabled = true
 
+[crates.rktk-cli]
+doc_disabled = true
+check_no_powerset = true
+
+[crates.rktk-log-macros]
+doc_disabled = true
+
 [crates.example-corne]
 check_no_powerset = true
 doc_disabled = true
@@ -38,10 +50,3 @@ doc_disabled = true
 [crates.example-dummy-kb-rp]
 doc_disabled = true
 check_no_powerset = true
-
-[crates.rktk-cli]
-doc_disabled = true
-check_no_powerset = true
-
-[crates.rktk-log-macros]
-doc_disabled = true
