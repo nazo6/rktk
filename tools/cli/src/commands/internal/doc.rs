@@ -140,5 +140,12 @@ pub fn start() -> anyhow::Result<()> {
     }
 
     cmd("rustdoc", args).run()?;
+
+    let index_html = merged_root.join("index.html");
+    std::fs::write(
+        &index_html,
+        r#"<meta http-equiv="refresh" content="0;URL=rktk/index.html">"#,
+    )?;
+
     Ok(())
 }

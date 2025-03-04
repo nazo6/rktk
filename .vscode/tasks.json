@@ -20,6 +20,11 @@
       "label": "clean",
       "type": "shell",
       "command": "cargo clean"
+    },
+    {
+      "label": "doc",
+      "type": "shell",
+      "command": "cargo rktk internal doc"
     }
   ]
 }
