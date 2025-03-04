@@ -48,7 +48,7 @@ serde-wasm-bindgen = { version = "0.6.5", optional = true }
 
 # native deps
 smol = { version = "2.0.2", optional = true }
-async-hid = { git = "https://github.com/sidit77/async-hid", optional = true }
+async-hid = { version = "0.2.0", optional = true }
 
 [features]
 _check = ["native"]

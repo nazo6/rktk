@@ -214,8 +214,9 @@ dependencies = [
 
 [[package]]
 name = "async-hid"
-version = "0.1.0"
-source = "git+https://github.com/sidit77/async-hid#c04bd388e035642165fab2fca5b5db0472360975"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2f7f810c0db07bfd87a5620b903e569770484a1d3154d9a55e2975cbedcaa88"
 dependencies = [
  "async-channel 1.9.0",
  "async-io",
