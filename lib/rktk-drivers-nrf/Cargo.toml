@@ -30,7 +30,11 @@ embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
+embassy-nrf = { workspace = true, features = [
+  "gpiote",
+  "time-driver-rtc1",
+  "unstable-pac",
+] }
 nrf-softdevice = { optional = true, workspace = true, features = [
   "ble-peripheral",
   "ble-central",
@@ -56,7 +60,8 @@ usbd-hid = { workspace = true }
 thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
-embassy-nrf-esb = { path = "../../../../../lib/embassy-nrf-esb/" }
+esb-ng = { git = "https://github.com/jamesmunns/esb", version = "0.1.0" }
+cortex-m-rt = "0.7.5"
 
 [features]
 _check = [
@@ -79,6 +84,5 @@ defmt = [
   "embassy-nrf/defmt",
   "heapless/defmt-impl",
   "postcard/use-defmt",
-  "embassy-nrf-esb/defmt",
 ]
 log = ["dep:log"]

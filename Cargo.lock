@@ -32,7 +32,7 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "version_check",
- "zerocopy 0.7.35",
+ "zerocopy",
 ]
 
 [[package]]
@@ -443,8 +443,10 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "bbq2"
 version = "0.1.0"
-source = "git+https://github.com/jamesmunns/bbq2#907cc6ae9740edd240808e4d2840fe97c9eeb201"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b5bbde0e5324bc9c282e869a2f544166ac94bbb82b26afd2ca82ac7b0742a89"
 dependencies = [
+ "critical-section",
  "maitake-sync",
 ]
 
@@ -2024,21 +2026,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "embassy-nrf-esb"
-version = "0.1.0"
-dependencies = [
- "bbq2",
- "defmt",
- "embassy-futures",
- "embassy-hal-internal",
- "embassy-nrf",
- "embassy-sync",
- "embassy-time",
- "nrf-pac",
- "zerocopy 0.8.20",
-]
-
-[[package]]
 name = "embassy-rp"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2330,6 +2317,16 @@ checksum = "33d852cb9b869c2a9b3df2f71a3074817f01e1844f839a144f5fcef059a4eb5d"
 dependencies = [
  "libc",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "esb-ng"
+version = "0.1.0"
+source = "git+https://github.com/jamesmunns/esb#8c4b91f49df564fd991be135a2d533e80ca13634"
+dependencies = [
+ "bbq2",
+ "cortex-m",
+ "nrf-pac",
 ]
 
 [[package]]
@@ -3881,15 +3878,17 @@ checksum = "b8dd856d451cc0da70e2ef2ce95a18e39a93b7558bedf10201ad28503f918568"
 
 [[package]]
 name = "maitake-sync"
-version = "0.1.2"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6816ab14147f80234c675b80ed6dc4f440d8a1cefc158e766067aedb84c0bcd5"
+checksum = "2e2643eb7d41ee3e0f17e4cb6ffaf925eb468337e99f6e180530259bc124177e"
 dependencies = [
  "cordyceps",
  "loom 0.7.2",
+ "mutex-traits",
  "mycelium-bitfield",
  "pin-project",
  "portable-atomic",
+ "tracing",
 ]
 
 [[package]]
@@ -4076,6 +4075,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "mutex-traits"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd54cb762feb1788c74f5d3387983864d2365ca1819043d2addb76db80169102"
+
+[[package]]
 name = "mycelium-bitfield"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4170,7 +4175,6 @@ checksum = "d334027d6703534f2a80de0794ae435c0e029358d28278533d3935e69b221b01"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
- "defmt",
 ]
 
 [[package]]
@@ -4904,7 +4908,7 @@ version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
 dependencies = [
- "zerocopy 0.7.35",
+ "zerocopy",
 ]
 
 [[package]]
@@ -5423,18 +5427,19 @@ dependencies = [
  "atomic-pool",
  "bitvec",
  "cortex-m",
+ "cortex-m-rt",
  "defmt",
  "display-interface",
  "embassy-embedded-hal",
  "embassy-executor",
  "embassy-futures",
  "embassy-nrf",
- "embassy-nrf-esb",
  "embassy-sync",
  "embassy-time",
  "embassy-usb",
  "embedded-io-async",
  "embedded-storage-async",
+ "esb-ng",
  "heapless 0.7.17",
  "log",
  "nrf-softdevice",
@@ -7816,16 +7821,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b9b4fd18abc82b8136838da5d50bae7bdea537c574d8dc1a34ed098d6c166f0"
 dependencies = [
  "byteorder",
- "zerocopy-derive 0.7.35",
-]
-
-[[package]]
-name = "zerocopy"
-version = "0.8.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dde3bb8c68a8f3f1ed4ac9221aad6b10cece3e60a8e2ea54a6a2dec806d0084c"
-dependencies = [
- "zerocopy-derive 0.8.20",
+ "zerocopy-derive",
 ]
 
 [[package]]
@@ -7833,17 +7829,6 @@ name = "zerocopy-derive"
 version = "0.7.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.98",
-]
-
-[[package]]
-name = "zerocopy-derive"
-version = "0.8.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eea57037071898bf96a6da35fd626f4f27e9cee3ead2a6c703cf09d472b2e700"
 dependencies = [
  "proc-macro2",
  "quote",
