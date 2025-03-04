@@ -2,6 +2,7 @@ use core::{convert::Infallible, marker::PhantomData, sync::atomic::AtomicBool};
 
 use embassy_nrf::{
     interrupt::{self, typelevel::Binding},
+    pac::Interrupt,
     radio::{self},
     timer,
 };
@@ -18,7 +19,7 @@ use rktk::{
     },
     utils::Channel,
 };
-use rktk_log::{debug, warn};
+use rktk_log::{debug, helper::Debug2Format, warn};
 
 macro_rules! use_peripheral {
     ($radio:ident, $timer:ident, $esb_timer:ident) => {
@@ -42,7 +43,6 @@ impl interrupt::typelevel::Handler<<DongleTimer as timer::Instance>::Interrupt>
     for TimerInterruptHandler
 {
     unsafe fn on_interrupt() {
-        panic!("reach interrupt");
         if let Ok(mut irq_timer) = IRQ_TIMER.try_lock() {
             if let Some(irq_timer) = &mut *irq_timer {
                 irq_timer.timer_interrupt();
@@ -64,10 +64,11 @@ impl interrupt::typelevel::Handler<<DongleRadio as radio::Instance>::Interrupt>
     for EsbInterruptHandler
 {
     unsafe fn on_interrupt() {
-        panic!("reach interrupt");
         if let Ok(mut esb_irq) = ESB_IRQ.try_lock() {
             if let Some(esb_irq) = &mut *esb_irq {
-                esb_irq.radio_interrupt();
+                if let Err(e) = esb_irq.radio_interrupt() {
+                    rktk_log::warn!("Irq error: {:?}", Debug2Format(&e));
+                }
             }
         }
     }
@@ -124,6 +125,10 @@ impl DriverBuilderWithTask for EsbReporterDriverBuilder {
         let esb_irq = esb_irq.into_ptx();
         ESB_IRQ.lock().await.replace(esb_irq);
         IRQ_TIMER.lock().await.replace(esb_timer);
+        unsafe {
+            cortex_m::peripheral::NVIC::unmask(Interrupt::RADIO);
+            cortex_m::peripheral::NVIC::unmask(Interrupt::TIMER0);
+        }
 
         Ok((EsbReporterDriver {}, Task { esb_app }))
     }
@@ -135,42 +140,56 @@ struct Task {
     esb_app: EsbApp<1024, 1024>,
 }
 impl BackgroundTask for Task {
-    async fn run(mut self) {
-        let mut cnt = 0;
+    async fn run(self) {
+        let mut cnt: u8 = 0;
         let mut pid = 0;
-        loop {
-            let report = REPORT_SEND_CHAN.receive().await;
-            debug!("Received report: {:?}", report);
-            let mut buf = [0; DongleDataWithCnt::POSTCARD_MAX_SIZE];
-            let Ok(slice) = postcard::to_slice(&(cnt, report), &mut buf) else {
-                warn!("Postcard error");
-                continue;
-            };
+        let (mut s, mut r) = self.esb_app.split();
+        embassy_futures::join::join(
+            async move {
+                loop {
+                    let report = REPORT_SEND_CHAN.receive().await;
+                    let mut buf = [0; DongleDataWithCnt::POSTCARD_MAX_SIZE];
+                    let Ok(slice) = postcard::to_slice(&(cnt, report), &mut buf) else {
+                        warn!("Postcard error");
+                        continue;
+                    };
 
-            let esb_header = EsbHeader::build()
-                .max_payload(MAX_PAYLOAD_SIZE)
-                .pid(pid)
-                .pipe(0)
-                .no_ack(false)
-                .check()
-                .unwrap();
-            let Ok(mut packet) = self.esb_app.grant_packet(esb_header) else {
-                warn!("Packet full");
-                continue;
-            };
-            packet[..slice.len()].copy_from_slice(slice);
-            packet.commit(slice.len());
-            self.esb_app.start_tx();
+                    let esb_header = EsbHeader::build()
+                        .max_payload(MAX_PAYLOAD_SIZE)
+                        .pid(pid)
+                        .pipe(0)
+                        .no_ack(false)
+                        .check()
+                        .unwrap();
+                    let mut packet = match s.wait_grant_packet(esb_header).await {
+                        Ok(p) => p,
+                        Err(e) => {
+                            warn!("Grant packet error: {:?}", Debug2Format(&e));
+                            continue;
+                        }
+                    };
+                    packet[..slice.len()].copy_from_slice(slice);
+                    packet.commit(slice.len());
+                    s.start_tx();
 
-            debug!("Sent report: {:?}", slice);
+                    debug!("Sent report: {:?}", slice);
 
-            cnt += 1;
-            if pid == 3 {
-                pid = 0;
-            } else {
-                pid += 1;
-            }
-        }
+                    cnt = cnt.wrapping_add(1);
+                    if pid == 3 {
+                        pid = 0;
+                    } else {
+                        pid += 1;
+                    }
+                }
+            },
+            async move {
+                loop {
+                    let p = r.wait_read_packet().await;
+                    p.release();
+                }
+            },
+        )
+        .await;
     }
 }
 

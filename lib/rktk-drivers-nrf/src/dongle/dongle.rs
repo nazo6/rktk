@@ -2,6 +2,7 @@ use core::{marker::PhantomData, sync::atomic::AtomicBool};
 
 use embassy_nrf::{
     interrupt,
+    pac::Interrupt,
     radio::{self},
     timer,
 };
@@ -14,6 +15,7 @@ use rktk::drivers::interface::{
     dongle::{DongleData, DongleDriver},
     BackgroundTask, DriverBuilderWithTask,
 };
+use rktk_log::helper::Debug2Format;
 
 macro_rules! use_peripheral {
     ($radio:ident, $timer:ident, $esb_timer:ident) => {
@@ -39,7 +41,6 @@ impl interrupt::typelevel::Handler<<DongleTimer as timer::Instance>::Interrupt>
     unsafe fn on_interrupt() {
         if let Ok(mut irq_timer) = IRQ_TIMER.try_lock() {
             if let Some(irq_timer) = &mut *irq_timer {
-                rktk_log::debug!("Timer interrupt");
                 irq_timer.timer_interrupt();
             }
         }
@@ -61,8 +62,9 @@ impl interrupt::typelevel::Handler<<DongleRadio as radio::Instance>::Interrupt>
     unsafe fn on_interrupt() {
         if let Ok(mut esb_irq) = ESB_IRQ.try_lock() {
             if let Some(esb_irq) = &mut *esb_irq {
-                rktk_log::debug!("Radio interrupt");
-                esb_irq.radio_interrupt();
+                if let Err(e) = esb_irq.radio_interrupt() {
+                    rktk_log::warn!("Irq error: {:?}", Debug2Format(&e));
+                }
             }
         }
     }
@@ -105,6 +107,11 @@ impl DriverBuilderWithTask for EsbDongleDriverBuilder {
         ESB_IRQ.lock().await.replace(esb_irq);
         IRQ_TIMER.lock().await.replace(esb_timer);
 
+        unsafe {
+            cortex_m::peripheral::NVIC::unmask(Interrupt::RADIO);
+            cortex_m::peripheral::NVIC::unmask(Interrupt::TIMER0);
+        }
+
         Ok((
             EsbDongleDriver {
                 esb: esb_app,
@@ -141,10 +148,11 @@ impl DongleDriver for EsbDongleDriver {
 
     async fn recv(&mut self) -> Result<DongleData, Self::Error> {
         let payload = self.esb.wait_read_packet().await;
-        rktk_log::debug!("packet received");
         let (cnt, data): (u8, DongleData) =
             postcard::from_bytes(&payload).map_err(EsbDongleError::Deserialization)?;
 
+        rktk::print!("recv:{:?}", cnt);
+        payload.release();
         if cnt.wrapping_sub(self.cnt) > 1 {
             rktk_log::warn!("Packet dropped: {} -> {}", self.cnt, cnt);
         }
