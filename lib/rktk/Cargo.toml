@@ -21,7 +21,6 @@ embassy-time = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-executor = { workspace = true }
-embedded-io-async = { workspace = true }
 
 critical-section = { workspace = true, optional = true }
 usbd-hid = { workspace = true }
@@ -32,7 +31,6 @@ smart-leds = { workspace = true }
 
 heapless = { workspace = true }
 static_cell = "2.1.0"
-paste = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
 futures = { workspace = true, features = ["async-await"] }
 serde = { workspace = true, features = ["derive"] }
@@ -40,10 +38,6 @@ postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
-
-[dev-dependencies]
-embassy-time = { workspace = true, features = ["mock-driver"] }
-critical-section = { workspace = true, features = ["std"] }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }

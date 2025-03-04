@@ -14,7 +14,7 @@ mcu = "Nrf52840"
 
 [dependencies]
 rktk = { workspace = true }
-rktk-drivers-nrf = { workspace = true }
+rktk-drivers-nrf = { workspace = true, features = ["softdevice-ble"] }
 rktk-drivers-common = { workspace = true }
 
 cortex-m = { workspace = true }

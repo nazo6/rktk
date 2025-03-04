@@ -40,6 +40,7 @@ nrf-softdevice = { optional = true, workspace = true, features = [
   "ble-l2cap",
 ] }
 embedded-io-async = { workspace = true }
+cortex-m = { workspace = true }
 
 embedded-storage-async = { workspace = true }
 sequential-storage = { workspace = true }
@@ -57,7 +58,6 @@ thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
 esb-ng = { git = "https://github.com/jamesmunns/esb", version = "0.1.0", optional = true }
-cortex-m = { workspace = true, optional = true }
 
 document-features = { workspace = true }
 
@@ -80,7 +80,7 @@ power = []
 
 ## Enables wireless dongle driver using esb(Enhanced Shockburst) protocol.
 ## This feature is not compatible with softdevice.
-esb = ["dep:esb-ng", "dep:cortex-m"]
+esb = ["dep:esb-ng"]
 
 #! #### Softdevice
 ## Enables softdevice. If this feature is enabled, the softdevice will be included in the build.
@@ -91,6 +91,8 @@ softdevice-ble = [
   "softdevice",
   "nrf-softdevice/ble-gatt-server",
   "nrf-softdevice/ble-sec",
+  "nrf-softdevice/ble-central",
+  "nrf-softdevice/ble-peripheral",
 ]
 
 #! #### Logging
