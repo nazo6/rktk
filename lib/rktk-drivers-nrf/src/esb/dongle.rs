@@ -112,7 +112,6 @@ impl DriverBuilderWithTask for EsbDongleDriverBuilder {
             .max_payload_size(192)
             .check()
             .map_err(|_| "Invalid config")?;
-        let mut a =super::Addresses::default();
         let (esb_app, esb_irq, esb_timer) = BUFFER
             .try_split(
                 unsafe { DongleTimerEsb::take() },
