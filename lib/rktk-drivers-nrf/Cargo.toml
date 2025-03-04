@@ -79,6 +79,8 @@ nightly = ["embassy-executor/nightly"]
 
 defmt = [
   "dep:defmt",
+  "rktk/defmt",
+  "rktk-log/defmt",
   "nrf-softdevice?/defmt",
   "embassy-nrf/defmt",
   "heapless/defmt-impl",
