@@ -4,13 +4,15 @@
 #![allow(static_mut_refs)]
 #![allow(unused)]
 
-mod buffer;
-mod controller;
 mod task;
 
 use core::borrow::BorrowMut as _;
 
-use embassy_sync::blocking_mutex::raw::RawMutex as _;
+use embassy_sync::{
+    blocking_mutex::raw::{CriticalSectionRawMutex, RawMutex as _},
+    mutex::Mutex,
+    signal::Signal,
+};
 pub use task::logger;
 
 /// The restore state of the critical section.
@@ -22,9 +24,9 @@ static mut TAKEN: bool = false;
 /// The `defmt` encoder.
 static mut ENCODER: defmt::Encoder = defmt::Encoder::new();
 
-static QUEUE: rktk::utils::Mutex<heapless::Vec<u8, 1024>> =
-    rktk::utils::Mutex::new(heapless::Vec::new());
-static LOG_SIGNAL: rktk::utils::Signal<()> = rktk::utils::Signal::new();
+static QUEUE: Mutex<CriticalSectionRawMutex, heapless::Vec<u8, 1024>> =
+    Mutex::new(heapless::Vec::new());
+static LOG_SIGNAL: Signal<CriticalSectionRawMutex, ()> = Signal::new();
 
 /// The logger implementation.
 #[defmt::global_logger]
@@ -59,7 +61,9 @@ unsafe impl defmt::Logger for USBLogger {
 }
 
 fn inner(bytes: &[u8]) {
-    let mut q = QUEUE.try_lock().unwrap();
+    let Ok(mut q) = QUEUE.try_lock() else {
+        return;
+    };
     if q.capacity() - q.len() < bytes.len() {
         return;
     }

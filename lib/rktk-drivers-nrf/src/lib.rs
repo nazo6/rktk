@@ -13,6 +13,7 @@
 #![cfg_attr(feature = "nightly", feature(impl_trait_in_assoc_type))]
 
 pub mod display;
+pub mod esb;
 pub mod keyscan;
 pub mod mouse;
 pub mod rgb;

@@ -44,6 +44,7 @@ pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;
 
 /// sjoin or "spawn or join"
 pub mod sjoin {
+    #[macro_export]
     macro_rules! join {
         ($f1:expr, $($future:expr),* ) => {
             #[cfg(feature = "alloc")]
