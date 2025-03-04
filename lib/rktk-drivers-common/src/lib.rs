@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![no_std]
+#![cfg_attr(doc, feature(doc_auto_cfg))]
 
 pub mod debounce;
 pub mod display;

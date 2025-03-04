@@ -11,6 +11,7 @@
 
 #![no_std]
 #![cfg_attr(feature = "nightly", feature(impl_trait_in_assoc_type))]
+#![cfg_attr(doc, feature(doc_auto_cfg))]
 
 pub mod display;
 pub mod esb;

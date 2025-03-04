@@ -42,3 +42,6 @@ check_no_powerset = true
 [crates.rktk-cli]
 doc_disabled = true
 check_no_powerset = true
+
+[crates.rktk-log-macros]
+doc_disabled = true
