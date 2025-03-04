@@ -8,8 +8,8 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    bbq2::queue::BBQueue, irq::StatePRX, peripherals::PtrTimer as _, EsbApp, EsbBuffer, EsbIrq,
-    IrqTimer,
+    bbq2::queue::BBQueue, irq::StatePRX, payload::PayloadR, peripherals::PtrTimer as _, EsbApp,
+    EsbBuffer, EsbIrq, IrqTimer,
 };
 use rktk::drivers::interface::{
     dongle::{DongleData, DongleDriver},
@@ -168,11 +168,17 @@ impl DongleDriver for EsbDongleDriver {
 
     async fn recv(&mut self) -> Result<DongleData, Self::Error> {
         let payload = self.esb.wait_read_packet().await;
-        let (cnt, data): (u8, DongleData) =
-            postcard::from_bytes(&payload).map_err(EsbDongleError::Deserialization)?;
+        let (cnt, data) = match postcard::from_bytes::<'_, (u8, DongleData)>(&payload) {
+            Ok(d) => d,
+            Err(e) => {
+                payload.release();
+                return Err(EsbDongleError::Deserialization(e));
+            }
+        };
+        payload.release();
 
         rktk::print!("recv:{:?}", cnt);
-        payload.release();
+
         if cnt.wrapping_sub(self.cnt) > 1 {
             rktk_log::warn!("Packet dropped: {} -> {}", self.cnt, cnt);
         }

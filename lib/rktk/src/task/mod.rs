@@ -232,7 +232,7 @@ pub async fn dongle_start<
                     }
                 }
                 Err(e) => {
-                    // rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
+                    rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
                     embassy_time::Timer::after_millis(100).await;
                     continue;
                 }
