@@ -22,7 +22,7 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  check-and-doc:
+  check-test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -56,42 +56,5 @@ jobs:
     - name: Run rust check
       run: cargo rktk internal check all
 
-    - name: Generate docs
-      run: cargo rktk internal doc
-
-    - name: Upload static files as artifact
-      id: deployment
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: target/doc.merged/
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Setup rust
-      uses: ./.github/workflows/setup-rust
-      with:
-        components: "rust-src"
-        target: ""
-
-    - uses: r7kamura/rust-problem-matchers@v1
-
     - name: Run rust test
       run: cargo rktk internal test all
-
-  doc-deploy:
-    permissions:
-      id-token: write
-      pages: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: check-and-doc
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
