@@ -24,6 +24,8 @@ uf2 = "0.1.0"
 dunce = "1.0.5"
 sysinfo = "0.33.1"
 dircpy = "0.3.19"
+sha2 = "0.10.8"
+hex = "0.4.3"
 
 [features]
 _check = []

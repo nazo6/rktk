@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::LazyLock};
 
 use anyhow::Context as _;
 use cargo_metadata::{
@@ -6,10 +6,33 @@ use cargo_metadata::{
     Package,
 };
 use duct::cmd;
+use hex;
+use sha2::{Digest, Sha256};
 
 use crate::{utils::METADATA, xprintln};
 
 use super::config::CRATES_CONFIG;
+
+const BEFORE_CONTENT: &str = include_str!("./doc_before.html");
+static HTML_BEFORE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let mut hasher = Sha256::new();
+    hasher.update(BEFORE_CONTENT);
+    let hash = hex::encode(hasher.finalize());
+
+    let path = std::env::temp_dir().join(format!("doc_header_{}.html", hash));
+    std::fs::write(&path, BEFORE_CONTENT).unwrap();
+    path
+});
+const AFTER_CONTENT: &str = include_str!("./doc_after.html");
+static HTML_AFTER_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let mut hasher = Sha256::new();
+    hasher.update(AFTER_CONTENT);
+    let hash = hex::encode(hasher.finalize());
+
+    let path = std::env::temp_dir().join(format!("doc_header_{}.html", hash));
+    std::fs::write(&path, AFTER_CONTENT).unwrap();
+    path
+});
 
 fn run_doc(
     p: &Package,
@@ -38,6 +61,10 @@ fn run_doc(
         "--parts-out-dir".to_string(),
         part_dir.to_string(),
         "--merge=none".to_string(),
+        "--html-before-content".to_string(),
+        HTML_BEFORE_PATH.to_string_lossy().to_string(),
+        "--html-after-content".to_string(),
+        HTML_AFTER_PATH.to_string_lossy().to_string(),
     ];
 
     let output = cmd("cargo", args)
@@ -129,7 +156,7 @@ pub fn start() -> anyhow::Result<()> {
         doc_dirs.push((doc_dir, part_dir, src_dir));
     }
 
-    let mut args = vec![
+    let mut rustdoc_args = vec![
         "-Z".to_string(),
         "unstable-options".to_string(),
         "--merge=finalize".to_string(),
@@ -140,7 +167,7 @@ pub fn start() -> anyhow::Result<()> {
     ];
 
     for (doc_dir, part_dir, src_dir) in doc_dirs {
-        args.push(format!("--include-parts-dir={}", part_dir));
+        rustdoc_args.push(format!("--include-parts-dir={}", part_dir));
         let crate_name = doc_dir.file_name().unwrap().to_str().unwrap();
         // copy doc html
         dircpy::CopyBuilder::new::<&str, &str>(
@@ -156,13 +183,15 @@ pub fn start() -> anyhow::Result<()> {
         .run()?;
     }
 
-    cmd("rustdoc", args).run()?;
+    cmd("rustdoc", rustdoc_args).run()?;
 
     let index_html = merged_root.join("index.html");
     std::fs::write(
         &index_html,
         r#"<meta http-equiv="refresh" content="0;URL=rktk/index.html">"#,
     )?;
+
+    std::fs::remove_file(&*HTML_BEFORE_PATH).unwrap();
 
     Ok(())
 }
