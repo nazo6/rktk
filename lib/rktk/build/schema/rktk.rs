@@ -49,4 +49,8 @@ pub struct RktkConfig {
     /// Size of the encoder event buffer
     #[default(4)]
     pub encoder_event_buffer_size: usize,
+
+    /// Time(ms) until the display is turned off if there is no activity
+    #[default(20000)]
+    pub display_timeout: u64,
 }

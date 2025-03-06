@@ -1,9 +1,10 @@
 use embassy_futures::select::{select4, Either4};
+use embassy_time::{Duration, Instant};
 use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
 use rktk_log::{debug, helper::Debug2Format};
 
 use crate::{
-    config::storage::StorageConfigManager,
+    config::{constant::RKTK_CONFIG, storage::StorageConfigManager},
     drivers::interface::{
         ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, system::SystemDriver,
         usb::UsbDriver,
@@ -12,6 +13,7 @@ use crate::{
     task::channels::report::{
         ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL,
     },
+    utils::display_state,
 };
 
 use super::SharedState;
@@ -33,10 +35,9 @@ pub async fn report_task<
     debug!("report task start");
 
     let mut prev_update_time = embassy_time::Instant::now();
-
     let mut current_output = state.lock().await.get_config().initial_output;
-
     let mut prev_report = None;
+    let mut display_off = DisplayOffController::new();
 
     loop {
         let event = match select4(
@@ -91,6 +92,7 @@ pub async fn report_task<
 
         prev_update_time = embassy_time::Instant::now();
         if prev_report == Some(state_report.clone()) {
+            display_off.update(false);
             continue;
         }
 
@@ -100,6 +102,7 @@ pub async fn report_task<
             .on_state_update(&mut state_report, usb, ble)
             .await
         {
+            display_off.update(false);
             continue;
         }
 
@@ -135,25 +138,32 @@ pub async fn report_task<
         }
 
         current_output = state_report.transparent_report.output;
-        match state_report.transparent_report.output {
+        let reported = match state_report.transparent_report.output {
             Output::Usb => {
                 crate::utils::display_state!(Output, Output::Usb);
                 if let Some(usb) = &usb {
-                    send_report(usb, state_report).await;
+                    send_report(usb, state_report).await
+                } else {
+                    false
                 }
             }
             Output::Ble => {
                 crate::utils::display_state!(Output, Output::Ble);
                 if let Some(ble) = &ble {
-                    send_report(ble, state_report).await;
+                    send_report(ble, state_report).await
+                } else {
+                    false
                 }
             }
-        }
+        };
+        display_off.update(reported);
     }
 }
 
-async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) {
+async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) -> bool {
+    let mut reported = false;
     if let Some(report) = state_report.keyboard_report {
+        reported = true;
         let report = if let Ok(true) = reporter.wakeup() {
             usbd_hid::descriptor::KeyboardReport::default()
         } else {
@@ -165,12 +175,14 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) 
         }
     }
     if let Some(report) = state_report.mouse_report {
+        reported = true;
         crate::utils::display_state!(MouseMove, (report.x, report.y));
         if let Err(e) = reporter.try_send_mouse_report(report) {
             rktk_log::warn!("Failed to send mouse report: {:?}", Debug2Format(&e));
         }
     }
     if let Some(report) = state_report.media_keyboard_report {
+        reported = true;
         if let Err(e) = reporter.try_send_media_keyboard_report(report) {
             rktk_log::warn!(
                 "Failed to send media keyboard report: {:?}",
@@ -178,6 +190,8 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) 
             );
         }
     }
+
+    reported
 }
 
 async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
@@ -209,4 +223,35 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
     };
 
     Ok(report)
+}
+
+struct DisplayOffController {
+    display_off: bool,
+    latest_report_time: Instant,
+}
+
+impl DisplayOffController {
+    fn new() -> Self {
+        Self {
+            display_off: false,
+            latest_report_time: Instant::now(),
+        }
+    }
+    fn update(&mut self, reported: bool) {
+        if reported {
+            self.latest_report_time = Instant::now();
+        }
+
+        if Instant::now() - self.latest_report_time
+            > Duration::from_millis(RKTK_CONFIG.display_timeout)
+        {
+            if !self.display_off {
+                display_state!(On, false);
+                self.display_off = true;
+            }
+        } else if self.display_off {
+            display_state!(On, true);
+            self.display_off = false;
+        }
+    }
 }

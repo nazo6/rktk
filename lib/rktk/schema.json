@@ -240,6 +240,13 @@
           "format": "uint16",
           "minimum": 0.0
         },
+        "display_timeout": {
+          "description": "Time(ms) until the display is turned off if there is no activity",
+          "default": 20000,
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
         "double_tap_threshold": {
           "description": "Threshold for double tap (ms).",
           "default": 500,

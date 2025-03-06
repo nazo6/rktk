@@ -20,6 +20,8 @@ pub enum DisplayMessage {
     Hand(Option<Hand>),
     NumLock(bool),
     CapsLock(bool),
+    Brightness(u8),
+    On(bool),
 }
 
 pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
@@ -113,6 +115,12 @@ pub(super) async fn start<D: DisplayDriver>(display_builder: impl DriverBuilder<
                     let _ = display
                         .update_text(if caps_lock { "C" } else { "c" }, D::calculate_point(19, 1))
                         .await;
+                }
+                DisplayMessage::Brightness(brightness) => {
+                    let _ = display.set_brightness(brightness).await;
+                }
+                DisplayMessage::On(on) => {
+                    let _ = display.set_display_on(on).await;
                 }
             },
             Either::Second(str) => {

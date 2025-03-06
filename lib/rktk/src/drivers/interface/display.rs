@@ -55,4 +55,12 @@ pub trait DisplayDriver: DrawTarget + Sized {
     async fn set_brightness(&mut self, _brightness: u8) -> Result<(), DisplayError> {
         Err(DisplayError::DataFormatNotImplemented)
     }
+
+    async fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {
+        if on {
+            self.set_brightness(255).await
+        } else {
+            self.set_brightness(0).await
+        }
+    }
 }
