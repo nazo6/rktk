@@ -1,16 +1,20 @@
 //! Key action and keycode definitions.
 //!
 //! A key is represented by a three-layer structure: `KeyAction` → `KeyCode` → `Key`.
-//! For example, the definition of a normal key `A` is as follows.
-//! ```ignore
-//! KeyAction::Normal(KeyCode::Key(Key::A))
+//! For example, a key action that sends A on Tap and Shift on Hold could be defined as follows
 //! ```
+//! # use rktk_keymanager::keycode::prelude::*;
+//! const ACTION: KeyAction = KeyAction::TapHold(KeyCode::Key(Key::A),
+//! KeyCode::Modifier(Modifier::LShft));
+//! ```
+//!
 //! This hierarchical structure allows any key to be used for any action.
 //! For example, QMK only allows Mod-Tap and Layer-Tap as TapHolds.
 //! However, it requires more bytes to represent one key.
 //!
 //! For convenience, keycodes are defined as constants with normal keyaction like this:
-//! ```ignore
+//! ```
+//! # use rktk_keymanager::keycode::prelude::*;
 //! const A: KeyAction = KeyAction::Normal(KeyCode::Key(Key::A));
 //! ```
 //! You can use these constants to define keymap.
