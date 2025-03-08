@@ -22,8 +22,7 @@ pub struct Keymap<
     const COMBO_KEY_MAX_DEFINITIONS: usize,
     const COMBO_KEY_MAX_SOURCES: usize,
 > {
-    pub layers: [Layer<ROW, COL>; LAYER],
-    pub encoder_keys: [(KeyCode, KeyCode); ENCODER_COUNT],
+    pub layers: [Layer<ROW, COL, ENCODER_COUNT>; LAYER],
     pub tap_dance: TapDanceDefinitions<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
     pub combo: ComboDefinitions<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
 }
@@ -52,7 +51,6 @@ impl<
     pub const fn const_default() -> Self {
         Self {
             layers: [const { Layer::const_default() }; LAYER],
-            encoder_keys: [(KeyCode::None, KeyCode::None); ENCODER_COUNT],
             tap_dance: [const { None }; TAP_DANCE_MAX_DEFINITIONS],
             combo: [const { None }; COMBO_KEY_MAX_DEFINITIONS],
         }
@@ -69,15 +67,22 @@ impl<
         None
     }
 
-    pub fn get_encoder_key(&self, encoder: usize, direction: EncoderDirection) -> Option<&KeyCode> {
-        if let Some(key) = self.encoder_keys.get(encoder) {
-            match direction {
-                EncoderDirection::Clockwise => Some(&key.1),
-                EncoderDirection::CounterClockwise => Some(&key.0),
-            }
-        } else {
-            None
-        }
+    pub fn get_encoder_key(
+        &self,
+        mut layer_state: [bool; LAYER],
+        encoder: usize,
+        direction: EncoderDirection,
+    ) -> Option<&KeyCode> {
+        layer_state[0] = true;
+        self.layers
+            .iter()
+            .zip(layer_state.iter())
+            .rev()
+            .filter_map(|(l, s)| if *s { Some(l) } else { None })
+            .find_map(|l| match direction {
+                EncoderDirection::Clockwise => l.encoder_keys[encoder].1.as_ref(),
+                EncoderDirection::CounterClockwise => l.encoder_keys[encoder].0.as_ref(),
+            })
     }
 }
 
@@ -85,7 +90,7 @@ impl<
 ///
 /// This structure holds information about layer. This contains keymap and arrowmouse flag.
 #[apply(common_derive)]
-pub struct Layer<const ROW: usize, const COL: usize> {
+pub struct Layer<const ROW: usize, const COL: usize, const ENCODER_COUNT: usize> {
     // NOTE: This is workaround for issue that serde_as cannot be used with cfg-attr.
     // ref: https://github.com/jonasbb/serde_with/issues/355
     #[cfg_attr(
@@ -93,19 +98,33 @@ pub struct Layer<const ROW: usize, const COL: usize> {
         serde(with = "serde_with::As::<[[serde_with::Same; COL]; ROW]>")
     )]
     pub keymap: LayerKeymap<ROW, COL>,
+    /// Keycode assigned to each encoder.
+    ///
+    /// Left of tuple is for counter clockwise, right of tuple is for clockwise.
+    /// None has special meaning that it is not assigned and inherits keycode from previous layer.
+    #[cfg_attr(
+        feature = "serde",
+        serde(with = "serde_with::As::<[serde_with::Same; ENCODER_COUNT]>")
+    )]
+    pub encoder_keys: [(Option<KeyCode>, Option<KeyCode>); ENCODER_COUNT],
     pub arrow_mouse: bool,
 }
 
-impl<const ROW: usize, const COL: usize> Layer<ROW, COL> {
+impl<const ROW: usize, const COL: usize, const ENCODER_COUNT: usize>
+    Layer<ROW, COL, ENCODER_COUNT>
+{
     pub const fn const_default() -> Self {
         Self {
             keymap: [[KeyAction::const_default(); COL]; ROW],
+            encoder_keys: [(None, None); ENCODER_COUNT],
             arrow_mouse: false,
         }
     }
 }
 
-impl<const ROW: usize, const COL: usize> Default for Layer<ROW, COL> {
+impl<const ROW: usize, const COL: usize, const ENCODER_COUNT: usize> Default
+    for Layer<ROW, COL, ENCODER_COUNT>
+{
     fn default() -> Self {
         Self::const_default()
     }

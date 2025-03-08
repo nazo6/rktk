@@ -51,27 +51,26 @@ const L4: LayerKeymap = [
 ];
 
 pub const KEYMAP: Keymap = Keymap {
-    encoder_keys: [],
     layers: [
         Layer {
             keymap: L0,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L1,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L2,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L3,
-            arrow_mouse: true,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L4,
-            arrow_mouse: true,
+            ..Layer::const_default()
         },
     ],
     tap_dance: [

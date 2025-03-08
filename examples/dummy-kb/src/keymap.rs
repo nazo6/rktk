@@ -13,23 +13,23 @@ pub const KEYMAP: Keymap = Keymap {
     layers: [
         Layer {
             keymap: L0,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L0,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L0,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L0,
-            arrow_mouse: true,
+            ..Layer::const_default()
         },
         Layer {
             keymap: L0,
-            arrow_mouse: true,
+            ..Layer::const_default()
         },
     ],
     ..Keymap::const_default()

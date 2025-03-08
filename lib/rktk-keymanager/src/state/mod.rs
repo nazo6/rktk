@@ -89,6 +89,10 @@ impl<
         >,
         config: StateConfig,
     ) -> Self {
+        const {
+            assert!(LAYER >= 1, "Layer count must be at least 1");
+        }
+
         Self {
             config: config.clone(),
             key_resolver: key_resolver::KeyResolver::new(
@@ -114,7 +118,11 @@ impl<
                 None
             }
             Event::Encoder((id, dir)) => {
-                if let Some(kc) = self.shared.keymap.get_encoder_key(id as usize, dir) {
+                if let Some(kc) =
+                    self.shared
+                        .keymap
+                        .get_encoder_key(self.shared.layer_active, id as usize, dir)
+                {
                     lms.process_keycode(
                         &mut self.shared.layer_active,
                         &mut self.manager,

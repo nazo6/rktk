@@ -21,8 +21,11 @@ pub type Keymap = rktk_keymanager::keymap::Keymap<
     { KM_CONFIG.constant.combo_key_max_sources },
 >;
 
-pub type Layer =
-    rktk_keymanager::keymap::Layer<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+pub type Layer = rktk_keymanager::keymap::Layer<
+    { KEYBOARD.rows as usize },
+    { KEYBOARD.cols as usize },
+    { KEYBOARD.encoder_count as usize },
+>;
 
 pub type LayerKeymap =
     rktk_keymanager::keymap::LayerKeymap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;

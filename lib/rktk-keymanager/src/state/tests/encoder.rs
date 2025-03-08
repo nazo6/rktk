@@ -5,7 +5,7 @@ use pretty_assertions::assert_eq;
 
 const ENCODER_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> = const {
     let mut keymap = EMPTY_KEYMAP;
-    keymap.encoder_keys[0] = (KeyCode::Key(Key::B), KeyCode::Key(Key::A));
+    keymap.layers[0].encoder_keys[0] = (Some(KeyCode::Key(Key::B)), Some(KeyCode::Key(Key::A)));
     keymap
 };
 

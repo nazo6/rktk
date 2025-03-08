@@ -18,26 +18,25 @@ pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> =
     layers: [
         Layer {
             keymap: EMPTY_LAYER,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrow_mouse: false,
+            ..Layer::const_default()
         },
         Layer {
             keymap: EMPTY_LAYER,
-            arrow_mouse: true,
+            ..Layer::const_default()
         },
     ],
-    encoder_keys: [(KeyCode::None, KeyCode::None)],
     tap_dance: [
         Some(TapDanceDefinition {
             tap: [
