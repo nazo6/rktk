@@ -5,7 +5,7 @@
 //!
 //! For full list of supported features, see [RKTK project README](https://github.com/nazo6/rktk).
 //!
-//! # `rktk` crate
+//! ## `rktk` crate
 //!
 //! This `rktk` crate is the main crate of the project. It contains the main logic of the
 //! keyboard firmware and does not depend on any specific hardware.
@@ -24,7 +24,16 @@
 //! Just a random value is provided because it is required to generate docs.
 //!
 //! For more detail, see [`config::constant`].
-
+//!
+//! ## Features
+#![doc = document_features::document_features!()]
+//!
+//! ### `alloc` feature
+//! Embassy has the limitation that tasks with generics cannot be spawned.
+//! For this reason, rktk, which makes heavy use of generics, uses the `join` method of embassy-sync to execute all tasks instead of spawning them.
+//! However, this may be inferior to using spawning in terms of performance and power consumption.
+//!
+//! So if we enable `alloc` feature and provide an allocator, we can remove this limitation by spawning tasks in the heap.
 #![no_std]
 
 #[cfg(feature = "alloc")]

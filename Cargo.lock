@@ -5364,6 +5364,7 @@ dependencies = [
  "critical-section",
  "defmt",
  "display-interface",
+ "document-features",
  "embassy-executor",
  "embassy-futures",
  "embassy-sync",

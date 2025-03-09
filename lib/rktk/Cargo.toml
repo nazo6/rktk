@@ -38,6 +38,7 @@ postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
+document-features = { workspace = true }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }
@@ -51,6 +52,8 @@ macro_rules_attribute = { workspace = true }
 [features]
 _check = ["alloc", "log", "defmt"]
 
+## Uses alloc to spawn arbitary tasks.
+## For more detail, see next section.
 alloc = []
 
 defmt = [
