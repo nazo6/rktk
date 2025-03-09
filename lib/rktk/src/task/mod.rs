@@ -29,7 +29,7 @@ use rktk_log::{debug, helper::Debug2Format, info};
 
 pub(crate) mod channels;
 pub mod display;
-#[cfg(feature = "log")]
+#[cfg(feature = "rrp-log")]
 mod logger;
 pub(crate) mod main_loop;
 
@@ -81,7 +81,7 @@ pub async fn start<
     key_config: Keymap,
     hooks: Hooks<CH, MH, SH, BH>,
 ) {
-    #[cfg(feature = "log")]
+    #[cfg(feature = "rrp-log")]
     {
         debug!("log init");
         critical_section::with(|_| unsafe {

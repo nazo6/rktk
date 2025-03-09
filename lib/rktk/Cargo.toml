@@ -10,8 +10,8 @@ build = "build/main.rs"
 readme = "../../README.md"
 
 [dependencies]
-rktk-keymanager = { workspace = true, features = ["state"] }
-rktk-rrp = { workspace = true, features = ["server"] }
+rktk-keymanager = { workspace = true, features = ["state", "postcard"] }
+rktk-rrp = { workspace = true, features = ["server"], optional = true }
 
 rktk-log = { workspace = true }
 log = { workspace = true, optional = true }
@@ -50,11 +50,16 @@ schemars = "0.8.21"
 macro_rules_attribute = { workspace = true }
 
 [features]
-_check = ["alloc", "log", "defmt"]
+_check = ["alloc", "log", "defmt", "rrp-log"]
 
 ## Uses alloc to spawn arbitary tasks.
 ## For more detail, see next section.
 alloc = []
+
+## Enables rrp
+rrp = ["dep:rktk-rrp"]
+## Set rrp-over-usb logger of `log` crate
+rrp-log = ["dep:critical-section", "rrp", "log"]
 
 defmt = [
   "dep:defmt",
@@ -62,4 +67,4 @@ defmt = [
   "rktk-keymanager/defmt",
   "heapless/defmt-impl",
 ]
-log = ["dep:log", "dep:critical-section", "rktk-log/log"]
+log = ["dep:log", "rktk-log/log"]

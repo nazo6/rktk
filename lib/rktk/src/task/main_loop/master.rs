@@ -31,6 +31,7 @@ mod handle_keyboard;
 mod handle_mouse;
 mod handle_slave;
 mod report;
+#[cfg(feature = "rrp")]
 mod rrp_server;
 mod utils;
 
@@ -112,7 +113,10 @@ pub async fn start<
                 },
             ),
         ),
-        rrp_server::start(&usb, &ble, &state, &config_store),
+        async {
+            #[cfg(feature = "rrp")]
+            rrp_server::start(&usb, &ble, &state, &config_store).await;
+        },
     )
     .await;
 }

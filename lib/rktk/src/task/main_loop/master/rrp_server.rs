@@ -146,12 +146,12 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         _req: get_log::Request,
     ) -> Result<impl Stream<Item = get_log::Response>, Self::Error> {
         Ok(futures::stream::iter(core::iter::from_fn(|| {
-            #[cfg(feature = "log")]
+            #[cfg(feature = "rrp-log")]
             {
                 crate::task::logger::LOG_CHANNEL.try_receive().ok()
             }
 
-            #[cfg(not(feature = "log"))]
+            #[cfg(not(feature = "rrp-log"))]
             {
                 None
             }
