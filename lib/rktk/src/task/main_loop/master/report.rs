@@ -121,6 +121,8 @@ pub async fn report_task<
                                 }
                             }
                         }
+                    } else {
+                        master_hooks.on_keymanager_event(ev);
                     }
                 });
 

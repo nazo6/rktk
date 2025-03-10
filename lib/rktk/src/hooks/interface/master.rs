@@ -1,5 +1,8 @@
 pub use rktk_keymanager::{
-    interface::state::input_event::{EncoderDirection, KeyChangeEvent},
+    interface::state::{
+        input_event::{EncoderDirection, KeyChangeEvent},
+        output_event::OutputEvent,
+    },
     state::hid_report::Report,
 };
 
@@ -52,6 +55,11 @@ pub trait MasterHooks {
     async fn on_encoder_event(&mut self, _id: &mut u8, _dir: &mut EncoderDirection) -> bool {
         true
     }
+
+    /// Called after keymanager event occur.
+    ///
+    /// This hook can be used to handle custom keycode.
+    fn on_keymanager_event(&mut self, _event: OutputEvent) {}
 
     /// Called after state update, before report send.
     ///
