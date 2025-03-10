@@ -1,19 +1,20 @@
 use dioxus::prelude::*;
+use rktk::config::keymap::prelude::RktkKeys;
 use rktk_keymanager::keycode::{
     key::Key, layer::LayerOp, media::Media, modifier::Modifier, mouse::Mouse, special::Special,
     KeyCode,
 };
 use strum::IntoEnumIterator as _;
 
-use crate::app::components::selector::key::LayerKeySelector;
+use crate::app::components::selector::key::{CustomKeySelector, LayerKeySelector};
 
 use super::key::KeySelector;
 
 #[component]
 pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) -> Element {
     rsx! {
-        div { class: "flex flex-col gap-2", class: "join",
-            form {
+        div { class: "flex flex-col gap-2",
+            form { class: "join",
                 input {
                     r#type: "radio",
                     name: "options",
@@ -70,6 +71,30 @@ pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) ->
                     onclick: move |_| select_key_code(KeyCode::Media(Media::Play)),
                     aria_label: "Media",
                 }
+                input {
+                    r#type: "radio",
+                    name: "options",
+                    class: "join-item btn btn-sm",
+                    checked: matches!(key_code, KeyCode::Custom1(_)),
+                    onclick: move |_| select_key_code(KeyCode::Custom1(RktkKeys::OutputUsb as u8)),
+                    aria_label: "RKTK",
+                }
+                input {
+                    r#type: "radio",
+                    name: "options",
+                    class: "join-item btn btn-sm",
+                    checked: matches!(key_code, KeyCode::Custom2(_)),
+                    onclick: move |_| select_key_code(KeyCode::Custom2(0)),
+                    aria_label: "Custom(2)",
+                }
+                input {
+                    r#type: "radio",
+                    name: "options",
+                    class: "join-item btn btn-sm",
+                    checked: matches!(key_code, KeyCode::Custom3(_)),
+                    onclick: move |_| select_key_code(KeyCode::Custom3(0)),
+                    aria_label: "Custom(3)",
+                }
             }
             div {
                 match key_code {
@@ -99,7 +124,6 @@ pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) ->
                         LayerKeySelector {
                             selected_key: layer_op,
                             select_key: Callback::new(move |layer| select_key_code(KeyCode::Layer(layer))),
-
                         }
                     },
                     KeyCode::Special(special) => rsx! {
@@ -123,7 +147,18 @@ pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) ->
                             select_key: Callback::new(move |k| select_key_code(KeyCode::Custom1(k as u8))),
                         }
                     },
-                    _ => rsx! {},
+                    KeyCode::Custom2(id) => rsx! {
+                        CustomKeySelector {
+                            selected_key: id,
+                            select_key: Callback::new(move |id| select_key_code(KeyCode::Custom2(id))),
+                        }
+                    },
+                    KeyCode::Custom3(id) => rsx! {
+                        CustomKeySelector {
+                            selected_key: id,
+                            select_key: Callback::new(move |id| select_key_code(KeyCode::Custom3(id))),
+                        }
+                    },
                 }
             }
         }
