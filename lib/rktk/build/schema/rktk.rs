@@ -57,4 +57,12 @@ pub struct RktkConfig {
     /// Time(ms) until the display is turned off if there is no activity
     #[default(20000)]
     pub display_timeout: u64,
+
+    /// rktk basically updates the keyboard state only when it receives an event from the hardware.
+    /// However, many states are time-dependent and can change even without an event.
+    /// Polling at regular time intervals is necessary to monitor such changes.
+    ///
+    /// This setting specifies that interval. (ms)
+    #[default(10)]
+    pub state_update_interval: u64,
 }

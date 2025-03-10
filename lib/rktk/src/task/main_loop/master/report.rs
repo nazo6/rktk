@@ -1,4 +1,4 @@
-use embassy_futures::select::{Either4, select4};
+use embassy_futures::select::{Either, Either4, select, select4};
 use embassy_time::{Duration, Instant};
 use rktk_keymanager::interface::state::output_event::EventType;
 use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::OutputEvent};
@@ -49,7 +49,10 @@ pub async fn report_task<
             MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
             KEYBOARD_EVENT_REPORT_CHANNEL.receive(),
             ENCODER_EVENT_REPORT_CHANNEL.receive(),
-            read_keyboard_report(usb, ble, current_output),
+            select(
+                read_keyboard_report(usb, ble, current_output),
+                embassy_time::Timer::after_millis(RKTK_CONFIG.state_update_interval),
+            ),
         )
         .await
         {
@@ -80,14 +83,16 @@ pub async fn report_task<
 
                 InputEvent::Encoder((id, dir))
             }
-            Either4::Fourth(report) => {
-                if let Ok(report) = report {
-                    crate::utils::display_state!(NumLock, (report & 1) == 1);
-                    crate::utils::display_state!(CapsLock, (report & 2) == 2);
+            Either4::Fourth(r) => match r {
+                Either::First(report) => {
+                    if let Ok(report) = report {
+                        crate::utils::display_state!(NumLock, (report & 1) == 1);
+                        crate::utils::display_state!(CapsLock, (report & 2) == 2);
+                    }
+                    continue;
                 }
-
-                continue;
-            }
+                Either::Second(_) => InputEvent::None,
+            },
         };
 
         struct RktkKeyState {

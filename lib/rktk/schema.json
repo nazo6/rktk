@@ -317,6 +317,13 @@
           "format": "uint64",
           "minimum": 0.0
         },
+        "state_update_interval": {
+          "description": "rktk basically updates the keyboard state only when it receives an event from the hardware. However, many states are time-dependent and can change even without an event. Polling at regular time intervals is necessary to monitor such changes.\n\nThis setting specifies that interval. (ms)",
+          "default": 10,
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
         "swap_mouse_x_y": {
           "description": "Swap the x and y values obtained from the mouse driver. This also affects the scroll direction.",
           "default": false,

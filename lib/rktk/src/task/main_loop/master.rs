@@ -1,5 +1,4 @@
-use embassy_futures::join::{join, join5};
-use embassy_time::Timer;
+use embassy_futures::join::{join, join4};
 use rktk_keymanager::state::hid_report::HidReportState;
 use rktk_log::{info, warn};
 use utils::{init_storage, load_state};
@@ -88,7 +87,7 @@ pub async fn start<
     join(
         join(
             report::report_task(system, &state, &config_store, &ble, &usb, master_hooks),
-            join5(
+            join4(
                 handle_slave::start(hand, s2m_rx),
                 handle_keyboard::start(hand, keyscan, debounce),
                 handle_mouse::start(mouse),
@@ -99,15 +98,6 @@ pub async fn start<
                             if ENCODER_EVENT_REPORT_CHANNEL.try_send((id, dir)).is_err() {
                                 warn!("enc full");
                             }
-                        }
-                    }
-                },
-                async {
-                    // this is dummy task to make time-dependent things work
-                    loop {
-                        Timer::after_millis(10).await;
-                        if MOUSE_EVENT_REPORT_CHANNEL.try_send((0, 0)).is_err() {
-                            warn!("mouse full");
                         }
                     }
                 },
