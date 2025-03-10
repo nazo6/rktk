@@ -1,0 +1,186 @@
+use heapless::Vec;
+use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
+
+use crate::interface::state::{
+    input_event::InputEvent,
+    output_event::{EventType, OutputEvent},
+};
+
+use super::hooks::Hooks;
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Report {
+    pub keyboard_report: Option<KeyboardReport>,
+    pub mouse_report: Option<MouseReport>,
+    pub media_keyboard_report: Option<MediaKeyboardReport>,
+    pub highest_layer: u8,
+}
+
+pub struct HidReportState<
+    H: Hooks,
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const ONESHOT_STATE_SIZE: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+> {
+    state: super::State<
+        H,
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >,
+}
+
+impl<
+        H: Hooks,
+        const LAYER: usize,
+        const ROW: usize,
+        const COL: usize,
+        const ENCODER_COUNT: usize,
+        const ONESHOT_STATE_SIZE: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
+    >
+    HidReportState<
+        H,
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >
+{
+    pub fn update_and_report(
+        &mut self,
+        event: InputEvent,
+        since_last_update: core::time::Duration,
+        mut cb: impl FnMut(OutputEvent),
+    ) -> Report {
+        let mut keyboard_change = false;
+        let mut keys: Vec<u8, 6> = Vec::new();
+        let mut modifier = 0u8;
+
+        let mut mouse_change = false;
+        let mut movement = (0, 0);
+        let mut scroll = (0, 0);
+        let mut mouse_buttons = 0u8;
+
+        let mut media_keyboard_change = false;
+        let mut media_keys = 0u16;
+
+        self.state.update(event, since_last_update, |ev| {
+            match ev {
+                OutputEvent::Key((key, ev)) => {
+                    if ev != EventType::Pressing {
+                        keyboard_change = true;
+                    }
+                    if ev != EventType::Released {
+                        let _ = keys.push(key as u8);
+                    }
+                }
+                OutputEvent::Modifier((m, ev)) => {
+                    if ev != EventType::Pressing {
+                        keyboard_change = true;
+                    }
+                    if ev != EventType::Released {
+                        modifier |= m as u8;
+                    }
+                }
+                OutputEvent::MouseButton((m, ev)) => {
+                    if ev != EventType::Pressing {
+                        mouse_change = true;
+                    }
+                    if ev != EventType::Released {
+                        mouse_buttons |= m as u8;
+                    }
+                }
+                OutputEvent::MediaKey((m, ev)) => {
+                    if ev != EventType::Pressing {
+                        media_keyboard_change = true;
+                    }
+                    media_keys = m as u16;
+                }
+                OutputEvent::MouseMove(m) => {
+                    mouse_change = true;
+                    movement.0 += m.0;
+                    movement.1 += m.1;
+                }
+                OutputEvent::MouseScroll((wheel, pan)) => {
+                    mouse_change = true;
+                    scroll.0 += wheel;
+                    scroll.1 += pan;
+                }
+                _ => {}
+            }
+            cb(ev);
+        });
+
+        Report {
+            keyboard_report: if keyboard_change {
+                keys.resize_default(6).unwrap();
+                let keycodes = keys.into_array().unwrap();
+                Some(KeyboardReport {
+                    keycodes,
+                    modifier,
+                    leds: 0,
+                    reserved: 0,
+                })
+            } else {
+                None
+            },
+            mouse_report: if mouse_change {
+                Some(MouseReport {
+                    buttons: mouse_buttons,
+                    x: movement.0,
+                    y: movement.1,
+                    wheel: scroll.0,
+                    pan: scroll.1,
+                })
+            } else {
+                None
+            },
+            media_keyboard_report: if media_keyboard_change {
+                Some(MediaKeyboardReport {
+                    usage_id: media_keys,
+                })
+            } else {
+                None
+            },
+            highest_layer: self.state.shared.highest_layer() as u8,
+        }
+    }
+
+    pub fn inner(
+        &self,
+    ) -> &super::State<
+        H,
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    > {
+        &self.state
+    }
+}

@@ -14,6 +14,7 @@ use crate::{
 };
 use hooks::Hooks;
 
+pub mod hid_report;
 pub mod hooks;
 mod key_resolver;
 mod shared;
@@ -136,6 +137,34 @@ impl<
         self.shared = shared::SharedState::new(keymap);
     }
 
+    pub fn get_keymap(
+        &self,
+    ) -> &Keymap<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    > {
+        &self.shared.keymap
+    }
+
+    pub fn get_config(&self) -> &StateConfig {
+        &self.config
+    }
+
+    pub fn get_keymap_info() -> KeymapInfo {
+        KeymapInfo {
+            layer_count: LAYER as u8,
+            max_tap_dance_key_count: TAP_DANCE_MAX_DEFINITIONS as u8,
+            max_tap_dance_repeat_count: TAP_DANCE_MAX_REPEATS as u8,
+            oneshot_state_size: ONESHOT_STATE_SIZE as u8,
+        }
+    }
+
     pub fn update(
         &mut self,
         event: InputEvent,
@@ -174,33 +203,5 @@ impl<
             });
 
         updater.end(self.shared.highest_layer(), &mut self.shared, cb);
-    }
-
-    pub fn get_keymap(
-        &self,
-    ) -> &Keymap<
-        LAYER,
-        ROW,
-        COL,
-        ENCODER_COUNT,
-        TAP_DANCE_MAX_DEFINITIONS,
-        TAP_DANCE_MAX_REPEATS,
-        COMBO_KEY_MAX_DEFINITIONS,
-        COMBO_KEY_MAX_SOURCES,
-    > {
-        &self.shared.keymap
-    }
-
-    pub fn get_config(&self) -> &StateConfig {
-        &self.config
-    }
-
-    pub fn get_keymap_info() -> KeymapInfo {
-        KeymapInfo {
-            layer_count: LAYER as u8,
-            max_tap_dance_key_count: TAP_DANCE_MAX_DEFINITIONS as u8,
-            max_tap_dance_repeat_count: TAP_DANCE_MAX_REPEATS as u8,
-            oneshot_state_size: ONESHOT_STATE_SIZE as u8,
-        }
     }
 }

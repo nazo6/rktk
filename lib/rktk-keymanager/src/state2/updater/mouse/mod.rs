@@ -10,11 +10,14 @@ use crate::{
 use self::aml::Aml;
 
 mod aml;
-mod reporter;
 
 /// Global mouse state
 pub struct MouseState {
     scroll_mode: bool,
+    scroll_remained: (i8, i8),
+    scroll_divider_x: i8,
+    scroll_divider_y: i8,
+
     aml: Aml,
     arrow_mouse_move: (i8, i8),
     auto_mouse_layer: usize,
@@ -23,11 +26,15 @@ pub struct MouseState {
 impl MouseState {
     pub fn new(config: MouseConfig) -> Self {
         Self {
+            scroll_mode: false,
+            scroll_remained: (0, 0),
+            scroll_divider_x: config.scroll_divider_x,
+            scroll_divider_y: config.scroll_divider_y,
+
             aml: Aml::new(
                 Duration::from_millis(config.auto_mouse_duration),
                 config.auto_mouse_threshold,
             ),
-            scroll_mode: false,
             arrow_mouse_move: (0, 0),
             auto_mouse_layer: config.auto_mouse_layer as usize,
         }
@@ -146,7 +153,18 @@ impl<'a> MouseUpdater<'a> {
         }
 
         if self.mouse_move != (0, 0) {
-            cb(OutputEvent::MouseMove(self.mouse_move));
+            if self.state.scroll_mode {
+                let wheel_raw = self.mouse_move.0 + self.state.scroll_remained.0;
+                let pan_raw = self.mouse_move.1 + self.state.scroll_remained.1;
+                let wheel = wheel_raw / self.state.scroll_divider_y;
+                let pan = pan_raw / self.state.scroll_divider_x;
+                self.state.scroll_remained.0 = wheel_raw % self.state.scroll_divider_y;
+                self.state.scroll_remained.1 = pan_raw % self.state.scroll_divider_x;
+
+                cb(OutputEvent::MouseScroll((wheel, pan)));
+            } else {
+                cb(OutputEvent::MouseMove(self.mouse_move));
+            }
         }
     }
 }

@@ -105,5 +105,6 @@ pub mod output_event {
         MediaKey((Media, EventType)),
         Custom((u8, EventType)),
         MouseMove((i8, i8)),
+        MouseScroll((i8, i8)),
     }
 }
