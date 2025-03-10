@@ -4,6 +4,7 @@ use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 use crate::interface::state::{
     input_event::InputEvent,
     output_event::{EventType, OutputEvent},
+    KeymapInfo,
 };
 
 use super::hooks::Hooks;
@@ -195,5 +196,49 @@ impl<
             },
             highest_layer: self.state.shared.highest_layer() as u8,
         }
+    }
+
+    pub fn inner(
+        &self,
+    ) -> &super::State<
+        H,
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    > {
+        &self.state
+    }
+
+    pub fn get_keymap_info() -> KeymapInfo {
+        KeymapInfo {
+            layer_count: LAYER as u8,
+            max_tap_dance_key_count: TAP_DANCE_MAX_DEFINITIONS as u8,
+            max_tap_dance_repeat_count: TAP_DANCE_MAX_REPEATS as u8,
+            oneshot_state_size: ONESHOT_STATE_SIZE as u8,
+        }
+    }
+
+    pub fn reset_with_config(
+        &mut self,
+        keymap: crate::keymap::Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
+        config: crate::interface::state::config::StateConfig,
+    ) {
+        self.next_send_keyboard_report = false;
+        self.state.reset_with_config(keymap, config);
     }
 }

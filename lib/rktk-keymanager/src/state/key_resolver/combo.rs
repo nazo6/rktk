@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use crate::{
     interface::state::config::ComboConfig,
     keycode::KeyCode,

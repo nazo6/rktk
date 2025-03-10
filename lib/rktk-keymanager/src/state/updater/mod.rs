@@ -67,7 +67,9 @@ impl<'a> Updater<'a> {
             KeyCode::Mouse(mouse) => OutputEvent::MouseButton((mouse, ev)),
             KeyCode::Modifier(modifier) => OutputEvent::Modifier((modifier, ev)),
             KeyCode::Media(media) => OutputEvent::MediaKey((media, ev)),
-            KeyCode::Custom(id) => OutputEvent::Custom((id, ev)),
+            KeyCode::Custom1(id) => OutputEvent::Custom(1, (id, ev)),
+            KeyCode::Custom2(id) => OutputEvent::Custom(2, (id, ev)),
+            KeyCode::Custom3(id) => OutputEvent::Custom(3, (id, ev)),
             // These keycodes does not appear in the output event
             KeyCode::None => return,
             KeyCode::Layer(_) => return,

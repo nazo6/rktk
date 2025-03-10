@@ -135,6 +135,7 @@ impl<
             keymap.combo.clone(),
         );
         self.shared = shared::SharedState::new(keymap);
+        self.updater_state = updater::UpdaterState::new(config.mouse);
     }
 
     pub fn get_keymap(

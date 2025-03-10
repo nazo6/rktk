@@ -19,12 +19,6 @@ use crate::macros::{common_derive, impl_display, with_consts};
 pub enum Special {
     MoScrl,
     AmlReset,
-    FlashClear,
-    OutputBle,
-    OutputUsb,
-    BleBondClear,
-    Bootloader,
-    PowerOff,
 }
 
 impl_display!(Special);

@@ -78,7 +78,7 @@ impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHand
         &mut self,
         _req: (),
     ) -> Result<impl Stream<Item = get_keymaps::Response>, Self::Error> {
-        let keymap = self.state.lock().await.get_keymap().clone();
+        let keymap = self.state.lock().await.inner().get_keymap().clone();
         Ok(futures::stream::iter(
             itertools::iproduct!(
                 0..RKTK_CONFIG.layer_count,
@@ -102,7 +102,10 @@ impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHand
 
         let (mut keymap, config) = {
             let state = self.state.lock().await;
-            (state.get_keymap().clone(), state.get_config().clone())
+            (
+                state.inner().get_keymap().clone(),
+                state.inner().get_config().clone(),
+            )
         };
 
         while let Some(Ok(key)) = req.next().await {
@@ -125,14 +128,14 @@ impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHand
         &mut self,
         _req: get_keymap_config::Request,
     ) -> Result<get_keymap_config::Response, Self::Error> {
-        Ok(self.state.lock().await.get_config().clone())
+        Ok(self.state.lock().await.inner().get_config().clone())
     }
 
     async fn set_keymap_config(
         &mut self,
         req: set_keymap_config::Request,
     ) -> Result<set_keymap_config::Response, Self::Error> {
-        let keymap = self.state.lock().await.get_keymap().clone();
+        let keymap = self.state.lock().await.inner().get_keymap().clone();
 
         if let Some(storage) = self.storage {
             if let Err(_e) = storage.write_state_config(&req).await {

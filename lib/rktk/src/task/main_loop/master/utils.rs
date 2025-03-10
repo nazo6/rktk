@@ -1,10 +1,8 @@
-use rktk_keymanager::interface::{
-    state::{config::StateConfig, input_event::KeyChangeEvent},
-    Output,
-};
+use rktk_keymanager::interface::state::{config::StateConfig, input_event::KeyChangeEvent};
 use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::helper::Debug2Format;
 
+use crate::drivers::interface::reporter::Output;
 use crate::{
     config::{
         constant::{KEYBOARD, KM_CONFIG},
@@ -93,7 +91,6 @@ pub async fn load_state<KH: KeymanagerHooks>(
     let state_config = state_config.unwrap_or(StateConfig {
         mouse: KM_CONFIG.mouse,
         key_resolver: KM_CONFIG.key_resolver,
-        initial_output,
     });
 
     SharedState::new(ConfiguredState::new(keymap, state_config, hooks))

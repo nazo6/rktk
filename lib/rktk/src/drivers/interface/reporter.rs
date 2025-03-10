@@ -1,3 +1,4 @@
+use rktk_log::derive_format_and_debug;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 pub trait ReporterDriver {
@@ -41,4 +42,11 @@ pub trait ReporterDriver {
     /// - `Ok(false)`: The device is already awake.
     /// - `Err(_)`: Failed to send the wake up signal or not supported.
     fn wakeup(&self) -> Result<bool, Self::Error>;
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive_format_and_debug]
+pub enum Output {
+    Usb,
+    Ble,
 }

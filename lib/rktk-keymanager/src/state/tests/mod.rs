@@ -12,7 +12,7 @@ mod prelude {
 
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::interface::state::config::{
-        ComboConfig, KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
+        ComboConfig, KeyResolverConfig, MouseConfig, StateConfig, TapDanceConfig, TapHoldConfig,
     };
     pub(super) use crate::{
         interface::state::input_event::InputEvent,
@@ -20,9 +20,9 @@ mod prelude {
         time::Instant,
     };
     pub use crate::{
-        interface::{state::input_event::KeyChangeEvent, Output},
+        interface::state::input_event::KeyChangeEvent,
         keymap::{Keymap, TapDanceDefinition},
-        state2::{
+        state::{
             hid_report::{HidReportState, Report},
             hooks::EmptyHooks,
             State,
@@ -97,7 +97,7 @@ mod prelude {
     ) -> HidReportState<EmptyHooks, LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
         HidReportState::new(
             keymap,
-            crate::state2::StateConfig {
+            StateConfig {
                 mouse: MouseConfig {
                     auto_mouse_layer: 1,
                     auto_mouse_duration: 500,
@@ -113,7 +113,6 @@ mod prelude {
                     tap_dance: TapDanceConfig { threshold: 100 },
                     combo: ComboConfig { threshold: 20 },
                 },
-                initial_output: Output::Usb,
             },
             EmptyHooks,
         )

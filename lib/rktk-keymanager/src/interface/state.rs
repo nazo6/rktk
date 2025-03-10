@@ -11,7 +11,7 @@ pub struct KeymapInfo {
 }
 
 pub mod config {
-    use crate::{interface::Output, macros::common_derive};
+    use crate::macros::common_derive;
     use macro_rules_attribute::apply;
 
     /// Configuration to initialize the keyboard state.
@@ -19,7 +19,6 @@ pub mod config {
     pub struct StateConfig {
         pub mouse: MouseConfig,
         pub key_resolver: KeyResolverConfig,
-        pub initial_output: Output,
     }
 
     #[apply(common_derive)]
@@ -107,7 +106,7 @@ pub mod output_event {
         Modifier((Modifier, EventType)),
         MouseButton((Mouse, EventType)),
         MediaKey((Media, EventType)),
-        Custom((u8, EventType)),
+        Custom(u8, (u8, EventType)),
         MouseMove((i8, i8)),
         MouseScroll((i8, i8)),
     }
