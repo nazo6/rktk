@@ -23,9 +23,8 @@ mod prelude {
         interface::state::input_event::KeyChangeEvent,
         keymap::{Keymap, TapDanceDefinition},
         state::{
-            hid_report::{HidReportState, Report},
-            hooks::EmptyHooks,
             State,
+            hid_report::{HidReportState, Report},
         },
     };
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -94,7 +93,7 @@ mod prelude {
 
     pub fn new_state(
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3>,
-    ) -> HidReportState<EmptyHooks, LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
+    ) -> HidReportState<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
         HidReportState::new(
             keymap,
             StateConfig {
@@ -114,7 +113,6 @@ mod prelude {
                     combo: ComboConfig { threshold: 20 },
                 },
             },
-            EmptyHooks,
         )
     }
 

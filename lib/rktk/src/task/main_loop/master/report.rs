@@ -3,7 +3,6 @@ use embassy_time::{Duration, Instant};
 use rktk_keymanager::interface::state::output_event::EventType;
 use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::OutputEvent};
 use rktk_keymanager::state::hid_report::Report;
-use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::{debug, helper::Debug2Format};
 
 use crate::config::keymap::prelude::RktkKeys;
@@ -31,10 +30,9 @@ pub async fn report_task<
     Ble: BleDriver,
     Usb: UsbDriver,
     MH: MasterHooks,
-    KH: KeymanagerHooks,
 >(
     system: &System,
-    state: &SharedState<KH>,
+    state: &SharedState,
     config_store: &Option<StorageConfigManager<S>>,
     ble: &Option<Ble>,
     usb: &Option<Usb>,

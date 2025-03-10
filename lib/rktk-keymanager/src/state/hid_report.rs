@@ -2,12 +2,10 @@ use heapless::Vec;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use crate::interface::state::{
+    KeymapInfo,
     input_event::InputEvent,
     output_event::{EventType, OutputEvent},
-    KeymapInfo,
 };
-
-use super::hooks::Hooks;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Report {
@@ -18,7 +16,6 @@ pub struct Report {
 }
 
 pub struct HidReportState<
-    H: Hooks,
     const LAYER: usize,
     const ROW: usize,
     const COL: usize,
@@ -30,7 +27,6 @@ pub struct HidReportState<
     const COMBO_KEY_MAX_SOURCES: usize,
 > {
     state: super::State<
-        H,
         LAYER,
         ROW,
         COL,
@@ -45,19 +41,17 @@ pub struct HidReportState<
 }
 
 impl<
-        H: Hooks,
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const ONESHOT_STATE_SIZE: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const ONESHOT_STATE_SIZE: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+>
     HidReportState<
-        H,
         LAYER,
         ROW,
         COL,
@@ -81,10 +75,9 @@ impl<
             COMBO_KEY_MAX_SOURCES,
         >,
         config: crate::interface::state::config::StateConfig,
-        hooks: H,
     ) -> Self {
         Self {
-            state: super::State::new(keymap, config, hooks),
+            state: super::State::new(keymap, config),
             next_send_keyboard_report: false,
         }
     }
@@ -201,7 +194,6 @@ impl<
     pub fn inner(
         &self,
     ) -> &super::State<
-        H,
         LAYER,
         ROW,
         COL,
@@ -222,23 +214,5 @@ impl<
             max_tap_dance_repeat_count: TAP_DANCE_MAX_REPEATS as u8,
             oneshot_state_size: ONESHOT_STATE_SIZE as u8,
         }
-    }
-
-    pub fn reset_with_config(
-        &mut self,
-        keymap: crate::keymap::Keymap<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
-        config: crate::interface::state::config::StateConfig,
-    ) {
-        self.next_send_keyboard_report = false;
-        self.state.reset_with_config(keymap, config);
     }
 }

@@ -1,11 +1,10 @@
 use core::fmt::Display;
 
 use futures::{Stream, StreamExt as _};
-use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_rrp::{
     endpoints::*,
     server::ServerHandlers,
-    transport::{error::ReceiveError, ReadTransport, WriteTransport},
+    transport::{ReadTransport, WriteTransport, error::ReceiveError},
 };
 
 use crate::{
@@ -15,12 +14,12 @@ use crate::{
     },
 };
 
-use super::{ConfiguredState, SharedState, RKTK_CONFIG};
+use super::{ConfiguredState, RKTK_CONFIG, SharedState};
 
 pub async fn start(
     usb: &Option<impl UsbDriver>,
     _ble: &Option<impl BleDriver>,
-    state: &SharedState<impl KeymanagerHooks>,
+    state: &SharedState,
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
 ) {
     if let Some(usb) = &usb {
@@ -36,13 +35,11 @@ pub async fn start(
     }
 }
 
-struct Handlers<'a, S: StorageDriver, KH: KeymanagerHooks> {
-    pub state: &'a SharedState<KH>,
+struct Handlers<'a, S: StorageDriver> {
+    pub state: &'a SharedState,
     pub storage: Option<&'a StorageConfigManager<S>>,
 }
-impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHandlers<RE, WE>
-    for Handlers<'_, S, KH>
-{
+impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Handlers<'_, S> {
     type Error = &'static str;
 
     async fn get_keyboard_info(
@@ -53,7 +50,7 @@ impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHand
             name: heapless::String::from(KEYBOARD.name),
             cols: KEYBOARD.cols,
             rows: KEYBOARD.rows,
-            keymap: ConfiguredState::<KH>::get_keymap_info(),
+            keymap: ConfiguredState::get_keymap_info(),
         })
     }
 
@@ -119,7 +116,7 @@ impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHand
                 }
             }
         }
-        self.state.lock().await.reset_with_config(keymap, config);
+        *self.state.lock().await = ConfiguredState::new(keymap, config);
 
         Ok(())
     }
@@ -142,7 +139,7 @@ impl<RE: Display, WE: Display, S: StorageDriver, KH: KeymanagerHooks> ServerHand
                 crate::print!("set_keymap_config failed");
             }
         }
-        self.state.lock().await.reset_with_config(keymap, req);
+        *self.state.lock().await = ConfiguredState::new(keymap, req);
         Ok(())
     }
 

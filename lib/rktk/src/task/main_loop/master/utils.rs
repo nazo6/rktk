@@ -1,5 +1,4 @@
 use rktk_keymanager::interface::state::{config::StateConfig, input_event::KeyChangeEvent};
-use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::helper::Debug2Format;
 
 use crate::{
@@ -11,7 +10,7 @@ use crate::{
     drivers::interface::{keyscan::Hand, storage::StorageDriver},
 };
 
-use super::{ConfiguredState, SharedState, RKTK_CONFIG};
+use super::{ConfiguredState, RKTK_CONFIG, SharedState};
 
 const SPLIT_RIGHT_SHIFT: u8 = {
     if let Some(val) = KEYBOARD.split_right_shift {
@@ -67,11 +66,10 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 
 /// Loads config from storage and return it as state.
 /// If storage doesn't exist or read fails, uses provided static config value insted.
-pub async fn load_state<KH: KeymanagerHooks>(
+pub async fn load_state(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
     mut keymap: Keymap,
-    hooks: KH,
-) -> SharedState<KH> {
+) -> SharedState {
     let (state_config, keymap) = if let Some(storage) = &config_store {
         for l in 0..RKTK_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
@@ -91,5 +89,5 @@ pub async fn load_state<KH: KeymanagerHooks>(
         key_resolver: KM_CONFIG.key_resolver,
     });
 
-    SharedState::new(ConfiguredState::new(keymap, state_config, hooks))
+    SharedState::new(ConfiguredState::new(keymap, state_config))
 }

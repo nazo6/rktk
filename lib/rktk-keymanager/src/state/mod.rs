@@ -5,17 +5,15 @@
 
 use crate::{
     interface::state::{
+        KeymapInfo,
         config::StateConfig,
         input_event::InputEvent,
         output_event::{EventType, OutputEvent},
-        KeymapInfo,
     },
     keymap::Keymap,
 };
-use hooks::Hooks;
 
 pub mod hid_report;
-pub mod hooks;
 mod key_resolver;
 mod shared;
 mod updater;
@@ -24,7 +22,6 @@ mod updater;
 
 /// Represents the state of the keyboard.
 pub struct State<
-    H: Hooks,
     const LAYER: usize,
     const ROW: usize,
     const COL: usize,
@@ -54,23 +51,20 @@ pub struct State<
     >,
     config: StateConfig,
     updater_state: updater::UpdaterState,
-    pub hooks: H,
 }
 
 impl<
-        H: Hooks,
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const ONESHOT_STATE_SIZE: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const ONESHOT_STATE_SIZE: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+>
     State<
-        H,
         LAYER,
         ROW,
         COL,
@@ -95,7 +89,6 @@ impl<
             COMBO_KEY_MAX_SOURCES,
         >,
         config: StateConfig,
-        hooks: H,
     ) -> Self {
         const {
             assert!(LAYER >= 1, "Layer count must be at least 1");
@@ -110,32 +103,7 @@ impl<
             ),
             shared: shared::SharedState::new(keymap),
             updater_state: updater::UpdaterState::new(config.mouse),
-            hooks,
         }
-    }
-
-    pub fn reset_with_config(
-        &mut self,
-        keymap: Keymap<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
-        config: StateConfig,
-    ) {
-        self.config = config.clone();
-        self.key_resolver = key_resolver::KeyResolver::new(
-            config.key_resolver,
-            keymap.tap_dance.clone(),
-            keymap.combo.clone(),
-        );
-        self.shared = shared::SharedState::new(keymap);
-        self.updater_state = updater::UpdaterState::new(config.mouse);
     }
 
     pub fn get_keymap(
@@ -198,9 +166,7 @@ impl<
 
         self.key_resolver
             .resolve_key(&mut self.shared, key_change.as_ref(), |shared, et, kc| {
-                if self.hooks.on_key_code(et, kc) {
-                    updater.update_by_keycode(&kc, et, shared, &mut cb);
-                }
+                updater.update_by_keycode(&kc, et, shared, &mut cb);
             });
 
         updater.end(self.shared.highest_layer(), &mut self.shared, cb);

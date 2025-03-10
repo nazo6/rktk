@@ -3,6 +3,7 @@
 use crate::{
     config::constant::RKTK_CONFIG,
     drivers::interface::{
+        BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
         ble::BleDriver,
         debounce::DebounceDriver,
         display::DisplayDriver,
@@ -14,18 +15,16 @@ use crate::{
         split::SplitDriver,
         storage::StorageDriver,
         usb::UsbDriver,
-        BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
     },
     hooks::Hooks,
 };
 use crate::{
     config::keymap::Keymap,
-    drivers::{interface::system::SystemDriver, Drivers},
+    drivers::{Drivers, interface::system::SystemDriver},
     hooks::interface::*,
     utils::sjoin,
 };
 use embassy_time::Duration;
-use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::{debug, helper::Debug2Format, info};
 
 pub(crate) mod channels;
@@ -61,7 +60,6 @@ pub async fn start<
     MH: MasterHooks,
     SH: SlaveHooks,
     BH: RgbHooks,
-    KH: KeymanagerHooks,
 >(
     drivers: Drivers<
         KeyScan,
@@ -81,7 +79,7 @@ pub async fn start<
         BleBuilder,
     >,
     key_config: Keymap,
-    hooks: Hooks<CH, MH, SH, BH, KH>,
+    hooks: Hooks<CH, MH, SH, BH>,
 ) {
     #[cfg(feature = "rrp-log")]
     {
