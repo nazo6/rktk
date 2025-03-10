@@ -29,7 +29,7 @@ fn tap_dance_tap1() {
         "TapDance key released but dance tapping term not exceeded. nothing happens yet."
     );
 
-    let report = state.update(Event::None, time(150));
+    let report = state.update(InputEvent::None, time(150));
     let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0, 0, 0, 0, 0];
     assert_eq!(
@@ -53,7 +53,7 @@ fn tap_dance_hold1() {
         "TapDance key pressed. nothing happens yet"
     );
 
-    let report = state.update(Event::None, time(600));
+    let report = state.update(InputEvent::None, time(600));
     let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().modifier = 0x01;
     assert_eq!(
@@ -101,7 +101,7 @@ fn tap_dance_tap2() {
         "TapDance key released one more. nothing happens yet"
     );
 
-    let report = state.update(Event::None, time(250));
+    let report = state.update(InputEvent::None, time(250));
     let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().keycodes = [0x05, 0, 0, 0, 0, 0];
     assert_eq!(
@@ -123,7 +123,7 @@ fn tap_dance_hold2() {
 
     let _ = update!(state, time(50), (0, 0, true));
 
-    let report = state.update(Event::None, time(600));
+    let report = state.update(InputEvent::None, time(600));
     assert_eq!(report.highest_layer, 1, "hold2");
 }
 
@@ -144,6 +144,6 @@ fn tap_dance_tap3() {
     let _ = update!(state, time(100), (0, 0, true));
     let _ = update!(state, time(100), (0, 0, false));
 
-    let report = state.update(Event::None, time(700));
+    let report = state.update(InputEvent::None, time(700));
     assert_eq!(report.highest_layer, 2, "tap3");
 }

@@ -1,6 +1,6 @@
 use embassy_futures::select::{select4, Either4};
 use embassy_time::{Duration, Instant};
-use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
+use rktk_keymanager::interface::{report::StateReport, state::input_event::InputEvent, Output};
 use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::{debug, helper::Debug2Format};
 
@@ -61,21 +61,21 @@ pub async fn report_task<
                     continue;
                 }
 
-                Event::Mouse(mouse_move)
+                InputEvent::Mouse(mouse_move)
             }
             Either4::Second(mut event) => {
                 if !master_hooks.on_keyboard_event(&mut event).await {
                     continue;
                 }
 
-                Event::Key(event)
+                InputEvent::Key(event)
             }
             Either4::Third((mut id, mut dir)) => {
                 if !master_hooks.on_encoder_event(&mut id, &mut dir).await {
                     continue;
                 }
 
-                Event::Encoder((id, dir))
+                InputEvent::Encoder((id, dir))
             }
             Either4::Fourth(report) => {
                 if let Ok(report) = report {

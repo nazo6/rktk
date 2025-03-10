@@ -3,7 +3,7 @@
 use macro_rules_attribute::apply;
 
 use crate::{
-    interface::state::event::EncoderDirection,
+    interface::state::input_event::EncoderDirection,
     keycode::{KeyAction, KeyCode},
     macros::common_derive,
 };

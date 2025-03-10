@@ -2,7 +2,7 @@
 //!
 //! `debounce` is way to reduce chatter or noise this can be achieved by ignoring events that are too close to each other in time.
 
-pub use rktk_keymanager::interface::state::event::KeyChangeEvent;
+pub use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
 
 /// Debounce driver interface
 pub trait DebounceDriver {

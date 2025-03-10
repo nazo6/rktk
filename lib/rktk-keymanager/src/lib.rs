@@ -17,6 +17,7 @@ pub mod interface;
 pub mod keycode;
 pub mod keymap;
 mod macros;
+pub mod state2;
 mod time;
 
 #[cfg(any(test, feature = "state"))]

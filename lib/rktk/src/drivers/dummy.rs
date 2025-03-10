@@ -11,7 +11,7 @@ use embedded_graphics::{
     prelude::{Dimensions, DrawTarget, Point},
     Pixel,
 };
-use rktk_keymanager::interface::state::event::{EncoderDirection, KeyChangeEvent};
+use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
 use crate::drivers::interface::{
     ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,

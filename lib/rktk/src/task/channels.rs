@@ -38,7 +38,7 @@ pub mod split {
 
 pub mod report {
 
-    use rktk_keymanager::interface::state::event::{EncoderDirection, KeyChangeEvent};
+    use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
     use crate::task::RKTK_CONFIG;
 

@@ -19,14 +19,14 @@ mod prelude {
     pub use crate::{
         interface::{
             report::{StateReport, TransparentReport},
-            state::event::KeyChangeEvent,
+            state::input_event::KeyChangeEvent,
             Output,
         },
         keymap::{Keymap, TapDanceDefinition},
     };
     pub(super) use crate::{
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
-        state::Event,
+        state::InputEvent,
         time::Instant,
     };
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -104,7 +104,7 @@ mod prelude {
     macro_rules! update {
         ($state:expr, $now:expr, ($row:expr, $col:expr, $pressed:expr)) => {
             $state.update(
-                Event::Key(KeyChangeEvent {
+                InputEvent::Key(KeyChangeEvent {
                     row: $row,
                     col: $col,
                     pressed: $pressed,
@@ -113,7 +113,7 @@ mod prelude {
             )
         };
         ($state:expr, $now:expr) => {
-            $state.update(Event::None, $now)
+            $state.update(InputEvent::None, $now)
         };
     }
 

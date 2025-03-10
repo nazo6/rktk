@@ -4,20 +4,20 @@
 #![allow(clippy::single_match)]
 
 use crate::{
-    interface::{
-        report::StateReport,
-        state::{config::StateConfig, input_event::InputEvent, KeymapInfo},
+    interface::state::{
+        config::StateConfig,
+        input_event::InputEvent,
+        output_event::{EventType, OutputEvent},
+        KeymapInfo,
     },
     keymap::Keymap,
 };
 use hooks::Hooks;
-use key_resolver::EventType;
-use manager::{GlobalManagerState, LocalManagerState};
 
 pub mod hooks;
 mod key_resolver;
-mod manager;
 mod shared;
+mod updater;
 
 // TODO: Delete these generics hell in some day...
 
@@ -52,7 +52,7 @@ pub struct State<
         COMBO_KEY_MAX_SOURCES,
     >,
     config: StateConfig,
-    manager: GlobalManagerState,
+    updater_state: updater::UpdaterState,
     pub hooks: H,
 }
 
@@ -108,7 +108,7 @@ impl<
                 keymap.combo.clone(),
             ),
             shared: shared::SharedState::new(keymap),
-            manager: GlobalManagerState::new(config.mouse, config.initial_output),
+            updater_state: updater::UpdaterState::new(config.mouse),
             hooks,
         }
     }
@@ -134,62 +134,46 @@ impl<
             keymap.combo.clone(),
         );
         self.shared = shared::SharedState::new(keymap);
-        self.manager = GlobalManagerState::new(config.mouse, config.initial_output);
     }
 
-    /// Updates state with the given events.
     pub fn update(
         &mut self,
         event: InputEvent,
         since_last_update: core::time::Duration,
-    ) -> StateReport {
+        mut cb: impl FnMut(OutputEvent),
+    ) {
         self.shared.now = self.shared.now + since_last_update.into();
-
-        let mut lms = LocalManagerState::new(&self.manager);
+        let mut updater = self.updater_state.start_update();
 
         let key_change = match event {
             InputEvent::Key(key_change) => Some(key_change),
             InputEvent::Mouse(movement) => {
-                lms.process_mouse_event(movement);
+                updater.update_by_mouse_move(movement, &mut cb);
                 None
             }
             InputEvent::Encoder((id, dir)) => {
-                if let Some(kc) =
-                    self.shared
-                        .keymap
-                        .get_encoder_key(self.shared.layer_active, id as usize, dir)
+                if let Some(kc) = self
+                    .shared
+                    .keymap
+                    .get_encoder_key(self.shared.layer_active, id as usize, dir)
+                    .copied()
                 {
-                    lms.process_keycode(
-                        &mut self.shared.layer_active,
-                        &mut self.manager,
-                        kc,
-                        EventType::Pressed,
-                    );
-                    lms.process_keycode(
-                        &mut self.shared.layer_active,
-                        &mut self.manager,
-                        kc,
-                        EventType::Released,
-                    );
+                    updater.update_by_keycode(&kc, EventType::Pressed, &mut self.shared, &mut cb);
+                    updater.update_by_keycode(&kc, EventType::Released, &mut self.shared, &mut cb);
                 }
                 None
             }
             _ => None,
         };
 
-        self.key_resolver.resolve_key(
-            &self.shared.keymap,
-            &mut self.shared.layer_active,
-            key_change.as_ref(),
-            self.shared.now,
-            |layer_active, et, kc| {
+        self.key_resolver
+            .resolve_key(&mut self.shared, key_change.as_ref(), |shared, et, kc| {
                 if self.hooks.on_key_code(et, kc) {
-                    lms.process_keycode(layer_active, &mut self.manager, &kc, et);
+                    updater.update_by_keycode(&kc, et, shared, &mut cb);
                 }
-            },
-        );
+            });
 
-        lms.report(&mut self.shared, &mut self.manager)
+        updater.end(self.shared.highest_layer(), &mut self.shared, cb);
     }
 
     pub fn get_keymap(
@@ -220,6 +204,3 @@ impl<
         }
     }
 }
-
-#[cfg(test)]
-mod tests;

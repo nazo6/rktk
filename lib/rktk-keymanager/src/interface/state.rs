@@ -55,7 +55,7 @@ pub mod config {
     }
 }
 
-pub mod event {
+pub mod input_event {
     /// Represents a key event.
     ///
     /// Used generically to indicate that the state of a physical key has changed
@@ -77,10 +77,33 @@ pub mod event {
 
     #[derive(Debug)]
     #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-    pub enum Event {
+    pub enum InputEvent {
         Key(KeyChangeEvent),
         Mouse((i8, i8)),
         Encoder((u8, EncoderDirection)),
         None,
+    }
+}
+
+pub mod output_event {
+    use crate::keycode::prelude::*;
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    pub enum EventType {
+        Pressed,
+        Pressing,
+        Released,
+    }
+
+    #[derive(Debug)]
+    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    pub enum OutputEvent {
+        Key((Key, EventType)),
+        Modifier((Modifier, EventType)),
+        MouseButton((Mouse, EventType)),
+        MediaKey((Media, EventType)),
+        Custom((u8, EventType)),
+        MouseMove((i8, i8)),
     }
 }

@@ -1,5 +1,5 @@
 use rktk_keymanager::interface::{
-    state::{config::StateConfig, event::KeyChangeEvent},
+    state::{config::StateConfig, input_event::KeyChangeEvent},
     Output,
 };
 use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;

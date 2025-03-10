@@ -1,6 +1,6 @@
 use rktk_keymanager::interface::{
     report::StateReport,
-    state::event::{EncoderDirection, KeyChangeEvent},
+    state::input_event::{EncoderDirection, KeyChangeEvent},
 };
 
 use crate::drivers::interface::{
