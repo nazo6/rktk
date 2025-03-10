@@ -25,6 +25,7 @@ use crate::{
     utils::sjoin,
 };
 use embassy_time::Duration;
+use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::{debug, helper::Debug2Format, info};
 
 pub(crate) mod channels;
@@ -60,6 +61,7 @@ pub async fn start<
     MH: MasterHooks,
     SH: SlaveHooks,
     BH: RgbHooks,
+    KH: KeymanagerHooks,
 >(
     drivers: Drivers<
         KeyScan,
@@ -79,7 +81,7 @@ pub async fn start<
         BleBuilder,
     >,
     key_config: Keymap,
-    hooks: Hooks<CH, MH, SH, BH>,
+    hooks: Hooks<CH, MH, SH, BH, KH>,
 ) {
     #[cfg(feature = "rrp-log")]
     {

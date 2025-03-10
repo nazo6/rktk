@@ -2,6 +2,7 @@ use rktk_keymanager::interface::{
     state::{config::StateConfig, event::KeyChangeEvent},
     Output,
 };
+use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::helper::Debug2Format;
 
 use crate::{
@@ -69,11 +70,12 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 
 /// Loads config from storage and return it as state.
 /// If storage doesn't exist or read fails, uses provided static config value insted.
-pub async fn load_state(
+pub async fn load_state<KH: KeymanagerHooks>(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
     mut keymap: Keymap,
     initial_output: Output,
-) -> SharedState {
+    hooks: KH,
+) -> SharedState<KH> {
     let (state_config, keymap) = if let Some(storage) = &config_store {
         for l in 0..RKTK_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
@@ -94,5 +96,5 @@ pub async fn load_state(
         initial_output,
     });
 
-    SharedState::new(ConfiguredState::new(keymap, state_config))
+    SharedState::new(ConfiguredState::new(keymap, state_config, hooks))
 }

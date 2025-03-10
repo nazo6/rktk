@@ -14,6 +14,7 @@ mod prelude {
     use crate::interface::state::config::{
         ComboConfig, KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
     };
+    use crate::state::hooks::EmptyHooks;
     pub use crate::state::State;
     pub use crate::{
         interface::{
@@ -118,7 +119,7 @@ mod prelude {
 
     pub fn new_state(
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3>,
-    ) -> State<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
+    ) -> State<EmptyHooks, LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
         State::new(
             keymap,
             crate::state::StateConfig {
@@ -139,6 +140,7 @@ mod prelude {
                 },
                 initial_output: Output::Usb,
             },
+            EmptyHooks,
         )
     }
 

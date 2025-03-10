@@ -5,13 +5,22 @@ use interface::*;
 pub mod interface;
 pub use empty_hooks::create_empty_hooks;
 
+use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
+
 /// Hooks that can be passed to [`crate::task::start`] function.
 /// See earch trait's documentation for more information.
-pub struct Hooks<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, RH: RgbHooks> {
+pub struct Hooks<
+    CH: CommonHooks,
+    MH: MasterHooks,
+    SH: SlaveHooks,
+    RH: RgbHooks,
+    KH: KeymanagerHooks,
+> {
     pub common: CH,
     pub master: MH,
     pub slave: SH,
     pub rgb: RH,
+    pub key_manager: KH,
 }
 
 /// Collection of sender/receiver that can be used with hooks.
@@ -29,6 +38,8 @@ pub mod empty_hooks {
         Hooks, MasterHooks, SlaveHooks,
     };
 
+    use rktk_keymanager::state::hooks::EmptyHooks as EmptyKeymanagerHooks;
+
     pub struct EmptyCommonHooks;
     impl CommonHooks for EmptyCommonHooks {}
 
@@ -41,13 +52,19 @@ pub mod empty_hooks {
     pub struct EmptyRgbHooks;
     impl RgbHooks for EmptyRgbHooks {}
 
-    pub const fn create_empty_hooks(
-    ) -> Hooks<EmptyCommonHooks, EmptyMasterHooks, EmptySlaveHooks, EmptyRgbHooks> {
+    pub const fn create_empty_hooks() -> Hooks<
+        EmptyCommonHooks,
+        EmptyMasterHooks,
+        EmptySlaveHooks,
+        EmptyRgbHooks,
+        EmptyKeymanagerHooks,
+    > {
         Hooks {
             common: EmptyCommonHooks,
             master: EmptyMasterHooks,
             slave: EmptySlaveHooks,
             rgb: EmptyRgbHooks,
+            key_manager: EmptyKeymanagerHooks,
         }
     }
 }

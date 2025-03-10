@@ -1,6 +1,7 @@
 use embassy_futures::select::{select4, Either4};
 use embassy_time::{Duration, Instant};
 use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
+use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::{debug, helper::Debug2Format};
 
 use crate::{
@@ -24,9 +25,10 @@ pub async fn report_task<
     Ble: BleDriver,
     Usb: UsbDriver,
     MH: MasterHooks,
+    KH: KeymanagerHooks,
 >(
     system: &System,
-    state: &SharedState,
+    state: &SharedState<KH>,
     config_store: &Option<StorageConfigManager<S>>,
     ble: &Option<Ble>,
     usb: &Option<Usb>,

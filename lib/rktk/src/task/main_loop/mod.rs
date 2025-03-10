@@ -24,6 +24,7 @@ use crate::{
 };
 use embassy_futures::select::{select, Either};
 use embassy_time::{Duration, Timer};
+use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::debug;
 
 mod master;
@@ -47,6 +48,7 @@ pub async fn start<
     MH: MasterHooks,
     SH: SlaveHooks,
     BH: RgbHooks,
+    KH: KeymanagerHooks,
 >(
     system: &Sys,
     ble: Option<Ble>,
@@ -59,7 +61,7 @@ pub async fn start<
     mut split: Option<SP>,
     rgb: Option<RGB>,
     key_config: Keymap,
-    mut hooks: Hooks<CH, MH, SH, BH>,
+    mut hooks: Hooks<CH, MH, SH, BH, KH>,
 ) {
     let hand = keyscan.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
@@ -121,6 +123,7 @@ pub async fn start<
                     key_config,
                     hand,
                     hooks.master,
+                    hooks.key_manager,
                 )
                 .await;
             } else {

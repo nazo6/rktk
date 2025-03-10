@@ -10,9 +10,11 @@ use crate::{
     },
     keymap::Keymap,
 };
+use hooks::Hooks;
 use key_resolver::EventType;
 use manager::{GlobalManagerState, LocalManagerState};
 
+pub mod hooks;
 mod key_resolver;
 mod manager;
 mod shared;
@@ -21,6 +23,7 @@ mod shared;
 
 /// Represents the state of the keyboard.
 pub struct State<
+    H: Hooks,
     const LAYER: usize,
     const ROW: usize,
     const COL: usize,
@@ -50,9 +53,11 @@ pub struct State<
     >,
     config: StateConfig,
     manager: GlobalManagerState,
+    pub hooks: H,
 }
 
 impl<
+        H: Hooks,
         const LAYER: usize,
         const ROW: usize,
         const COL: usize,
@@ -64,6 +69,7 @@ impl<
         const COMBO_KEY_MAX_SOURCES: usize,
     >
     State<
+        H,
         LAYER,
         ROW,
         COL,
@@ -88,6 +94,7 @@ impl<
             COMBO_KEY_MAX_SOURCES,
         >,
         config: StateConfig,
+        hooks: H,
     ) -> Self {
         const {
             assert!(LAYER >= 1, "Layer count must be at least 1");
@@ -102,7 +109,32 @@ impl<
             ),
             shared: shared::SharedState::new(keymap),
             manager: GlobalManagerState::new(config.mouse, config.initial_output),
+            hooks,
         }
+    }
+
+    pub fn reset_with_config(
+        &mut self,
+        keymap: Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
+        config: StateConfig,
+    ) {
+        self.config = config.clone();
+        self.key_resolver = key_resolver::KeyResolver::new(
+            config.key_resolver,
+            keymap.tap_dance.clone(),
+            keymap.combo.clone(),
+        );
+        self.shared = shared::SharedState::new(keymap);
+        self.manager = GlobalManagerState::new(config.mouse, config.initial_output);
     }
 
     /// Updates state with the given events.
@@ -147,7 +179,9 @@ impl<
             key_change.as_ref(),
             self.shared.now,
             |layer_active, et, kc| {
-                lms.process_keycode(layer_active, &mut self.manager, &kc, et);
+                if self.hooks.on_key_code(et, kc) {
+                    lms.process_keycode(layer_active, &mut self.manager, &kc, et);
+                }
             },
         );
 
