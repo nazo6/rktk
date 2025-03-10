@@ -154,14 +154,15 @@ impl<'a> MouseUpdater<'a> {
 
         if self.mouse_move != (0, 0) {
             if self.state.scroll_mode {
-                let wheel_raw = self.mouse_move.0 + self.state.scroll_remained.0;
-                let pan_raw = self.mouse_move.1 + self.state.scroll_remained.1;
-                let wheel = wheel_raw / self.state.scroll_divider_y;
+                let pan_raw = self.mouse_move.0 + self.state.scroll_remained.0;
                 let pan = pan_raw / self.state.scroll_divider_x;
-                self.state.scroll_remained.0 = wheel_raw % self.state.scroll_divider_y;
-                self.state.scroll_remained.1 = pan_raw % self.state.scroll_divider_x;
+                self.state.scroll_remained.0 = pan_raw % self.state.scroll_divider_x;
 
-                cb(OutputEvent::MouseScroll((wheel, pan)));
+                let wheel_raw = self.mouse_move.1 + self.state.scroll_remained.1;
+                let wheel = wheel_raw / self.state.scroll_divider_y;
+                self.state.scroll_remained.1 = wheel_raw % self.state.scroll_divider_y;
+
+                cb(OutputEvent::MouseScroll((pan, wheel)));
             } else {
                 cb(OutputEvent::MouseMove(self.mouse_move));
             }

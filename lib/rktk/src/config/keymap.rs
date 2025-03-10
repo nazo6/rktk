@@ -41,12 +41,17 @@ pub mod rktk_keys {
         }
     }
 
-    pub const FLASH_CLEAR: KeyCode = KeyCode::Custom1(RktkKeys::FlashClear as u8);
-    pub const OUTPUT_BLE: KeyCode = KeyCode::Custom1(RktkKeys::OutputBle as u8);
-    pub const OUTPUT_USB: KeyCode = KeyCode::Custom1(RktkKeys::OutputUsb as u8);
-    pub const BLE_BOND_CLEAR: KeyCode = KeyCode::Custom1(RktkKeys::BleBondClear as u8);
-    pub const BOOTLOADER: KeyCode = KeyCode::Custom1(RktkKeys::Bootloader as u8);
-    pub const POWER_OFF: KeyCode = KeyCode::Custom1(RktkKeys::PowerOff as u8);
+    pub const FLASH_CLEAR: KeyAction =
+        KeyAction::Normal(KeyCode::Custom1(RktkKeys::FlashClear as u8));
+    pub const OUTPUT_BLE: KeyAction =
+        KeyAction::Normal(KeyCode::Custom1(RktkKeys::OutputBle as u8));
+    pub const OUTPUT_USB: KeyAction =
+        KeyAction::Normal(KeyCode::Custom1(RktkKeys::OutputUsb as u8));
+    pub const BLE_BOND_CLEAR: KeyAction =
+        KeyAction::Normal(KeyCode::Custom1(RktkKeys::BleBondClear as u8));
+    pub const BOOTLOADER: KeyAction =
+        KeyAction::Normal(KeyCode::Custom1(RktkKeys::Bootloader as u8));
+    pub const POWER_OFF: KeyAction = KeyAction::Normal(KeyCode::Custom1(RktkKeys::PowerOff as u8));
 }
 
 pub mod prelude {

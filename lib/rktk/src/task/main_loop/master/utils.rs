@@ -2,7 +2,6 @@ use rktk_keymanager::interface::state::{config::StateConfig, input_event::KeyCha
 use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::helper::Debug2Format;
 
-use crate::drivers::interface::reporter::Output;
 use crate::{
     config::{
         constant::{KEYBOARD, KM_CONFIG},
@@ -71,7 +70,6 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 pub async fn load_state<KH: KeymanagerHooks>(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
     mut keymap: Keymap,
-    initial_output: Output,
     hooks: KH,
 ) -> SharedState<KH> {
     let (state_config, keymap) = if let Some(storage) = &config_store {

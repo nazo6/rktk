@@ -38,7 +38,7 @@ pub mod empty_hooks {
         Hooks, MasterHooks, SlaveHooks,
     };
 
-    use rktk_keymanager::state::hooks::EmptyHooks as EmptyKeymanagerHooks;
+    pub use rktk_keymanager::state::hooks::EmptyHooks as EmptyKeymanagerHooks;
 
     pub struct EmptyCommonHooks;
     impl CommonHooks for EmptyCommonHooks {}

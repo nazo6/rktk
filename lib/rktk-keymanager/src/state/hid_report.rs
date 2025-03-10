@@ -153,10 +153,10 @@ impl<
                     movement.0 += m.0;
                     movement.1 += m.1;
                 }
-                OutputEvent::MouseScroll((wheel, pan)) => {
+                OutputEvent::MouseScroll((pan, wheel)) => {
                     mouse_change = true;
-                    scroll.0 += wheel;
-                    scroll.1 += pan;
+                    scroll.0 += pan;
+                    scroll.1 += wheel;
                 }
                 _ => {}
             }
@@ -181,8 +181,8 @@ impl<
                     buttons: mouse_buttons,
                     x: movement.0,
                     y: movement.1,
-                    wheel: scroll.0,
-                    pan: scroll.1,
+                    pan: scroll.0,
+                    wheel: scroll.1,
                 })
             } else {
                 None

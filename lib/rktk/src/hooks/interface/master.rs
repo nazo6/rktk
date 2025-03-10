@@ -1,4 +1,4 @@
-use rktk_keymanager::{
+pub use rktk_keymanager::{
     interface::state::input_event::{EncoderDirection, KeyChangeEvent},
     state::hid_report::Report,
 };

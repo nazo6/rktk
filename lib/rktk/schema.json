@@ -316,6 +316,11 @@
           "type": "integer",
           "format": "uint64",
           "minimum": 0.0
+        },
+        "swap_mouse_x_y": {
+          "description": "Swap the x and y values obtained from the mouse driver. This also affects the scroll direction.",
+          "default": false,
+          "type": "boolean"
         }
       },
       "additionalProperties": false

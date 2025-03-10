@@ -44,7 +44,6 @@ pub async fn report_task<
 
     let mut prev_update_time = embassy_time::Instant::now();
     let mut current_output = Output::Usb;
-    let mut prev_report = None;
     let mut display_off = DisplayOffController::new();
 
     loop {
@@ -128,12 +127,6 @@ pub async fn report_task<
                 });
 
         prev_update_time = embassy_time::Instant::now();
-        if prev_report == Some(state_report.clone()) {
-            display_off.update(false);
-            continue;
-        }
-
-        prev_report = Some(state_report.clone());
 
         if !master_hooks
             .on_state_update(&mut state_report, usb, ble)

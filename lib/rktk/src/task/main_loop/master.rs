@@ -15,7 +15,6 @@ use crate::{
         encoder::EncoderDriver,
         keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
-        reporter::Output,
         storage::StorageDriver,
         system::SystemDriver,
         usb::UsbDriver,
@@ -81,7 +80,7 @@ pub async fn start<
     key_manager_hooks: KH,
 ) {
     let config_store = init_storage(storage).await;
-    let state = load_state(&config_store, key_config, Output::Usb, key_manager_hooks).await;
+    let state = load_state(&config_store, key_config, key_manager_hooks).await;
 
     info!("Master side task start");
 
