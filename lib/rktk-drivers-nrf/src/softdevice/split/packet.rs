@@ -2,7 +2,7 @@
 
 use core::ptr::NonNull;
 
-use atomic_pool::{pool, Box};
+use atomic_pool::{Box, pool};
 use nrf_softdevice::ble::l2cap;
 
 pool!(pub PacketPool: [[u8; 64]; 10]);
@@ -54,7 +54,7 @@ impl l2cap::Packet for Packet {
         // info!("from_raw_parts {}", ptr.as_ptr() as u32);
         Self {
             len: len as u8,
-            buf: Box::from_raw(ptr.cast::<[u8; 64]>()),
+            buf: unsafe { Box::from_raw(ptr.cast::<[u8; 64]>()) },
         }
     }
 }

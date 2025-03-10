@@ -47,16 +47,20 @@ unsafe impl defmt::Logger for USBLogger {
     }
 
     unsafe fn release() {
-        ENCODER.end_frame(inner);
-        TAKEN = false;
-        let restore = RESTORE;
-        critical_section::release(restore);
+        unsafe {
+            ENCODER.end_frame(inner);
+            unsafe { TAKEN = false };
+            let restore = RESTORE;
+            critical_section::release(restore);
+        }
     }
 
     unsafe fn flush() {}
 
     unsafe fn write(bytes: &[u8]) {
-        ENCODER.write(bytes, inner);
+        unsafe {
+            ENCODER.write(bytes, inner);
+        }
     }
 }
 

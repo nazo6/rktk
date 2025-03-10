@@ -8,7 +8,7 @@ use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, rktk_keymanager::keyc
 use crate::app::{
     cache::{invalidate_cache, use_cache, with_cache},
     components::{
-        notification::{push_notification, Notification, NotificationLevel},
+        notification::{Notification, NotificationLevel, push_notification},
         selector::key_action::KeyActionSelector,
     },
     state::CONN,
@@ -42,20 +42,22 @@ pub fn Remap() -> Element {
 
     match &*res.value().read() {
         Some(Ok((keymap, time))) => {
+            let elements = [rsx! {
+                RemapInner {
+                    keyboard,
+                    keymap: keymap.to_owned(),
+                    refetch: Callback::new(move |_| {
+                        invalidate_cache(cache.clone(), "get_keymap");
+                        res.restart()
+                    }),
+                    key: "{time}",
+                }
+            }];
+
             rsx! {
                 div { class: "h-full",
                     // Using array as re-rendering using key only works for list
-                    {[rsx! {
-                        RemapInner {
-                            keyboard,
-                            keymap: keymap.to_owned(),
-                            refetch: Callback::new(move |_| {
-                                invalidate_cache(cache.clone(), "get_keymap");
-                                res.restart()
-                            }),
-                            key: "{time}",
-                        }
-                    }].iter()}
+                    {elements.iter()}
                 }
             }
         }

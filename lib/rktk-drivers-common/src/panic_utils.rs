@@ -22,7 +22,7 @@ impl Write for PanicMessage {
     }
 }
 
-#[link_section = ".uninit.PANICINFO"]
+#[unsafe(link_section = ".uninit.PANICINFO")]
 static mut PANIC_INFO: MaybeUninit<PanicMessage> = MaybeUninit::uninit();
 const PANIC_INFO_MAGIC: u32 = 0x54_41_43_4B;
 
@@ -61,14 +61,13 @@ fn read_panic_message() -> Option<PanicMessage> {
 }
 
 fn parse_panic_message(panic_info: &PanicMessage) -> &str {
-    let str = match core::str::from_utf8(&panic_info.data) {
+    match core::str::from_utf8(&panic_info.data) {
         Ok(str) => str,
         Err(e) => {
             let valid_len = e.valid_up_to();
             core::str::from_utf8(&panic_info.data[..valid_len]).unwrap()
         }
-    };
-    str
+    }
 }
 
 /// Display panic message on display is exists.

@@ -1,8 +1,10 @@
 [package]
 name = "rktk-client"
-version = "0.1.0"
-authors = ["nazo6 <git@nazo6.dev>"]
-edition = "2021"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
 
 [dependencies]
 rktk = { workspace = true }

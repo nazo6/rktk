@@ -1,4 +1,4 @@
-use embassy_futures::select::{select4, Either4};
+use embassy_futures::select::{Either4, select4};
 use embassy_time::{Duration, Instant};
 use rktk_keymanager::interface::state::output_event::EventType;
 use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::OutputEvent};
@@ -142,7 +142,7 @@ pub async fn report_task<
             system.reset_to_bootloader();
         }
         if rktk_key_state.flash_clear {
-            if let Some(ref storage) = config_store {
+            if let Some(storage) = config_store.as_ref() {
                 match storage.storage.format().await {
                     Ok(_) => {
                         rktk_log::info!("Storage formatted by report");

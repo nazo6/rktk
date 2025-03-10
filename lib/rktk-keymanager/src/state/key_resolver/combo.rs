@@ -74,7 +74,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
                                 }
                                 (
                                     EventType::Pressed | EventType::Pressing,
-                                    ComboUnitState::Pending(mut state),
+                                    &ComboUnitState::Pending(mut state),
                                 ) => {
                                     state.1[i] = true;
                                     if state
@@ -96,7 +96,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
                                 ) => {
                                     *keycode = def.dst;
                                 }
-                                (EventType::Released, ComboUnitState::Pressing(mut state)) => {
+                                (EventType::Released, &ComboUnitState::Pressing(mut state)) => {
                                     state[i] = false;
                                     if state.iter().all(|&b| !b) {
                                         unit.state = ComboUnitState::None;

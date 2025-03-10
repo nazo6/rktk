@@ -5,7 +5,7 @@ use rktk::drivers::interface::system::SystemDriver;
 
 const BOOTLOADER_MAGIC: u32 = 0xABCD_EF01;
 
-#[link_section = ".uninit"]
+#[unsafe(link_section = ".uninit")]
 static mut FLAG: MaybeUninit<u32> = MaybeUninit::uninit();
 
 pub struct RpSystemDriver;
