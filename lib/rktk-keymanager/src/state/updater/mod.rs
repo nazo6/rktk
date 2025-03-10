@@ -33,7 +33,7 @@ pub struct Updater<'a> {
     mouse: mouse::MouseUpdater<'a>,
 }
 
-impl<'a> Updater<'a> {
+impl Updater<'_> {
     pub fn update_by_keycode<
         const LAYER: usize,
         const ROW: usize,
