@@ -1,13 +1,19 @@
 use embassy_futures::select::{select4, Either4};
 use embassy_time::{Duration, Instant};
-use rktk_keymanager::interface::{report::StateReport, state::event::Event, Output};
+use rktk_keymanager::interface::state::output_event::EventType;
+use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::OutputEvent};
+use rktk_keymanager::state::hid_report::Report;
 use rktk_keymanager::state::hooks::Hooks as KeymanagerHooks;
 use rktk_log::{debug, helper::Debug2Format};
 
+use crate::config::keymap::prelude::RktkKeys;
 use crate::{
     config::{constant::RKTK_CONFIG, storage::StorageConfigManager},
     drivers::interface::{
-        ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, system::SystemDriver,
+        ble::BleDriver,
+        reporter::{Output, ReporterDriver},
+        storage::StorageDriver,
+        system::SystemDriver,
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
@@ -37,8 +43,7 @@ pub async fn report_task<
     debug!("report task start");
 
     let mut prev_update_time = embassy_time::Instant::now();
-    let mut current_output = state.lock().await.get_config().initial_output;
-    let mut prev_report = None;
+    let mut current_output = Output::Usb;
     let mut display_off = DisplayOffController::new();
 
     loop {
@@ -61,21 +66,21 @@ pub async fn report_task<
                     continue;
                 }
 
-                Event::Mouse(mouse_move)
+                InputEvent::Mouse(mouse_move)
             }
             Either4::Second(mut event) => {
                 if !master_hooks.on_keyboard_event(&mut event).await {
                     continue;
                 }
 
-                Event::Key(event)
+                InputEvent::Key(event)
             }
             Either4::Third((mut id, mut dir)) => {
                 if !master_hooks.on_encoder_event(&mut id, &mut dir).await {
                     continue;
                 }
 
-                Event::Encoder((id, dir))
+                InputEvent::Encoder((id, dir))
             }
             Either4::Fourth(report) => {
                 if let Ok(report) = report {
@@ -87,18 +92,41 @@ pub async fn report_task<
             }
         };
 
-        let mut state_report = state
-            .lock()
-            .await
-            .update(event, prev_update_time.elapsed().into());
+        struct RktkKeyState {
+            bootloader: bool,
+            ble_bond_clear: bool,
+            flash_clear: bool,
+            power_off: bool,
+        }
+        let mut rktk_key_state = RktkKeyState {
+            bootloader: false,
+            ble_bond_clear: false,
+            flash_clear: false,
+            power_off: false,
+        };
+
+        let mut state_report =
+            state
+                .lock()
+                .await
+                .update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
+                    if let OutputEvent::Custom(1, (id, et)) = ev {
+                        if et == EventType::Pressed {
+                            if let Ok(k) = TryInto::<RktkKeys>::try_into(id) {
+                                match k {
+                                    RktkKeys::FlashClear => rktk_key_state.flash_clear = true,
+                                    RktkKeys::OutputBle => current_output = Output::Ble,
+                                    RktkKeys::OutputUsb => current_output = Output::Usb,
+                                    RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
+                                    RktkKeys::Bootloader => rktk_key_state.bootloader = true,
+                                    RktkKeys::PowerOff => rktk_key_state.power_off = true,
+                                }
+                            }
+                        }
+                    }
+                });
 
         prev_update_time = embassy_time::Instant::now();
-        if prev_report == Some(state_report.clone()) {
-            display_off.update(false);
-            continue;
-        }
-
-        prev_report = Some(state_report.clone());
 
         if !master_hooks
             .on_state_update(&mut state_report, usb, ble)
@@ -110,11 +138,10 @@ pub async fn report_task<
 
         crate::utils::display_state!(HighestLayer, state_report.highest_layer);
 
-        if state_report.transparent_report.bootloader {
+        if rktk_key_state.bootloader {
             system.reset_to_bootloader();
         }
-
-        if state_report.transparent_report.flash_clear {
+        if rktk_key_state.flash_clear {
             if let Some(ref storage) = config_store {
                 match storage.storage.format().await {
                     Ok(_) => {
@@ -129,18 +156,17 @@ pub async fn report_task<
             }
         }
 
-        if state_report.transparent_report.ble_bond_clear {
+        if rktk_key_state.ble_bond_clear {
             if let Some(ble) = &ble {
                 let _ = ble.clear_bond_data().await;
             }
         }
 
-        if state_report.transparent_report.power_off {
+        if rktk_key_state.power_off {
             system.power_off().await;
         }
 
-        current_output = state_report.transparent_report.output;
-        let reported = match state_report.transparent_report.output {
+        let reported = match current_output {
             Output::Usb => {
                 crate::utils::display_state!(Output, Output::Usb);
                 if let Some(usb) = &usb {
@@ -162,7 +188,7 @@ pub async fn report_task<
     }
 }
 
-async fn send_report(reporter: &impl ReporterDriver, state_report: StateReport) -> bool {
+async fn send_report(reporter: &impl ReporterDriver, state_report: Report) -> bool {
     let mut reported = false;
     if let Some(report) = state_report.keyboard_report {
         reported = true;

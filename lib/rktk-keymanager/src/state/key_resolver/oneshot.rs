@@ -1,4 +1,4 @@
-use crate::{interface::state::event::KeyChangeEvent, keycode::KeyCode};
+use crate::{interface::state::input_event::KeyChangeEvent, keycode::KeyCode};
 
 use super::EventType;
 

@@ -1,10 +1,11 @@
-use crate::interface::state::config::KeyResolverConfig;
-use crate::interface::state::event::KeyChangeEvent;
-use crate::keymap::{ComboDefinitions, Keymap, TapDanceDefinitions};
-use crate::time::Instant;
-
-use super::shared::LayerActive;
-use crate::keycode::{KeyAction, KeyCode};
+use super::shared::SharedState;
+use crate::{
+    interface::state::{
+        config::KeyResolverConfig, input_event::KeyChangeEvent, output_event::EventType,
+    },
+    keycode::{KeyAction, KeyCode},
+    keymap::{ComboDefinitions, TapDanceDefinitions},
+};
 
 mod combo;
 mod normal;
@@ -25,13 +26,6 @@ pub struct KeyResolver<
     oneshot: oneshot::OneshotState<ONESHOT_BUFFER_SIZE>,
     tap_hold: tap_hold::TapHoldState,
     combo: combo::ComboState<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum EventType {
-    Pressed,
-    Pressing,
-    Released,
 }
 
 impl<
@@ -70,7 +64,7 @@ impl<
         const ENCODER_COUNT: usize,
     >(
         &mut self,
-        keymap: &Keymap<
+        shared_state: &mut SharedState<
             LAYER,
             ROW,
             COL,
@@ -80,86 +74,100 @@ impl<
             COMBO_KEY_MAX_DEFINITIONS,
             COMBO_KEY_MAX_SOURCES,
         >,
-        layer_state: &mut LayerActive<LAYER>,
         event: Option<&KeyChangeEvent>,
-        now: Instant,
-        mut cb: impl FnMut(&mut LayerActive<LAYER>, EventType, KeyCode),
+        mut cb: impl FnMut(
+            &mut SharedState<
+                LAYER,
+                ROW,
+                COL,
+                ENCODER_COUNT,
+                TAP_DANCE_MAX_DEFINITIONS,
+                TAP_DANCE_MAX_REPEATS,
+                COMBO_KEY_MAX_DEFINITIONS,
+                COMBO_KEY_MAX_SOURCES,
+            >,
+            EventType,
+            KeyCode,
+        ),
     ) {
-        {
-            let mut cb_with_layer = |event_type, mut key_code| {
-                self.combo.process_keycode(&event_type, &mut key_code, now);
-                cb(layer_state, event_type, key_code);
+        let now = shared_state.now;
+        macro_rules! with_layer {
+            ($cb:expr) => {
+                |event_type, mut key_code| {
+                    self.combo.process_keycode(&event_type, &mut key_code, now);
+                    $cb(shared_state, event_type, key_code);
+                }
             };
+        }
+
+        {
+            let mut cb_with_layer = with_layer!(cb);
 
             self.oneshot.pre_resolve(event, &mut cb_with_layer);
             self.tap_hold.pre_resolve(event, now, &mut cb_with_layer);
 
             self.combo.pre_resolve(now, |event_type, key_code| {
-                cb(layer_state, event_type, key_code);
+                cb(shared_state, event_type, key_code);
             });
         }
 
-        let highest_layer = layer_state
-            .iter()
-            .enumerate()
-            .rev()
-            .find(|(_, &active)| active)
-            .map(|(idx, _)| idx)
-            .unwrap_or(0);
-
-        let mut cb_with_layer = |event_type, mut key_code| {
-            self.combo.process_keycode(&event_type, &mut key_code, now);
-            cb(layer_state, event_type, key_code);
-        };
+        let highest_layer = shared_state.highest_layer();
 
         if let Some(event) = event {
-            let Some(mut key_action) =
-                keymap.get_keyaction(highest_layer, event.row as usize, event.col as usize)
+            let Some(mut key_action) = shared_state
+                .keymap
+                .get_keyaction(highest_layer, event.row as usize, event.col as usize)
+                .copied()
             else {
                 return;
             };
 
-            if *key_action == KeyAction::Inherit {
+            if key_action == KeyAction::Inherit {
                 for layer in 0..highest_layer {
-                    let Some(action) =
-                        keymap.get_keyaction(layer, event.row as usize, event.col as usize)
-                    else {
+                    let Some(action) = shared_state.keymap.get_keyaction(
+                        layer,
+                        event.row as usize,
+                        event.col as usize,
+                    ) else {
                         return;
                     };
                     if *action != KeyAction::Inherit {
-                        key_action = action;
+                        key_action = *action;
                         break;
                     }
                 }
             }
 
+            let mut cb_with_layer = with_layer!(cb);
+
             match key_action {
                 KeyAction::Inherit => {}
                 KeyAction::Normal(key_code) => {
                     self.normal_state
-                        .process_event(event, (*key_code, None), &mut cb_with_layer);
+                        .process_event(event, (key_code, None), &mut cb_with_layer);
                 }
                 KeyAction::Normal2(key_code, key_code1) => {
                     self.normal_state.process_event(
                         event,
-                        (*key_code, Some(*key_code1)),
+                        (key_code, Some(key_code1)),
                         &mut cb_with_layer,
                     );
                 }
                 KeyAction::TapHold(tkc, hkc) => {
                     self.tap_hold
-                        .process_event(now, event, (*tkc, *hkc), &mut cb_with_layer);
+                        .process_event(now, event, (tkc, hkc), &mut cb_with_layer);
                 }
                 KeyAction::OneShot(key_code) => {
-                    self.oneshot.process_keycode(key_code, event.pressed);
+                    self.oneshot.process_keycode(&key_code, event.pressed);
                 }
                 KeyAction::TapDance(id) => {
                     self.tap_dance
-                        .process_event(*id, now, event.pressed, &mut cb_with_layer);
+                        .process_event(id, now, event.pressed, &mut cb_with_layer);
                 }
             }
         }
 
+        let mut cb_with_layer = with_layer!(cb);
         self.tap_dance.post_resolve(now, &mut cb_with_layer);
         self.normal_state.post_resolve(&mut cb_with_layer);
     }

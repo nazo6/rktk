@@ -39,6 +39,7 @@ postcard = { workspace = true, features = [
   "heapless-cas",
 ] }
 document-features = { workspace = true }
+strum = { workspace = true }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }

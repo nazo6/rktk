@@ -1,6 +1,4 @@
-use crate::keycode::KeyCode;
-
-use super::key_resolver::EventType;
+use crate::{interface::state::output_event::EventType, keycode::KeyCode};
 
 pub trait Hooks {
     fn on_key_code(&mut self, _et: EventType, _kc: KeyCode) -> bool {

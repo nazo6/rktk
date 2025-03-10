@@ -12,22 +12,21 @@ mod prelude {
 
     pub(super) use super::keymap::EMPTY_KEYMAP;
     use crate::interface::state::config::{
-        ComboConfig, KeyResolverConfig, MouseConfig, TapDanceConfig, TapHoldConfig,
-    };
-    use crate::state::hooks::EmptyHooks;
-    pub use crate::state::State;
-    pub use crate::{
-        interface::{
-            report::{StateReport, TransparentReport},
-            state::event::KeyChangeEvent,
-            Output,
-        },
-        keymap::{Keymap, TapDanceDefinition},
+        ComboConfig, KeyResolverConfig, MouseConfig, StateConfig, TapDanceConfig, TapHoldConfig,
     };
     pub(super) use crate::{
+        interface::state::input_event::InputEvent,
         keycode::{key::*, layer::*, media::*, modifier::*, mouse::*, special::*, utils::*, *},
-        state::Event,
         time::Instant,
+    };
+    pub use crate::{
+        interface::state::input_event::KeyChangeEvent,
+        keymap::{Keymap, TapDanceDefinition},
+        state::{
+            hid_report::{HidReportState, Report},
+            hooks::EmptyHooks,
+            State,
+        },
     };
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
@@ -35,47 +34,19 @@ mod prelude {
         Duration::from_millis(ms as u64)
     }
 
-    pub const fn default_transparent_report() -> TransparentReport {
-        TransparentReport {
-            flash_clear: false,
-            ble_bond_clear: false,
-            output: Output::Usb,
-            bootloader: false,
-            power_off: false,
-        }
-    }
-
     pub const ROWS: usize = 5;
     pub const COLS: usize = 14;
     pub const LAYER_COUNT: usize = 5;
     pub const ENC_COUNT: usize = 1;
 
-    pub const NONE_REPORT: StateReport = StateReport {
+    /// All report is None. This means there is no report to send.
+    pub const NONE_REPORT: Report = Report {
         keyboard_report: None,
         mouse_report: None,
         media_keyboard_report: None,
         highest_layer: 0,
-        transparent_report: default_transparent_report(),
     };
-    pub const EMPTY_REPORT: StateReport = StateReport {
-        keyboard_report: Some(KeyboardReport {
-            modifier: 0,
-            reserved: 0,
-            leds: 0,
-            keycodes: [0, 0, 0, 0, 0, 0],
-        }),
-        mouse_report: Some(MouseReport {
-            buttons: 0,
-            x: 0,
-            y: 0,
-            wheel: 0,
-            pan: 0,
-        }),
-        media_keyboard_report: Some(MediaKeyboardReport { usage_id: 0 }),
-        transparent_report: default_transparent_report(),
-        highest_layer: 0,
-    };
-    pub const KEYBOARD_ONLY_REPORT: StateReport = StateReport {
+    pub const KEYBOARD_ONLY_REPORT: Report = Report {
         keyboard_report: Some(KeyboardReport {
             modifier: 0,
             reserved: 0,
@@ -84,10 +55,9 @@ mod prelude {
         }),
         mouse_report: None,
         media_keyboard_report: None,
-        transparent_report: default_transparent_report(),
         highest_layer: 0,
     };
-    pub const MOUSE_ONLY_REPORT: StateReport = StateReport {
+    pub const MOUSE_ONLY_REPORT: Report = Report {
         keyboard_report: None,
         mouse_report: Some(MouseReport {
             buttons: 0,
@@ -97,14 +67,19 @@ mod prelude {
             pan: 0,
         }),
         media_keyboard_report: None,
-        transparent_report: default_transparent_report(),
         highest_layer: 0,
     };
+
+    pub const fn report_with_keycodes(keycodes: [u8; 6]) -> Report {
+        let mut report = KEYBOARD_ONLY_REPORT;
+        report.keyboard_report.as_mut().unwrap().keycodes = keycodes;
+        report
+    }
 
     macro_rules! update {
         ($state:expr, $now:expr, ($row:expr, $col:expr, $pressed:expr)) => {
             $state.update(
-                Event::Key(KeyChangeEvent {
+                InputEvent::Key(KeyChangeEvent {
                     row: $row,
                     col: $col,
                     pressed: $pressed,
@@ -113,16 +88,16 @@ mod prelude {
             )
         };
         ($state:expr, $now:expr) => {
-            $state.update(Event::None, $now)
+            $state.update(InputEvent::None, $now)
         };
     }
 
     pub fn new_state(
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3>,
-    ) -> State<EmptyHooks, LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
-        State::new(
+    ) -> HidReportState<EmptyHooks, LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
+        HidReportState::new(
             keymap,
-            crate::state::StateConfig {
+            StateConfig {
                 mouse: MouseConfig {
                     auto_mouse_layer: 1,
                     auto_mouse_duration: 500,
@@ -138,7 +113,6 @@ mod prelude {
                     tap_dance: TapDanceConfig { threshold: 100 },
                     combo: ComboConfig { threshold: 20 },
                 },
-                initial_output: Output::Usb,
             },
             EmptyHooks,
         )

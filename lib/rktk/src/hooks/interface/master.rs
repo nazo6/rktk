@@ -1,6 +1,6 @@
-use rktk_keymanager::interface::{
-    report::StateReport,
-    state::event::{EncoderDirection, KeyChangeEvent},
+pub use rktk_keymanager::{
+    interface::state::input_event::{EncoderDirection, KeyChangeEvent},
+    state::hid_report::Report,
 };
 
 use crate::drivers::interface::{
@@ -65,7 +65,7 @@ pub trait MasterHooks {
     /// If false, this report will be ignored.
     async fn on_state_update(
         &mut self,
-        _state_report: &mut StateReport,
+        _state_report: &mut Report,
         _usb_reporter: &Option<impl ReporterDriver>,
         _ble_reporter: &Option<impl ReporterDriver>,
     ) -> bool {

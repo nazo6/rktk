@@ -1,9 +1,6 @@
 use embassy_futures::join::{join, join5};
 use embassy_time::Timer;
-use rktk_keymanager::{
-    interface::Output,
-    state::{hooks::Hooks as KeymanagerHooks, State},
-};
+use rktk_keymanager::state::{hid_report::HidReportState, hooks::Hooks as KeymanagerHooks};
 use rktk_log::{info, warn};
 use utils::{init_storage, load_state};
 
@@ -38,7 +35,7 @@ mod report;
 mod rrp_server;
 mod utils;
 
-type ConfiguredState<H> = State<
+type ConfiguredState<H> = HidReportState<
     H,
     { RKTK_CONFIG.layer_count as usize },
     { KEYBOARD.rows as usize },
@@ -83,7 +80,7 @@ pub async fn start<
     key_manager_hooks: KH,
 ) {
     let config_store = init_storage(storage).await;
-    let state = load_state(&config_store, key_config, Output::Usb, key_manager_hooks).await;
+    let state = load_state(&config_store, key_config, key_manager_hooks).await;
 
     info!("Master side task start");
 

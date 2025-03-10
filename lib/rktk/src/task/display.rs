@@ -1,11 +1,10 @@
 use core::fmt::Write as _;
 
 use embassy_futures::select::{select, Either};
-use rktk_keymanager::interface::Output;
 use rktk_log::error;
 
 use crate::{
-    drivers::interface::{display::DisplayDriver, keyscan::Hand, DriverBuilder},
+    drivers::interface::{display::DisplayDriver, keyscan::Hand, reporter::Output, DriverBuilder},
     utils::Channel,
 };
 

@@ -9,9 +9,9 @@
 //!
 //! ## Feature flags
 #![doc = document_features::document_features!()]
-#![cfg_attr(all(not(test), not(feature = "std")), no_std)]
 #![cfg_attr(doc, feature(doc_auto_cfg))]
 #![allow(non_snake_case)]
+#![no_std]
 
 pub mod interface;
 pub mod keycode;

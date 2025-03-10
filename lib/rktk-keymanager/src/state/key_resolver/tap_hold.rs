@@ -1,5 +1,5 @@
 use crate::{
-    interface::state::{config::TapHoldConfig, event::KeyChangeEvent},
+    interface::state::{config::TapHoldConfig, input_event::KeyChangeEvent},
     keycode::KeyCode,
     time::{Duration, Instant},
 };

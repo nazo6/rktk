@@ -1,4 +1,4 @@
-use rktk_keymanager::interface::state::event::KeyChangeEvent;
+use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
 use rktk_log::debug;
 
 use crate::{

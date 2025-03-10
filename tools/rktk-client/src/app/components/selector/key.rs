@@ -71,3 +71,20 @@ pub fn LayerKeySelector(selected_key: LayerOp, select_key: Callback<LayerOp>) ->
         }
     }
 }
+
+#[component]
+pub fn CustomKeySelector(selected_key: u8, select_key: Callback<u8>) -> Element {
+    rsx! {
+        input {
+            class: "col-span-2 input input-sm input-bordered w-full",
+            r#type: "number",
+            value: selected_key,
+            oninput: move |evt| {
+                let Ok(n) = evt.data().value().parse::<u8>() else {
+                    return;
+                };
+                select_key(n);
+            },
+        }
+    }
+}

@@ -1,9 +1,9 @@
 use crate::{
+    interface::state::output_event::EventType,
     keycode::{layer::LayerOp, KeyCode},
-    state::key_resolver::EventType,
 };
 
-pub fn layer_event_process<const LAYER: usize>(
+pub fn update_layer_by_keycode<const LAYER: usize>(
     layer_active: &mut [bool; LAYER],
     keycode: &KeyCode,
     event: EventType,

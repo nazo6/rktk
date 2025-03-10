@@ -91,6 +91,9 @@ pub enum KeyCode {
     Special(special::Special),
     /// Media key
     Media(media::Media),
+    Custom1(u8),
+    Custom2(u8),
+    Custom3(u8),
 }
 
 /// Inherit key: `KeyAction::Inherit`

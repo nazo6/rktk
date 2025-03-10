@@ -1,4 +1,4 @@
-pub use rktk_keymanager::interface::state::event::KeyChangeEvent;
+pub use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Hand {

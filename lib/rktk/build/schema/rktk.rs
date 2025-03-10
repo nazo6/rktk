@@ -14,6 +14,10 @@ pub struct RktkConfig {
     #[default(600)]
     pub default_cpi: u16,
 
+    /// Swap the x and y values obtained from the mouse driver. This also affects the scroll direction.
+    #[default(false)]
+    pub swap_mouse_x_y: bool,
+
     /// Default duration of auto mouse mode (ms)
     #[default(500)]
     pub default_auto_mouse_duration: u32,
