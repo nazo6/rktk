@@ -46,23 +46,6 @@ mod prelude {
         media_keyboard_report: None,
         highest_layer: 0,
     };
-    pub const EMPTY_REPORT: Report = Report {
-        keyboard_report: Some(KeyboardReport {
-            modifier: 0,
-            reserved: 0,
-            leds: 0,
-            keycodes: [0, 0, 0, 0, 0, 0],
-        }),
-        mouse_report: Some(MouseReport {
-            buttons: 0,
-            x: 0,
-            y: 0,
-            wheel: 0,
-            pan: 0,
-        }),
-        media_keyboard_report: Some(MediaKeyboardReport { usage_id: 0 }),
-        highest_layer: 0,
-    };
     pub const KEYBOARD_ONLY_REPORT: Report = Report {
         keyboard_report: Some(KeyboardReport {
             modifier: 0,
