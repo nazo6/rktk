@@ -45,8 +45,5 @@ serde = ["dep:serde", "dep:serde_with"]
 ## Derives postcard's MaxSize trait
 postcard = ["dep:postcard", "serde"]
 
-## Uses std types instead of heapless types.
-std = []
-
 ## Derives defmt's Format trait
 defmt = ["dep:defmt"]

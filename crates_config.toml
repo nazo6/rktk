@@ -25,6 +25,7 @@ check_group_features = [["defmt", "defmt-timestamp"]]
 test_enabled = true
 
 [crates.rktk-keymanager]
+check_group_features = [["serde", "postcard"]]
 test_enabled = true
 
 [crates.rktk-client]
