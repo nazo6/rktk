@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
-    "dev:dioxus": "dx serve -i true",
+    "dev:dioxus": "dx serve -i true --platform web --features web",
     "dev": "conc -r -c auto npm:dev:*",
     "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release --platform web --features web"
   },

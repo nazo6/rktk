@@ -116,6 +116,14 @@ pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) ->
                             select_key: Callback::new(move |media| select_key_code(KeyCode::Media(media))),
                         }
                     },
+                    KeyCode::Custom1(id) => rsx! {
+                        KeySelector {
+                            items: rktk::config::keymap::rktk_keys::RktkKeys::iter().collect(),
+                            selected_key: id.try_into().unwrap(),
+                            select_key: Callback::new(move |k| select_key_code(KeyCode::Custom1(k as u8))),
+                        }
+                    },
+                    _ => rsx! {},
                 }
             }
         }

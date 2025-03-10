@@ -5,6 +5,8 @@ authors = ["nazo6 <git@nazo6.dev>"]
 edition = "2021"
 
 [dependencies]
+rktk = { workspace = true }
+ssmarshal = { workspace = true, features = ["std"] }
 rktk-rrp = { workspace = true, features = ["client"] }
 rktk-keymanager = { workspace = true }
 

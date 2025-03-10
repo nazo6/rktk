@@ -5386,6 +5386,7 @@ dependencies = [
  "smart-leds",
  "ssmarshal",
  "static_cell",
+ "strum",
  "usbd-hid",
 ]
 
@@ -5425,12 +5426,14 @@ dependencies = [
  "js-sys",
  "kle-serial",
  "log",
+ "rktk",
  "rktk-keymanager",
  "rktk-rrp",
  "serde",
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "smol",
+ "ssmarshal",
  "strum",
  "tracing-log",
  "wasm-bindgen",

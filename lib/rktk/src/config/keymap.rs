@@ -16,6 +16,7 @@ pub mod rktk_keys {
     /// It must be used with `Custom1` variant of [`rktk_keymanager::keycode::KeyCode`]
     ///
     /// Custom2 and Custom3 can be used by user.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumIter, strum::IntoStaticStr)]
     pub enum RktkKeys {
         FlashClear = 0,
         OutputBle = 1,
@@ -23,6 +24,14 @@ pub mod rktk_keys {
         BleBondClear = 3,
         Bootloader = 4,
         PowerOff = 5,
+    }
+
+    use core::fmt::{self, Display, Formatter};
+    impl Display for RktkKeys {
+        fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+            let s: &'static str = self.into();
+            write!(f, "{}", s)
+        }
     }
 
     impl TryFrom<u8> for RktkKeys {

@@ -119,6 +119,7 @@ pub fn Key(
 }
 
 mod utils {
+    use rktk::config::keymap::prelude::RktkKeys;
     use rktk_keymanager::keycode::{layer::LayerOp, KeyAction, KeyCode};
 
     pub fn key_str(key: &KeyAction) -> String {
@@ -148,6 +149,11 @@ mod utils {
             },
             KeyCode::Special(special) => Into::<&'static str>::into(special).to_string(),
             KeyCode::Media(media) => Into::<&'static str>::into(media).to_string(),
+            KeyCode::Custom1(n) => {
+                Into::<&'static str>::into(TryInto::<RktkKeys>::try_into(*n).unwrap()).to_string()
+            }
+            KeyCode::Custom2(n) => format!("C2({})", n),
+            KeyCode::Custom3(n) => format!("C3({})", n),
         }
     }
 }
