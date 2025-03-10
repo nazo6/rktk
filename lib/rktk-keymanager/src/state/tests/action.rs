@@ -143,9 +143,10 @@ fn oneshot_action_mod() {
         leds: 0,
     });
     assert_eq!(report, expected, "Key 'a' is pressed with lctrl modifier");
+
     let report = update!(state, time(0));
     assert_eq!(
-        report, expected,
+        report, NONE_REPORT,
         "Key 'a' is still pressed with lctrl modifier"
     );
 

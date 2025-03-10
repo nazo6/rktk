@@ -20,9 +20,11 @@ pub fn encoder_clockwise() {
         time(0),
     );
 
-    let mut expected = KEYBOARD_ONLY_REPORT;
-    expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0, 0, 0, 0, 0];
-    assert_eq!(report, expected, "In first report, key `A` should be sent");
+    assert_eq!(
+        report,
+        report_with_keycodes([0x04, 0, 0, 0, 0, 0]),
+        "In first report, key `A` should be sent"
+    );
 
     let report = update!(state, time(0));
     assert_eq!(
@@ -42,13 +44,15 @@ pub fn encoder_counterclockwise() {
         time(0),
     );
 
-    let mut expected = KEYBOARD_ONLY_REPORT;
-    expected.keyboard_report.as_mut().unwrap().keycodes = [0x05, 0, 0, 0, 0, 0];
-    assert_eq!(report, expected, "In first report, key `B` should be sent");
+    assert_eq!(
+        report,
+        report_with_keycodes([0x05, 0, 0, 0, 0, 0]),
+        "In first report, key `B` should be sent"
+    );
 
     let report = update!(state, time(0));
     assert_eq!(
         report, KEYBOARD_ONLY_REPORT,
-        "In second send, report should not be sent"
+        "In second send, empty report should be sent"
     );
 }

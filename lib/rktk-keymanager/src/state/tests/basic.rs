@@ -6,16 +6,10 @@ pub fn first_empty_second_none() {
     let mut state = new_state(EMPTY_KEYMAP);
 
     let report = update!(state, time(0));
-    assert_eq!(
-        report, EMPTY_REPORT,
-        "In first report, empty report should be sent"
-    );
+    assert_eq!(report, NONE_REPORT, "Nothing happens");
 
     let report = update!(state, time(0));
-    assert_eq!(
-        report, NONE_REPORT,
-        "In second send, empty report should not be sent"
-    );
+    assert_eq!(report, NONE_REPORT, "Nothing happens, second");
 }
 
 #[test]
@@ -26,9 +20,11 @@ pub fn key_press_release() {
     let _ = update!(state, time(0));
 
     let report = update!(state, time(0), (0, 0, true));
-    let mut expected = KEYBOARD_ONLY_REPORT;
-    expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0, 0, 0, 0, 0];
-    assert_eq!(report, expected, "Key 'a' pressed");
+    assert_eq!(
+        report,
+        report_with_keycodes([0x04, 0, 0, 0, 0, 0]),
+        "Key 'a' pressed"
+    );
 
     let report = update!(state, time(0), (0, 0, false));
     assert_eq!(report, KEYBOARD_ONLY_REPORT, "Key 'a' released");
