@@ -205,3 +205,6 @@ impl<
         updater.end(self.shared.highest_layer(), &mut self.shared, cb);
     }
 }
+
+#[cfg(test)]
+mod tests;

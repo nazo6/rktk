@@ -94,7 +94,11 @@ impl<
         macro_rules! with_layer {
             ($cb:expr) => {
                 |event_type, mut key_code| {
+                    #[cfg(test)]
+                    println!("BEFORE: {:?},{:?}", &event_type, &key_code);
                     self.combo.process_keycode(&event_type, &mut key_code, now);
+                    #[cfg(test)]
+                    println!("AFTER: {:?},{:?}", &event_type, &key_code);
                     $cb(shared_state, event_type, key_code);
                 }
             };

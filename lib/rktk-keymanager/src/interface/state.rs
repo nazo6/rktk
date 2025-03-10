@@ -56,11 +56,14 @@ pub mod config {
 }
 
 pub mod input_event {
+    use crate::macros::common_derive;
+
+    use macro_rules_attribute::apply;
+
     /// Represents a key event.
     ///
     /// Used generically to indicate that the state of a physical key has changed
-    #[derive(Debug)]
-    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    #[apply(common_derive)]
     pub struct KeyChangeEvent {
         pub col: u8,
         pub row: u8,
@@ -68,15 +71,14 @@ pub mod input_event {
     }
 
     /// Represents the direction of an encoder
-    #[derive(Debug)]
-    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    #[derive(Copy)]
+    #[apply(common_derive)]
     pub enum EncoderDirection {
         Clockwise,
         CounterClockwise,
     }
 
-    #[derive(Debug)]
-    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    #[apply(common_derive)]
     pub enum InputEvent {
         Key(KeyChangeEvent),
         Mouse((i8, i8)),
@@ -86,18 +88,20 @@ pub mod input_event {
 }
 
 pub mod output_event {
-    use crate::keycode::prelude::*;
+    use crate::{keycode::prelude::*, macros::common_derive};
 
-    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    use macro_rules_attribute::apply;
+
+    #[derive(Copy)]
+    #[apply(common_derive)]
     pub enum EventType {
         Pressed,
         Pressing,
         Released,
     }
 
-    #[derive(Debug)]
-    #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+    #[derive(Copy)]
+    #[apply(common_derive)]
     pub enum OutputEvent {
         Key((Key, EventType)),
         Modifier((Modifier, EventType)),

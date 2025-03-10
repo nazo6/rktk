@@ -40,6 +40,7 @@ pub struct HidReportState<
         COMBO_KEY_MAX_DEFINITIONS,
         COMBO_KEY_MAX_SOURCES,
     >,
+    next_send_keyboard_report: bool,
 }
 
 impl<
@@ -67,13 +68,37 @@ impl<
         COMBO_KEY_MAX_SOURCES,
     >
 {
-    pub fn update_and_report(
+    pub fn new(
+        keymap: crate::keymap::Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
+        config: crate::interface::state::config::StateConfig,
+        hooks: H,
+    ) -> Self {
+        Self {
+            state: super::State::new(keymap, config, hooks),
+            next_send_keyboard_report: false,
+        }
+    }
+
+    pub fn update(&mut self, event: InputEvent, since_last_update: core::time::Duration) -> Report {
+        self.update_with_cb(event, since_last_update, |_| {})
+    }
+
+    pub fn update_with_cb(
         &mut self,
         event: InputEvent,
         since_last_update: core::time::Duration,
         mut cb: impl FnMut(OutputEvent),
     ) -> Report {
-        let mut keyboard_change = false;
+        let mut keyboard_change = self.next_send_keyboard_report;
         let mut keys: Vec<u8, 6> = Vec::new();
         let mut modifier = 0u8;
 
@@ -91,8 +116,13 @@ impl<
                     if ev != EventType::Pressing {
                         keyboard_change = true;
                     }
-                    if ev != EventType::Released {
+                    if ev != EventType::Released && !keys.contains(&(key as u8)) {
                         let _ = keys.push(key as u8);
+                    }
+                    // If both `Pressing` and `Released` events are sent same time, that means key
+                    // should be released in next report.
+                    if ev == EventType::Released && keys.contains(&(key as u8)) {
+                        self.next_send_keyboard_report = true;
                     }
                 }
                 OutputEvent::Modifier((m, ev)) => {
@@ -165,22 +195,5 @@ impl<
             },
             highest_layer: self.state.shared.highest_layer() as u8,
         }
-    }
-
-    pub fn inner(
-        &self,
-    ) -> &super::State<
-        H,
-        LAYER,
-        ROW,
-        COL,
-        ENCODER_COUNT,
-        ONESHOT_STATE_SIZE,
-        TAP_DANCE_MAX_DEFINITIONS,
-        TAP_DANCE_MAX_REPEATS,
-        COMBO_KEY_MAX_DEFINITIONS,
-        COMBO_KEY_MAX_SOURCES,
-    > {
-        &self.state
     }
 }

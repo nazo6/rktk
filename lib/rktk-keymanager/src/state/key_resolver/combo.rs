@@ -62,9 +62,6 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
                 for (i, key) in def.src.iter().enumerate() {
                     if let Some(key) = key {
                         if *keycode == *key {
-                            #[cfg(test)]
-                            dbg!(event_type, &unit.state);
-
                             match (event_type, &unit.state) {
                                 (EventType::Pressed, ComboUnitState::None) => {
                                     unit.state =
