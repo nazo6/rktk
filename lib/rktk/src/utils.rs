@@ -1,3 +1,6 @@
+//! Util types
+
+/// Print to the display
 #[macro_export]
 macro_rules! print {
     ($literal:literal) => {{
@@ -14,6 +17,9 @@ macro_rules! print {
     }};
 }
 
+/// Print to the display without formatting.
+///
+/// For string that does not require formatting, this macro is more efficient than `print!`.
 #[macro_export]
 macro_rules! print_str {
     ($str:tt) => {{
@@ -31,6 +37,7 @@ macro_rules! display_state {
 
 pub(crate) use display_state;
 
+// Usually, we don't touch the interrupt code directly, so ThreadModeRawMutex is enough.
 #[cfg(target_arch = "arm")]
 pub type RawMutex = embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
 #[cfg(not(target_arch = "arm"))]
@@ -43,8 +50,7 @@ pub type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<'a, R
 pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;
 
 /// sjoin or "spawn or join"
-pub mod sjoin {
-    #[macro_export]
+pub(crate) mod sjoin {
     macro_rules! join {
         ($f1:expr, $($future:expr),* ) => {
             #[cfg(feature = "alloc")]

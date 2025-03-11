@@ -62,10 +62,12 @@ rrp = ["dep:rktk-rrp"]
 ## Set rrp-over-usb logger of `log` crate
 rrp-log = ["dep:critical-section", "rrp", "log"]
 
+## Logging using [`defmt`]. Intended for debugging.
 defmt = [
   "dep:defmt",
   "rktk-log/defmt",
   "rktk-keymanager/defmt",
   "heapless/defmt-impl",
 ]
+## Logging using [`log`]. Required to send logs via rrp.
 log = ["dep:log", "rktk-log/log"]

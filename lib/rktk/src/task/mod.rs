@@ -28,12 +28,12 @@ use embassy_time::Duration;
 use rktk_log::{debug, helper::Debug2Format, info};
 
 pub(crate) mod channels;
-pub mod display;
+pub(crate) mod display;
 #[cfg(feature = "rrp-log")]
 mod logger;
 pub(crate) mod main_loop;
 
-/// Receives configs and executes the main process of the keyboard.
+/// Runs rktk with the given drivers and key configuration.
 ///
 /// # Parameters
 /// - `drivers`: Drivers for the keyboard.
@@ -182,6 +182,7 @@ pub async fn start<
     );
 }
 
+/// Runs dongle with the given drivers.
 pub async fn dongle_start<
     Usb: UsbDriver,
     Dongle: DongleDriver,

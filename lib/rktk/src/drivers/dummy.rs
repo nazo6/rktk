@@ -1,4 +1,4 @@
-//! Dummy drivers for type annotations.
+//! Dummy drivers just for type annotations.
 //!
 //! This is intended to be used by the [`crate::none_driver`] macro.
 
@@ -6,17 +6,17 @@ use core::convert::Infallible;
 
 use display_interface::DisplayError;
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyle, MonoTextStyleBuilder},
+    Pixel,
+    mono_font::{MonoTextStyle, MonoTextStyleBuilder, ascii::FONT_6X10},
     pixelcolor::BinaryColor,
     prelude::{Dimensions, DrawTarget, Point},
-    Pixel,
 };
 use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
 use crate::drivers::interface::{
-    ble::BleDriver, debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
-    mouse::MouseDriver, reporter::ReporterDriver, rgb::RgbDriver, split::SplitDriver,
-    storage::StorageDriver, usb::UsbDriver, BackgroundTask, DriverBuilder, DriverBuilderWithTask,
+    BackgroundTask, DriverBuilder, DriverBuilderWithTask, ble::BleDriver, debounce::DebounceDriver,
+    display::DisplayDriver, encoder::EncoderDriver, mouse::MouseDriver, reporter::ReporterDriver,
+    rgb::RgbDriver, split::SplitDriver, storage::StorageDriver, usb::UsbDriver,
 };
 
 // Rgb

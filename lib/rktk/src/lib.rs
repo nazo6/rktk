@@ -18,14 +18,7 @@
 //!
 //! Basically, by passing [`drivers::Drivers`], [`hooks::Hooks`] and [`config::keymap::Keymap`] to [`task::start`], you can start the keyboard firmware.
 //!
-//! ## Note about statically configured value
-//! You may see hard-coded values is used in some places (ex: [`config::keymap::Keymap`]).
-//! These types are actually not hardcoded, but are configurable using json file.
-//! Just a random value is provided because it is required to generate docs.
-//!
-//! For more detail, see [`config::constant`].
-//!
-//! ## Features
+//! ## Feature flags
 #![doc = document_features::document_features!()]
 //!
 //! ### `alloc` feature
@@ -34,6 +27,14 @@
 //! However, this may be inferior to using spawning in terms of performance and power consumption.
 //!
 //! So if we enable `alloc` feature and provide an allocator, we can remove this limitation by spawning tasks in the heap.
+//!
+//! ## Note about statically configured value
+//! You may see hard-coded values is used in some places (ex: [`config::keymap::Keymap`]).
+//! These types are actually not hardcoded, but are configurable using json file.
+//! Just a random value is provided because it is required to generate docs.
+//!
+//! For more detail, see [`config::constant`].
+//!
 #![no_std]
 
 #[cfg(feature = "alloc")]
