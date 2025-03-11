@@ -61,7 +61,7 @@ pub fn Keyboard(
                     div { class: "flex flex-col gap-2 justify-center pr-2",
                         for (l , _) in keymap.iter().enumerate() {
                             button {
-                                class: "btn btn-square btn-sm rounded-sm",
+                                class: "btn btn-square btn-sm rounded-xs",
                                 class: if *layer.read() == l { "btn-primary" },
                                 onclick: move |_| layer.set(l),
                                 "{l}"

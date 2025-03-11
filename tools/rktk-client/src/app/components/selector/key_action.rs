@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use rktk_keymanager::keycode::{key::Key, KeyAction, KeyCode};
+use rktk_keymanager::keycode::{KeyAction, KeyCode, key::Key};
 
 use crate::app::components::selector::key_code::KeyCodeSelector;
 
@@ -66,7 +66,11 @@ pub fn KeyActionSelector(
                         aria_label: "Tap-Dance",
                     }
                 }
-                button { class: "btn btn-sm", onclick: move |_| discard(()), "Discard" }
+                button {
+                    class: "btn btn-sm btn-secondary",
+                    onclick: move |_| discard(()),
+                    "Discard"
+                }
             }
             div { class: "border-2 rounded-md p-2",
                 match key_action {

@@ -11,7 +11,7 @@ pub fn KeySelector<I: Display + PartialEq + Clone + 'static>(
 ) -> Element {
     rsx! {
         select {
-            class: "select-sm select-bordered w-full",
+            class: "select select-sm w-full",
             onchange: move |evt| {
                 let Ok(idx) = evt.data().value().parse::<usize>() else {
                     return;
@@ -30,7 +30,7 @@ pub fn LayerKeySelector(selected_key: LayerOp, select_key: Callback<LayerOp>) ->
     rsx! {
         div { class: "grid grid-cols-3 items-center gap-2",
             select {
-                class: "col-span-1 select select-sm select-bordered",
+                class: "col-span-1 select select-sm",
                 onchange: move |evt| {
                     let selected_key = match evt.data().value().as_str() {
                         "mo" => LayerOp::Momentary(0),
