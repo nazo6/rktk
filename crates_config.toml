@@ -6,6 +6,9 @@ check_env = { DEFMT_LOG = "trace" }
 test_features_global = ["_check"]
 doc_features_global = ["_check"]
 
+[crates.rktk]
+check_at_least_one_of = ["defmt", "log"]
+
 [crates.rktk-rrp]
 check_at_least_one_of = ["server", "client"]
 test_enabled = true

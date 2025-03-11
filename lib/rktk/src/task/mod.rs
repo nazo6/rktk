@@ -28,7 +28,7 @@ use embassy_time::Duration;
 use rktk_log::{debug, helper::Debug2Format, info};
 
 pub(crate) mod channels;
-pub(crate) mod display;
+pub mod display;
 #[cfg(feature = "rrp-log")]
 mod logger;
 pub(crate) mod main_loop;
