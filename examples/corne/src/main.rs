@@ -9,12 +9,12 @@ use embassy_executor::Spawner;
 use embassy_rp::gpio::{Input, Level, Output, Pull};
 use rktk::{
     config::constant::CONFIG,
-    drivers::{interface::keyscan::Hand, Drivers},
+    drivers::{Drivers, interface::keyscan::Hand},
     hooks::empty_hooks::create_empty_hooks,
     none_driver,
 };
 
-use rktk_drivers_common::keyscan::{matrix::Matrix, HandDetector};
+use rktk_drivers_common::keyscan::{HandDetector, matrix::Matrix};
 use rktk_drivers_rp::system::RpSystemDriver;
 
 #[embassy_executor::main]

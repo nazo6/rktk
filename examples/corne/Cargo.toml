@@ -1,6 +1,13 @@
 # You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
 cargo-features = ["per-package-target"]
 
+[[bin]]
+name = "corne"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
 [package]
 name = "example-corne"
 authors.workspace = true
@@ -44,5 +51,5 @@ default = ["right"]
 right = []
 left = []
 
-# Remove this line in your project. It's just used in this workspace for check.
 _check = []
+# Remove this line in your project. It's just used in this workspace for check.

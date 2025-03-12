@@ -10,6 +10,12 @@ edition.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[lib]
+path = "src/lib.rs"
+test = false
+doctest = false
+bench = false
+
 [package.metadata.docs.rs]
 no-default-features = true
 features = ["embassy-nrf/nrf52840"]

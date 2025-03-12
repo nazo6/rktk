@@ -1,5 +1,12 @@
 cargo-features = ["per-package-target"]
 
+[[bin]]
+name = "dummy-kb"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
 [package]
 name = "example-dummy-kb-rp"
 authors.workspace = true
