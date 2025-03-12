@@ -1,10 +1,10 @@
 use super::{
+    ReadySignal, RemoteWakeupSignal,
     raw_hid::RAW_HID_BUFFER_SIZE,
     task::{
         HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL, HID_MOUSE_CHANNEL, KEYBOARD_LED_SIGNAL,
         RAW_HID_SEND_CHANNEL, RRP_RECV_PIPE, RRP_SEND_PIPE,
     },
-    ReadySignal, RemoteWakeupSignal,
 };
 use rktk::drivers::interface::{reporter::ReporterDriver, usb::UsbDriver};
 

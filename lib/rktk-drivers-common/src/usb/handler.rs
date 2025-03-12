@@ -1,41 +1,24 @@
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::sync::atomic::Ordering;
 use embassy_usb::{
+    Handler,
     class::hid::{ReportId, RequestHandler},
     control::OutResponse,
-    Handler,
 };
 
 use super::SUSPENDED;
 
-pub struct UsbDeviceHandler {
-    configured: AtomicBool,
-}
+pub struct UsbDeviceHandler {}
 
 impl UsbDeviceHandler {
     pub fn new() -> Self {
-        UsbDeviceHandler {
-            configured: AtomicBool::new(false),
-        }
+        UsbDeviceHandler {}
     }
 }
 
 // 参考: https://www.itf.co.jp/tech/road-to-usb-master/usb-status
 impl Handler for UsbDeviceHandler {
     fn enabled(&mut self, _enabled: bool) {
-        self.configured.store(false, Ordering::Relaxed);
         SUSPENDED.store(false, Ordering::Release);
-    }
-
-    fn reset(&mut self) {
-        self.configured.store(false, Ordering::Relaxed);
-    }
-
-    fn addressed(&mut self, _addr: u8) {
-        self.configured.store(false, Ordering::Relaxed);
-    }
-
-    fn configured(&mut self, configured: bool) {
-        self.configured.store(configured, Ordering::Relaxed);
     }
 
     fn suspended(&mut self, suspended: bool) {

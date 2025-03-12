@@ -197,7 +197,11 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: Report) -> bo
     let mut reported = false;
     if let Some(report) = state_report.keyboard_report {
         reported = true;
-        let report = if let Ok(true) = reporter.wakeup() {
+
+        // Don't send wakeup signal if the report is empty
+        let report = if report == usbd_hid::descriptor::KeyboardReport::default() {
+            report
+        } else if let Ok(true) = reporter.wakeup() {
             usbd_hid::descriptor::KeyboardReport::default()
         } else {
             report

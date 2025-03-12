@@ -1,14 +1,14 @@
-use super::raw_hid::RawHidReport;
 use super::raw_hid::RAW_HID_BUFFER_SIZE;
-use super::rrp::RrpReport;
+use super::raw_hid::RawHidReport;
 use super::rrp::RRP_HID_BUFFER_SIZE;
+use super::rrp::RrpReport;
 use embassy_futures::join::join;
 use embassy_futures::join::join4;
 use embassy_futures::join::join5;
 use embassy_sync::pipe::Pipe;
+use embassy_usb::UsbDevice;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
-use embassy_usb::UsbDevice;
 use rktk::drivers::interface::BackgroundTask;
 use rktk::utils::Signal;
 use rktk::utils::{Channel, RawMutex};
