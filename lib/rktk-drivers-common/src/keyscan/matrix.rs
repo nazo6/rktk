@@ -1,7 +1,7 @@
-use super::{pressed::Pressed, HandDetector};
+use super::pressed::Pressed;
 use embedded_hal::digital::{InputPin, OutputPin};
 use embedded_hal_async::digital::Wait;
-use rktk::drivers::interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver};
+use rktk::drivers::interface::keyscan::{KeyChangeEvent, KeyscanDriver};
 
 /// Matrix scanner
 ///
@@ -11,6 +11,7 @@ use rktk::drivers::interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver};
 pub struct Matrix<
     OP: OutputPin,
     IP: InputPin + Wait,
+    T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
     const COLS: usize,
@@ -19,19 +20,19 @@ pub struct Matrix<
     output_pins: [OP; OUTPUT_PIN_COUNT],
     input_pins: [IP; INPUT_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
-    hand_detector: HandDetector,
-    map_key: fn(usize, usize) -> Option<(usize, usize)>,
+    map_key_pos: T,
     scan_delay: embassy_time::Duration,
 }
 
 impl<
-        OP: OutputPin,
-        IP: InputPin + Wait,
-        const OUTPUT_PIN_COUNT: usize,
-        const INPUT_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > Matrix<OP, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    OP: OutputPin,
+    IP: InputPin + Wait,
+    T: Fn(usize, usize) -> Option<(usize, usize)>,
+    const OUTPUT_PIN_COUNT: usize,
+    const INPUT_PIN_COUNT: usize,
+    const COLS: usize,
+    const ROWS: usize,
+> Matrix<OP, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
     /// Initialize the scanner.
     ///
@@ -48,29 +49,28 @@ impl<
     pub fn new(
         output_pins: [OP; OUTPUT_PIN_COUNT],
         input_pins: [IP; INPUT_PIN_COUNT],
-        hand_detector: HandDetector,
-        map_key: fn(usize, usize) -> Option<(usize, usize)>,
+        map_key_pos: T,
         scan_delay: Option<embassy_time::Duration>,
     ) -> Self {
         Self {
             output_pins,
             input_pins,
-            hand_detector,
             pressed: Pressed::new(),
-            map_key,
+            map_key_pos,
             scan_delay: scan_delay.unwrap_or(embassy_time::Duration::from_micros(5)),
         }
     }
 }
 
 impl<
-        OP: OutputPin,
-        IP: InputPin + Wait,
-        const OUTPUT_PIN_COUNT: usize,
-        const INPUT_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > KeyscanDriver for Matrix<OP, IP, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    OP: OutputPin,
+    IP: InputPin + Wait,
+    T: Fn(usize, usize) -> Option<(usize, usize)>,
+    const OUTPUT_PIN_COUNT: usize,
+    const INPUT_PIN_COUNT: usize,
+    const COLS: usize,
+    const ROWS: usize,
+> KeyscanDriver for Matrix<OP, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
 {
     // TODO: support async matrix
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
@@ -80,7 +80,7 @@ impl<
             embassy_time::Timer::after(self.scan_delay).await;
 
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
-                if let Some((row, col)) = (self.map_key)(input_idx, output_idx) {
+                if let Some((row, col)) = (self.map_key_pos)(input_idx, output_idx) {
                     if let Some(change) =
                         self.pressed
                             .set_pressed(input_pin.is_high().unwrap(), row, col)
@@ -95,22 +95,6 @@ impl<
             }
 
             let _ = self.output_pins[output_idx].set_low();
-        }
-    }
-
-    async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
-        match self.hand_detector {
-            HandDetector::ByKey(d_col, d_row) => {
-                let mut hand = Hand::Right;
-                self.scan(|e| {
-                    if e.row == d_col as u8 && e.col == d_row as u8 {
-                        hand = Hand::Left;
-                    }
-                })
-                .await;
-                hand
-            }
-            HandDetector::Constant(hand) => hand,
         }
     }
 }

@@ -9,7 +9,7 @@ use crate::{
         display::DisplayDriver,
         dongle::{DongleData, DongleDriver},
         encoder::EncoderDriver,
-        keyscan::KeyscanDriver,
+        keyscan::{Hand, KeyscanDriver},
         mouse::MouseDriver,
         rgb::RgbDriver,
         split::SplitDriver,
@@ -79,6 +79,7 @@ pub async fn start<
         BleBuilder,
     >,
     key_config: Keymap,
+    hand: Option<Hand>,
     hooks: Hooks<CH, MH, SH, BH>,
 ) {
     #[cfg(feature = "rrp-log")]
@@ -159,6 +160,7 @@ pub async fn start<
                         drivers.rgb,
                         key_config,
                         hooks,
+                        hand.unwrap_or(Hand::Left),
                     )
                     .await;
                 },

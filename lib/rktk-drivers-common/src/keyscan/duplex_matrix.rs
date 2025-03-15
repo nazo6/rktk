@@ -3,10 +3,9 @@
 use super::{
     flex_pin::{FlexPin, Pull},
     pressed::Pressed,
-    HandDetector,
 };
 use embassy_time::Duration;
-use rktk::drivers::interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver};
+use rktk::drivers::interface::keyscan::{KeyChangeEvent, KeyscanDriver};
 
 /// How to change the wait for output pins
 ///
@@ -24,6 +23,7 @@ pub enum OutputWait {
 /// Implementation of keyscan driver for [duplex matrix](https://kbd.news/The-Japanese-duplex-matrix-1391.html).
 pub struct DuplexMatrixScanner<
     F: FlexPin,
+    T: Fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
     const ROW_PIN_COUNT: usize,
     const COL_PIN_COUNT: usize,
     const COLS: usize,
@@ -33,17 +33,17 @@ pub struct DuplexMatrixScanner<
     cols: [F; COL_PIN_COUNT],
     pressed: Pressed<COLS, ROWS>,
     output_wait: OutputWait,
-    hand_detector: HandDetector,
-    translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
+    map_key_pos: T,
 }
 
 impl<
-        F: FlexPin,
-        const ROW_PIN_COUNT: usize,
-        const COL_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    F: FlexPin,
+    T: Fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
+    const ROW_PIN_COUNT: usize,
+    const COL_PIN_COUNT: usize,
+    const COLS: usize,
+    const ROWS: usize,
+> DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     /// Detect the hand and initialize the scanner.
     ///
@@ -59,17 +59,15 @@ impl<
     pub fn new(
         rows: [F; ROW_PIN_COUNT],
         cols: [F; COL_PIN_COUNT],
-        hand_detector: HandDetector,
         output_wait: Option<OutputWait>,
-        translate_key_position: fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
+        translate_key_position: T,
     ) -> Self {
         Self {
             rows,
             cols,
-            hand_detector,
             pressed: Pressed::new(),
             output_wait: output_wait.unwrap_or(OutputWait::Time(Duration::from_micros(20))),
-            translate_key_position,
+            map_key_pos: translate_key_position,
         }
     }
 
@@ -132,12 +130,13 @@ impl<
 }
 
 impl<
-        F: FlexPin,
-        const ROW_PIN_COUNT: usize,
-        const COL_PIN_COUNT: usize,
-        const COLS: usize,
-        const ROWS: usize,
-    > KeyscanDriver for DuplexMatrixScanner<F, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    F: FlexPin,
+    T: Fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
+    const ROW_PIN_COUNT: usize,
+    const COL_PIN_COUNT: usize,
+    const COLS: usize,
+    const ROWS: usize,
+> KeyscanDriver for DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
 {
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         Self::scan_dir(
@@ -146,7 +145,7 @@ impl<
             self.output_wait,
             |row_pin_idx, col_pin_idx, pressed| {
                 if let Some((row, col)) =
-                    (self.translate_key_position)(ScanDir::Row2Col, row_pin_idx, col_pin_idx)
+                    (self.map_key_pos)(ScanDir::Row2Col, row_pin_idx, col_pin_idx)
                 {
                     if let Some(change) = self.pressed.set_pressed(pressed, row, col) {
                         cb(KeyChangeEvent {
@@ -166,7 +165,7 @@ impl<
             self.output_wait,
             |col_pin_idx, row_pin_idx, pressed| {
                 if let Some((row, col)) =
-                    (self.translate_key_position)(ScanDir::Col2Row, row_pin_idx, col_pin_idx)
+                    (self.map_key_pos)(ScanDir::Col2Row, row_pin_idx, col_pin_idx)
                 {
                     if let Some(change) = self.pressed.set_pressed(pressed, row, col) {
                         cb(KeyChangeEvent {
@@ -179,22 +178,6 @@ impl<
             },
         )
         .await;
-    }
-
-    async fn current_hand(&mut self) -> rktk::drivers::interface::keyscan::Hand {
-        match self.hand_detector {
-            HandDetector::ByKey(d_col, d_row) => {
-                let mut hand = Hand::Right;
-                self.scan(|e| {
-                    if e.row == d_col as u8 && e.col == d_row as u8 {
-                        hand = Hand::Left;
-                    }
-                })
-                .await;
-                hand
-            }
-            HandDetector::Constant(hand) => hand,
-        }
     }
 }
 

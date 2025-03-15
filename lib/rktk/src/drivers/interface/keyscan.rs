@@ -25,5 +25,4 @@ impl Hand {
 pub trait KeyscanDriver {
     /// Scans a key and returns the delta from the previous key scan
     async fn scan(&mut self, callback: impl FnMut(KeyChangeEvent));
-    async fn current_hand(&mut self) -> Hand;
 }

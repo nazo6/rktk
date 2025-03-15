@@ -60,8 +60,8 @@ pub async fn start<
     rgb: Option<RGB>,
     key_config: Keymap,
     mut hooks: Hooks<CH, MH, SH, BH>,
+    hand: Hand,
 ) {
-    let hand = keyscan.current_hand().await;
     crate::utils::display_state!(Hand, Some(hand));
 
     if let Some(split) = &mut split {
