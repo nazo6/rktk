@@ -2,9 +2,9 @@ use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
 use embassy_usb::driver::Driver;
 use rktk::singleton;
 
-use super::raw_hid::{RawHidReport, RAW_HID_BUFFER_SIZE};
-use super::rrp::RrpReport;
+use super::raw_hid::{RAW_HID_BUFFER_SIZE, RawHidReport};
 use super::rrp::RRP_HID_BUFFER_SIZE;
+use super::rrp::RrpReport;
 use embassy_usb::Builder;
 use rktk::drivers::interface::DriverBuilderWithTask;
 use usbd_hid::descriptor::{
@@ -14,7 +14,7 @@ use usbd_hid::descriptor::{
 use crate::usb::handler::UsbDeviceHandler;
 
 use super::driver::CommonUsbDriver;
-use super::{task::*, ReadySignal};
+use super::{ReadySignal, task::*};
 use super::{RemoteWakeupSignal, UsbOpts};
 
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
@@ -138,11 +138,14 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
 
     #[allow(refining_impl_trait)]
     async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
-        let usb = self.builder.build();
+        let mut usb = self.builder.build();
+
+        let support_wakeup_signal = usb.remote_wakeup().await.is_ok();
         Ok((
             CommonUsbDriver {
                 wakeup_signal: self.wakeup_signal,
                 ready_signal: self.ready_signal,
+                support_wakeup_signal,
             },
             UsbBackgroundTask {
                 device: usb,

@@ -11,6 +11,7 @@ use rktk::drivers::interface::{reporter::ReporterDriver, usb::UsbDriver};
 pub struct CommonUsbDriver {
     pub(super) wakeup_signal: &'static RemoteWakeupSignal,
     pub(super) ready_signal: &'static ReadySignal,
+    pub(super) support_wakeup_signal: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -102,11 +103,15 @@ impl ReporterDriver for CommonUsbDriver {
     }
 
     fn wakeup(&self) -> Result<bool, Self::Error> {
-        if super::SUSPENDED.load(core::sync::atomic::Ordering::Acquire) {
-            self.wakeup_signal.signal(());
-            return Ok(true);
+        if self.support_wakeup_signal {
+            if super::SUSPENDED.load(core::sync::atomic::Ordering::Acquire) {
+                self.wakeup_signal.signal(());
+                return Ok(true);
+            }
+            Ok(false)
+        } else {
+            Err(Self::Error::NotSupported)
         }
-        Ok(false)
     }
 }
 impl UsbDriver for CommonUsbDriver {
