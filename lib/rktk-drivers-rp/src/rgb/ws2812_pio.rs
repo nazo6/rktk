@@ -4,7 +4,7 @@ use embassy_rp::dma::{AnyChannel, Channel};
 use embassy_rp::pio::{
     Config, FifoJoin, Instance, Pio, PioPin, ShiftConfig, ShiftDirection, StateMachine,
 };
-use embassy_rp::{clocks, into_ref, Peripheral, PeripheralRef};
+use embassy_rp::{Peripheral, PeripheralRef, clocks, into_ref};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
@@ -100,7 +100,10 @@ impl<I: Instance + 'static> RgbDriver for Ws2812Pio<'static, I> {
         }
 
         // DMA transfer
-        self.sm.tx().dma_push(self.dma.reborrow(), &words).await;
+        self.sm
+            .tx()
+            .dma_push(self.dma.reborrow(), &words, false)
+            .await;
 
         Timer::after_micros(55).await;
 

@@ -1,7 +1,7 @@
 use embassy_futures::yield_now;
 use embassy_rp::{
-    pio::{Common, Config, Instance, Pin, Pio, PioPin, ShiftDirection, StateMachine},
     Peripheral,
+    pio::{Common, Config, Instance, Pin, Pio, PioPin, ShiftDirection, StateMachine},
 };
 use embassy_sync::semaphore::{FairSemaphore, Semaphore};
 use embassy_time::Timer;
@@ -23,7 +23,7 @@ fn rx_init<'a, I: Instance>(
     sm: &mut StateMachine<'a, I, 0>,
     data_pin: &Pin<'a, I>,
 ) {
-    let prg = pio_proc::pio_asm!(
+    let prg = pio::pio_asm!(
         "set pindirs 0",
         ".wrap_target",
         "wait 0 pin 0",
@@ -53,7 +53,7 @@ fn tx_init<'a, I: Instance>(
     sm: &mut StateMachine<'a, I, 1>,
     data_pin: &Pin<'a, I>,
 ) {
-    let prg = pio_proc::pio_asm!(
+    let prg = pio::pio_asm!(
         "set pindirs 0",
         ".wrap_target",
         "pull",
