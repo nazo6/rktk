@@ -2,9 +2,9 @@ use core::fmt::{self, Formatter};
 
 use rktk_log::warn;
 
-pub struct Pressed<const COLS: usize, const ROWS: usize>([[bool; COLS]; ROWS]);
+pub struct Pressed<const ROWS: usize, const COLS: usize>([[bool; COLS]; ROWS]);
 
-impl<const COLS: usize, const ROWS: usize> Pressed<COLS, ROWS> {
+impl<const ROWS: usize, const COLS: usize> Pressed<ROWS, COLS> {
     pub fn new() -> Self {
         Self([[false; COLS]; ROWS])
     }
@@ -29,7 +29,7 @@ impl<const COLS: usize, const ROWS: usize> Pressed<COLS, ROWS> {
     }
 }
 
-impl<const COLS: usize, const ROWS: usize> core::fmt::Debug for Pressed<COLS, ROWS> {
+impl<const ROWS: usize, const COLS: usize> core::fmt::Debug for Pressed<ROWS, COLS> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         for (row, col) in self.iter() {
             write!(f, "{},{} ", row, col)?;
@@ -38,13 +38,13 @@ impl<const COLS: usize, const ROWS: usize> core::fmt::Debug for Pressed<COLS, RO
     }
 }
 
-pub struct PressedIter<'a, const COLS: usize, const ROWS: usize> {
-    pressed: &'a Pressed<COLS, ROWS>,
+pub struct PressedIter<'a, const ROWS: usize, const COLS: usize> {
+    pressed: &'a Pressed<ROWS, COLS>,
     idx_row: usize,
     idx_col: usize,
 }
 
-impl<const COLS: usize, const ROWS: usize> Iterator for PressedIter<'_, COLS, ROWS> {
+impl<const ROWS: usize, const COLS: usize> Iterator for PressedIter<'_, ROWS, COLS> {
     type Item = (u8, u8);
     fn next(&mut self) -> Option<Self::Item> {
         for i in self.idx_row..ROWS {
@@ -66,8 +66,8 @@ impl<const COLS: usize, const ROWS: usize> Iterator for PressedIter<'_, COLS, RO
     }
 }
 
-impl<const COLS: usize, const ROWS: usize> Pressed<COLS, ROWS> {
-    pub fn iter(&self) -> PressedIter<COLS, ROWS> {
+impl<const ROWS: usize, const COLS: usize> Pressed<ROWS, COLS> {
+    pub fn iter(&self) -> PressedIter<ROWS, COLS> {
         PressedIter {
             pressed: self,
             idx_row: 0,

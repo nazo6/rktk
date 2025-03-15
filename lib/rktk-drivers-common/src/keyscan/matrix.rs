@@ -14,12 +14,12 @@ pub struct Matrix<
     T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
+    const COLS: usize,
 > {
     output_pins: [OP; OUTPUT_PIN_COUNT],
     input_pins: [IP; INPUT_PIN_COUNT],
-    pressed: Pressed<COLS, ROWS>,
+    pressed: Pressed<ROWS, COLS>,
     map_key_pos: T,
     scan_delay: embassy_time::Duration,
 }
@@ -30,9 +30,9 @@ impl<
     T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
-> Matrix<OP, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    const COLS: usize,
+> Matrix<OP, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, ROWS, COLS>
 {
     /// Initialize the scanner.
     ///
@@ -41,7 +41,7 @@ impl<
     /// - `input_pins`: Input pins to read the matrix.
     /// - `left_detect_key`: The (logical, not pin index) key position to detect the hand.
     /// - `map_key`: Function to map key position from pin index. This function must return
-    ///   position within specified `COLS` and `ROWS`.
+    ///   position within specified `ROWS` and `COLS`.
     ///   Signature: (input_pin_idx, output_pin_idx) -> Option<(row, col)>
     /// * `scan_delay`: Delay between output pin change and input read. This is executed for each
     ///   col/row so, this should be short enough to scan the matrix in a reasonable time.
@@ -68,9 +68,9 @@ impl<
     T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
-> KeyscanDriver for Matrix<OP, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    const COLS: usize,
+> KeyscanDriver for Matrix<OP, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, ROWS, COLS>
 {
     // TODO: support async matrix
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {

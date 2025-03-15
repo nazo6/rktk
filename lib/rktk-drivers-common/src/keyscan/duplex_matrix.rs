@@ -26,12 +26,12 @@ pub struct DuplexMatrixScanner<
     T: Fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
     const ROW_PIN_COUNT: usize,
     const COL_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
+    const COLS: usize,
 > {
     rows: [F; ROW_PIN_COUNT],
     cols: [F; COL_PIN_COUNT],
-    pressed: Pressed<COLS, ROWS>,
+    pressed: Pressed<ROWS, COLS>,
     output_wait: OutputWait,
     map_key_pos: T,
 }
@@ -41,9 +41,9 @@ impl<
     T: Fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
     const ROW_PIN_COUNT: usize,
     const COL_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
-> DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    const COLS: usize,
+> DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, ROWS, COLS>
 {
     /// Detect the hand and initialize the scanner.
     ///
@@ -134,9 +134,9 @@ impl<
     T: Fn(ScanDir, usize, usize) -> Option<(usize, usize)>,
     const ROW_PIN_COUNT: usize,
     const COL_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
-> KeyscanDriver for DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, COLS, ROWS>
+    const COLS: usize,
+> KeyscanDriver for DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, ROWS, COLS>
 {
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         Self::scan_dir(

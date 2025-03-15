@@ -12,12 +12,12 @@ pub struct ShiftRegisterMatrix<
     T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
+    const COLS: usize,
 > {
     row_shift_register: S,
     input_pins: [IP; INPUT_PIN_COUNT],
-    pressed: Pressed<COLS, ROWS>,
+    pressed: Pressed<ROWS, COLS>,
     map_key_pos: T,
     scan_delay: embassy_time::Duration,
 }
@@ -28,9 +28,9 @@ impl<
     T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
-> ShiftRegisterMatrix<S, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    const COLS: usize,
+> ShiftRegisterMatrix<S, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, ROWS, COLS>
 {
     /// Initialize the scanner.
     ///
@@ -40,7 +40,7 @@ impl<
     /// * `row_shift_register`: SPI bus for the shift register used as output pin.
     /// * `input_pins`: Input pins to read the matrix.
     /// * `map_key_pos`: Function to map key position from pin number. This function must return
-    ///   position within specified `COLS` and `ROWS`.
+    ///   position within specified `ROWS` and `COLS`.
     ///   Signature: (row, col) -> Option<(row, col)>
     /// * `scan_delay`: Delay between output pin change and input read. This is executed for each
     ///   col/row so, this should be short enough to scan the matrix in a reasonable time. (Default: 5us)
@@ -66,9 +66,9 @@ impl<
     T: Fn(usize, usize) -> Option<(usize, usize)>,
     const OUTPUT_PIN_COUNT: usize,
     const INPUT_PIN_COUNT: usize,
-    const COLS: usize,
     const ROWS: usize,
-> KeyscanDriver for ShiftRegisterMatrix<S, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, COLS, ROWS>
+    const COLS: usize,
+> KeyscanDriver for ShiftRegisterMatrix<S, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, ROWS, COLS>
 {
     // TODO: support async matrix
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
