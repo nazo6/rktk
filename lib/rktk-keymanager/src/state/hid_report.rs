@@ -140,7 +140,9 @@ impl<
                     if ev != EventType::Pressing {
                         media_keyboard_change = true;
                     }
-                    media_keys = m as u16;
+                    if ev != EventType::Released {
+                        media_keys = m as u16;
+                    }
                 }
                 OutputEvent::MouseMove(m) => {
                     mouse_change = true;
