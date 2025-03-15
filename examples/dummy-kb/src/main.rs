@@ -11,7 +11,7 @@ use embassy_executor::Spawner;
 use rktk::{
     drivers::{
         Drivers,
-        interface::keyscan::{Hand, KeyChangeEvent, KeyscanDriver},
+        interface::keyscan::{KeyChangeEvent, KeyscanDriver},
     },
     hooks::empty_hooks::create_empty_hooks,
     none_driver,
@@ -23,9 +23,6 @@ pub struct DummyKeyscanDriver;
 impl KeyscanDriver for DummyKeyscanDriver {
     async fn scan(&mut self, _cb: impl FnMut(KeyChangeEvent)) {
         let _: () = core::future::pending().await;
-    }
-    async fn current_hand(&mut self) -> Hand {
-        Hand::Right
     }
 }
 
@@ -47,7 +44,7 @@ async fn main(_spawner: Spawner) {
         encoder: none_driver!(Encoder),
     };
 
-    rktk::task::start(drivers, keymap::KEYMAP, create_empty_hooks()).await;
+    rktk::task::start(drivers, keymap::KEYMAP, None, create_empty_hooks()).await;
 }
 
 #[panic_handler]

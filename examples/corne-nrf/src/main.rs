@@ -14,7 +14,7 @@ use rktk::{
     none_driver,
 };
 
-use rktk_drivers_common::keyscan::{HandDetector, matrix::Matrix};
+use rktk_drivers_common::keyscan::matrix::Matrix;
 use rktk_drivers_nrf::system::NrfSystemDriver;
 
 #[embassy_executor::main]
@@ -46,10 +46,11 @@ async fn main(_spawner: Spawner) {
         keyscan: Matrix::<
             _,
             _,
+            _,
             6,
             4,
-            { CONFIG.keyboard.cols as usize },
             { CONFIG.keyboard.rows as usize },
+            { CONFIG.keyboard.cols as usize },
         >::new(
             outputs,
             [
@@ -58,16 +59,6 @@ async fn main(_spawner: Spawner) {
                 Input::new(p.P1_00, Pull::Down), // ROW2
                 Input::new(p.P0_11, Pull::Down), // ROW3
             ],
-            HandDetector::Constant({
-                #[cfg(feature = "left")]
-                {
-                    Hand::Left
-                }
-                #[cfg(feature = "right")]
-                {
-                    Hand::Right
-                }
-            }),
             |row, col| Some((row, col)),
             None,
         ),
@@ -83,7 +74,22 @@ async fn main(_spawner: Spawner) {
         encoder: none_driver!(Encoder),
     };
 
-    rktk::task::start(drivers, keymap::KEYMAP, create_empty_hooks()).await;
+    rktk::task::start(
+        drivers,
+        keymap::KEYMAP,
+        {
+            #[cfg(feature = "left")]
+            {
+                Some(Hand::Left)
+            }
+            #[cfg(feature = "right")]
+            {
+                Some(Hand::Right)
+            }
+        },
+        create_empty_hooks(),
+    )
+    .await;
 }
 
 #[panic_handler]
