@@ -93,6 +93,7 @@ impl<
         mut cb: impl FnMut(OutputEvent),
     ) -> Report {
         let mut keyboard_change = self.next_send_keyboard_report;
+        self.next_send_keyboard_report = false;
         let mut keys: Vec<u8, 6> = Vec::new();
         let mut modifier = 0u8;
 
