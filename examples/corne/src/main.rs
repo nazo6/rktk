@@ -8,10 +8,8 @@ use core::panic::PanicInfo;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::{Input, Level, Output, Pull};
 use rktk::{
-    config::constant::CONFIG,
-    drivers::{Drivers, interface::keyscan::Hand},
-    hooks::empty_hooks::create_empty_hooks,
-    none_driver,
+    config::constant::CONFIG, drivers::Drivers, hooks::empty_hooks::create_empty_hooks,
+    interface::Hand, none_driver,
 };
 
 use rktk_drivers_common::keyscan::matrix::Matrix;

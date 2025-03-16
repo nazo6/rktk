@@ -3,10 +3,8 @@ use rktk_log::{debug, warn};
 
 use crate::{
     config::constant::SCAN_INTERVAL_KEYBOARD,
-    drivers::interface::{
-        debounce::DebounceDriver,
-        keyscan::{Hand, KeyscanDriver},
-    },
+    drivers::interface::{debounce::DebounceDriver, keyscan::KeyscanDriver},
+    interface::Hand,
     task::channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
 };
 

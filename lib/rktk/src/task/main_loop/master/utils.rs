@@ -7,7 +7,8 @@ use crate::{
         keymap::Keymap,
         storage::StorageConfigManager,
     },
-    drivers::interface::{keyscan::Hand, storage::StorageDriver},
+    drivers::interface::storage::StorageDriver,
+    interface::Hand,
 };
 
 use super::{ConfiguredState, RKTK_CONFIG, SharedState};

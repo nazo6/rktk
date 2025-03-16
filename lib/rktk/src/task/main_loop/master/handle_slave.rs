@@ -2,7 +2,8 @@ use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
 use rktk_log::debug;
 
 use crate::{
-    drivers::interface::{keyscan::Hand, split::SlaveToMaster},
+    drivers::interface::split::SlaveToMaster,
+    interface::Hand,
     task::channels::{
         report::{KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
         split::S2mRx,

@@ -9,7 +9,7 @@ use crate::{
         display::DisplayDriver,
         dongle::{DongleData, DongleDriver},
         encoder::EncoderDriver,
-        keyscan::{Hand, KeyscanDriver},
+        keyscan::KeyscanDriver,
         mouse::MouseDriver,
         rgb::RgbDriver,
         split::SplitDriver,
@@ -17,6 +17,7 @@ use crate::{
         usb::UsbDriver,
     },
     hooks::Hooks,
+    interface::Hand,
 };
 use crate::{
     config::keymap::Keymap,
