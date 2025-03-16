@@ -289,6 +289,13 @@
           "format": "uint",
           "minimum": 0.0
         },
+        "rrp_buffer_size": {
+          "description": "Size of the buffer used by rrp",
+          "default": 512,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
         "scan_interval_keyboard": {
           "description": "Time (ms) to wait for the next keyboard scan",
           "default": 5,

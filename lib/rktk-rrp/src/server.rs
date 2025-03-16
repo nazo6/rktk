@@ -19,16 +19,18 @@ impl<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers<RT::Error, WT::Err
         }
     }
 
-    pub async fn start(&mut self) {
+    pub async fn start<const BUF_SIZE: usize>(&mut self) {
         loop {
-            let _ = self.process_request().await;
+            let _ = self.process_request::<BUF_SIZE>().await;
         }
     }
 
-    async fn process_request(&mut self) -> Result<(), TransportError<RT::Error, WT::Error>> {
+    async fn process_request<const BUF_SIZE: usize>(
+        &mut self,
+    ) -> Result<(), TransportError<RT::Error, WT::Error>> {
         let req_header = self.reader.recv_request_header().await?;
 
-        self.handle::<1024>(req_header).await?;
+        self.handle::<BUF_SIZE>(req_header).await?;
 
         Ok(())
     }

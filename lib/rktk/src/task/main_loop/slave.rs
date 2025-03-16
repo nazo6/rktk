@@ -21,7 +21,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
     mut keyscan: KS,
-    mut debounce: Option<DB>,
+    debounce: &mut Option<DB>,
     mut mouse: Option<M>,
     mut slave_hooks: SH,
 ) {
@@ -64,7 +64,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
                 keyscan
                     .scan(|event| {
                         debug!("keyscan event: {:?}", event);
-                        if let Some(debounce) = &mut debounce {
+                        if let Some(debounce) = debounce.as_mut() {
                             if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
                                 debug!("keyscan event ignored");
                                 return;

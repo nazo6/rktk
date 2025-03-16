@@ -62,16 +62,16 @@ pub async fn start<
     ble: Option<Ble>,
     usb: Option<Usb>,
     mut keyscan: KS,
-    debounce: Option<DB>,
+    debounce: &mut Option<DB>,
     mut encoder: Option<EN>,
     storage: Option<S>,
     mut mouse: Option<M>,
-    key_config: Keymap,
+    key_config: &Keymap,
     hand: Hand,
     mut master_hooks: MH,
 ) {
     let config_store = init_storage(storage).await;
-    let state = load_state(&config_store, key_config).await;
+    let state = load_state(&config_store, key_config.clone()).await;
 
     info!("Master side task start");
 

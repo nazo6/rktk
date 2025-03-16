@@ -31,7 +31,7 @@ pub async fn start(
                 storage: config_store.as_ref(),
             },
         );
-        server.start().await;
+        server.start::<{ RKTK_CONFIG.rrp_buffer_size }>().await;
     }
 }
 

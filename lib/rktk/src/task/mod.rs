@@ -62,7 +62,7 @@ pub async fn start<
     SH: SlaveHooks,
     BH: RgbHooks,
 >(
-    drivers: Drivers<
+    mut drivers: Drivers<
         KeyScan,
         Debounce,
         Encoder,
@@ -108,7 +108,7 @@ pub async fn start<
         .await;
 
     sjoin::join!(
-        async move {
+        async {
             let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
                 debug!("Mouse init");
                 match mouse_builder.build().await {
@@ -153,13 +153,13 @@ pub async fn start<
                         ble,
                         usb,
                         drivers.keyscan,
-                        drivers.debounce,
+                        &mut drivers.debounce,
                         drivers.encoder,
                         mouse,
                         drivers.storage,
                         drivers.split,
                         drivers.rgb,
-                        key_config,
+                        &key_config,
                         hooks,
                         hand.unwrap_or(Hand::Left),
                     )

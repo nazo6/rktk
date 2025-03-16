@@ -34,6 +34,10 @@ pub struct RktkConfig {
     #[default(5)]
     pub scan_interval_mouse: u64,
 
+    /// Size of the buffer used by rrp
+    #[default(512)]
+    pub rrp_buffer_size: usize,
+
     /// Size of the split channel buffer
     #[default(64)]
     pub split_channel_size: usize,
