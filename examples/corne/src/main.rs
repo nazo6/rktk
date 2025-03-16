@@ -74,7 +74,7 @@ async fn main(_spawner: Spawner) {
 
     rktk::task::start(
         drivers,
-        keymap::KEYMAP,
+        &keymap::KEYMAP,
         {
             #[cfg(feature = "left")]
             {
