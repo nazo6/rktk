@@ -71,7 +71,7 @@ pub async fn start<
     mut master_hooks: MH,
 ) {
     let config_store = init_storage(storage).await;
-    let state = load_state(&config_store, key_config.clone()).await;
+    let state = load_state(&config_store, key_config).await;
 
     info!("Master side task start");
 

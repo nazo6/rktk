@@ -69,8 +69,9 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 /// If storage doesn't exist or read fails, uses provided static config value insted.
 pub async fn load_state(
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
-    mut keymap: Keymap,
+    keymap: &Keymap,
 ) -> SharedState {
+    let mut keymap = keymap.clone();
     let (state_config, keymap) = if let Some(storage) = &config_store {
         for l in 0..RKTK_CONFIG.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
