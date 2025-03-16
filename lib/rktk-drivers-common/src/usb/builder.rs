@@ -5,7 +5,7 @@ use rktk::singleton;
 use super::raw_hid::{RAW_HID_BUFFER_SIZE, RawHidReport};
 use super::rrp::RRP_HID_BUFFER_SIZE;
 use super::rrp::RrpReport;
-use embassy_usb::Builder;
+use embassy_usb::{Builder, RemoteWakeupError};
 use rktk::drivers::interface::DriverBuilderWithTask;
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
@@ -140,7 +140,8 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
     async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
         let mut usb = self.builder.build();
 
-        let support_wakeup_signal = usb.remote_wakeup().await.is_ok();
+        let support_wakeup_signal =
+            !(usb.remote_wakeup().await == Err(RemoteWakeupError::Unsupported));
         Ok((
             CommonUsbDriver {
                 wakeup_signal: self.wakeup_signal,
