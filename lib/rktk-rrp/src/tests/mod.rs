@@ -1,6 +1,6 @@
 use core::pin::pin;
 
-use futures::{future::select, StreamExt};
+use futures::{StreamExt, future::select};
 use test_server::Handlers;
 use tokio::io::duplex;
 
@@ -21,7 +21,7 @@ macro_rules! execute_test {
                 let writer = test_transport::TestWriter(input_channel.0);
 
                 let mut server = crate::server::Server::<_, _, _>::new(reader, writer, $handlers);
-                server.start().await;
+                server.start::<1024>().await;
             }),
             pin!(async {
                 let reader = test_transport::TestReader(input_channel.1);
