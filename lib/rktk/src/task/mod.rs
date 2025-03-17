@@ -200,53 +200,56 @@ pub async fn dongle_start<
     let (usb, usb_task) = usb.build().await.unwrap();
     let (mut dongle, dongle_task) = dongle.build().await.unwrap();
 
-    let main_task = async move {
-        loop {
-            let data = dongle.recv().await;
-            match data {
-                Ok(mut data) => {
-                    if !hooks.on_dongle_data(&mut data).await {
+    sjoin::join!(
+        async move {
+            loop {
+                let data = dongle.recv().await;
+                match data {
+                    Ok(mut data) => {
+                        if !hooks.on_dongle_data(&mut data).await {
+                            continue;
+                        }
+                        match data {
+                            DongleData::Keyboard(report) => {
+                                if let Err(e) = usb.try_send_keyboard_report(report.into()) {
+                                    rktk_log::warn!(
+                                        "Failed to send keyboard report: {:?}",
+                                        Debug2Format(&e)
+                                    );
+                                }
+                            }
+                            DongleData::Mouse(report) => {
+                                if let Err(e) = usb.try_send_mouse_report(report.into()) {
+                                    rktk_log::warn!(
+                                        "Failed to send mouse report: {:?}",
+                                        Debug2Format(&e)
+                                    );
+                                }
+                            }
+                            DongleData::MediaKeyboard(report) => {
+                                if let Err(e) = usb.try_send_media_keyboard_report(report.into()) {
+                                    rktk_log::warn!(
+                                        "Failed to send media keyboard report: {:?}",
+                                        Debug2Format(&e)
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
+                        embassy_time::Timer::after_millis(100).await;
                         continue;
                     }
-                    match data {
-                        DongleData::Keyboard(report) => {
-                            if let Err(e) = usb.try_send_keyboard_report(report.into()) {
-                                rktk_log::warn!(
-                                    "Failed to send keyboard report: {:?}",
-                                    Debug2Format(&e)
-                                );
-                            }
-                        }
-                        DongleData::Mouse(report) => {
-                            if let Err(e) = usb.try_send_mouse_report(report.into()) {
-                                rktk_log::warn!(
-                                    "Failed to send mouse report: {:?}",
-                                    Debug2Format(&e)
-                                );
-                            }
-                        }
-                        DongleData::MediaKeyboard(report) => {
-                            if let Err(e) = usb.try_send_media_keyboard_report(report.into()) {
-                                rktk_log::warn!(
-                                    "Failed to send media keyboard report: {:?}",
-                                    Debug2Format(&e)
-                                );
-                            }
-                        }
-                    }
-                }
-                Err(e) => {
-                    rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
-                    embassy_time::Timer::after_millis(100).await;
-                    continue;
                 }
             }
+        },
+        usb_task.run(),
+        dongle_task.run(),
+        async move {
+            if let Some(display_builder) = display {
+                display::start(display_builder).await;
+            }
         }
-    };
-
-    sjoin::join!(main_task, usb_task.run(), dongle_task.run(), async move {
-        if let Some(display_builder) = display {
-            display::start(display_builder).await;
-        }
-    });
+    );
 }
