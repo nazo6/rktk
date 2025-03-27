@@ -1,2 +1,7 @@
+# This is part of the cargo config. This config will be merged with examples/.cargo/config.toml.
+
 [env]
 RKTK_CONFIG_PATH = { value = "rktk.json", relative = true, force = true }
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "uf2deploy deploy -f rp2040 -p auto"

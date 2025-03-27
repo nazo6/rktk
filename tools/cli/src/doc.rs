@@ -2,11 +2,10 @@ use std::{path::PathBuf, sync::LazyLock};
 
 use anyhow::Context as _;
 use cargo_metadata::{
-    camino::{Utf8Path, Utf8PathBuf},
     Package,
+    camino::{Utf8Path, Utf8PathBuf},
 };
 use duct::cmd;
-use hex;
 use sha2::{Digest, Sha256};
 
 use crate::{utils::METADATA, xprintln};

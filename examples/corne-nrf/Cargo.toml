@@ -18,10 +18,6 @@ repository.workspace = true
 publish = false
 forced-target = "thumbv7em-none-eabihf"
 
-# Config used by rktk-cli. For details, see [rktk-cli](https://crates.io/crates/rktk-cli).
-[package.metadata.rktk-cli]
-mcu = "Nrf52840"
-
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-nrf = { workspace = true, features = ["softdevice-ble"] }

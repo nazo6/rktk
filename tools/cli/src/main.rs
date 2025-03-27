@@ -2,7 +2,11 @@ use std::process::ExitCode;
 
 use utils::xprintln;
 
-mod commands;
+mod check;
+mod config;
+mod doc;
+mod release;
+mod test;
 mod utils;
 
 use clap::{Parser, Subcommand};
@@ -16,17 +20,39 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    /// Builds keyboard
-    Build(commands::build::BuildCommand),
-    #[command(subcommand)]
-    Internal(commands::internal::InternalCommands),
+    /// Run `cargo clippy` for rktk crates.
+    Check {
+        /// crate name to check
+        /// If 'all' is specified, all crates will be checked.
+        crate_name: String,
+    },
+    Test {
+        /// crate name to run test
+        /// If 'all' is specified, all crates will be tested.
+        crate_name: String,
+    },
+    Release {
+        crate_name: Option<String>,
+
+        #[arg(long)]
+        execute: bool,
+        #[arg(long)]
+        continue_on_error: bool,
+    },
+    Doc,
 }
 
 fn main() -> ExitCode {
     let args = Cli::parse();
     let res = match args.command {
-        Commands::Build(build_args) => commands::build::start(build_args),
-        Commands::Internal(internal_command) => commands::internal::start(internal_command),
+        Commands::Check { crate_name } => check::start(crate_name),
+        Commands::Test { crate_name } => test::start(crate_name),
+        Commands::Release {
+            crate_name,
+            execute,
+            continue_on_error,
+        } => release::start(crate_name, execute, continue_on_error),
+        Commands::Doc => doc::start(),
     };
 
     eprintln!();

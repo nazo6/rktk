@@ -4,12 +4,12 @@
     {
       "label": "check all",
       "type": "shell",
-      "command": "cargo rktk internal check all"
+      "command": "cargo rktk check all"
     },
     {
       "label": "test all",
       "type": "shell",
-      "command": "cargo rktk internal test all"
+      "command": "cargo rktk test all"
     },
     {
       "label": "start rktk-client",
@@ -24,7 +24,7 @@
     {
       "label": "doc",
       "type": "shell",
-      "command": "cargo rktk internal doc"
+      "command": "cargo rktk doc"
     }
   ]
 }

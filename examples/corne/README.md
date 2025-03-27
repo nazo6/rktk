@@ -8,27 +8,20 @@ encounter.
 
 ## Building
 
-See [README.md](../../README.md) for prerequisites.
-
 1. Clone this repository and move here
    ```bash
    git clone https://github.com/nazo6/rktk
    cd rktk/examples/corne
    ```
 
-2. Install `rktk-cli`
+2. Install `uf2deploy`
    ```bash
-   cargo install rktk-cli
+   cargo install uf2deploy
    ```
 
-3. Build the firmware
+3. Build and deploy the firmware
    ```bash
+   # By running cargo run, uf2deploy will be executed automatically. uf2deploy converts elf to uf2 and copies uf2 to attached device.
    # Use feature `left` or `right` to build firmware for left or right half.
-   rktk-cli build -- --features left
+   cargo run --release --features left
    ```
-
-4. Flash the firmware
-
-   After building the firmware, you will find the uf2 file in the `target`. Boot
-   ProMicro into the bootloader mode and drag and drop the uf2 file to the
-   device.
