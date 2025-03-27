@@ -1,6 +1,3 @@
-[env]
-RKTK_CONFIG_PATH = { value = "rktk.json", relative = true, force = true }
-
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 # By uncommenting below line, you can enable flip-link, which provides stack overflow protection.
 # RKTK works without flip-link, but it's recommended to use it. You can install flip-link by running `cargo install flip-link`.

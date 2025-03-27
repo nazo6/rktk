@@ -1,7 +1,14 @@
 cargo-features = ["profile-rustflags"]
 
 [workspace]
-members = ["lib/*", "examples/*", "tools/cli", "tools/rktk-client"]
+members = [
+  "lib/*",
+  "examples/corne-rp",
+  "examples/corne-nrf",
+  "examples/dummy-kb",
+  "tools/cli",
+  "tools/rktk-client",
+]
 resolver = "3"
 
 [workspace.package]
