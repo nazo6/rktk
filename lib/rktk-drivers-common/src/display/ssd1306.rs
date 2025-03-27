@@ -3,16 +3,17 @@
 use display_interface::DisplayError;
 use embedded_graphics::{
     geometry::Point,
-    mono_font::{ascii::FONT_6X10, MonoTextStyle, MonoTextStyleBuilder},
+    mono_font::{MonoTextStyle, MonoTextStyleBuilder, ascii::FONT_6X10},
     pixelcolor::BinaryColor,
     prelude::{Dimensions, DrawTarget},
 };
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
-use rktk::drivers::interface::{display::DisplayDriver, DriverBuilder};
+use rktk::drivers::interface::{DriverBuilder, display::DisplayDriver};
+pub use ssd1306::prelude;
 use ssd1306::{
-    mode::BufferedGraphicsModeAsync, prelude::*, size::DisplaySizeAsync, I2CDisplayInterface,
-    Ssd1306Async,
+    I2CDisplayInterface, Ssd1306Async, mode::BufferedGraphicsModeAsync, prelude::*,
+    size::DisplaySizeAsync,
 };
 
 pub struct Ssd1306DisplayBuilder<I2C: I2cAsync + I2cSync, SIZE: DisplaySizeAsync>(
