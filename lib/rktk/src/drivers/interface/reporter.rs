@@ -1,4 +1,3 @@
-use rktk_log::derive_format_and_debug;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 pub trait ReporterDriver {
@@ -44,8 +43,8 @@ pub trait ReporterDriver {
     fn wakeup(&self) -> Result<bool, Self::Error>;
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-#[derive_format_and_debug]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Output {
     Usb,
     Ble,

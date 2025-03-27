@@ -1,17 +1,16 @@
 use postcard::experimental::max_size::MaxSize;
-use rktk_log::derive_format_and_debug;
 use serde::{Deserialize, Serialize};
 use usbd_hid::descriptor;
 
-#[derive(Serialize, Deserialize, MaxSize)]
-#[derive_format_and_debug]
+#[derive(Debug, Serialize, Deserialize, MaxSize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct KeyboardReport {
     pub modifier: u8,
     pub keycodes: heapless::Vec<u8, 6>,
 }
 
-#[derive(Serialize, Deserialize, MaxSize)]
-#[derive_format_and_debug]
+#[derive(Debug, Serialize, Deserialize, MaxSize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct MouseReport {
     pub buttons: u8,
     pub x: i8,
@@ -20,8 +19,8 @@ pub struct MouseReport {
     pub pan: i8,
 }
 
-#[derive(Serialize, Deserialize, MaxSize)]
-#[derive_format_and_debug]
+#[derive(Debug, Serialize, Deserialize, MaxSize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct MediaKeyboardReport {
     pub usage_id: u16,
 }
@@ -86,8 +85,8 @@ impl From<descriptor::MediaKeyboardReport> for MediaKeyboardReport {
     }
 }
 
-#[derive(Serialize, Deserialize, MaxSize)]
-#[derive_format_and_debug]
+#[derive(Debug, Serialize, Deserialize, MaxSize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum DongleData {
     Keyboard(KeyboardReport),
     Mouse(MouseReport),

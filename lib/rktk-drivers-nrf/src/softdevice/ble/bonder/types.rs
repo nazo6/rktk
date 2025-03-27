@@ -2,37 +2,36 @@ use nrf_softdevice::{
     ble::{Address, EncryptionInfo, IdentityKey, IdentityResolutionKey, MasterId},
     raw::ble_gap_irk_t,
 };
-use rktk_log::derive_format_and_debug;
 use serde::{Deserialize, Serialize};
 
 use super::MAX_PEER_COUNT;
 
-#[derive_format_and_debug]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[serde(remote = "MasterId")]
 pub struct MasterIdDef {
     pub ediv: u16,
     pub rand: [u8; 8],
 }
 
-#[derive_format_and_debug]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[serde(remote = "EncryptionInfo")]
 pub struct EncryptionInfoDef {
     pub ltk: [u8; 16],
     pub flags: u8,
 }
 
-#[derive_format_and_debug]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[serde(remote = "Address")]
 pub struct AddressDef {
     pub flags: u8,
     pub bytes: [u8; 6],
 }
 
-#[derive_format_and_debug]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[serde(remote = "IdentityResolutionKey")]
 pub struct IdentityResolutionKeyDef {
     #[serde(getter = "get_irk")]
@@ -49,8 +48,8 @@ impl From<IdentityResolutionKeyDef> for IdentityResolutionKey {
     }
 }
 
-#[derive_format_and_debug]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[serde(remote = "IdentityKey")]
 pub struct IdentityKeyDef {
     #[serde(with = "IdentityResolutionKeyDef")]
@@ -59,8 +58,8 @@ pub struct IdentityKeyDef {
     pub addr: Address,
 }
 
-#[derive_format_and_debug]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct DeviceData {
     #[serde(with = "IdentityKeyDef")]
     pub peer_id: IdentityKey,

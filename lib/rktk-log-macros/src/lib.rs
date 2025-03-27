@@ -5,20 +5,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, DeriveInput, Ident};
-
-/// Derive Debug always
-/// If `defmt` feature is enabled in invoked crate, also derives defmt::Format.
-#[proc_macro_attribute]
-pub fn derive_format_and_debug(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-
-    TokenStream::from(quote! {
-        #[derive(::core::fmt::Debug)]
-        #[cfg_attr(feature="defmt", derive(defmt::Format))]
-        #input
-    })
-}
+use syn::{DeriveInput, Ident, parse_macro_input};
 
 // private macros
 
