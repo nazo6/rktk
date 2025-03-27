@@ -1,5 +1,5 @@
 # This config is used by internal `cargo rktk` command.
-# For more detail, see `tools/cli/src/commands/internal`
+# For more detail, see `tools/cli`
 
 check_skip_global = ["_check", "default"]
 check_env = { DEFMT_LOG = "trace" }

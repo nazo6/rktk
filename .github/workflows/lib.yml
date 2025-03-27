@@ -47,7 +47,7 @@ jobs:
     - uses: r7kamura/rust-problem-matchers@v1
 
     - name: Run rust check
-      run: cargo rktk internal check all
+      run: cargo rktk check all
 
     - name: Run rust test
-      run: cargo rktk internal test all
+      run: cargo rktk test all
