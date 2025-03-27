@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use async_hid::{Device, DeviceInfo};
+use async_hid::{AsyncHidRead as _, AsyncHidWrite as _, DeviceReader, DeviceWriter, HidBackend};
 use futures::stream::StreamExt;
 use rktk_rrp::transport::{ReadTransport, WriteTransport};
 
@@ -18,8 +16,10 @@ impl RrpHidBackend for NativeBackend {
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error> {
+        let backend = HidBackend::default();
+
         let mut device = None;
-        let mut devices = DeviceInfo::enumerate().await?;
+        let mut devices = backend.enumerate().await?;
         while let Some(info) = devices.next().await {
             if info.usage_page == usage_page && info.usage_id == usage {
                 device = Some(info);
@@ -30,22 +30,20 @@ impl RrpHidBackend for NativeBackend {
             return Err(anyhow::anyhow!("Device not found"));
         };
 
-        let device = device.open(async_hid::AccessMode::ReadWrite).await?;
-        let device = Arc::new(device);
+        let (reader, writer) = device.open().await?;
 
         Ok(NativeHidDevice {
             client: rktk_rrp::client::Client::new(
                 HidReader {
-                    device: device.clone(),
+                    device: reader,
                     remained: Vec::new(),
                 },
-                HidWriter {
-                    device: device.clone(),
-                },
+                HidWriter { device: writer },
             ),
         })
     }
 
+    // TODO: Implement this after event system is implemented for async-hid
     fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>) {}
 
     fn new() -> Self {
@@ -75,7 +73,7 @@ impl RrpHidDevice for NativeHidDevice {
 }
 
 pub struct HidReader {
-    device: Arc<Device>,
+    device: DeviceReader,
     remained: Vec<u8>,
 }
 
@@ -102,7 +100,7 @@ impl ReadTransport for HidReader {
 }
 
 pub struct HidWriter {
-    device: Arc<Device>,
+    device: DeviceWriter,
 }
 
 impl WriteTransport for HidWriter {
