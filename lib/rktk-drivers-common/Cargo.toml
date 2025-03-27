@@ -31,9 +31,6 @@ sequential-storage = { workspace = true }
 usbd-hid = { workspace = true }
 
 ssd1306 = { workspace = true }
-# upgrading this breaks ssd1306
-# ref: https://github.com/rust-embedded-community/ssd1306/issues/219
-maybe-async-cfg = { version = "=0.2.4" }
 display-interface = { workspace = true }
 embedded-graphics = { workspace = true }
 
