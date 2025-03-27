@@ -5523,16 +5523,6 @@ name = "rktk-log"
 version = "0.1.0"
 dependencies = [
  "defmt",
- "rktk-log-macros",
-]
-
-[[package]]
-name = "rktk-log-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.100",
 ]
 
 [[package]]

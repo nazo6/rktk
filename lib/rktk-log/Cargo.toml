@@ -7,7 +7,6 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
-rktk-log-macros = { path = "../rktk-log-macros/" }
 defmt = { workspace = true, optional = true }
 
 [features]

@@ -1,11 +1,11 @@
-use embassy_futures::select::{select, Either};
+use embassy_futures::select::{Either, select};
 use postcard::{from_bytes_cobs, to_slice_cobs};
 use rktk_log::{
     debug,
     helper::{Debug2Format, MaybeFormat},
     warn,
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
     config::constant::RKTK_CONFIG,
@@ -133,7 +133,7 @@ pub async fn start<
                         }
                     },
                     Err(e) => {
-                        warn!("Failed to receive split data: {:?}", Debug2Format(&e))
+                        warn!("Failed to receive split data: {:?}", Debug2Format(&e));
                     }
                 }
             }
@@ -142,7 +142,7 @@ pub async fn start<
                 let mut send_buf = [0u8; MAX_DATA_SIZE];
                 if let Ok(bytes) = to_slice_cobs(&(send_id, send_data), &mut send_buf) {
                     if let Err(e) = split.send_all(bytes, is_master).await {
-                        rktk_log::error!("Split send error: {:?}", Debug2Format(&e))
+                        rktk_log::error!("Split send error: {:?}", Debug2Format(&e));
                     }
                     send_id += 1;
                 }

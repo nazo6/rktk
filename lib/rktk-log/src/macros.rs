@@ -1,20 +1,55 @@
-use rktk_log_macros::{defmt_or_core, defmt_or_log_or_noop};
+// HACK: Nested macro_rules
+// https://github.com/rust-lang/rust/issues/35853#issuecomment-415993963
+#[rustfmt::skip]
+macro_rules! defmt_or_core {
+    ($d:tt $name:ident) => {
+        #[macro_export]
+        macro_rules! $name {
+            ($d($d x:tt)*) => {
+                #[cfg(not(feature = "defmt"))]
+                ::core::$name!($d($d x)*);
 
-defmt_or_core!(assert);
-defmt_or_core!(assert_eq);
-defmt_or_core!(assert_ne);
-defmt_or_core!(debug_assert);
-defmt_or_core!(debug_assert_eq);
-defmt_or_core!(debug_assert_ne);
-defmt_or_core!(todo);
-defmt_or_core!(unreachable);
-defmt_or_core!(panic);
+                #[cfg(feature = "defmt")]
+                ::defmt::$name!($d($d x)*);
+            }
+        }
+    }
+}
 
-defmt_or_log_or_noop!(trace);
-defmt_or_log_or_noop!(debug);
-defmt_or_log_or_noop!(info);
-defmt_or_log_or_noop!(warn);
-defmt_or_log_or_noop!(error);
+#[rustfmt::skip]
+macro_rules! defmt_or_log_or_noop {
+    ($d:tt $name:ident) => {
+        #[macro_export]
+        macro_rules! $name {
+            ($s:literal $d(, $d x:expr)* $d(,)?) => {
+                #[cfg(feature = "defmt")]
+                ::defmt::$name!($s $d(, $d x)*);
+
+                #[cfg(feature = "log")]
+                ::log::$name!($s $d(, $d x)*);
+
+                #[cfg(all(not(feature = "defmt"), not(feature = "log")))]
+                let _ = ($d( & $d x ),*);
+            }
+        }
+    }
+}
+
+defmt_or_core!($ assert);
+defmt_or_core!($ assert_eq);
+defmt_or_core!($ assert_ne);
+defmt_or_core!($ debug_assert);
+defmt_or_core!($ debug_assert_eq);
+defmt_or_core!($ debug_assert_ne);
+defmt_or_core!($ todo);
+defmt_or_core!($ unreachable);
+defmt_or_core!($ panic);
+
+defmt_or_log_or_noop!($ trace);
+defmt_or_log_or_noop!($ debug);
+defmt_or_log_or_noop!($ info);
+defmt_or_log_or_noop!($ warn);
+defmt_or_log_or_noop!($ error);
 
 #[macro_export]
 macro_rules! intern {
