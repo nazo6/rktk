@@ -31,8 +31,8 @@ document-features = { workspace = true }
 
 [dev-dependencies]
 critical-section = { workspace = true, features = ["std"] }
-pretty_assertions = "1.4.0"
 usbd-hid = { workspace = true }
+pretty_assertions = { workspace = true }
 
 [features]
 _check = ["state", "ssmarshal/std", "defmt"]

@@ -84,6 +84,7 @@ defmt = "0.3.10"
 log = "0.4.25"
 
 document-features = "0.2.11"
+pretty_assertions = "1.4.1"
 
 [profile]
 

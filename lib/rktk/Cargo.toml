@@ -30,8 +30,7 @@ display-interface = { workspace = true }
 smart-leds = { workspace = true }
 
 heapless = { workspace = true }
-static_cell = "2.1.0"
-itertools = { version = "0.14.0", default-features = false }
+static_cell = { workspace = true }
 futures = { workspace = true, features = ["async-await"] }
 serde = { workspace = true, features = ["derive"] }
 postcard = { workspace = true, features = [
@@ -41,14 +40,17 @@ postcard = { workspace = true, features = [
 document-features = { workspace = true }
 strum = { workspace = true }
 
+itertools = { version = "0.14.0", default-features = false }
+
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }
-smart-default = "0.7.1"
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+macro_rules_attribute = { workspace = true }
+
+smart-default = "0.7.1"
 const-gen = "1.6.5"
 schemars = "0.8.21"
-macro_rules_attribute = { workspace = true }
 
 [features]
 _check = ["alloc", "log", "defmt", "rrp-log"]
