@@ -1,5 +1,5 @@
 use super::{
-    ReadySignal, RemoteWakeupSignal,
+    ReadySignal,
     raw_hid::RAW_HID_BUFFER_SIZE,
     task::{
         HID_KEYBOARD_CHANNEL, HID_MEDIA_KEYBOARD_CHANNEL, HID_MOUSE_CHANNEL, KEYBOARD_LED_SIGNAL,
@@ -9,9 +9,9 @@ use super::{
 use rktk::drivers::interface::{reporter::ReporterDriver, usb::UsbDriver};
 
 pub struct CommonUsbDriver {
-    pub(super) wakeup_signal: &'static RemoteWakeupSignal,
+    #[cfg(feature = "usb-remote-wakeup")]
+    pub(super) wakeup_signal: &'static super::RemoteWakeupSignal,
     pub(super) ready_signal: &'static ReadySignal,
-    pub(super) support_wakeup_signal: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -103,15 +103,17 @@ impl ReporterDriver for CommonUsbDriver {
     }
 
     fn wakeup(&self) -> Result<bool, Self::Error> {
-        if self.support_wakeup_signal {
+        #[cfg(feature = "usb-remote-wakeup")]
+        {
             if super::SUSPENDED.load(core::sync::atomic::Ordering::Acquire) {
                 self.wakeup_signal.signal(());
                 return Ok(true);
             }
             Ok(false)
-        } else {
-            Err(Self::Error::NotSupported)
         }
+
+        #[cfg(not(feature = "usb-remote-wakeup"))]
+        Err(UsbError::NotSupported)
     }
 }
 impl UsbDriver for CommonUsbDriver {

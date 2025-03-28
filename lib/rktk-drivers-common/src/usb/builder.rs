@@ -1,28 +1,31 @@
-use embassy_usb::class::hid::{HidReaderWriter, HidWriter, State};
-use embassy_usb::driver::Driver;
-use rktk::singleton;
-
-use super::raw_hid::{RAW_HID_BUFFER_SIZE, RawHidReport};
-use super::rrp::RRP_HID_BUFFER_SIZE;
-use super::rrp::RrpReport;
-use embassy_usb::{Builder, RemoteWakeupError};
+use embassy_usb::{
+    Builder,
+    class::hid::{HidReaderWriter, HidWriter, State},
+    driver::Driver,
+};
 use rktk::drivers::interface::DriverBuilderWithTask;
+use rktk::singleton;
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
 
 use crate::usb::handler::UsbDeviceHandler;
 
-use super::driver::CommonUsbDriver;
-use super::{ReadySignal, task::*};
-use super::{RemoteWakeupSignal, UsbOpts};
+use super::{
+    ReadySignal, UsbOpts,
+    driver::CommonUsbDriver,
+    raw_hid::{RAW_HID_BUFFER_SIZE, RawHidReport},
+    rrp::{RRP_HID_BUFFER_SIZE, RrpReport},
+    task::*,
+};
 
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,
     keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
     mouse_hid: HidWriter<'static, D, 8>,
     media_key_hid: HidWriter<'static, D, 8>,
-    wakeup_signal: &'static RemoteWakeupSignal,
+    #[cfg(feature = "usb-remote-wakeup")]
+    wakeup_signal: &'static super::RemoteWakeupSignal,
     ready_signal: &'static ReadySignal,
     rrp_hid: HidReaderWriter<'static, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
     raw_hid: HidReaderWriter<'static, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
@@ -34,7 +37,8 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
     pub fn new(opts: UsbOpts<D>) -> Self {
-        let wakeup_signal = singleton!(RemoteWakeupSignal::new(), RemoteWakeupSignal);
+        #[cfg(feature = "usb-remote-wakeup")]
+        let wakeup_signal = singleton!(super::RemoteWakeupSignal::new(), super::RemoteWakeupSignal);
         let ready_signal = singleton!(ReadySignal::new(), ReadySignal);
 
         let mut builder = Builder::new(
@@ -120,6 +124,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             mouse_hid,
             media_key_hid,
             rrp_hid,
+            #[cfg(feature = "usb-remote-wakeup")]
             wakeup_signal,
             ready_signal,
             #[cfg(feature = "defmtusb")]
@@ -138,19 +143,18 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
 
     #[allow(refining_impl_trait)]
     async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
-        let mut usb = self.builder.build();
+        let usb = self.builder.build();
 
-        let support_wakeup_signal =
-            !(usb.remote_wakeup().await == Err(RemoteWakeupError::Unsupported));
         Ok((
             CommonUsbDriver {
+                #[cfg(feature = "usb-remote-wakeup")]
                 wakeup_signal: self.wakeup_signal,
                 ready_signal: self.ready_signal,
-                support_wakeup_signal,
             },
             UsbBackgroundTask {
                 device: usb,
-                signal: self.wakeup_signal,
+                #[cfg(feature = "usb-remote-wakeup")]
+                wakeup_signal: self.wakeup_signal,
                 ready_signal: self.ready_signal,
                 keyboard_hid: self.keyboard_hid,
                 media_key_hid: self.media_key_hid,

@@ -14,7 +14,7 @@ use rktk::utils::Signal;
 use rktk::utils::{Channel, RawMutex};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use super::{ReadySignal, RemoteWakeupSignal};
+use super::ReadySignal;
 
 pub static HID_KEYBOARD_CHANNEL: Channel<KeyboardReport, 8> = Channel::new();
 pub static HID_MOUSE_CHANNEL: Channel<MouseReport, 8> = Channel::new();
@@ -27,7 +27,8 @@ pub static KEYBOARD_LED_SIGNAL: Signal<u8> = Signal::new();
 
 pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
     pub device: UsbDevice<'d, D>,
-    pub signal: &'static RemoteWakeupSignal,
+    #[cfg(feature = "usb-remote-wakeup")]
+    pub wakeup_signal: &'static super::RemoteWakeupSignal,
     pub ready_signal: &'static ReadySignal,
     pub keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
     pub media_key_hid: HidWriter<'d, D, 8>,
@@ -43,7 +44,11 @@ pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
 impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
     async fn run(self) {
         join5(
-            usb(self.device, self.signal),
+            usb(
+                self.device,
+                #[cfg(feature = "usb-remote-wakeup")]
+                self.wakeup_signal,
+            ),
             hid(
                 self.keyboard_hid,
                 self.media_key_hid,
@@ -64,10 +69,15 @@ impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
     }
 }
 
-async fn usb<'d, D: Driver<'d>>(mut device: UsbDevice<'d, D>, signal: &'static RemoteWakeupSignal) {
+async fn usb<'d, D: Driver<'d>>(
+    mut device: UsbDevice<'d, D>,
+    #[cfg(feature = "usb-remote-wakeup")] wakeup_signal: &'static super::RemoteWakeupSignal,
+) {
     loop {
         device.run_until_suspend().await;
-        match embassy_futures::select::select(device.wait_resume(), signal.wait()).await {
+
+        #[cfg(feature = "usb-remote-wakeup")]
+        match embassy_futures::select::select(device.wait_resume(), wakeup_signal.wait()).await {
             embassy_futures::select::Either::First(_) => {}
             embassy_futures::select::Either::Second(_) => {
                 if let Err(e) = device.remote_wakeup().await {
@@ -75,6 +85,9 @@ async fn usb<'d, D: Driver<'d>>(mut device: UsbDevice<'d, D>, signal: &'static R
                 }
             }
         }
+
+        #[cfg(not(feature = "usb-remote-wakeup"))]
+        device.wait_resume().await;
     }
 }
 
@@ -181,7 +194,7 @@ pub async fn raw_hid<'d, D: Driver<'d>>(
                     continue;
                 };
                 if to_recv_bytes != 32 {
-                    panic!("One read should give one report. Maybe packet size is not enough?");
+                    panic!("One read should give one report. Maybe packet size is not enough.");
                 }
                 RAW_HID_RECV_CHANNEL.send(buf).await;
             }

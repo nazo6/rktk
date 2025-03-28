@@ -23,7 +23,7 @@ default-target = "thumbv7em-none-eabihf"
 
 [dependencies]
 rktk = { workspace = true }
-rktk-drivers-common = { workspace = true }
+rktk-drivers-common = { workspace = true, features = ["usb-remote-wakeup"] }
 
 rktk-log = { workspace = true }
 log = { workspace = true, optional = true }
