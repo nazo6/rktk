@@ -1,7 +1,7 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 # By uncommenting below line, you can enable flip-link, which provides stack overflow protection.
-# RKTK works without flip-link, but it's recommended to use it. You can install flip-link by running `cargo install flip-link`.
-#
+# RKTK works without flip-link, but it's recommended to use it. 
+# NOTE: To use flip-link, install it by running `cargo install flip-link`.
 # linker = "flip-link"
 
 # By specifying this, binary will be converted to UF2 format and deployed to the device.
@@ -14,12 +14,16 @@ debug = true
 opt-level = "z"
 lto = "fat"
 codegen-units = 1
+
 # Below 2 lines of config reduces binary size by omitting panic messages.
 # If you want to see panic messages, comment out below 2 lines.
+# NOTE: `rustflags` option requires nightly Rust.
 panic = "abort"
-rustflags = ["-Zlocation-detail=none"]
+# rustflags = ["-Zlocation-detail=none"]
 
-# By uncommenting below lines, more size optimization can be achieved. Note that these configurations need nightly Rust.
+# By uncommenting below lines, more size optimization can be achieved.
+# NOTE: These configurations need nightly Rust.
+# WARN: Currently, cargo's build-std doesn't work well with `per-package-target` (https://github.com/rust-lang/cargo/issues/11898).
 #
 # [unstable]
 # build-std = ["core", "alloc"]
