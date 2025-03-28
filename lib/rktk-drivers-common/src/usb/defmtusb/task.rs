@@ -1,7 +1,5 @@
 //! Main task that runs the USB transport layer.
 
-#![allow(unused_labels)]
-
 use embassy_usb::{
     class::cdc_acm::Sender,
     driver::{Driver, EndpointError},

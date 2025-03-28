@@ -1,18 +1,6 @@
-//! Code in this directory is from https://github.com/micro-rust/defmtusb
-
-// FIXME:
-#![allow(static_mut_refs)]
-#![allow(unused)]
-
 mod task;
 
-use core::borrow::BorrowMut as _;
-
-use embassy_sync::{
-    blocking_mutex::raw::{CriticalSectionRawMutex, RawMutex as _},
-    mutex::Mutex,
-    signal::Signal,
-};
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex, signal::Signal};
 pub use task::logger;
 
 /// The restore state of the critical section.
@@ -42,14 +30,14 @@ unsafe impl defmt::Logger for USBLogger {
             }
             TAKEN = true;
             RESTORE = restore;
-            ENCODER.start_frame(inner);
+            (&raw mut ENCODER).read().start_frame(inner);
         }
     }
 
     unsafe fn release() {
         unsafe {
-            ENCODER.end_frame(inner);
-            unsafe { TAKEN = false };
+            (&raw mut ENCODER).read().end_frame(inner);
+            TAKEN = false;
             let restore = RESTORE;
             critical_section::release(restore);
         }
@@ -59,7 +47,7 @@ unsafe impl defmt::Logger for USBLogger {
 
     unsafe fn write(bytes: &[u8]) {
         unsafe {
-            ENCODER.write(bytes, inner);
+            (&raw mut ENCODER).read().write(bytes, inner);
         }
     }
 }
@@ -68,11 +56,9 @@ fn inner(bytes: &[u8]) {
     let Ok(mut q) = QUEUE.try_lock() else {
         return;
     };
-    if q.capacity() - q.len() < bytes.len() {
+    if q.extend_from_slice(bytes).is_err() {
         return;
     }
-
-    q.extend_from_slice(bytes);
 
     LOG_SIGNAL.signal(());
 }
