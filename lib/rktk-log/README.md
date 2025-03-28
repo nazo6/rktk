@@ -25,7 +25,7 @@ log = ["dep:log", "rktk-log/log"]
 Also you should consider to modify defmt to feature if your depedency provides
 feature for defmt.
 
-## Viewing defmtusb log
+## Viewing defmt-usb log
 
 By using
 [my defmt-print fork](https://github.com/nazo6/defmt/tree/defmt-print-serial),

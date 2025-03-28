@@ -29,9 +29,9 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     ready_signal: &'static ReadySignal,
     rrp_hid: HidReaderWriter<'static, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
     raw_hid: HidReaderWriter<'static, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
-    #[cfg(feature = "defmtusb")]
+    #[cfg(feature = "defmt-usb")]
     defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'static, D>,
-    #[cfg(feature = "defmtusb")]
+    #[cfg(feature = "defmt-usb")]
     defmt_usb_use_dtr: bool,
 }
 
@@ -108,7 +108,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             )
         };
 
-        #[cfg(feature = "defmtusb")]
+        #[cfg(feature = "defmt-usb")]
         let defmt_usb = embassy_usb::class::cdc_acm::CdcAcmClass::new(
             &mut builder,
             singleton!(
@@ -127,9 +127,9 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             #[cfg(feature = "usb-remote-wakeup")]
             wakeup_signal,
             ready_signal,
-            #[cfg(feature = "defmtusb")]
+            #[cfg(feature = "defmt-usb")]
             defmt_usb,
-            #[cfg(feature = "defmtusb")]
+            #[cfg(feature = "defmt-usb")]
             defmt_usb_use_dtr: opts.defmt_usb_use_dtr,
             raw_hid,
         }
@@ -160,9 +160,9 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
                 media_key_hid: self.media_key_hid,
                 mouse_hid: self.mouse_hid,
                 rrp_hid: self.rrp_hid,
-                #[cfg(feature = "defmtusb")]
+                #[cfg(feature = "defmt-usb")]
                 defmt_usb: self.defmt_usb,
-                #[cfg(feature = "defmtusb")]
+                #[cfg(feature = "defmt-usb")]
                 defmt_usb_use_dtr: self.defmt_usb_use_dtr,
                 raw_hid: self.raw_hid,
             },

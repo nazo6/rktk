@@ -3,8 +3,8 @@
 use core::sync::atomic::AtomicBool;
 
 mod builder;
-#[cfg(feature = "defmtusb")]
-mod defmtusb;
+#[cfg(feature = "defmt-usb")]
+mod defmt_logger;
 mod driver;
 mod handler;
 mod raw_hid;
@@ -24,6 +24,6 @@ pub struct UsbOpts<D: embassy_usb::driver::Driver<'static>> {
     pub mouse_poll_interval: u8,
     pub kb_poll_interval: u8,
     pub driver: D,
-    #[cfg(feature = "defmtusb")]
+    #[cfg(feature = "defmt-usb")]
     pub defmt_usb_use_dtr: bool,
 }

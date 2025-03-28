@@ -38,9 +38,9 @@ heapless = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-_check = ["defmtusb", "log", "defmt", "defmt-timestamp", "usb-remote-wakeup"]
+_check = ["defmt-usb", "log", "defmt", "defmt-timestamp", "usb-remote-wakeup"]
 
-defmtusb = ["defmt", "dep:critical-section"]
+defmt-usb = ["defmt", "dep:critical-section"]
 defmt-timestamp = ["defmt"]
 defmt = ["dep:defmt", "embassy-usb/defmt"]
 log = ["dep:log"]
