@@ -21,6 +21,8 @@ pub mod esb;
 pub mod keyscan;
 pub mod mouse;
 pub mod rgb;
+#[cfg(feature = "sdc")]
+pub mod sdc;
 #[cfg(feature = "softdevice")]
 pub mod softdevice;
 pub mod split;
