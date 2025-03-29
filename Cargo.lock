@@ -5181,6 +5181,7 @@ dependencies = [
  "itertools",
  "log",
  "macro_rules_attribute",
+ "paste",
  "postcard",
  "rktk-keymanager",
  "rktk-log",

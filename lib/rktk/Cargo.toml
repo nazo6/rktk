@@ -39,8 +39,8 @@ postcard = { workspace = true, features = [
 ] }
 document-features = { workspace = true }
 strum = { workspace = true }
-
 itertools = { version = "0.14.0", default-features = false }
+paste = { workspace = true }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }

@@ -9,3 +9,5 @@ pub trait BleDriver: ReporterDriver {
     /// Clears all bond data
     async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error>;
 }
+
+super::generate_builder!(with_task, BleDriver);

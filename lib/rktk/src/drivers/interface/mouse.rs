@@ -5,3 +5,5 @@ pub trait MouseDriver {
     async fn set_cpi(&mut self, _cpi: u16) -> Result<(), Self::Error>;
     async fn get_cpi(&mut self) -> Result<u16, Self::Error>;
 }
+
+super::generate_builder!(without_task, MouseDriver);
