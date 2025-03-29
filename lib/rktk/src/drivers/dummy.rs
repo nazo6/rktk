@@ -19,7 +19,7 @@ use crate::drivers::interface::{
     mouse::MouseDriver,
     reporter::ReporterDriver,
     rgb::RgbDriver,
-    split::{SplitDriver, SplitDriverBuilder},
+    split::SplitDriver,
     storage::StorageDriver,
     usb::{UsbDriver, UsbDriverBuilder},
 };
@@ -124,7 +124,7 @@ pub fn mouse() -> Option<impl MouseDriver> {
 }
 
 // split
-pub fn split_builder() -> Option<impl SplitDriverBuilder> {
+pub fn split() -> Option<impl SplitDriver> {
     pub enum Split {}
     impl SplitDriver for Split {
         type Error = Infallible;
@@ -136,17 +136,7 @@ pub fn split_builder() -> Option<impl SplitDriverBuilder> {
             unreachable!()
         }
     }
-    pub enum SplitBuilder {}
-    impl SplitDriverBuilder for SplitBuilder {
-        type Output = Split;
-        type Error = Infallible;
-
-        async fn build(self) -> Result<Self::Output, Self::Error> {
-            unreachable!()
-        }
-    }
-
-    Option::<SplitBuilder>::None
+    Option::<Split>::None
 }
 
 // storage

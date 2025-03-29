@@ -1,5 +1,3 @@
-use core::convert::Infallible;
-
 use embassy_futures::yield_now;
 use embassy_rp::{
     Peripheral,
@@ -8,10 +6,7 @@ use embassy_rp::{
 use embassy_sync::semaphore::{FairSemaphore, Semaphore};
 use embassy_time::Timer;
 use fixed::traits::ToFixed;
-use rktk::{
-    drivers::interface::split::{SplitDriver, SplitDriverBuilder},
-    utils::RawMutex,
-};
+use rktk::{drivers::interface::split::SplitDriver, utils::RawMutex};
 
 pub const SPLIT_BITRATE: f64 = 1000000.0;
 pub const SPLIT_CLK_DIVIDER: f64 = 62_000_000.0 / (SPLIT_BITRATE * 8.0);
@@ -96,7 +91,7 @@ pub struct PioHalfDuplexSplitDriver<'a, I: Instance> {
 static COMM_SEMAPHORE: FairSemaphore<RawMutex, 3> = FairSemaphore::new(1);
 
 impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
-    fn new<'b: 'a>(
+    pub fn new<'b: 'a>(
         pio: Pio<'static, I>,
         data_pin: impl Peripheral<P = impl PioPin + 'a> + 'a,
     ) -> PioHalfDuplexSplitDriver<'a, I> {
@@ -156,6 +151,11 @@ pub enum Error {
 impl<I: Instance + 'static> SplitDriver for PioHalfDuplexSplitDriver<'static, I> {
     type Error = Error;
 
+    async fn init(&mut self) -> Result<(), Self::Error> {
+        self.enter_rx().await;
+        Ok(())
+    }
+
     async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {
         let _permit = loop {
             let (start, end, data) = self.recv_byte().await;
@@ -210,25 +210,5 @@ impl<I: Instance + 'static> SplitDriver for PioHalfDuplexSplitDriver<'static, I>
         self.enter_rx().await;
 
         Ok(())
-    }
-}
-
-pub struct PioHalfDuplexSplitDriverBuilder<'a, I: Instance> {
-    driver: PioHalfDuplexSplitDriver<'a, I>,
-}
-impl<'a, I: Instance> PioHalfDuplexSplitDriverBuilder<'a, I> {
-    pub fn new(pio: Pio<'static, I>, data_pin: impl Peripheral<P = impl PioPin + 'a> + 'a) -> Self {
-        let driver = PioHalfDuplexSplitDriver::new(pio, data_pin);
-        Self { driver }
-    }
-}
-impl<I: Instance + 'static> SplitDriverBuilder for PioHalfDuplexSplitDriverBuilder<'static, I> {
-    type Output = PioHalfDuplexSplitDriver<'static, I>;
-
-    type Error = Infallible;
-
-    async fn build(mut self) -> Result<Self::Output, Self::Error> {
-        self.driver.enter_rx().await;
-        Ok(self.driver)
     }
 }

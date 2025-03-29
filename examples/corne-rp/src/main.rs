@@ -66,7 +66,7 @@ async fn main(_spawner: Spawner) {
         mouse: dummy::mouse_builder(),
         usb_builder: dummy::usb_builder(),
         display: dummy::display_builder(),
-        split_builder: dummy::split_builder(),
+        split: dummy::split_builder(),
         rgb: dummy::rgb(),
         ble_builder: dummy::ble_builder(),
         storage: dummy::storage(),

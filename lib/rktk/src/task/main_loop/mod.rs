@@ -5,7 +5,7 @@ use crate::{
     },
     drivers::interface::{
         ble::BleDriver, debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
-        mouse::MouseDriver, rgb::RgbDriver, split::SplitDriverBuilder, storage::StorageDriver,
+        mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver, storage::StorageDriver,
         system::SystemDriver, usb::UsbDriver,
     },
     hooks::{
@@ -18,7 +18,7 @@ use crate::{
 };
 use embassy_futures::select::{Either, select};
 use embassy_time::{Duration, Timer};
-use rktk_log::debug;
+use rktk_log::{debug, helper::Debug2Format};
 
 mod master;
 mod rgb;
@@ -35,7 +35,7 @@ pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHook
     encoder: Option<impl EncoderDriver>,
     mut mouse: Option<impl MouseDriver>,
     mut storage: Option<impl StorageDriver>,
-    split: Option<impl SplitDriverBuilder>,
+    split: Option<impl SplitDriver>,
     rgb: Option<impl RgbDriver>,
     key_config: &Keymap,
     mut hooks: Hooks<CH, MH, SH, BH>,
@@ -43,8 +43,14 @@ pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHook
 ) {
     crate::utils::display_state!(Hand, Some(hand));
 
-    let split = if let Some(split) = split {
-        split.build().await.ok()
+    let split = if let Some(mut split) = split {
+        match split.init().await {
+            Ok(_) => Some(split),
+            Err(e) => {
+                rktk_log::error!("Failed to initialize split: {:?}", Debug2Format(&e));
+                None
+            }
+        }
     } else {
         None
     };
