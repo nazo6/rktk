@@ -3,7 +3,6 @@ use std::{env, fs, path::Path};
 use const_gen::*;
 use schemars::schema_for;
 
-mod rktk_json_docsrs;
 mod schema;
 
 fn main() {
