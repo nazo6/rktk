@@ -35,11 +35,7 @@ embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
-embassy-nrf = { workspace = true, features = [
-  "gpiote",
-  "time-driver-rtc1",
-  "unstable-pac",
-] }
+embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
 nrf-softdevice = { optional = true, workspace = true, features = [
   "ble-peripheral",
   "ble-central",
@@ -51,8 +47,8 @@ cortex-m = { workspace = true }
 embedded-storage-async = { workspace = true }
 sequential-storage = { workspace = true }
 
-serde = { workspace = true }
-postcard = { workspace = true }
+serde = { workspace = true, optional = true }
+postcard = { workspace = true, optional = true }
 
 static_cell = { workspace = true }
 heapless = { workspace = true }
@@ -86,7 +82,7 @@ power = []
 
 ## Enables wireless dongle driver using esb(Enhanced Shockburst) protocol.
 ## This feature is not compatible with softdevice.
-esb = ["dep:esb-ng"]
+esb = ["dep:esb-ng", "dep:postcard", "embassy-nrf/unstable-pac"]
 
 #! #### Softdevice
 ## Enables softdevice. If this feature is enabled, the softdevice will be included in the build.
@@ -94,6 +90,8 @@ softdevice = ["dep:nrf-softdevice"]
 
 ## Enables BLE split and reporter driver using softdevice
 softdevice-ble = [
+  "dep:postcard",
+  "dep:serde",
   "softdevice",
   "nrf-softdevice/ble-gatt-server",
   "nrf-softdevice/ble-sec",
@@ -107,10 +105,11 @@ defmt = [
   "dep:defmt",
   "rktk/defmt",
   "rktk-log/defmt",
+  "rktk-drivers-common/defmt",
   "nrf-softdevice?/defmt",
   "embassy-nrf/defmt",
   "heapless/defmt-impl",
-  "postcard/use-defmt",
+  "postcard?/use-defmt",
 ]
 ## Enables log logging
 log = ["dep:log"]

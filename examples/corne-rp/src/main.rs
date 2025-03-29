@@ -8,8 +8,10 @@ use core::panic::PanicInfo;
 use embassy_executor::Spawner;
 use embassy_rp::gpio::{Input, Level, Output, Pull};
 use rktk::{
-    config::constant::CONFIG, drivers::Drivers, hooks::empty_hooks::create_empty_hooks,
-    interface::Hand, none_driver,
+    config::constant::CONFIG,
+    drivers::{Drivers, dummy},
+    hooks::empty_hooks::create_empty_hooks,
+    interface::Hand,
 };
 
 use rktk_drivers_common::keyscan::matrix::Matrix;
@@ -61,15 +63,15 @@ async fn main(_spawner: Spawner) {
             None,
         ),
         system: RpSystemDriver,
-        mouse_builder: none_driver!(MouseBuilder),
-        usb_builder: none_driver!(UsbBuilder),
-        display_builder: none_driver!(DisplayBuilder),
-        split: none_driver!(Split),
-        rgb: none_driver!(Rgb),
-        ble_builder: none_driver!(BleBuilder),
-        storage: none_driver!(Storage),
-        debounce: none_driver!(Debounce),
-        encoder: none_driver!(Encoder),
+        mouse_builder: dummy::mouse_builder(),
+        usb_builder: dummy::usb_builder(),
+        display_builder: dummy::display_builder(),
+        split_builder: dummy::split_builder(),
+        rgb: dummy::rgb(),
+        ble_builder: dummy::ble_builder(),
+        storage: dummy::storage(),
+        debounce: dummy::debounce(),
+        encoder: dummy::encoder(),
     };
 
     rktk::task::start(
