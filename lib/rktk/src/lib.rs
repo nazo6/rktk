@@ -3,8 +3,6 @@
 //! `rktk` is a framework to build keyboard firmware. Using rktk, you can easily make feature-rich
 //! highly customizable keyboard firmware.
 //!
-//! For full list of supported features, see [RKTK project README](https://github.com/nazo6/rktk).
-//!
 //! ## `rktk` crate
 //!
 //! This `rktk` crate is the main crate of the project. It contains the main logic of the

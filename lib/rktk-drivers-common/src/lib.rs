@@ -1,4 +1,6 @@
 #![doc = include_str!("../README.md")]
+//! ## Feature flags
+#![doc = document_features::document_features!()]
 #![no_std]
 #![cfg_attr(doc, feature(doc_auto_cfg))]
 
