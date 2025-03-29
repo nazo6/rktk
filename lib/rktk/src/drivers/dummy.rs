@@ -1,6 +1,4 @@
-//! Dummy drivers just for type annotations.
-//!
-//! This is intended to be used by the [`crate::none_driver`] macro.
+//! Utilities to geenrate type annotated `None` value of driver.
 
 use core::convert::Infallible;
 

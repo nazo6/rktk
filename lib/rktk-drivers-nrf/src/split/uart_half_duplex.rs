@@ -4,16 +4,18 @@
 //! Since this driver is a half-duplex communication where the transmitter and receiver share pins, a TRRS cable is not required for connection; a TRS cable is sufficient.
 //! However, due to its nature, it is relatively prone to transmission and reception errors. I checked on the receiving side and confirmed that reception failed at a rate of about 0.3%. This is a relatively high figure for a keyboard.
 
+use core::convert::Infallible;
+
 use embassy_nrf::{
+    Peripheral,
     buffered_uarte::{BufferedUarteRx, BufferedUarteTx, InterruptHandler},
     gpio::{AnyPin, Flex},
     interrupt,
     ppi::AnyGroup,
     uarte::{Baudrate, Instance, Parity},
-    Peripheral,
 };
 use embedded_io_async::{Read as _, Write};
-use rktk::drivers::interface::split::SplitDriver;
+use rktk::drivers::interface::split::{SplitDriver, SplitDriverBuilder};
 
 #[derive(Debug, thiserror::Error)]
 pub enum UartHalfDuplexSplitDriverError {
@@ -44,16 +46,16 @@ pub struct UartHalfDuplexSplitDriver<
 }
 
 impl<
-        UARTE: Instance,
-        UARTEP: Peripheral<P = UARTE>,
-        IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone,
-        TIMER: embassy_nrf::timer::Instance,
-        TIMERP: Peripheral<P = TIMER>,
-        CH1: embassy_nrf::ppi::ConfigurableChannel,
-        CH1P: Peripheral<P = CH1>,
-        CH2: embassy_nrf::ppi::ConfigurableChannel,
-        CH2P: Peripheral<P = CH2>,
-    > UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
+    UARTE: Instance,
+    UARTEP: Peripheral<P = UARTE>,
+    IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone,
+    TIMER: embassy_nrf::timer::Instance,
+    TIMERP: Peripheral<P = TIMER>,
+    CH1: embassy_nrf::ppi::ConfigurableChannel,
+    CH1P: Peripheral<P = CH1>,
+    CH2: embassy_nrf::ppi::ConfigurableChannel,
+    CH2P: Peripheral<P = CH2>,
+> UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
 {
     pub fn new(
         mut pin: AnyPin,
@@ -86,16 +88,16 @@ impl<
 }
 
 impl<
-        UARTE: Instance,
-        UARTEP: Peripheral<P = UARTE> + 'static,
-        IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone + 'static,
-        TIMER: embassy_nrf::timer::Instance,
-        TIMERP: Peripheral<P = TIMER> + 'static,
-        CH1: embassy_nrf::ppi::ConfigurableChannel,
-        CH1P: Peripheral<P = CH1> + 'static,
-        CH2: embassy_nrf::ppi::ConfigurableChannel,
-        CH2P: Peripheral<P = CH2> + 'static,
-    > SplitDriver
+    UARTE: Instance,
+    UARTEP: Peripheral<P = UARTE> + 'static,
+    IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone + 'static,
+    TIMER: embassy_nrf::timer::Instance,
+    TIMERP: Peripheral<P = TIMER> + 'static,
+    CH1: embassy_nrf::ppi::ConfigurableChannel,
+    CH1P: Peripheral<P = CH1> + 'static,
+    CH2: embassy_nrf::ppi::ConfigurableChannel,
+    CH2P: Peripheral<P = CH2> + 'static,
+> SplitDriver
     for UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
 {
     type Error = UartHalfDuplexSplitDriverError;
@@ -157,5 +159,27 @@ impl<
         embassy_time::Timer::after_micros(50).await;
 
         Ok(())
+    }
+}
+
+impl<
+    UARTE: Instance,
+    UARTEP: Peripheral<P = UARTE> + 'static,
+    IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone + 'static,
+    TIMER: embassy_nrf::timer::Instance,
+    TIMERP: Peripheral<P = TIMER> + 'static,
+    CH1: embassy_nrf::ppi::ConfigurableChannel,
+    CH1P: Peripheral<P = CH1> + 'static,
+    CH2: embassy_nrf::ppi::ConfigurableChannel,
+    CH2P: Peripheral<P = CH2> + 'static,
+> SplitDriverBuilder
+    for UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
+{
+    type Output = Self;
+
+    type Error = Infallible;
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        Ok(self)
     }
 }

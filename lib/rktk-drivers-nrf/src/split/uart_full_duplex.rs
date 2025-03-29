@@ -1,8 +1,10 @@
+use core::convert::Infallible;
+
 use embassy_nrf::buffered_uarte::BufferedUarte;
 use embassy_nrf::timer::Instance as TimerInstance;
 use embassy_nrf::uarte::Instance as UarteInstance;
 use embedded_io_async::Write as _;
-use rktk::drivers::interface::split::SplitDriver;
+use rktk::drivers::interface::split::{SplitDriver, SplitDriverBuilder};
 
 #[derive(Debug, thiserror::Error)]
 pub enum UartFullDuplexSplitDriverError {
@@ -39,5 +41,17 @@ impl<I: UarteInstance + 'static, T: TimerInstance + 'static> SplitDriver
             .write_all(buf)
             .await
             .map_err(|_| UartFullDuplexSplitDriverError::GeneralError("Write error"))
+    }
+}
+
+impl<I: UarteInstance + 'static, T: TimerInstance + 'static> SplitDriverBuilder
+    for UartFullDuplexSplitDriver<I, T>
+{
+    type Output = Self;
+
+    type Error = Infallible;
+
+    async fn build(self) -> Result<Self::Output, Self::Error> {
+        Ok(self)
     }
 }
