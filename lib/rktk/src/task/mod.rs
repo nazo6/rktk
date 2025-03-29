@@ -79,7 +79,7 @@ pub async fn start<
         UsbBuilder,
         BleBuilder,
     >,
-    key_config: &Keymap,
+    keymap: &'static Keymap,
     hand: Option<Hand>,
     hooks: Hooks<CH, MH, SH, BH>,
 ) {
@@ -159,7 +159,7 @@ pub async fn start<
                         drivers.storage,
                         drivers.split,
                         drivers.rgb,
-                        key_config,
+                        keymap,
                         hooks,
                         hand.unwrap_or(Hand::Left),
                     )
