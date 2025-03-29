@@ -9,9 +9,20 @@ use embedded_graphics::{
 /// Interface for display drivers.
 ///
 /// TODO: Allow sync-only drivers?
-pub trait DisplayDriver: DrawTarget + Sized {
+pub trait DisplayDriver: DrawTarget + Sized + 'static {
     const MAX_TEXT_WIDTH: usize;
     const TEXT_STYLE: MonoTextStyle<'static, Self::Color>;
+
+    /// Called when the display is initialized.
+    ///
+    /// It is guaranteed that:
+    /// - No other function is called before this function.
+    /// - If this function returns an error, other functions will not be called.
+    ///
+    /// Default implementation returns `Ok(())`.
+    async fn init(&mut self) -> Result<(), DisplayError> {
+        Ok(())
+    }
 
     fn clear_buffer(&mut self);
     async fn flush(&mut self) -> Result<(), DisplayError>;
@@ -64,5 +75,3 @@ pub trait DisplayDriver: DrawTarget + Sized {
         }
     }
 }
-
-super::generate_builder!(without_task, DisplayDriver);

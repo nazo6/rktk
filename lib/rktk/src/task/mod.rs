@@ -5,7 +5,7 @@ use crate::{
     drivers::interface::{
         ble::BleDriverBuilder,
         debounce::DebounceDriver,
-        display::DisplayDriverBuilder,
+        display::DisplayDriver,
         dongle::{DongleData, DongleDriver, DongleDriverBuilder},
         encoder::EncoderDriver,
         keyscan::KeyscanDriver,
@@ -51,7 +51,7 @@ pub async fn start<
     Split: SplitDriverBuilder,
     Ble: BleDriverBuilder,
     Usb: UsbDriverBuilder,
-    Display: DisplayDriverBuilder + 'static,
+    Display: DisplayDriver,
     Mouse: MouseDriverBuilder,
     //
     CH: CommonHooks,
@@ -92,7 +92,7 @@ pub async fn start<
         drivers.usb_builder.is_some(),
         drivers.storage.is_some(),
         drivers.mouse_builder.is_some(),
-        drivers.display_builder.is_some(),
+        drivers.display.is_some(),
     );
 
     drivers
@@ -171,8 +171,8 @@ pub async fn start<
             );
         },
         async move {
-            if let Some(display_builder) = drivers.display_builder {
-                display::start(display_builder).await;
+            if let Some(mut display) = drivers.display {
+                display::start(&mut display).await;
             }
         }
     );
@@ -183,7 +183,7 @@ pub async fn dongle_start(
     usb: impl UsbDriverBuilder,
     dongle: impl DongleDriverBuilder,
     mut hooks: impl dongle::DongleHooks,
-    display: Option<impl DisplayDriverBuilder + 'static>,
+    display: Option<impl DisplayDriver>,
 ) {
     let (usb, usb_task) = usb.build().await.unwrap();
     let (mut dongle, dongle_task) = dongle.build().await.unwrap();
@@ -235,8 +235,8 @@ pub async fn dongle_start(
         usb_task,
         dongle_task,
         async move {
-            if let Some(display_builder) = display {
-                display::start(display_builder).await;
+            if let Some(mut display) = display {
+                display::start(&mut display).await;
             }
         }
     );

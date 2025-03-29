@@ -9,21 +9,21 @@ use embedded_graphics::{
 };
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
-use rktk::drivers::interface::display::{DisplayDriver, DisplayDriverBuilder};
+use rktk::drivers::interface::display::DisplayDriver;
 pub use ssd1306::prelude;
 use ssd1306::{
     I2CDisplayInterface, Ssd1306Async, mode::BufferedGraphicsModeAsync, prelude::*,
     size::DisplaySizeAsync,
 };
 
-pub struct Ssd1306DisplayBuilder<I2C: I2cAsync + I2cSync, SIZE: DisplaySizeAsync>(
+pub struct Ssd1306Display<I2C: I2cAsync + I2cSync, SIZE: DisplaySizeAsync>(
     Ssd1306Async<I2CInterface<I2C>, SIZE, BufferedGraphicsModeAsync<SIZE>>,
 );
 
-impl<I2C, SIZE> Ssd1306DisplayBuilder<I2C, SIZE>
+impl<I2C, SIZE> Ssd1306Display<I2C, SIZE>
 where
-    I2C: I2cAsync + I2cSync,
-    SIZE: DisplaySizeAsync,
+    I2C: I2cAsync + I2cSync + 'static,
+    SIZE: DisplaySizeAsync + DisplaySize + 'static,
 {
     pub fn new(i2c: I2C, size: SIZE) -> Self {
         let interface = I2CDisplayInterface::new(i2c);
@@ -32,35 +32,12 @@ where
                 .into_buffered_graphics_mode(),
         )
     }
-
-    // pub fn build_sync(mut self) -> Result<Ssd1306Display<I2C, SIZE>, DisplayError> {
-    //     self.0.init()?;
-    //     Ok(Ssd1306Display(self.0))
-    // }
 }
-
-impl<I2C, SIZE> DisplayDriverBuilder for Ssd1306DisplayBuilder<I2C, SIZE>
-where
-    I2C: I2cAsync + I2cSync,
-    SIZE: DisplaySize + DisplaySizeAsync,
-{
-    type Output = Ssd1306Display<I2C, SIZE>;
-    type Error = DisplayError;
-
-    async fn build(mut self) -> Result<Self::Output, Self::Error> {
-        self.0.init().await?;
-        Ok(Ssd1306Display(self.0))
-    }
-}
-
-pub struct Ssd1306Display<I2C: I2cAsync + I2cSync, SIZE: DisplaySizeAsync>(
-    Ssd1306Async<I2CInterface<I2C>, SIZE, BufferedGraphicsModeAsync<SIZE>>,
-);
 
 impl<I2C, SIZE> DisplayDriver for Ssd1306Display<I2C, SIZE>
 where
-    I2C: I2cAsync + I2cSync,
-    SIZE: DisplaySizeAsync + DisplaySize,
+    I2C: I2cAsync + I2cSync + 'static,
+    SIZE: DisplaySizeAsync + DisplaySize + 'static,
 {
     const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::new()
         .font(&FONT_6X10)
@@ -69,9 +46,10 @@ where
         .build();
     const MAX_TEXT_WIDTH: usize = 20;
 
-    // fn flush(&mut self) -> Result<(), DisplayError> {
-    //     self.0.flush()
-    // }
+    async fn init(&mut self) -> Result<(), DisplayError> {
+        self.0.init().await
+    }
+
     async fn flush(&mut self) -> Result<(), DisplayError> {
         self.0.flush().await
     }

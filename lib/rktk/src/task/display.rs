@@ -4,10 +4,7 @@ use embassy_futures::select::{Either, select};
 use rktk_log::error;
 
 use crate::{
-    drivers::interface::{
-        display::{DisplayDriver, DisplayDriverBuilder},
-        reporter::Output,
-    },
+    drivers::interface::{display::DisplayDriver, reporter::Output},
     interface::Hand,
     utils::Channel,
 };
@@ -30,14 +27,11 @@ pub enum DisplayMessage {
 pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
 pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<heapless::String<256>, 3> = Channel::new();
 
-pub(super) async fn start<B: DisplayDriverBuilder>(display_builder: B) {
-    let mut display = match display_builder.build().await {
-        Ok(display) => display,
-        Err(_e) => {
-            error!("Failed to initialize display");
-            return;
-        }
-    };
+pub(super) async fn start<D: DisplayDriver>(display: &mut D) {
+    if display.init().await.is_err() {
+        error!("Failed to initialize display");
+        return;
+    }
     let _ = display.clear_flush().await;
 
     loop {
@@ -64,16 +58,13 @@ pub(super) async fn start<B: DisplayDriverBuilder>(display_builder: B) {
                                 Some(false) => "S",
                                 None => "_",
                             },
-                            B::Output::calculate_point(1, 1),
+                            D::calculate_point(1, 1),
                         )
                         .await;
                 }
                 DisplayMessage::MouseAvailable(mouse) => {
                     let _ = display
-                        .update_text(
-                            if mouse { "m" } else { "x" },
-                            B::Output::calculate_point(2, 1),
-                        )
+                        .update_text(if mouse { "m" } else { "x" }, D::calculate_point(2, 1))
                         .await;
                 }
                 DisplayMessage::Hand(hand) => {
@@ -84,7 +75,7 @@ pub(super) async fn start<B: DisplayDriverBuilder>(display_builder: B) {
                                 Some(Hand::Right) => "R",
                                 None => "_",
                             },
-                            B::Output::calculate_point(3, 1),
+                            D::calculate_point(3, 1),
                         )
                         .await;
                 }
@@ -93,45 +84,33 @@ pub(super) async fn start<B: DisplayDriverBuilder>(display_builder: B) {
                         Output::Usb => "U",
                         Output::Ble => "B",
                     };
-                    let _ = display
-                        .update_text(text, B::Output::calculate_point(4, 1))
-                        .await;
+                    let _ = display.update_text(text, D::calculate_point(4, 1)).await;
                 }
 
                 // (6,1): highest layer
                 DisplayMessage::HighestLayer(layer) => {
                     let mut str = heapless::String::<2>::new();
                     write!(str, "{:1}", layer).unwrap();
-                    let _ = display
-                        .update_text(&str, B::Output::calculate_point(6, 1))
-                        .await;
+                    let _ = display.update_text(&str, D::calculate_point(6, 1)).await;
                 }
 
                 // (8,1): mouse position
                 DisplayMessage::MouseMove((x, y)) => {
                     let mut str = heapless::String::<12>::new();
                     write!(str, "[{:3},{:3}]", x, y).unwrap();
-                    let _ = display
-                        .update_text(&str, B::Output::calculate_point(8, 1))
-                        .await;
+                    let _ = display.update_text(&str, D::calculate_point(8, 1)).await;
                 }
 
                 // (18,1): num lock
                 DisplayMessage::NumLock(num_lock) => {
                     let _ = display
-                        .update_text(
-                            if num_lock { "N" } else { "n" },
-                            B::Output::calculate_point(18, 1),
-                        )
+                        .update_text(if num_lock { "N" } else { "n" }, D::calculate_point(18, 1))
                         .await;
                 }
                 // (19,1): caps lock
                 DisplayMessage::CapsLock(caps_lock) => {
                     let _ = display
-                        .update_text(
-                            if caps_lock { "C" } else { "c" },
-                            B::Output::calculate_point(19, 1),
-                        )
+                        .update_text(if caps_lock { "C" } else { "c" }, D::calculate_point(19, 1))
                         .await;
                 }
                 DisplayMessage::Brightness(brightness) => {

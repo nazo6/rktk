@@ -1,7 +1,7 @@
 //! Drivers for the keyboard.
 
 use interface::{
-    ble::BleDriverBuilder, display::DisplayDriverBuilder, mouse::MouseDriverBuilder,
+    ble::BleDriverBuilder, display::DisplayDriver, mouse::MouseDriverBuilder,
     split::SplitDriverBuilder, system::SystemDriver, usb::UsbDriverBuilder,
 };
 
@@ -27,7 +27,7 @@ pub struct Drivers<
     Split: SplitDriverBuilder,
     Ble: BleDriverBuilder,
     Usb: UsbDriverBuilder,
-    Display: DisplayDriverBuilder,
+    Display: DisplayDriver,
     Mouse: MouseDriverBuilder,
 > {
     pub system: System,
@@ -40,5 +40,5 @@ pub struct Drivers<
     pub ble_builder: Option<Ble>,
     pub usb_builder: Option<Usb>,
     pub mouse_builder: Option<Mouse>,
-    pub display_builder: Option<Display>,
+    pub display: Option<Display>,
 }

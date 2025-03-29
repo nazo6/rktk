@@ -24,10 +24,7 @@ use crate::drivers::interface::{
     usb::UsbDriver,
 };
 
-use super::interface::{
-    ble::BleDriverBuilder, display::DisplayDriverBuilder, mouse::MouseDriverBuilder,
-    usb::UsbDriverBuilder,
-};
+use super::interface::{ble::BleDriverBuilder, mouse::MouseDriverBuilder, usb::UsbDriverBuilder};
 
 // Rgb
 pub fn rgb() -> Option<impl RgbDriver> {
@@ -58,7 +55,7 @@ pub fn debounce() -> Option<impl DebounceDriver> {
 }
 
 // Display
-pub fn display_builder() -> Option<impl DisplayDriverBuilder> {
+pub fn display() -> Option<impl DisplayDriver> {
     pub enum Display {}
     impl Dimensions for Display {
         fn bounding_box(&self) -> embedded_graphics::primitives::Rectangle {
@@ -80,6 +77,7 @@ pub fn display_builder() -> Option<impl DisplayDriverBuilder> {
     impl DisplayDriver for Display {
         const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::new().build();
         const MAX_TEXT_WIDTH: usize = 10;
+
         fn clear_buffer(&mut self) {
             unreachable!()
         }
@@ -91,18 +89,7 @@ pub fn display_builder() -> Option<impl DisplayDriverBuilder> {
         }
     }
 
-    pub enum DisplayBuilder {}
-
-    impl DisplayDriverBuilder for DisplayBuilder {
-        type Output = Display;
-        type Error = ();
-
-        async fn build(self) -> Result<Self::Output, Self::Error> {
-            unreachable!()
-        }
-    }
-
-    Option::<DisplayBuilder>::None
+    Option::<Display>::None
 }
 
 // encoder

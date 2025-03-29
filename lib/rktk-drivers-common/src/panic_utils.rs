@@ -8,7 +8,7 @@
 
 use core::{fmt::Write, mem::MaybeUninit, ptr::write_volatile};
 
-use rktk::drivers::interface::display::{DisplayDriver as _, DisplayDriverBuilder};
+use rktk::drivers::interface::display::DisplayDriver;
 
 pub struct PanicMessage {
     magic: u32,
@@ -79,12 +79,12 @@ fn parse_panic_message(panic_info: &PanicMessage) -> &str {
 /// Otherwise, it will return the display builder.
 ///
 /// When None is returned, caller can stop execution using something like [`cortex_m::asm::udf`]
-pub async fn display_message_if_panicked<D: DisplayDriverBuilder>(display_builder: D) -> Option<D> {
+pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
     if let Some(panic_info) = read_panic_message() {
-        if let Ok(mut display) = display_builder.build().await {
+        if display.init().await.is_ok() {
             let str = parse_panic_message(&panic_info);
 
-            if str.len() > D::Output::MAX_TEXT_WIDTH {
+            if str.len() > D::MAX_TEXT_WIDTH {
                 let mut idx = 0;
                 loop {
                     let _ = display
@@ -93,7 +93,7 @@ pub async fn display_message_if_panicked<D: DisplayDriverBuilder>(display_builde
                             embedded_graphics::prelude::Point { x: 0, y: 0 },
                         )
                         .await;
-                    if str.len() - idx <= D::Output::MAX_TEXT_WIDTH {
+                    if str.len() - idx <= D::MAX_TEXT_WIDTH {
                         embassy_time::Timer::after_millis(600).await;
                         idx = 0;
                     } else {
@@ -102,13 +102,8 @@ pub async fn display_message_if_panicked<D: DisplayDriverBuilder>(display_builde
                     embassy_time::Timer::after_millis(200).await;
                 }
             } else {
-                let _ = display
-                    .update_text(str, D::Output::calculate_point(1, 1))
-                    .await;
+                let _ = display.update_text(str, D::calculate_point(1, 1)).await;
             }
         }
-        None
-    } else {
-        Some(display_builder)
     }
 }
