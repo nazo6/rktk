@@ -32,7 +32,7 @@ async fn main(_spawner: Spawner) {
     let drivers = Drivers {
         keyscan: DummyKeyscanDriver,
         system: RpSystemDriver,
-        mouse_builder: dummy::mouse_builder(),
+        mouse: dummy::mouse_builder(),
         usb_builder: dummy::usb_builder(),
         display: dummy::display_builder(),
         split_builder: dummy::split_builder(),

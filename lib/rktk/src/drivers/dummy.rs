@@ -12,7 +12,7 @@ use embedded_graphics::{
 use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
 use crate::drivers::interface::{
-    ble::BleDriver,
+    ble::{BleDriver, BleDriverBuilder},
     debounce::DebounceDriver,
     display::DisplayDriver,
     encoder::EncoderDriver,
@@ -21,10 +21,8 @@ use crate::drivers::interface::{
     rgb::RgbDriver,
     split::{SplitDriver, SplitDriverBuilder},
     storage::StorageDriver,
-    usb::UsbDriver,
+    usb::{UsbDriver, UsbDriverBuilder},
 };
-
-use super::interface::{ble::BleDriverBuilder, mouse::MouseDriverBuilder, usb::UsbDriverBuilder};
 
 // Rgb
 pub fn rgb() -> Option<impl RgbDriver> {
@@ -105,7 +103,7 @@ pub fn encoder() -> Option<impl EncoderDriver> {
 }
 
 // mouse
-pub fn mouse_builder() -> Option<impl MouseDriverBuilder> {
+pub fn mouse() -> Option<impl MouseDriver> {
     pub enum Mouse {}
     impl MouseDriver for Mouse {
         type Error = Infallible;
@@ -122,16 +120,7 @@ pub fn mouse_builder() -> Option<impl MouseDriverBuilder> {
             unreachable!()
         }
     }
-    pub enum MouseBuilder {}
-    impl MouseDriverBuilder for MouseBuilder {
-        type Output = Mouse;
-        type Error = Infallible;
-
-        async fn build(self) -> Result<Self::Output, Self::Error> {
-            unreachable!()
-        }
-    }
-    Option::<MouseBuilder>::None
+    Option::<Mouse>::None
 }
 
 // split

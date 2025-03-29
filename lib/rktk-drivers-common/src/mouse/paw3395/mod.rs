@@ -12,7 +12,7 @@ use embedded_hal::spi::Operation;
 use embedded_hal_async::spi::SpiDevice;
 use error::Paw3395Error;
 use registers as reg;
-use rktk::drivers::interface::mouse::{MouseDriver, MouseDriverBuilder};
+use rktk::drivers::interface::mouse::MouseDriver;
 
 mod timing {
     pub const NCS_SCLK: u32 = 120;
@@ -39,43 +39,29 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Paw3395Builder<S: SpiDevice> {
-    spi: S,
-    config: config::Config,
-}
-
-impl<S: SpiDevice> Paw3395Builder<S> {
-    pub fn new(spi: S, config: config::Config) -> Self {
-        Self { spi, config }
-    }
-}
-
-impl<S: SpiDevice> MouseDriverBuilder for Paw3395Builder<S> {
-    type Output = Paw3395<S>;
-
-    type Error = Paw3395Error<S::Error>;
-
-    async fn build(self) -> Result<Self::Output, Self::Error> {
-        let mut driver = Paw3395 {
-            spi: self.spi,
-            timer: embassy_time::Instant::now(),
-            config: self.config,
-        };
-
-        driver.power_up().await?;
-
-        Ok(driver)
-    }
-}
-
 pub struct Paw3395<S: SpiDevice> {
     spi: S,
     timer: embassy_time::Instant,
     config: config::Config,
 }
 
+impl<S: SpiDevice> Paw3395<S> {
+    pub fn new(spi: S, config: config::Config) -> Self {
+        Self {
+            spi,
+            timer: embassy_time::Instant::now(),
+            config,
+        }
+    }
+}
+
 impl<S: SpiDevice> MouseDriver for Paw3395<S> {
     type Error = Paw3395Error<S::Error>;
+
+    async fn init(&mut self) -> Result<(), Self::Error> {
+        self.timer = embassy_time::Instant::now();
+        self.power_up().await
+    }
 
     async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
         self.burst_read()

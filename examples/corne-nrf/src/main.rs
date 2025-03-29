@@ -63,7 +63,7 @@ async fn main(_spawner: Spawner) {
             None,
         ),
         system: NrfSystemDriver::new(None),
-        mouse_builder: dummy::mouse_builder(),
+        mouse: dummy::mouse_builder(),
         usb_builder: dummy::usb_builder(),
         display: dummy::display_builder(),
         split_builder: dummy::split_builder(),

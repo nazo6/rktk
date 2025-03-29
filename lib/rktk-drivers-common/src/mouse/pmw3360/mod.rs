@@ -11,7 +11,7 @@ use embassy_time::Timer;
 use embedded_hal_async::spi::{Operation, SpiDevice};
 use error::Pmw3360Error;
 use registers as reg;
-use rktk::drivers::interface::mouse::{MouseDriver, MouseDriverBuilder};
+use rktk::drivers::interface::mouse::MouseDriver;
 
 mod timing {
     /// NCS To SCLK Active
@@ -31,40 +31,27 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Pmw3360Builder<S: SpiDevice> {
-    spi: S,
-}
-
-impl<S: SpiDevice> Pmw3360Builder<S> {
-    pub fn new(spi: S) -> Self {
-        Self { spi }
-    }
-}
-
-impl<S: SpiDevice> MouseDriverBuilder for Pmw3360Builder<S> {
-    type Output = Pmw3360<S>;
-
-    type Error = Pmw3360Error<S::Error>;
-
-    async fn build(self) -> Result<Self::Output, Self::Error> {
-        let mut driver = Pmw3360 {
-            spi: self.spi,
-            in_burst_mode: false,
-        };
-
-        driver.power_up().await?;
-
-        Ok(driver)
-    }
-}
-
 pub struct Pmw3360<S: SpiDevice> {
     spi: S,
     in_burst_mode: bool,
 }
 
+impl<S: SpiDevice> Pmw3360<S> {
+    pub fn new(spi: S) -> Self {
+        Self {
+            spi,
+            in_burst_mode: false,
+        }
+    }
+}
+
 impl<S: SpiDevice> MouseDriver for Pmw3360<S> {
     type Error = Pmw3360Error<S::Error>;
+
+    async fn init(&mut self) -> Result<(), Self::Error> {
+        self.power_up().await
+    }
+
     async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
         self.burst_read()
             .await

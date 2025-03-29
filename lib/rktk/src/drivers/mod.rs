@@ -1,8 +1,8 @@
 //! Drivers for the keyboard.
 
 use interface::{
-    ble::BleDriverBuilder, display::DisplayDriver, mouse::MouseDriverBuilder,
-    split::SplitDriverBuilder, system::SystemDriver, usb::UsbDriverBuilder,
+    ble::BleDriverBuilder, display::DisplayDriver, mouse::MouseDriver, split::SplitDriverBuilder,
+    system::SystemDriver, usb::UsbDriverBuilder,
 };
 
 use crate::drivers::interface::{
@@ -28,7 +28,7 @@ pub struct Drivers<
     Ble: BleDriverBuilder,
     Usb: UsbDriverBuilder,
     Display: DisplayDriver,
-    Mouse: MouseDriverBuilder,
+    Mouse: MouseDriver,
 > {
     pub system: System,
     pub keyscan: KeyScan,
@@ -39,6 +39,6 @@ pub struct Drivers<
     pub split_builder: Option<Split>,
     pub ble_builder: Option<Ble>,
     pub usb_builder: Option<Usb>,
-    pub mouse_builder: Option<Mouse>,
+    pub mouse: Option<Mouse>,
     pub display: Option<Display>,
 }

@@ -9,7 +9,7 @@ use crate::{
         dongle::{DongleData, DongleDriver, DongleDriverBuilder},
         encoder::EncoderDriver,
         keyscan::KeyscanDriver,
-        mouse::{MouseDriver, MouseDriverBuilder},
+        mouse::MouseDriver,
         reporter::ReporterDriver,
         rgb::RgbDriver,
         split::SplitDriverBuilder,
@@ -52,7 +52,7 @@ pub async fn start<
     Ble: BleDriverBuilder,
     Usb: UsbDriverBuilder,
     Display: DisplayDriver,
-    Mouse: MouseDriverBuilder,
+    Mouse: MouseDriver,
     //
     CH: CommonHooks,
     MH: MasterHooks,
@@ -91,7 +91,7 @@ pub async fn start<
         drivers.ble_builder.is_some(),
         drivers.usb_builder.is_some(),
         drivers.storage.is_some(),
-        drivers.mouse_builder.is_some(),
+        drivers.mouse.is_some(),
         drivers.display.is_some(),
     );
 
@@ -102,10 +102,11 @@ pub async fn start<
 
     sjoin::join!(
         async {
-            let mouse = if let Some(mouse_builder) = drivers.mouse_builder {
+            let mouse = if let Some(mut mouse) = drivers.mouse {
                 debug!("Mouse init");
-                match mouse_builder.build().await {
-                    Ok(mut mouse) => {
+
+                match mouse.init().await {
+                    Ok(_) => {
                         let _ = mouse.set_cpi(RKTK_CONFIG.default_cpi).await;
                         Some(mouse)
                     }
