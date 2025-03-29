@@ -49,3 +49,5 @@ pub enum Output {
     Usb,
     Ble,
 }
+
+super::generate_builder!(with_task, ReporterDriver);

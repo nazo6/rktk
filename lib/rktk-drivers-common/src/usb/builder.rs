@@ -3,8 +3,7 @@ use embassy_usb::{
     class::hid::{HidReaderWriter, HidWriter, State},
     driver::Driver,
 };
-use rktk::drivers::interface::DriverBuilderWithTask;
-use rktk::singleton;
+use rktk::{drivers::interface::usb::UsbDriverBuilder, singleton};
 use usbd_hid::descriptor::{
     KeyboardReport, MediaKeyboardReport, MouseReport, SerializedDescriptor as _,
 };
@@ -136,13 +135,13 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
     }
 }
 
-impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuilder<D> {
-    type Driver = CommonUsbDriver;
+impl<D: Driver<'static> + 'static> UsbDriverBuilder for CommonUsbDriverBuilder<D> {
+    type Output = CommonUsbDriver;
 
     type Error = embassy_executor::SpawnError;
 
     #[allow(refining_impl_trait)]
-    async fn build(self) -> Result<(Self::Driver, UsbBackgroundTask<'static, D>), Self::Error> {
+    async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         let usb = self.builder.build();
 
         Ok((
@@ -151,21 +150,21 @@ impl<D: Driver<'static> + 'static> DriverBuilderWithTask for CommonUsbDriverBuil
                 wakeup_signal: self.wakeup_signal,
                 ready_signal: self.ready_signal,
             },
-            UsbBackgroundTask {
-                device: usb,
+            usb_task(
+                usb,
                 #[cfg(feature = "usb-remote-wakeup")]
-                wakeup_signal: self.wakeup_signal,
-                ready_signal: self.ready_signal,
-                keyboard_hid: self.keyboard_hid,
-                media_key_hid: self.media_key_hid,
-                mouse_hid: self.mouse_hid,
-                rrp_hid: self.rrp_hid,
+                self.wakeup_signal,
+                self.ready_signal,
+                self.keyboard_hid,
+                self.media_key_hid,
+                self.mouse_hid,
+                self.rrp_hid,
+                self.raw_hid,
                 #[cfg(feature = "defmt-usb")]
-                defmt_usb: self.defmt_usb,
+                self.defmt_usb,
                 #[cfg(feature = "defmt-usb")]
-                defmt_usb_use_dtr: self.defmt_usb_use_dtr,
-                raw_hid: self.raw_hid,
-            },
+                self.defmt_usb_use_dtr,
+            ),
         ))
     }
 }

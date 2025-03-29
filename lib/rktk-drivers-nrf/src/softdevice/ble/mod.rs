@@ -1,6 +1,6 @@
-use nrf_softdevice::{raw, Softdevice};
+use nrf_softdevice::{Softdevice, raw};
 
-use rktk::{drivers::interface::DriverBuilderWithTask, utils::Channel};
+use rktk::{drivers::interface::ble::BleDriverBuilder, utils::Channel};
 use server::Server;
 pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -54,22 +54,15 @@ impl NrfBleDriverBuilder {
     }
 }
 
-impl DriverBuilderWithTask for NrfBleDriverBuilder {
-    type Driver = driver::NrfBleDriver;
+impl BleDriverBuilder for NrfBleDriverBuilder {
+    type Output = driver::NrfBleDriver;
 
     type Error = ();
 
-    async fn build(
-        self,
-    ) -> Result<(Self::Driver, impl rktk::drivers::interface::BackgroundTask), Self::Error> {
+    async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         Ok((
             driver::NrfBleDriver {},
-            task::SoftdeviceBleTask {
-                sd: self.sd,
-                server: self.server,
-                name: self.name,
-                flash: self.flash,
-            },
+            task::softdevice_task(self.sd, self.server, self.name, self.flash),
         ))
     }
 }

@@ -3,18 +3,18 @@
 use crate::{
     config::constant::RKTK_CONFIG,
     drivers::interface::{
-        BackgroundTask as _, DriverBuilder, DriverBuilderWithTask,
-        ble::BleDriver,
+        ble::BleDriverBuilder,
         debounce::DebounceDriver,
-        display::DisplayDriver,
-        dongle::{DongleData, DongleDriver},
+        display::DisplayDriverBuilder,
+        dongle::{DongleData, DongleDriver, DongleDriverBuilder},
         encoder::EncoderDriver,
         keyscan::KeyscanDriver,
-        mouse::MouseDriver,
+        mouse::{MouseDriver, MouseDriverBuilder},
+        reporter::ReporterDriver,
         rgb::RgbDriver,
-        split::SplitDriver,
+        split::SplitDriverBuilder,
         storage::StorageDriver,
-        usb::UsbDriver,
+        usb::UsbDriverBuilder,
     },
     hooks::Hooks,
     interface::Hand,
@@ -42,42 +42,35 @@ pub(crate) mod main_loop;
 /// - `hooks`: Hooks for the keyboard. See [`Hooks`] for detail.
 #[allow(clippy::type_complexity)]
 pub async fn start<
+    System: SystemDriver,
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
     Encoder: EncoderDriver,
-    Ble: BleDriver,
-    Usb: UsbDriver,
-    Split: SplitDriver,
     Rgb: RgbDriver,
-    System: SystemDriver,
     Storage: StorageDriver,
-    Mouse: MouseDriver,
-    Display: DisplayDriver,
-    MouseBuilder: DriverBuilder<Output = Mouse>,
-    DisplayBuilder: DriverBuilder<Output = Display> + 'static,
-    UsbBuilder: DriverBuilderWithTask<Driver = Usb>,
-    BleBuilder: DriverBuilderWithTask<Driver = Ble>,
+    Split: SplitDriverBuilder,
+    Ble: BleDriverBuilder,
+    Usb: UsbDriverBuilder,
+    Display: DisplayDriverBuilder + 'static,
+    Mouse: MouseDriverBuilder,
+    //
     CH: CommonHooks,
     MH: MasterHooks,
     SH: SlaveHooks,
     BH: RgbHooks,
 >(
     mut drivers: Drivers<
+        System,
         KeyScan,
         Debounce,
         Encoder,
+        Rgb,
+        Storage,
+        Split,
         Ble,
         Usb,
-        Split,
-        Rgb,
-        System,
-        Storage,
-        Mouse,
         Display,
-        MouseBuilder,
-        DisplayBuilder,
-        UsbBuilder,
-        BleBuilder,
+        Mouse,
     >,
     keymap: &'static Keymap,
     hand: Option<Hand>,
@@ -157,7 +150,7 @@ pub async fn start<
                         drivers.encoder,
                         mouse,
                         drivers.storage,
-                        drivers.split,
+                        drivers.split_builder,
                         drivers.rgb,
                         keymap,
                         hooks,
@@ -167,12 +160,12 @@ pub async fn start<
                 },
                 async {
                     if let Some(usb_task) = usb_task {
-                        usb_task.run().await
+                        usb_task.await
                     }
                 },
                 async {
                     if let Some(ble_task) = ble_task {
-                        ble_task.run().await
+                        ble_task.await
                     }
                 }
             );
@@ -186,16 +179,11 @@ pub async fn start<
 }
 
 /// Runs dongle with the given drivers.
-pub async fn dongle_start<
-    Usb: UsbDriver,
-    Dongle: DongleDriver,
-    Display: DisplayDriver,
-    DisplayBuilder: DriverBuilder<Output = Display> + 'static,
->(
-    usb: impl DriverBuilderWithTask<Driver = Usb>,
-    dongle: impl DriverBuilderWithTask<Driver = Dongle>,
+pub async fn dongle_start(
+    usb: impl UsbDriverBuilder,
+    dongle: impl DongleDriverBuilder,
     mut hooks: impl dongle::DongleHooks,
-    display: Option<DisplayBuilder>,
+    display: Option<impl DisplayDriverBuilder + 'static>,
 ) {
     let (usb, usb_task) = usb.build().await.unwrap();
     let (mut dongle, dongle_task) = dongle.build().await.unwrap();
@@ -244,8 +232,8 @@ pub async fn dongle_start<
                 }
             }
         },
-        usb_task.run(),
-        dongle_task.run(),
+        usb_task,
+        dongle_task,
         async move {
             if let Some(display_builder) = display {
                 display::start(display_builder).await;

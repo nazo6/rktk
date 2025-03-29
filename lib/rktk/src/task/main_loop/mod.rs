@@ -5,7 +5,7 @@ use crate::{
     },
     drivers::interface::{
         ble::BleDriver, debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
-        mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver, storage::StorageDriver,
+        mouse::MouseDriver, rgb::RgbDriver, split::SplitDriverBuilder, storage::StorageDriver,
         system::SystemDriver, usb::UsbDriver,
     },
     hooks::{
@@ -26,41 +26,28 @@ mod slave;
 mod split_handler;
 
 #[allow(clippy::too_many_arguments)]
-pub async fn start<
-    Sys: SystemDriver,
-    KS: KeyscanDriver,
-    DB: DebounceDriver,
-    EN: EncoderDriver,
-    M: MouseDriver,
-    SP: SplitDriver,
-    RGB: RgbDriver,
-    Ble: BleDriver,
-    Usb: UsbDriver,
-    S: StorageDriver,
-    CH: CommonHooks,
-    MH: MasterHooks,
-    SH: SlaveHooks,
-    BH: RgbHooks,
->(
-    system: &Sys,
-    ble: Option<Ble>,
-    usb: Option<Usb>,
-    mut keyscan: KS,
-    debounce: &mut Option<DB>,
-    encoder: Option<EN>,
-    mut mouse: Option<M>,
-    mut storage: Option<S>,
-    mut split: Option<SP>,
-    rgb: Option<RGB>,
+pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHooks>(
+    system: &impl SystemDriver,
+    ble: Option<impl BleDriver>,
+    usb: Option<impl UsbDriver>,
+    mut keyscan: impl KeyscanDriver,
+    debounce: &mut Option<impl DebounceDriver>,
+    encoder: Option<impl EncoderDriver>,
+    mut mouse: Option<impl MouseDriver>,
+    mut storage: Option<impl StorageDriver>,
+    split: Option<impl SplitDriverBuilder>,
+    rgb: Option<impl RgbDriver>,
     key_config: &Keymap,
     mut hooks: Hooks<CH, MH, SH, BH>,
     hand: Hand,
 ) {
     crate::utils::display_state!(Hand, Some(hand));
 
-    if let Some(split) = &mut split {
-        let _ = split.init().await;
-    }
+    let split = if let Some(split) = split {
+        split.build().await.ok()
+    } else {
+        None
+    };
 
     let usb_available = if let Some(usb) = &usb {
         match select(

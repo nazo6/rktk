@@ -44,28 +44,17 @@ type ConfiguredState = HidReportState<
 type SharedState = Mutex<ConfiguredState>;
 
 #[allow(clippy::too_many_arguments)]
-pub async fn start<
-    'a,
-    KS: KeyscanDriver,
-    DB: DebounceDriver,
-    EN: EncoderDriver,
-    M: MouseDriver,
-    Ble: BleDriver,
-    Usb: UsbDriver,
-    S: StorageDriver,
-    Sys: SystemDriver,
-    MH: MasterHooks,
->(
+pub async fn start<'a, MH: MasterHooks>(
     _m2s_tx: M2sTx<'a>,
     s2m_rx: S2mRx<'a>,
-    system: &Sys,
-    ble: Option<Ble>,
-    usb: Option<Usb>,
-    mut keyscan: KS,
-    debounce: &mut Option<DB>,
-    mut encoder: Option<EN>,
-    storage: Option<S>,
-    mut mouse: Option<M>,
+    system: &impl SystemDriver,
+    ble: Option<impl BleDriver>,
+    usb: Option<impl UsbDriver>,
+    mut keyscan: impl KeyscanDriver,
+    debounce: &mut Option<impl DebounceDriver>,
+    mut encoder: Option<impl EncoderDriver>,
+    storage: Option<impl StorageDriver>,
+    mut mouse: Option<impl MouseDriver>,
     key_config: &Keymap,
     hand: Hand,
     mut master_hooks: MH,

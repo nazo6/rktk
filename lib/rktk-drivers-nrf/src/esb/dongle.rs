@@ -8,13 +8,10 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    bbq2::queue::BBQueue, irq::StatePRX, peripherals::PtrTimer as _, EsbApp, EsbBuffer, EsbIrq,
-    IrqTimer,
+    EsbApp, EsbBuffer, EsbIrq, IrqTimer, bbq2::queue::BBQueue, irq::StatePRX,
+    peripherals::PtrTimer as _,
 };
-use rktk::drivers::interface::{
-    dongle::{DongleData, DongleDriver},
-    BackgroundTask, DriverBuilderWithTask,
-};
+use rktk::drivers::interface::dongle::{DongleData, DongleDriver, DongleDriverBuilder};
 use rktk_log::helper::Debug2Format;
 
 use super::Config;
@@ -95,12 +92,12 @@ impl EsbDongleDriverBuilder {
     }
 }
 
-impl DriverBuilderWithTask for EsbDongleDriverBuilder {
-    type Driver = EsbDongleDriver;
+impl DongleDriverBuilder for EsbDongleDriverBuilder {
+    type Output = EsbDongleDriver;
 
     type Error = &'static str;
 
-    async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
+    async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         static BUFFER: EsbBuffer<1024, 1024> = EsbBuffer {
             app_to_radio_buf: BBQueue::new(),
             radio_to_app_buf: BBQueue::new(),
@@ -137,17 +134,9 @@ impl DriverBuilderWithTask for EsbDongleDriverBuilder {
                 esb: esb_app,
                 cnt: 0,
             },
-            EsbDongleDriverTask {},
+            async {},
         ))
     }
-}
-
-// ---- Task ------
-
-pub struct EsbDongleDriverTask {}
-
-impl BackgroundTask for EsbDongleDriverTask {
-    async fn run(self) {}
 }
 
 // ----- Driver -------

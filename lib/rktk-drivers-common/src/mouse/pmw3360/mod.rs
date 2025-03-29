@@ -11,7 +11,7 @@ use embassy_time::Timer;
 use embedded_hal_async::spi::{Operation, SpiDevice};
 use error::Pmw3360Error;
 use registers as reg;
-use rktk::drivers::interface::{mouse::MouseDriver, DriverBuilder};
+use rktk::drivers::interface::mouse::{MouseDriver, MouseDriverBuilder};
 
 mod timing {
     /// NCS To SCLK Active
@@ -41,7 +41,7 @@ impl<S: SpiDevice> Pmw3360Builder<S> {
     }
 }
 
-impl<S: SpiDevice> DriverBuilder for Pmw3360Builder<S> {
+impl<S: SpiDevice> MouseDriverBuilder for Pmw3360Builder<S> {
     type Output = Pmw3360<S>;
 
     type Error = Pmw3360Error<S::Error>;

@@ -64,3 +64,5 @@ pub trait DisplayDriver: DrawTarget + Sized {
         }
     }
 }
+
+super::generate_builder!(without_task, DisplayDriver);

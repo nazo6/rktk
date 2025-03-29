@@ -46,5 +46,10 @@ thiserror = { workspace = true }
 [features]
 _check = ["embassy-rp/rp2040"]
 
-defmt = ["dep:defmt"]
+defmt = [
+  "dep:defmt",
+  "rktk/defmt",
+  "rktk-log/defmt",
+  "rktk-drivers-common/defmt",
+]
 log = ["dep:log"]

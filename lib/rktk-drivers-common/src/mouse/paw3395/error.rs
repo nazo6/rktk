@@ -11,3 +11,10 @@ pub enum Paw3395Error<SpiError: Debug> {
     #[error("Not supported")]
     NotSupported,
 }
+
+#[cfg(feature = "defmt")]
+impl<S: Debug> defmt::Format for Paw3395Error<S> {
+    fn format(&self, fmt: defmt::Formatter) {
+        defmt::write!(fmt, "{}", self);
+    }
+}

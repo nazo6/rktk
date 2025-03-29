@@ -5,9 +5,6 @@ use super::rgb::RgbCommand;
 pub trait SplitDriver: 'static {
     type Error: core::error::Error;
 
-    async fn init(&mut self) -> Result<(), Self::Error> {
-        Ok(())
-    }
     /// Receive data from the other side and return the number of bytes received.
     ///
     /// If there is no data, this function should wait until data is received.
@@ -41,3 +38,5 @@ pub enum KeyChangeType {
     Pressed,
     Released,
 }
+
+super::generate_builder!(without_task, SplitDriver);

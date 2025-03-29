@@ -39,8 +39,8 @@ postcard = { workspace = true, features = [
 ] }
 document-features = { workspace = true }
 strum = { workspace = true }
-
 itertools = { version = "0.14.0", default-features = false }
+paste = { workspace = true }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }
@@ -70,6 +70,7 @@ defmt = [
   "rktk-log/defmt",
   "rktk-keymanager/defmt",
   "heapless/defmt-impl",
+  "display-interface/defmt-03",
 ]
 ## Logging using [`log`]. Required to send logs via rrp.
 log = ["dep:log", "rktk-log/log"]
