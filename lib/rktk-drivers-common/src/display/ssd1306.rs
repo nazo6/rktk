@@ -9,7 +9,7 @@ use embedded_graphics::{
 };
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
-use rktk::drivers::interface::{DriverBuilder, display::DisplayDriver};
+use rktk::drivers::interface::display::{DisplayDriver, DisplayDriverBuilder};
 pub use ssd1306::prelude;
 use ssd1306::{
     I2CDisplayInterface, Ssd1306Async, mode::BufferedGraphicsModeAsync, prelude::*,
@@ -39,10 +39,10 @@ where
     // }
 }
 
-impl<I2C, SIZE> DriverBuilder for Ssd1306DisplayBuilder<I2C, SIZE>
+impl<I2C, SIZE> DisplayDriverBuilder for Ssd1306DisplayBuilder<I2C, SIZE>
 where
     I2C: I2cAsync + I2cSync,
-    SIZE: DisplaySizeAsync,
+    SIZE: DisplaySize + DisplaySizeAsync,
 {
     type Output = Ssd1306Display<I2C, SIZE>;
     type Error = DisplayError;

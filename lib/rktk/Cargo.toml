@@ -70,6 +70,7 @@ defmt = [
   "rktk-log/defmt",
   "rktk-keymanager/defmt",
   "heapless/defmt-impl",
+  "display-interface/defmt-03",
 ]
 ## Logging using [`log`]. Required to send logs via rrp.
 log = ["dep:log", "rktk-log/log"]

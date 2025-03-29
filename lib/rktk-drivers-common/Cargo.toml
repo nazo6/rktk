@@ -40,14 +40,20 @@ thiserror = { workspace = true }
 document-features = { workspace = true }
 
 [features]
-_check = ["defmt-usb", "log", "defmt", "defmt-timestamp", "usb-remote-wakeup"]
+_check = ["defmt-usb", "defmt-timestamp", "log", "usb-remote-wakeup"]
 
 ## Enables defmt-over-usb logger. You cannot use this feature with other defmt logger.
 defmt-usb = ["defmt", "dep:critical-section"]
 ## Enables defmt timestamp support using embassy-time
 defmt-timestamp = ["defmt"]
 ## Enables defmt logging
-defmt = ["dep:defmt", "embassy-usb/defmt"]
+defmt = [
+  "dep:defmt",
+  "embassy-usb/defmt",
+  "embassy-executor/defmt",
+  "rktk/defmt",
+  "rktk-log/defmt",
+]
 ## Enables logging using the `log` crate.
 log = ["dep:log"]
 

@@ -9,7 +9,6 @@ use embassy_sync::pipe::Pipe;
 use embassy_usb::UsbDevice;
 use embassy_usb::class::hid::{HidReaderWriter, HidWriter};
 use embassy_usb::driver::Driver;
-use rktk::drivers::interface::BackgroundTask;
 use rktk::utils::Signal;
 use rktk::utils::{Channel, RawMutex};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -25,48 +24,37 @@ pub static RAW_HID_SEND_CHANNEL: Channel<[u8; 32], 2> = Channel::new();
 pub static RAW_HID_RECV_CHANNEL: Channel<[u8; 32], 2> = Channel::new();
 pub static KEYBOARD_LED_SIGNAL: Signal<u8> = Signal::new();
 
-pub struct UsbBackgroundTask<'d, D: Driver<'d>> {
-    pub device: UsbDevice<'d, D>,
-    #[cfg(feature = "usb-remote-wakeup")]
-    pub wakeup_signal: &'static super::RemoteWakeupSignal,
-    pub ready_signal: &'static ReadySignal,
-    pub keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
-    pub media_key_hid: HidWriter<'d, D, 8>,
-    pub mouse_hid: HidWriter<'d, D, 8>,
-    pub rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
-    pub raw_hid: HidReaderWriter<'d, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
-    #[cfg(feature = "defmt-usb")]
-    pub defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>,
-    #[cfg(feature = "defmt-usb")]
-    pub defmt_usb_use_dtr: bool,
-}
-
-impl<'d, D: Driver<'d>> BackgroundTask for UsbBackgroundTask<'d, D> {
-    async fn run(self) {
-        join5(
-            usb(
-                self.device,
-                #[cfg(feature = "usb-remote-wakeup")]
-                self.wakeup_signal,
-            ),
-            hid(
-                self.keyboard_hid,
-                self.media_key_hid,
-                self.mouse_hid,
-                self.ready_signal,
-            ),
-            raw_hid(self.raw_hid),
-            rrp(self.rrp_hid),
-            async move {
-                #[cfg(feature = "defmt-usb")]
-                {
-                    let (sender, _) = self.defmt_usb.split();
-                    super::defmt_logger::logger(sender, 64, self.defmt_usb_use_dtr).await
-                }
-            },
-        )
-        .await;
-    }
+#[allow(clippy::too_many_arguments)]
+pub async fn usb_task<'d, D: Driver<'d>>(
+    device: UsbDevice<'d, D>,
+    #[cfg(feature = "usb-remote-wakeup")] wakeup_signal: &'static super::RemoteWakeupSignal,
+    ready_signal: &'static ReadySignal,
+    keyboard_hid: HidReaderWriter<'d, D, 1, 8>,
+    media_key_hid: HidWriter<'d, D, 8>,
+    mouse_hid: HidWriter<'d, D, 8>,
+    rrp_hid: HidReaderWriter<'d, D, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>,
+    raw_hid: HidReaderWriter<'d, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
+    #[cfg(feature = "defmt-usb")] defmt_usb: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>,
+    #[cfg(feature = "defmt-usb")] defmt_usb_use_dtr: bool,
+) {
+    join5(
+        usb(
+            device,
+            #[cfg(feature = "usb-remote-wakeup")]
+            wakeup_signal,
+        ),
+        hid(keyboard_hid, media_key_hid, mouse_hid, ready_signal),
+        raw_hid_task(raw_hid),
+        rrp(rrp_hid),
+        async move {
+            #[cfg(feature = "defmt-usb")]
+            {
+                let (sender, _) = defmt_usb.split();
+                super::defmt_logger::logger(sender, 64, defmt_usb_use_dtr).await
+            }
+        },
+    )
+    .await;
 }
 
 async fn usb<'d, D: Driver<'d>>(
@@ -178,7 +166,7 @@ pub async fn rrp<'d, D: Driver<'d>>(
     .await;
 }
 
-pub async fn raw_hid<'d, D: Driver<'d>>(
+pub async fn raw_hid_task<'d, D: Driver<'d>>(
     raw_hid: HidReaderWriter<'d, D, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>,
 ) {
     let (mut reader, mut writer) = raw_hid.split();

@@ -12,7 +12,7 @@ use embedded_hal::spi::Operation;
 use embedded_hal_async::spi::SpiDevice;
 use error::Paw3395Error;
 use registers as reg;
-use rktk::drivers::interface::{mouse::MouseDriver, DriverBuilder};
+use rktk::drivers::interface::mouse::{MouseDriver, MouseDriverBuilder};
 
 mod timing {
     pub const NCS_SCLK: u32 = 120;
@@ -50,7 +50,7 @@ impl<S: SpiDevice> Paw3395Builder<S> {
     }
 }
 
-impl<S: SpiDevice> DriverBuilder for Paw3395Builder<S> {
+impl<S: SpiDevice> MouseDriverBuilder for Paw3395Builder<S> {
     type Output = Paw3395<S>;
 
     type Error = Paw3395Error<S::Error>;

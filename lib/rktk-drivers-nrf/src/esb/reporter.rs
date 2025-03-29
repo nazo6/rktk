@@ -8,14 +8,15 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    bbq2::queue::BBQueue, irq::StatePTX, peripherals::PtrTimer as _, EsbApp, EsbBuffer, EsbHeader,
-    EsbIrq, IrqTimer,
+    EsbApp, EsbBuffer, EsbHeader, EsbIrq, IrqTimer, bbq2::queue::BBQueue, irq::StatePTX,
+    peripherals::PtrTimer as _,
 };
 use postcard::experimental::max_size::MaxSize as _;
 use rktk::{
     drivers::interface::{
-        ble::BleDriver, dongle::DongleData, reporter::ReporterDriver, BackgroundTask,
-        DriverBuilderWithTask,
+        ble::BleDriver,
+        dongle::DongleData,
+        reporter::{ReporterDriver, ReporterDriverBuilder},
     },
     utils::Channel,
 };
@@ -89,7 +90,7 @@ impl EsbReporterDriverBuilder {
         _timer: DongleTimer,
         _radio: DongleRadio,
         _irqs: impl Binding<<DongleTimer as timer::Instance>::Interrupt, TimerInterruptHandler>
-            + Binding<<DongleRadio as radio::Instance>::Interrupt, EsbInterruptHandler>,
+        + Binding<<DongleRadio as radio::Instance>::Interrupt, EsbInterruptHandler>,
         config: super::Config,
     ) -> Self {
         Self {
@@ -99,12 +100,12 @@ impl EsbReporterDriverBuilder {
     }
 }
 
-impl DriverBuilderWithTask for EsbReporterDriverBuilder {
-    type Driver = EsbReporterDriver;
+impl ReporterDriverBuilder for EsbReporterDriverBuilder {
+    type Output = EsbReporterDriver;
 
     type Error = &'static str;
 
-    async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
+    async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         static BUFFER: EsbBuffer<1024, 1024> = EsbBuffer {
             app_to_radio_buf: BBQueue::new(),
             radio_to_app_buf: BBQueue::new(),
@@ -133,67 +134,60 @@ impl DriverBuilderWithTask for EsbReporterDriverBuilder {
             cortex_m::peripheral::NVIC::unmask(Interrupt::TIMER0);
         }
 
-        Ok((EsbReporterDriver {}, Task { esb_app }))
+        Ok((EsbReporterDriver {}, esb_task(esb_app)))
     }
 }
 
-// --------- Task ----------
+async fn esb_task(esb_app: EsbApp<1024, 1024>) {
+    let mut cnt: u8 = 0;
+    let mut pid = 0;
+    let (mut s, mut r) = esb_app.split();
+    embassy_futures::join::join(
+        async move {
+            loop {
+                let report = REPORT_SEND_CHAN.receive().await;
+                let mut buf = [0; DongleDataWithCnt::POSTCARD_MAX_SIZE];
+                let Ok(slice) = postcard::to_slice(&(cnt, report), &mut buf) else {
+                    warn!("Postcard error");
+                    continue;
+                };
 
-struct Task {
-    esb_app: EsbApp<1024, 1024>,
-}
-impl BackgroundTask for Task {
-    async fn run(self) {
-        let mut cnt: u8 = 0;
-        let mut pid = 0;
-        let (mut s, mut r) = self.esb_app.split();
-        embassy_futures::join::join(
-            async move {
-                loop {
-                    let report = REPORT_SEND_CHAN.receive().await;
-                    let mut buf = [0; DongleDataWithCnt::POSTCARD_MAX_SIZE];
-                    let Ok(slice) = postcard::to_slice(&(cnt, report), &mut buf) else {
-                        warn!("Postcard error");
+                let esb_header = EsbHeader::build()
+                    .max_payload(MAX_PAYLOAD_SIZE)
+                    .pid(pid)
+                    .pipe(0)
+                    .no_ack(false)
+                    .check()
+                    .unwrap();
+                let mut packet = match s.wait_grant_packet(esb_header).await {
+                    Ok(p) => p,
+                    Err(e) => {
+                        warn!("Grant packet error: {:?}", Debug2Format(&e));
                         continue;
-                    };
-
-                    let esb_header = EsbHeader::build()
-                        .max_payload(MAX_PAYLOAD_SIZE)
-                        .pid(pid)
-                        .pipe(0)
-                        .no_ack(false)
-                        .check()
-                        .unwrap();
-                    let mut packet = match s.wait_grant_packet(esb_header).await {
-                        Ok(p) => p,
-                        Err(e) => {
-                            warn!("Grant packet error: {:?}", Debug2Format(&e));
-                            continue;
-                        }
-                    };
-                    packet[..slice.len()].copy_from_slice(slice);
-                    packet.commit(slice.len());
-                    s.start_tx();
-
-                    debug!("Sent report: {:?}", slice);
-
-                    cnt = cnt.wrapping_add(1);
-                    if pid == 3 {
-                        pid = 0;
-                    } else {
-                        pid += 1;
                     }
+                };
+                packet[..slice.len()].copy_from_slice(slice);
+                packet.commit(slice.len());
+                s.start_tx();
+
+                debug!("Sent report: {:?}", slice);
+
+                cnt = cnt.wrapping_add(1);
+                if pid == 3 {
+                    pid = 0;
+                } else {
+                    pid += 1;
                 }
-            },
-            async move {
-                loop {
-                    let p = r.wait_read_packet().await;
-                    p.release();
-                }
-            },
-        )
-        .await;
-    }
+            }
+        },
+        async move {
+            loop {
+                let p = r.wait_read_packet().await;
+                p.release();
+            }
+        },
+    )
+    .await;
 }
 
 // ----------- Driver ------------

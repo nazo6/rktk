@@ -224,22 +224,29 @@ impl ReporterDriver for DummyReporter {
         unreachable!()
     }
 }
+impl BleDriver for DummyReporter {
+    type Error = Infallible;
+    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
+        unreachable!()
+    }
+}
+impl UsbDriver for DummyReporter {
+    type Error = Infallible;
+
+    async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error> {
+        unreachable!()
+    }
+}
+
 // BLE
 pub fn ble_builder() -> Option<impl BleDriverBuilder> {
-    impl BleDriver for DummyReporter {
-        type Error = Infallible;
-        async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
-            unreachable!()
-        }
-    }
     pub enum BleBuilder {}
     impl BleDriverBuilder for BleBuilder {
         type Output = DummyReporter;
         type Error = Infallible;
-        async fn build(
-            self,
-        ) -> Result<(Self::Output, impl Future<Output = ()> + 'static), Self::Error> {
-            Ok((unreachable!(), futures::future::pending()))
+        #[allow(refining_impl_trait)]
+        async fn build(self) -> Result<(Self::Output, futures::future::Pending<()>), Self::Error> {
+            unreachable!()
         }
     }
 
@@ -248,23 +255,14 @@ pub fn ble_builder() -> Option<impl BleDriverBuilder> {
 
 // usb
 pub fn usb_builder() -> Option<impl UsbDriverBuilder> {
-    impl UsbDriver for DummyReporter {
-        type Error = Infallible;
-
-        async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error> {
-            unreachable!()
-        }
-    }
-
     pub enum UsbBuilder {}
     impl UsbDriverBuilder for UsbBuilder {
         type Output = DummyReporter;
         type Error = ();
 
-        async fn build(
-            self,
-        ) -> Result<(Self::Output, impl Future<Output = ()> + 'static), Self::Error> {
-            Ok((unreachable!(), futures::future::pending()))
+        #[allow(refining_impl_trait)]
+        async fn build(self) -> Result<(Self::Output, futures::future::Pending<()>), Self::Error> {
+            unreachable!()
         }
     }
 
