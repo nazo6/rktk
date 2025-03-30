@@ -4,10 +4,11 @@ use rktk::{
     drivers::interface::{ble::BleDriver, reporter::ReporterDriver},
     utils::Sender,
 };
-use usbd_hid::descriptor::KeyboardReport;
+
+use super::Report;
 
 pub struct TroubleReporter {
-    pub(super) output_tx: Sender<'static, KeyboardReport, 4>,
+    pub(super) output_tx: Sender<'static, Report, 4>,
 }
 
 impl ReporterDriver for TroubleReporter {
@@ -17,21 +18,23 @@ impl ReporterDriver for TroubleReporter {
         &self,
         report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), Self::Error> {
-        self.output_tx.try_send(report);
+        let _ = self.output_tx.try_send(Report::Keyboard(report));
         Ok(())
     }
 
     fn try_send_media_keyboard_report(
         &self,
-        _report: usbd_hid::descriptor::MediaKeyboardReport,
+        report: usbd_hid::descriptor::MediaKeyboardReport,
     ) -> Result<(), Self::Error> {
+        let _ = self.output_tx.try_send(Report::MediaKeyboard(report));
         Ok(())
     }
 
     fn try_send_mouse_report(
         &self,
-        _report: usbd_hid::descriptor::MouseReport,
+        report: usbd_hid::descriptor::MouseReport,
     ) -> Result<(), Self::Error> {
+        let _ = self.output_tx.try_send(Report::Mouse(report));
         Ok(())
     }
 

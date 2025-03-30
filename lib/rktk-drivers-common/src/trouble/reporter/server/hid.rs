@@ -98,5 +98,13 @@ pub(crate) enum BleCompositeReportType {
     Keyboard = 0x01,
     Mouse = 0x02,
     Media = 0x03,
-    // System = 0x04,
+}
+
+#[allow(unused)]
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum HidReportType {
+    Input = 1,
+    Output = 2,
+    Feature = 3,
 }

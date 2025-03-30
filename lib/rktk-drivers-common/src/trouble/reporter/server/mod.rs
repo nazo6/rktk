@@ -54,6 +54,12 @@ pub(super) struct HidService {
     #[characteristic(uuid = hid_uuid::PROTOCOL_MODE, read, write_without_response)]
     pub protocol_mode: u8,
     #[characteristic(uuid = hid_uuid::HID_REPORT, read, notify)]
-    #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Keyboard as u8, 1u8])]
+    #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Keyboard as u8, hid::HidReportType::Input as u8])]
     pub input_keyboard: [u8; 8],
+    #[characteristic(uuid = hid_uuid::HID_REPORT, read, notify)]
+    #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Media as u8, hid::HidReportType::Input as u8])]
+    pub input_media_keyboard: u16,
+    #[characteristic(uuid = hid_uuid::HID_REPORT, read, notify)]
+    #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Mouse as u8, hid::HidReportType::Input as u8])]
+    pub input_mouse: [u8; 5],
 }

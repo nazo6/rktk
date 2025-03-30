@@ -1,16 +1,15 @@
 use embassy_futures::{join::join, select::select};
 use rand_core::{CryptoRng, RngCore};
 use rktk::utils::Receiver;
-use rktk_log::{helper::Debug2Format, info, warn};
+use rktk_log::{info, warn};
 use ssmarshal::serialize;
 use trouble_host::{
     Address, Controller, Error, Host, HostResources,
     gap::{GapConfig, PeripheralConfig},
     prelude::*,
 };
-use usbd_hid::descriptor::KeyboardReport;
 
-use super::server::Server;
+use super::{Report, server::Server};
 
 pub async fn run<
     C: Controller + 'static,
@@ -21,7 +20,7 @@ pub async fn run<
 >(
     controller: C,
     rng: &mut RNG,
-    output_rx: Receiver<'static, KeyboardReport, 4>,
+    output_rx: Receiver<'static, Report, 4>,
 ) {
     rktk::print!("BLE start");
     let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
@@ -95,7 +94,7 @@ async fn gatt_events_task(conn: &GattConnection<'_, '_>) -> Result<(), Error> {
                 // Server processing emits
                 Ok(event) => {
                     let result = match &event {
-                        GattEvent::Read(event) => {
+                        GattEvent::Read(_event) => {
                             if conn.raw().encrypted() {
                                 None
                             } else {
@@ -171,25 +170,53 @@ async fn hid_task<C: Controller>(
     server: &Server<'_>,
     conn: &GattConnection<'_, '_>,
     _stack: &Stack<'_, C>,
-    output_rx: &Receiver<'static, KeyboardReport, 4>,
+    output_rx: &Receiver<'static, Report, 4>,
 ) {
     loop {
         let report = output_rx.receive().await;
-        rktk_log::info!("got report to send");
 
-        let mut buf = [0u8; 8];
-        match serialize(&mut buf, &report) {
-            Ok(_n) => match server.hid_service.input_keyboard.notify(conn, &buf).await {
-                Ok(_) => {
-                    rktk_log::debug!("sent report: {:?}", buf);
+        match report {
+            Report::Keyboard(keyboard_report) => {
+                let mut buf = [0u8; 8];
+                if let Err(_e) = serialize(&mut buf, &keyboard_report) {
+                    rktk_log::error!("failed to serialize keyboard report");
+                    continue;
                 }
-                Err(e) => {
-                    rktk_log::error!("failed to send report: {:?}", e);
+                if let Err(e) = server.hid_service.input_keyboard.notify(conn, &buf).await {
+                    rktk_log::error!("failed to send keyboard report: {:?}", e);
+                    continue;
                 }
-            },
-            Err(e) => {
-                rktk_log::error!("failed to serialize report: {:?}", Debug2Format(&e));
+            }
+            Report::MediaKeyboard(media_keyboard_report) => {
+                let mut buf = [0u8; 8];
+                if let Err(_e) = serialize(&mut buf, &media_keyboard_report) {
+                    rktk_log::error!("failed to serialize media keyboard report");
+                    continue;
+                }
+                let usage_id: u16 = media_keyboard_report.usage_id;
+                if let Err(e) = server
+                    .hid_service
+                    .input_media_keyboard
+                    .notify(conn, &usage_id)
+                    .await
+                {
+                    rktk_log::error!("failed to send media keyboard report: {:?}", e);
+                    continue;
+                }
+            }
+            Report::Mouse(mouse_report) => {
+                let mut buf = [0u8; 5];
+                if let Err(_e) = serialize(&mut buf, &mouse_report) {
+                    rktk_log::error!("failed to serialize keyboard report");
+                    continue;
+                }
+                if let Err(e) = server.hid_service.input_mouse.notify(conn, &buf).await {
+                    rktk_log::error!("failed to send keyboard report: {:?}", e);
+                    continue;
+                }
             }
         }
+
+        rktk_log::debug!("Successfully sent report");
     }
 }

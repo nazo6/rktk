@@ -7,7 +7,13 @@ mod driver;
 mod server;
 mod task;
 
-static OUTPUT_CHANNEL: Channel<usbd_hid::descriptor::KeyboardReport, 4> = Channel::new();
+pub enum Report {
+    Keyboard(usbd_hid::descriptor::KeyboardReport),
+    MediaKeyboard(usbd_hid::descriptor::MediaKeyboardReport),
+    Mouse(usbd_hid::descriptor::MouseReport),
+}
+
+static OUTPUT_CHANNEL: Channel<Report, 4> = Channel::new();
 
 pub struct TroubleReporterBuilder<
     C: Controller + 'static,
