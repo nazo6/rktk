@@ -1,3 +1,5 @@
+#![allow(static_mut_refs)]
+
 mod task;
 
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex, signal::Signal};
@@ -30,13 +32,13 @@ unsafe impl defmt::Logger for USBLogger {
             }
             TAKEN = true;
             RESTORE = restore;
-            (&raw mut ENCODER).read().start_frame(inner);
+            ENCODER.start_frame(inner);
         }
     }
 
     unsafe fn release() {
         unsafe {
-            (&raw mut ENCODER).read().end_frame(inner);
+            ENCODER.end_frame(inner);
             TAKEN = false;
             let restore = RESTORE;
             critical_section::release(restore);
@@ -47,7 +49,7 @@ unsafe impl defmt::Logger for USBLogger {
 
     unsafe fn write(bytes: &[u8]) {
         unsafe {
-            (&raw mut ENCODER).read().write(bytes, inner);
+            ENCODER.write(bytes, inner);
         }
     }
 }
