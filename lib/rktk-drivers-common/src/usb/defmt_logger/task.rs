@@ -25,14 +25,12 @@ pub async fn logger<'d, D: Driver<'d>>(mut sender: Sender<'d, D>, size: usize, u
         embassy_time::Timer::after_millis(100).await;
         LOG_SIGNAL.reset();
 
-        let mut q = QUEUE.lock().await;
+        let q = core::mem::take(&mut *QUEUE.lock().await);
 
         for chunk in q.chunks(size) {
             if let Err(EndpointError::Disabled) = sender.write_packet(chunk).await {
                 sender.wait_connection().await;
             }
         }
-
-        q.clear();
     }
 }
