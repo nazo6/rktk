@@ -13,7 +13,7 @@ macro_rules! print {
 
         let mut str = $crate::reexports::heapless::String::<256>::new();
         write!(str, $($arg)*).unwrap();
-        let _ = DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.try_send(str);
+        let _ = DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.signal(str);
     }};
 }
 

@@ -6,7 +6,7 @@ use rktk_log::error;
 use crate::{
     drivers::interface::{display::DisplayDriver, reporter::Output},
     interface::Hand,
-    utils::Channel,
+    utils::{Channel, Signal},
 };
 
 pub enum DisplayMessage {
@@ -25,7 +25,7 @@ pub enum DisplayMessage {
 }
 
 pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
-pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Channel<heapless::String<256>, 3> = Channel::new();
+pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Signal<heapless::String<256>> = Signal::new();
 
 pub(super) async fn start<D: DisplayDriver>(display: &mut D) {
     if display.init().await.is_err() {
@@ -37,7 +37,7 @@ pub(super) async fn start<D: DisplayDriver>(display: &mut D) {
     loop {
         match select(
             DISPLAY_CONTROLLER.receive(),
-            DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.receive(),
+            DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.wait(),
         )
         .await
         {
