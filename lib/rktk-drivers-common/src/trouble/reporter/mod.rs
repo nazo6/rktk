@@ -1,19 +1,24 @@
 use driver::TroubleReporter;
 use rand_core::{CryptoRng, RngCore};
 use rktk::{drivers::interface::ble::BleDriverBuilder, utils::Channel};
-use trouble_host::Controller;
+use trouble_host::{Controller, gap::PeripheralConfig};
 
 mod driver;
 mod server;
 mod task;
 
-pub enum Report {
+enum Report {
     Keyboard(usbd_hid::descriptor::KeyboardReport),
     MediaKeyboard(usbd_hid::descriptor::MediaKeyboardReport),
     Mouse(usbd_hid::descriptor::MouseReport),
 }
 
 static OUTPUT_CHANNEL: Channel<Report, 4> = Channel::new();
+
+pub struct TroubleReporterConfig {
+    pub advertise_name: &'static str,
+    pub peripheral_config: Option<PeripheralConfig<'static>>,
+}
 
 pub struct TroubleReporterBuilder<
     C: Controller + 'static,
@@ -24,6 +29,7 @@ pub struct TroubleReporterBuilder<
 > {
     controller: C,
     rng: &'static mut RNG,
+    config: TroubleReporterConfig,
 }
 
 impl<
@@ -34,8 +40,12 @@ impl<
     const L2CAP_MTU: usize,
 > TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
-    pub fn new(controller: C, rng: &'static mut RNG) -> Self {
-        Self { controller, rng }
+    pub fn new(controller: C, rng: &'static mut RNG, config: TroubleReporterConfig) -> Self {
+        Self {
+            controller,
+            rng,
+            config,
+        }
     }
 }
 
@@ -63,6 +73,7 @@ impl<
                 self.controller,
                 self.rng,
                 OUTPUT_CHANNEL.receiver(),
+                self.config,
             ),
         ))
     }

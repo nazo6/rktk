@@ -9,7 +9,7 @@ use trouble_host::{
     prelude::*,
 };
 
-use super::{Report, server::Server};
+use super::{Report, TroubleReporterConfig, server::Server};
 
 pub async fn run<
     C: Controller + 'static,
@@ -21,8 +21,9 @@ pub async fn run<
     controller: C,
     rng: &mut RNG,
     output_rx: Receiver<'static, Report, 4>,
+    config: TroubleReporterConfig,
 ) {
-    rktk::print!("BLE start");
+    info!("Trouble BLE starting");
     let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
     info!("Our address = {:?}", address);
 
@@ -38,22 +39,24 @@ pub async fn run<
     } = stack.build();
 
     info!("Starting advertising and GATT service");
-    let server = Server::new_with_config(GapConfig::Peripheral(PeripheralConfig {
-        name: "TrouBLE",
-        appearance: &appearance::human_interface_device::KEYBOARD,
-    }));
+    let server = Server::new_with_config(GapConfig::Peripheral(
+        config.peripheral_config.unwrap_or(PeripheralConfig {
+            name: config.advertise_name,
+            appearance: &appearance::human_interface_device::KEYBOARD,
+        }),
+    ));
     match server {
         Ok(server) => {
             let _ = join(ble_task(runner), async {
                 loop {
-                    match advertise("Trouble Example", &mut peripheral).await {
+                    match advertise(config.advertise_name, &mut peripheral).await {
                         Ok(conn) => {
                             let gatt_conn = conn.with_attribute_server(&server).unwrap();
-                            let a = gatt_events_task(&gatt_conn);
-                            let b = hid_task(&server, &gatt_conn, &stack, &output_rx);
-                            // run until any task ends (usually because the connection has been closed),
-                            // then return to advertising state.
-                            select(a, b).await;
+                            select(
+                                gatt_events_task(&gatt_conn),
+                                hid_task(&server, &gatt_conn, &stack, &output_rx),
+                            )
+                            .await;
                         }
                         Err(e) => {
                             #[cfg(feature = "defmt")]
@@ -91,7 +94,6 @@ async fn gatt_events_task(conn: &GattConnection<'_, '_>) -> Result<(), Error> {
                 break;
             }
             GattConnectionEvent::Gatt { event } => match event {
-                // Server processing emits
                 Ok(event) => {
                     let result = match &event {
                         GattEvent::Read(_event) => {
@@ -101,7 +103,7 @@ async fn gatt_events_task(conn: &GattConnection<'_, '_>) -> Result<(), Error> {
                                 Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
                             }
                         }
-                        GattEvent::Write(event) => {
+                        GattEvent::Write(_event) => {
                             if conn.raw().encrypted() {
                                 None
                             } else {
@@ -110,8 +112,6 @@ async fn gatt_events_task(conn: &GattConnection<'_, '_>) -> Result<(), Error> {
                         }
                     };
 
-                    // This step is also performed at drop(), but writing it explicitly is necessary
-                    // in order to ensure reply is sent.
                     let result = if let Some(code) = result {
                         event.reject(code)
                     } else {
