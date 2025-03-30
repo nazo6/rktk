@@ -52,9 +52,6 @@ _check = [
   "reporter-trouble",
 ]
 
-[features]
-_check = ["defmt-usb", "defmt-timestamp", "log", "usb-remote-wakeup"]
-
 ## Enables defmt-over-usb logger. You cannot use this feature with other defmt logger.
 defmt-usb = ["defmt", "dep:critical-section"]
 ## Enables defmt timestamp support using embassy-time
