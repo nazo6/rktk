@@ -47,6 +47,7 @@ check_group_features = [
   ],
 ]
 test_enabled = true
+test_features = []
 
 [crates.rktk-keymanager]
 check_group_features = [["serde", "postcard"]]
