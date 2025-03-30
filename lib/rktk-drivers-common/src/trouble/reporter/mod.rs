@@ -1,9 +1,6 @@
 use driver::TroubleReporter;
-use rktk::{
-    drivers::interface::{BackgroundTask, DriverBuilderWithTask},
-    utils::Channel,
-};
-use task::TroubleReporterTask;
+use rand_core::{CryptoRng, RngCore};
+use rktk::{drivers::interface::ble::BleDriverBuilder, utils::Channel};
 use trouble_host::Controller;
 
 mod driver;
@@ -14,46 +11,53 @@ static OUTPUT_CHANNEL: Channel<usbd_hid::descriptor::KeyboardReport, 4> = Channe
 
 pub struct TroubleReporterBuilder<
     C: Controller + 'static,
+    RNG: RngCore + CryptoRng + 'static,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
 > {
     controller: C,
+    rng: &'static mut RNG,
 }
 
 impl<
     C: Controller + 'static,
+    RNG: RngCore + CryptoRng,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
-> TroubleReporterBuilder<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+> TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
-    pub fn new(controller: C) -> Self {
-        Self { controller }
+    pub fn new(controller: C, rng: &'static mut RNG) -> Self {
+        Self { controller, rng }
     }
 }
 
 impl<
     C: Controller + 'static,
+    RNG: RngCore + CryptoRng,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
-> DriverBuilderWithTask
-    for TroubleReporterBuilder<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+> BleDriverBuilder
+    for TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
-    type Driver = TroubleReporter;
+    type Output = TroubleReporter;
 
     type Error = ();
 
-    async fn build(self) -> Result<(Self::Driver, impl BackgroundTask + 'static), Self::Error> {
+    async fn build(
+        self,
+    ) -> Result<(Self::Output, impl Future<Output = ()> + 'static), Self::Error> {
         Ok((
             TroubleReporter {
                 output_tx: OUTPUT_CHANNEL.sender(),
             },
-            TroubleReporterTask::<_, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU> {
-                controller: self.controller,
-                output_rx: OUTPUT_CHANNEL.receiver(),
-            },
+            task::run::<_, _, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>(
+                self.controller,
+                self.rng,
+                OUTPUT_CHANNEL.receiver(),
+            ),
         ))
     }
 }
