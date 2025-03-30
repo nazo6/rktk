@@ -179,9 +179,9 @@ async fn hid_task<C: Controller>(
 
         let mut buf = [0u8; 8];
         match serialize(&mut buf, &report) {
-            Ok(_n) => match server.hid_service.output_keyboard.notify(conn, &buf).await {
+            Ok(_n) => match server.hid_service.input_keyboard.notify(conn, &buf).await {
                 Ok(_) => {
-                    rktk_log::info!("sent report");
+                    rktk_log::debug!("sent report: {:?}", buf);
                 }
                 Err(e) => {
                     rktk_log::error!("failed to send report: {:?}", e);

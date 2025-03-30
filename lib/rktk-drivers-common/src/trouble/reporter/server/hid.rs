@@ -71,8 +71,6 @@ pub struct BleKeyboardReport {
     pub pan: i8,
     pub media_usage_id: u16,
     pub system_usage_id: u8,
-    pub vial_input_data: [u8; 32],
-    pub vial_output_data: [u8; 32],
 }
 
 pub struct Desc(&'static [u8]);

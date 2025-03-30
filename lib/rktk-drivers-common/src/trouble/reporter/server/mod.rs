@@ -5,7 +5,7 @@ mod hid;
 // GATT Server definition
 #[gatt_server]
 pub(super) struct Server {
-    pub battery_service: BatteryService,
+    // pub battery_service: BatteryService,
     // pub dis: DeviceInformationService,
     pub hid_service: HidService,
 }
@@ -46,14 +46,14 @@ mod hid_uuid {
 #[gatt_service(uuid = hid_uuid::HID_SERVICE)]
 pub(super) struct HidService {
     #[characteristic(uuid = hid_uuid::HID_INFO, read)]
-    pub hid_info: u16,
+    pub hid_info: [u8; 4],
     #[characteristic(uuid = hid_uuid::REPORT_MAP, read)]
     pub report_map: hid::Desc,
     #[characteristic(uuid = hid_uuid::HID_CONTROL_POINT, write_without_response)]
-    pub control_point: u16,
+    pub control_point: u8,
     #[characteristic(uuid = hid_uuid::PROTOCOL_MODE, read, write_without_response)]
-    pub protocol_mode: u16,
+    pub protocol_mode: u8,
     #[characteristic(uuid = hid_uuid::HID_REPORT, read, notify)]
-    #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Keyboard as u8, 2u8])]
-    pub output_keyboard: [u8; 8],
+    #[descriptor(uuid = hid_uuid::HID_REPORT_REF, read, value = [hid::BleCompositeReportType::Keyboard as u8, 1u8])]
+    pub input_keyboard: [u8; 8],
 }
