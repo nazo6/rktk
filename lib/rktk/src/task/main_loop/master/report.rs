@@ -41,7 +41,11 @@ pub async fn report_task<
     debug!("report task start");
 
     let mut prev_update_time = embassy_time::Instant::now();
-    let mut current_output = Output::Usb;
+    let mut current_output = if usb.is_some() {
+        Output::Usb
+    } else {
+        Output::Ble
+    };
     let mut display_off = DisplayOffController::new();
 
     loop {
