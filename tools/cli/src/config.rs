@@ -23,7 +23,10 @@ pub struct CrateConfig {
     pub check_mutually_exclusive_features: Option<Vec<Vec<String>>>,
     /// Features to skip check (these features will be never added.). This overrides global skip.
     pub check_skip: Option<Vec<String>>,
+
     pub test_enabled: bool,
+    pub test_features: Option<Vec<String>>,
+
     pub doc_disabled: bool,
 }
 

@@ -1,7 +1,7 @@
 use nrf_softdevice::{Softdevice, raw};
 
 use rktk::{drivers::interface::ble::BleDriverBuilder, utils::Channel};
-use server::Server;
+pub use server::Server;
 pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 

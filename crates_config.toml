@@ -14,18 +14,40 @@ check_at_least_one_of = ["server", "client"]
 test_enabled = true
 
 [crates.rktk-drivers-nrf]
-check_features = ["_check", "nightly", "power"]
+check_features = ["_nrfxx", "nightly", "power"]
 check_group_features = [["softdevice", "softdevice-ble"]]
-check_mutually_exclusive_features = [["softdevice-ble", "esb"]]
-check_skip = ["default"]
+check_mutually_exclusive_features = [
+  [
+    "softdevice-ble",
+    "esb",
+  ],
+  [
+    "esb",
+    "sdc",
+  ],
+  [
+    "softdevice-ble",
+    "sdc",
+  ],
+]
 
 [crates.rktk-drivers-rp]
 check_features = ["_check"]
 check_skip = []
 
 [crates.rktk-drivers-common]
-check_group_features = [["defmt", "defmt-timestamp"]]
+check_group_features = [
+  [
+    "defmt",
+    "defmt-timestamp",
+  ],
+  [
+    "trouble",
+    "reporter-trouble",
+  ],
+]
 test_enabled = true
+test_features = []
 
 [crates.rktk-keymanager]
 check_group_features = [["serde", "postcard"]]

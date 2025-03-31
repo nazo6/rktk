@@ -1,7 +1,7 @@
 use anyhow::Context;
 use duct::cmd;
 
-use crate::utils::{xprintln, METADATA};
+use crate::utils::{METADATA, xprintln};
 
 use super::config::CRATES_CONFIG;
 
@@ -10,11 +10,15 @@ fn build_args(crate_name: &str) -> Option<Vec<String>> {
         if c.test_enabled {
             let mut args = vec!["test".to_string()];
 
-            let features = CRATES_CONFIG
-                .test_features_global
-                .clone()
-                .unwrap_or_default()
-                .join(",");
+            let features = if let Some(crate_features) = c.test_features.as_ref() {
+                crate_features.join(",")
+            } else {
+                CRATES_CONFIG
+                    .test_features_global
+                    .clone()
+                    .unwrap_or_default()
+                    .join(",")
+            };
             if !features.is_empty() {
                 args.push("--features".to_string());
                 args.push(features);

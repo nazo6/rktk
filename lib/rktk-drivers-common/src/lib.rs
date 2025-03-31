@@ -11,6 +11,8 @@ pub mod keyscan;
 pub mod mouse;
 pub mod panic_utils;
 pub mod storage;
+#[cfg(feature = "trouble")]
+pub mod trouble;
 pub mod usb;
 
 #[cfg(feature = "defmt-timestamp")]

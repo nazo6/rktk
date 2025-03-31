@@ -38,9 +38,23 @@ heapless = { workspace = true }
 thiserror = { workspace = true }
 
 document-features = { workspace = true }
+static_cell = { workspace = true, optional = true }
+ssmarshal = { workspace = true, optional = true }
+
+trouble-host = { git = "https://github.com/embassy-rs/trouble/", version = "0.1.0", optional = true, features = [
+  "security",
+] }
+rand_core = { version = "0.6", optional = true }
 
 [features]
-_check = ["defmt-usb", "defmt-timestamp", "log", "usb-remote-wakeup"]
+_check = [
+  "defmt-usb",
+  "log",
+  "defmt",
+  "defmt-timestamp",
+  "usb-remote-wakeup",
+  "reporter-trouble",
+]
 
 ## Enables defmt-over-usb logger. You cannot use this feature with other defmt logger.
 defmt-usb = ["defmt", "dep:critical-section"]
@@ -53,9 +67,13 @@ defmt = [
   "embassy-executor/defmt",
   "rktk/defmt",
   "rktk-log/defmt",
+  "trouble-host?/defmt",
 ]
 ## Enables logging using the `log` crate.
 log = ["dep:log"]
+
+trouble = ["dep:trouble-host", "dep:rand_core"]
+reporter-trouble = ["trouble", "dep:ssmarshal", "dep:static_cell"]
 
 ## Enables remote wakeup feature of USB.
 ## NOTE: Usually, this is automatically enabled by each platform's driver crate and you should not enable this feature manually.
