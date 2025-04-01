@@ -49,16 +49,9 @@ use usbd_hid::descriptor::generator_prelude::*;
             }
         };
     },
-    (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = SYSTEM_CONTROL) = {
-        (report_id = 0x04,) = {
-            (usage_min = 0x81, usage_max = 0xB7, logical_min = 1) = {
-                #[item_settings data,array,absolute,not_null] system_usage_id=input;
-            };
-        };
-    },
 )]
 #[allow(dead_code)]
-pub struct BleKeyboardReport {
+struct BleKeyboardReportForDesc {
     pub modifier: u8,
     pub reserved: u8,
     pub leds: u8,
@@ -69,16 +62,25 @@ pub struct BleKeyboardReport {
     pub wheel: i8,
     pub pan: i8,
     pub media_usage_id: u16,
-    pub system_usage_id: u8,
-    pub vial_input_data: [u8; 32],
-    pub vial_output_data: [u8; 32],
+}
+
+pub fn hid_desc() -> &'static [u8] {
+    BleKeyboardReportForDesc::desc()
 }
 
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum BleCompositeReportType {
+pub(crate) enum HidKind {
     Keyboard = 0x01,
     Mouse = 0x02,
     Media = 0x03,
-    // System = 0x04,
+}
+
+#[allow(dead_code)]
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum ReportKind {
+    Input = 1,
+    Output = 2,
+    Feature = 3,
 }

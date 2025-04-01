@@ -9,7 +9,7 @@ use nrf_softdevice::ble::{
 };
 use rktk_log::{info, warn};
 
-use crate::softdevice::ble::REPORT_CHAN;
+use crate::softdevice::ble::INPUT_REPORT_CHAN;
 use crate::softdevice::flash::SharedFlash;
 
 use super::server::Server;
@@ -75,7 +75,7 @@ pub async fn softdevice_task(
             },
             async {
                 loop {
-                    let report = REPORT_CHAN.receive().await;
+                    let report = INPUT_REPORT_CHAN.receive().await;
                     if let Err(e) = server.hid.send_report(&conn, report) {
                         warn!("BLE hid failed: {:?}", e);
                     };

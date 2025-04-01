@@ -1,7 +1,7 @@
 use rktk::drivers::interface::{ble::BleDriver, reporter::ReporterDriver};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use super::{bonder::BOND_FLASH, HidReport, REPORT_CHAN};
+use super::{INPUT_REPORT_CHAN, InputReport, KB_OUTPUT_LED_SIGNAL, bonder::BOND_FLASH};
 
 pub struct NrfBleDriver {}
 
@@ -17,8 +17,8 @@ impl ReporterDriver for NrfBleDriver {
     type Error = BleError;
 
     fn try_send_keyboard_report(&self, report: KeyboardReport) -> Result<(), Self::Error> {
-        REPORT_CHAN
-            .try_send(HidReport::Keyboard(report))
+        INPUT_REPORT_CHAN
+            .try_send(InputReport::Keyboard(report))
             .map_err(|_| BleError::ReportChannelFull("keyboard"))?;
         Ok(())
     }
@@ -27,19 +27,24 @@ impl ReporterDriver for NrfBleDriver {
         &self,
         report: MediaKeyboardReport,
     ) -> Result<(), Self::Error> {
-        REPORT_CHAN
-            .try_send(HidReport::MediaKeyboard(report))
+        INPUT_REPORT_CHAN
+            .try_send(InputReport::MediaKeyboard(report))
             .map_err(|_| BleError::ReportChannelFull("media keyboard"))?;
 
         Ok(())
     }
 
     fn try_send_mouse_report(&self, report: MouseReport) -> Result<(), Self::Error> {
-        REPORT_CHAN
-            .try_send(HidReport::Mouse(report))
+        INPUT_REPORT_CHAN
+            .try_send(InputReport::Mouse(report))
             .map_err(|_| BleError::ReportChannelFull("mouse"))?;
 
         Ok(())
+    }
+
+    async fn read_keyboard_report(&self) -> Result<u8, Self::Error> {
+        let leds = KB_OUTPUT_LED_SIGNAL.wait().await;
+        Ok(leds)
     }
 
     async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), Self::Error> {

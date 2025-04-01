@@ -1,6 +1,9 @@
 use nrf_softdevice::{Softdevice, raw};
 
-use rktk::{drivers::interface::ble::BleDriverBuilder, utils::Channel};
+use rktk::{
+    drivers::interface::ble::BleDriverBuilder,
+    utils::{Channel, Signal},
+};
 pub use server::Server;
 pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
@@ -15,13 +18,16 @@ mod services;
 mod task;
 
 #[derive(Debug)]
-pub enum HidReport {
+pub enum InputReport {
     Keyboard(KeyboardReport),
     MediaKeyboard(MediaKeyboardReport),
     Mouse(MouseReport),
 }
 
-static REPORT_CHAN: Channel<HidReport, 8> = Channel::new();
+// Channel for input (device to host) report
+static INPUT_REPORT_CHAN: Channel<InputReport, 8> = Channel::new();
+// Channel for keyboard output report (only leds field)
+static KB_OUTPUT_LED_SIGNAL: Signal<u8> = Signal::new();
 
 pub fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> Server {
     unsafe {
