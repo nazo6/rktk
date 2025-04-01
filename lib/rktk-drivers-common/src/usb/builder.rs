@@ -11,13 +11,14 @@ use usbd_hid::descriptor::{
 use crate::usb::handler::UsbDeviceHandler;
 
 use super::{
-    ReadySignal, UsbOpts,
+    CommonUsbDriverConfig, ReadySignal,
     driver::CommonUsbDriver,
     raw_hid::{RAW_HID_BUFFER_SIZE, RawHidReport},
     rrp::{RRP_HID_BUFFER_SIZE, RrpReport},
     task::*,
 };
 
+/// General usb driver using embassy-usb.
 pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,
     keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
@@ -35,14 +36,14 @@ pub struct CommonUsbDriverBuilder<D: Driver<'static>> {
 }
 
 impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
-    pub fn new(opts: UsbOpts<D>) -> Self {
+    pub fn new(opts: CommonUsbDriverConfig<D>) -> Self {
         #[cfg(feature = "usb-remote-wakeup")]
         let wakeup_signal = singleton!(super::RemoteWakeupSignal::new(), super::RemoteWakeupSignal);
         let ready_signal = singleton!(ReadySignal::new(), ReadySignal);
 
         let mut builder = Builder::new(
             opts.driver,
-            opts.config,
+            opts.driver_config,
             singleton!([0; 256], [u8; 256]),
             singleton!([0; 256], [u8; 256]),
             singleton!([0; 256], [u8; 256]),
@@ -55,7 +56,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: KeyboardReport::desc(),
                 request_handler: None,
-                poll_ms: opts.kb_poll_interval,
+                poll_ms: opts.keyboard_poll_interval,
                 max_packet_size: 64,
             };
             HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
@@ -73,7 +74,7 @@ impl<D: Driver<'static>> CommonUsbDriverBuilder<D> {
             let config = embassy_usb::class::hid::Config {
                 report_descriptor: MediaKeyboardReport::desc(),
                 request_handler: None,
-                poll_ms: opts.kb_poll_interval,
+                poll_ms: opts.keyboard_poll_interval,
                 max_packet_size: 64,
             };
             HidWriter::<_, 8>::new(&mut builder, singleton!(State::new(), State), config)
