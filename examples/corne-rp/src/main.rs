@@ -6,7 +6,10 @@ mod keymap;
 use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
-use embassy_rp::gpio::{Input, Level, Output, Pull};
+use embassy_rp::{
+    bind_interrupts,
+    gpio::{Input, Level, Output, Pull},
+};
 use rktk::{
     config::constant::CONFIG,
     drivers::{Drivers, dummy},
@@ -14,8 +17,15 @@ use rktk::{
     interface::Hand,
 };
 
-use rktk_drivers_common::keyscan::matrix::Matrix;
+use rktk_drivers_common::{
+    keyscan::matrix::Matrix,
+    usb::{CommonUsbDriverBuilder, CommonUsbDriverConfig},
+};
 use rktk_drivers_rp::system::RpSystemDriver;
+
+bind_interrupts!(pub struct Irqs {
+    USBCTRL_IRQ => embassy_rp::usb::InterruptHandler<embassy_rp::peripherals::USB>;
+});
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -64,7 +74,12 @@ async fn main(_spawner: Spawner) {
         ),
         system: RpSystemDriver,
         mouse: dummy::mouse(),
-        usb_builder: dummy::usb_builder(),
+        usb_builder: Some({
+            let embassy_driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
+            let opts = CommonUsbDriverConfig::new(embassy_driver, 0xc0de, 0xcafe);
+
+            CommonUsbDriverBuilder::new(opts)
+        }),
         display: dummy::display(),
         split: dummy::split(),
         rgb: dummy::rgb(),

@@ -6,16 +6,28 @@ mod keymap;
 use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
-use embassy_nrf::gpio::{Input, Level, Output, OutputDrive, Pull};
+use embassy_nrf::{
+    bind_interrupts,
+    gpio::{Input, Level, Output, OutputDrive, Pull},
+    usb::vbus_detect::SoftwareVbusDetect,
+};
 use rktk::{
     config::constant::CONFIG,
     drivers::{Drivers, dummy},
     hooks::empty_hooks::create_empty_hooks,
     interface::Hand,
+    singleton,
 };
 
-use rktk_drivers_common::keyscan::matrix::Matrix;
+use rktk_drivers_common::{
+    keyscan::matrix::Matrix,
+    usb::{CommonUsbDriverBuilder, CommonUsbDriverConfig},
+};
 use rktk_drivers_nrf::system::NrfSystemDriver;
+
+bind_interrupts!(pub struct Irqs {
+    USBD => embassy_nrf::usb::InterruptHandler<embassy_nrf::peripherals::USBD>;
+});
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -64,7 +76,13 @@ async fn main(_spawner: Spawner) {
         ),
         system: NrfSystemDriver::new(None),
         mouse: dummy::mouse(),
-        usb_builder: dummy::usb_builder(),
+        usb_builder: Some({
+            let vbus = &*singleton!(SoftwareVbusDetect::new(true, true), SoftwareVbusDetect);
+            let embassy_driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
+            let opts = CommonUsbDriverConfig::new(embassy_driver, 0xc0de, 0xcafe);
+
+            CommonUsbDriverBuilder::new(opts)
+        }),
         display: dummy::display(),
         split: dummy::split(),
         rgb: dummy::rgb(),
