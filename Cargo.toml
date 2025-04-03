@@ -87,7 +87,7 @@ web-sys = { version = "0.3.70" }
 wasm-bindgen = "0.2.99"
 wasm-bindgen-futures = "0.4.49"
 
-defmt = "0.3.10"
+defmt = "1.0.1"
 log = "0.4.25"
 
 document-features = "0.2.11"
