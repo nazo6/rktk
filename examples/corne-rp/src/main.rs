@@ -19,7 +19,7 @@ use rktk::{
 
 use rktk_drivers_common::{
     keyscan::matrix::Matrix,
-    usb::{CommonUsbDriverBuilder, CommonUsbDriverConfig},
+    usb::{CommonUsbDriverBuilder, CommonUsbDriverConfig, UsbDriverConfig},
 };
 use rktk_drivers_rp::system::RpSystemDriver;
 
@@ -76,7 +76,9 @@ async fn main(_spawner: Spawner) {
         mouse: dummy::mouse(),
         usb_builder: Some({
             let embassy_driver = embassy_rp::usb::Driver::new(p.USB, Irqs);
-            let opts = CommonUsbDriverConfig::new(embassy_driver, 0xc0de, 0xcafe);
+            let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
+            driver_config.product = Some("corne");
+            let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);
 
             CommonUsbDriverBuilder::new(opts)
         }),

@@ -30,7 +30,7 @@ pub struct CommonUsbDriverConfig<D: embassy_usb::driver::Driver<'static>> {
     pub mouse_poll_interval: u8,
     /// USB Poll interval for keyboard in ms.
     pub keyboard_poll_interval: u8,
-    /// If this is set to true, defmt-usb logger waits for DTR signal to output log.
+    /// If this is set to true, defmt-usb logger waits for DTR signal before log output.
     /// This allows you to view logs recorded before the logger client is started.
     #[cfg(feature = "defmt-usb")]
     pub defmt_usb_use_dtr: bool,
@@ -42,9 +42,10 @@ impl<D: embassy_usb::driver::Driver<'static>> CommonUsbDriverConfig<D> {
     /// * `driver`: embassy-usb driver instance
     /// * `vid`: USB vendor ID
     /// * `pid`: USB product ID
-    pub fn new(driver: D, vid: u16, pid: u16) -> Self {
+    pub fn new(driver: D, mut driver_config: UsbDriverConfig<'static>) -> Self {
+        driver_config.supports_remote_wakeup = cfg!(feature = "usb-remote-wakeup");
         Self {
-            driver_config: UsbDriverConfig::new(vid, pid),
+            driver_config,
             mouse_poll_interval: 1,
             keyboard_poll_interval: 1,
             driver,

@@ -21,7 +21,7 @@ use rktk::{
 
 use rktk_drivers_common::{
     keyscan::matrix::Matrix,
-    usb::{CommonUsbDriverBuilder, CommonUsbDriverConfig},
+    usb::{CommonUsbDriverBuilder, CommonUsbDriverConfig, UsbDriverConfig},
 };
 use rktk_drivers_nrf::system::NrfSystemDriver;
 
@@ -79,7 +79,9 @@ async fn main(_spawner: Spawner) {
         usb_builder: Some({
             let vbus = &*singleton!(SoftwareVbusDetect::new(true, true), SoftwareVbusDetect);
             let embassy_driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
-            let opts = CommonUsbDriverConfig::new(embassy_driver, 0xc0de, 0xcafe);
+            let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
+            driver_config.product = Some("corne");
+            let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);
 
             CommonUsbDriverBuilder::new(opts)
         }),
