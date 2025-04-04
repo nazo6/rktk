@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::rgb::RgbCommand;
 
 pub trait SplitDriver: 'static {
-    type Error: core::error::Error;
+    type Error: super::Error;
 
     async fn init(&mut self) -> Result<(), Self::Error> {
         Ok(())

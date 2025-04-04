@@ -1,6 +1,6 @@
 /// Storage driver interface
 pub trait StorageDriver {
-    type Error: core::error::Error;
+    type Error: super::Error;
 
     async fn format(&self) -> Result<(), Self::Error>;
     async fn read<const N: usize>(&self, key: u64, buf: &mut [u8]) -> Result<(), Self::Error>;

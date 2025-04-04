@@ -10,15 +10,16 @@ use rktk_rrp::{
 use crate::{
     config::{constant::KEYBOARD, storage::StorageConfigManager},
     drivers::interface::{
-        ble::BleDriver, reporter::ReporterDriver, storage::StorageDriver, usb::UsbDriver,
+        reporter::ReporterDriver, storage::StorageDriver, usb::UsbReporterDriver,
+        wireless::WirelessReporterDriver,
     },
 };
 
 use super::{ConfiguredState, RKTK_CONFIG, SharedState};
 
 pub async fn start(
-    usb: &Option<impl UsbDriver>,
-    _ble: &Option<impl BleDriver>,
+    usb: &Option<impl UsbReporterDriver>,
+    _ble: &Option<impl WirelessReporterDriver>,
     state: &SharedState,
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
 ) {

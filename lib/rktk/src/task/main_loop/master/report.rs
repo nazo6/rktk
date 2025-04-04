@@ -12,11 +12,11 @@ use crate::task::channels::report::{MOUSE_CHANGE_SIGNAL, MOUSE_CHANGE_X, MOUSE_C
 use crate::{
     config::{constant::RKTK_CONFIG, storage::StorageConfigManager},
     drivers::interface::{
-        ble::BleDriver,
         reporter::{Output, ReporterDriver},
         storage::StorageDriver,
         system::SystemDriver,
-        usb::UsbDriver,
+        usb::UsbReporterDriver,
+        wireless::WirelessReporterDriver,
     },
     hooks::interface::MasterHooks,
     task::channels::report::{ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL},
@@ -28,8 +28,8 @@ use super::SharedState;
 pub async fn report_task<
     System: SystemDriver,
     S: StorageDriver,
-    Ble: BleDriver,
-    Usb: UsbDriver,
+    Ble: WirelessReporterDriver,
+    Usb: UsbReporterDriver,
     MH: MasterHooks,
 >(
     system: &System,
@@ -235,7 +235,7 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: Report) -> bo
     reported
 }
 
-async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
+async fn read_keyboard_report<USB: UsbReporterDriver, BLE: WirelessReporterDriver>(
     usb: &Option<USB>,
     ble: &Option<BLE>,
     output: Output,

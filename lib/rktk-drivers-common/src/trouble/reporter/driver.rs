@@ -1,7 +1,7 @@
 use core::convert::Infallible;
 
 use rktk::{
-    drivers::interface::{ble::BleDriver, reporter::ReporterDriver},
+    drivers::interface::{reporter::ReporterDriver, wireless::WirelessReporterDriver},
     utils::Sender,
 };
 
@@ -46,10 +46,10 @@ impl ReporterDriver for TroubleReporter {
         Ok(false)
     }
 }
-impl BleDriver for TroubleReporter {
+impl WirelessReporterDriver for TroubleReporter {
     type Error = Infallible;
 
-    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
+    async fn clear_bond_data(&self) -> Result<(), <Self as WirelessReporterDriver>::Error> {
         Ok(())
     }
 }

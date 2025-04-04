@@ -3,7 +3,6 @@
 use crate::{
     config::constant::RKTK_CONFIG,
     drivers::interface::{
-        ble::BleDriverBuilder,
         debounce::DebounceDriver,
         display::DisplayDriver,
         dongle::{DongleData, DongleDriver, DongleDriverBuilder},
@@ -14,7 +13,8 @@ use crate::{
         rgb::RgbDriver,
         split::SplitDriver,
         storage::StorageDriver,
-        usb::UsbDriverBuilder,
+        usb::UsbReporterDriverBuilder,
+        wireless::WirelessReporterDriverBuilder,
     },
     hooks::Hooks,
     interface::Hand,
@@ -49,8 +49,8 @@ pub async fn start<
     Rgb: RgbDriver,
     Storage: StorageDriver,
     Split: SplitDriver,
-    Ble: BleDriverBuilder,
-    Usb: UsbDriverBuilder,
+    Ble: WirelessReporterDriverBuilder,
+    Usb: UsbReporterDriverBuilder,
     Display: DisplayDriver,
     Mouse: MouseDriver,
     //
@@ -181,7 +181,7 @@ pub async fn start<
 
 /// Runs dongle with the given drivers.
 pub async fn dongle_start(
-    usb: impl UsbDriverBuilder,
+    usb: impl UsbReporterDriverBuilder,
     dongle: impl DongleDriverBuilder,
     mut hooks: impl dongle::DongleHooks,
     display: Option<impl DisplayDriver>,

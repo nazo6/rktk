@@ -147,10 +147,13 @@ pub struct EsbDongleDriver {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum EsbDongleError {
-    Esb(esb_ng::Error),
+    Esb(#[cfg_attr(feature = "defmt", defmt(Debug2Format))] esb_ng::Error),
     Deserialization(postcard::Error),
 }
+
+impl rktk::drivers::interface::Error for EsbDongleError {}
 
 impl DongleDriver for EsbDongleDriver {
     type Error = EsbDongleError;

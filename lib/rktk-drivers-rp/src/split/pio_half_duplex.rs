@@ -142,11 +142,13 @@ impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Error {
-    #[error("General: {0}")]
     GeneralError(&'static str),
 }
+
+impl rktk::drivers::interface::Error for Error {}
 
 impl<I: Instance + 'static> SplitDriver for PioHalfDuplexSplitDriver<'static, I> {
     type Error = Error;

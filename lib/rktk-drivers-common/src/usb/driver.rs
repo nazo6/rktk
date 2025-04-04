@@ -6,7 +6,7 @@ use super::{
         RAW_HID_SEND_CHANNEL, RRP_RECV_PIPE, RRP_SEND_PIPE,
     },
 };
-use rktk::drivers::interface::{reporter::ReporterDriver, usb::UsbDriver};
+use rktk::drivers::interface::{reporter::ReporterDriver, usb::UsbReporterDriver};
 
 pub struct CommonUsbDriver {
     #[cfg(feature = "usb-remote-wakeup")]
@@ -14,17 +14,16 @@ pub struct CommonUsbDriver {
     pub(super) ready_signal: &'static ReadySignal,
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UsbError {
-    #[error("Channel full: {0}")]
     ChannelFull(&'static str),
-    #[error("Not supported")]
     NotSupported,
-    #[error("Too big")]
     TooBig,
-    #[error("buf small")]
     BufSmall,
 }
+
+impl rktk::drivers::interface::Error for UsbError {}
 
 impl ReporterDriver for CommonUsbDriver {
     type Error = UsbError;
@@ -116,10 +115,10 @@ impl ReporterDriver for CommonUsbDriver {
         Err(UsbError::NotSupported)
     }
 }
-impl UsbDriver for CommonUsbDriver {
+impl UsbReporterDriver for CommonUsbDriver {
     type Error = UsbError;
 
-    async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error> {
+    async fn vbus_detect(&self) -> Result<bool, <Self as UsbReporterDriver>::Error> {
         Err(UsbError::NotSupported)
     }
 }

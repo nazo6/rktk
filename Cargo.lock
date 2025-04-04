@@ -5634,7 +5634,6 @@ dependencies = [
  "ssd1306",
  "ssmarshal",
  "static_cell",
- "thiserror 2.0.12",
  "trouble-host",
  "usbd-hid",
 ]
@@ -5672,7 +5671,6 @@ dependencies = [
  "smart-leds",
  "ssmarshal",
  "static_cell",
- "thiserror 2.0.12",
  "usbd-hid",
 ]
 
@@ -5700,7 +5698,6 @@ dependencies = [
  "smart-leds",
  "ssd1306",
  "static_cell",
- "thiserror 2.0.12",
 ]
 
 [[package]]

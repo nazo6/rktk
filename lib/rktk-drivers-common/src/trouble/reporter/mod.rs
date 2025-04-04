@@ -1,6 +1,6 @@
 use driver::TroubleReporter;
 use rand_core::{CryptoRng, RngCore};
-use rktk::{drivers::interface::ble::BleDriverBuilder, utils::Channel};
+use rktk::{drivers::interface::wireless::WirelessReporterDriverBuilder, utils::Channel};
 use trouble_host::{Controller, gap::PeripheralConfig};
 
 mod driver;
@@ -55,7 +55,7 @@ impl<
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
-> BleDriverBuilder
+> WirelessReporterDriverBuilder
     for TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
     type Output = TroubleReporter;

@@ -1,16 +1,24 @@
-use rktk::drivers::interface::{ble::BleDriver, reporter::ReporterDriver};
+use rktk::drivers::interface::{reporter::ReporterDriver, wireless::WirelessReporterDriver};
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{INPUT_REPORT_CHAN, InputReport, KB_OUTPUT_LED_SIGNAL, bonder::BOND_FLASH};
 
 pub struct NrfBleDriver {}
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum BleError {
-    #[error("Channel full: {0}")]
     ReportChannelFull(&'static str),
-    #[error("Not supported")]
     NotSupported,
+}
+
+impl rktk::drivers::interface::Error for BleError {
+    fn kind(&self) -> rktk::drivers::interface::ErrorKind {
+        match self {
+            Self::NotSupported => rktk::drivers::interface::ErrorKind::NotSupported,
+            _ => rktk::drivers::interface::ErrorKind::Other,
+        }
+    }
 }
 
 impl ReporterDriver for NrfBleDriver {
@@ -55,10 +63,10 @@ impl ReporterDriver for NrfBleDriver {
         Err(BleError::NotSupported)
     }
 }
-impl BleDriver for NrfBleDriver {
+impl WirelessReporterDriver for NrfBleDriver {
     type Error = BleError;
 
-    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
+    async fn clear_bond_data(&self) -> Result<(), <Self as WirelessReporterDriver>::Error> {
         BOND_FLASH.signal(super::bonder::BondFlashCommand::Clear);
         Ok(())
     }

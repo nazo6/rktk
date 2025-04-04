@@ -23,7 +23,7 @@ pub enum RgbMode {
 
 /// Driver for controlling the RGB leds.
 pub trait RgbDriver: 'static {
-    type Error: core::error::Error;
+    type Error: super::Error;
 
     /// Write provided colors to leds.
     async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error>;

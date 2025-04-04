@@ -4,11 +4,13 @@ use embassy_nrf::uarte::Instance as UarteInstance;
 use embedded_io_async::Write as _;
 use rktk::drivers::interface::split::SplitDriver;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UartFullDuplexSplitDriverError {
-    #[error("General error: {0}")]
     GeneralError(&'static str),
 }
+
+impl rktk::drivers::interface::Error for UartFullDuplexSplitDriverError {}
 
 pub struct UartFullDuplexSplitDriver<I: UarteInstance + 'static, T: TimerInstance + 'static> {
     uarte: BufferedUarte<'static, I, T>,

@@ -1,9 +1,9 @@
 use super::reporter::ReporterDriver;
 
-pub trait UsbDriver: ReporterDriver {
-    type Error: core::error::Error;
+pub trait UsbReporterDriver: ReporterDriver {
+    type Error: super::Error;
 
-    async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error>;
+    async fn vbus_detect(&self) -> Result<bool, <Self as UsbReporterDriver>::Error>;
 }
 
-super::generate_builder!(UsbDriver);
+super::generate_builder!(UsbReporterDriver);

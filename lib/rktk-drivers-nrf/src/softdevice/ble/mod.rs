@@ -1,7 +1,7 @@
 use nrf_softdevice::{Softdevice, raw};
 
 use rktk::{
-    drivers::interface::ble::BleDriverBuilder,
+    drivers::interface::wireless::WirelessReporterDriverBuilder,
     utils::{Channel, Signal},
 };
 pub use server::Server;
@@ -37,14 +37,14 @@ pub fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> S
     server::Server::new(sd, device_info).unwrap()
 }
 
-pub struct NrfBleDriverBuilder {
+pub struct NrfWirelessReporterDriverBuilder {
     sd: &'static Softdevice,
     server: Server,
     name: &'static str,
     flash: &'static SharedFlash,
 }
 
-impl NrfBleDriverBuilder {
+impl NrfWirelessReporterDriverBuilder {
     pub fn new(
         sd: &'static Softdevice,
         server: Server,
@@ -60,7 +60,7 @@ impl NrfBleDriverBuilder {
     }
 }
 
-impl BleDriverBuilder for NrfBleDriverBuilder {
+impl WirelessReporterDriverBuilder for NrfWirelessReporterDriverBuilder {
     type Output = driver::NrfBleDriver;
 
     type Error = ();

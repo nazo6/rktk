@@ -1,7 +1,7 @@
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 pub trait ReporterDriver {
-    type Error: core::fmt::Display + rktk_log::MaybeFormat;
+    type Error: super::Error;
 
     async fn wait_ready(&self) {}
 

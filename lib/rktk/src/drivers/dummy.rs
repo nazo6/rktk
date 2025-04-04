@@ -12,7 +12,6 @@ use embedded_graphics::{
 use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
 use crate::drivers::interface::{
-    ble::{BleDriver, BleDriverBuilder},
     debounce::DebounceDriver,
     display::DisplayDriver,
     encoder::EncoderDriver,
@@ -21,7 +20,8 @@ use crate::drivers::interface::{
     rgb::RgbDriver,
     split::SplitDriver,
     storage::StorageDriver,
-    usb::{UsbDriver, UsbDriverBuilder},
+    usb::{UsbReporterDriver, UsbReporterDriverBuilder},
+    wireless::{WirelessReporterDriver, WirelessReporterDriverBuilder},
 };
 
 // Rgb
@@ -188,24 +188,24 @@ impl ReporterDriver for DummyReporter {
         unreachable!()
     }
 }
-impl BleDriver for DummyReporter {
+impl WirelessReporterDriver for DummyReporter {
     type Error = Infallible;
-    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
+    async fn clear_bond_data(&self) -> Result<(), <Self as WirelessReporterDriver>::Error> {
         unreachable!()
     }
 }
-impl UsbDriver for DummyReporter {
+impl UsbReporterDriver for DummyReporter {
     type Error = Infallible;
 
-    async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error> {
+    async fn vbus_detect(&self) -> Result<bool, <Self as UsbReporterDriver>::Error> {
         unreachable!()
     }
 }
 
 // BLE
-pub fn ble_builder() -> Option<impl BleDriverBuilder> {
+pub fn ble_builder() -> Option<impl WirelessReporterDriverBuilder> {
     pub enum BleBuilder {}
-    impl BleDriverBuilder for BleBuilder {
+    impl WirelessReporterDriverBuilder for BleBuilder {
         type Output = DummyReporter;
         type Error = Infallible;
         #[allow(refining_impl_trait)]
@@ -218,9 +218,9 @@ pub fn ble_builder() -> Option<impl BleDriverBuilder> {
 }
 
 // usb
-pub fn usb_builder() -> Option<impl UsbDriverBuilder> {
+pub fn usb_builder() -> Option<impl UsbReporterDriverBuilder> {
     pub enum UsbBuilder {}
-    impl UsbDriverBuilder for UsbBuilder {
+    impl UsbReporterDriverBuilder for UsbBuilder {
         type Output = DummyReporter;
         type Error = ();
 

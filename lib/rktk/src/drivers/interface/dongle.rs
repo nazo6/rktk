@@ -94,7 +94,7 @@ pub enum DongleData {
 }
 
 pub trait DongleDriver {
-    type Error: core::fmt::Debug;
+    type Error: super::Error;
 
     async fn recv(&mut self) -> Result<DongleData, Self::Error>;
 }

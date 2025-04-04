@@ -15,11 +15,13 @@ use embassy_nrf::{
 use embedded_io_async::{Read as _, Write};
 use rktk::drivers::interface::split::SplitDriver;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UartHalfDuplexSplitDriverError {
-    #[error("General error: {0}")]
     GeneralError(&'static str),
 }
+
+impl rktk::drivers::interface::Error for UartHalfDuplexSplitDriverError {}
 
 pub struct UartHalfDuplexSplitDriver<
     UARTE: Instance,

@@ -41,7 +41,6 @@ pio = "0.3.0"
 fixed = { workspace = true }
 fixed-macro = { workspace = true }
 static_cell = { workspace = true }
-thiserror = { workspace = true }
 
 [features]
 _check = ["embassy-rp/rp2040"]

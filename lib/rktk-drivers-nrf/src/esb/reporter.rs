@@ -14,9 +14,9 @@ use esb_ng::{
 use postcard::experimental::max_size::MaxSize as _;
 use rktk::{
     drivers::interface::{
-        ble::BleDriver,
         dongle::DongleData,
         reporter::{ReporterDriver, ReporterDriverBuilder},
+        wireless::WirelessReporterDriver,
     },
     utils::Channel,
 };
@@ -195,13 +195,10 @@ async fn esb_task(esb_app: EsbApp<1024, 1024>) {
 pub struct EsbReporterDriver {}
 
 #[derive(Debug)]
-pub struct ErrorMsg(&'static str);
-impl core::fmt::Display for ErrorMsg {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-impl core::error::Error for ErrorMsg {}
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct ErrorMsg(pub &'static str);
+
+impl rktk::drivers::interface::Error for ErrorMsg {}
 
 type DongleDataWithCnt = (usize, DongleData);
 
@@ -244,10 +241,10 @@ impl ReporterDriver for EsbReporterDriver {
     }
 }
 
-impl BleDriver for EsbReporterDriver {
+impl WirelessReporterDriver for EsbReporterDriver {
     type Error = Infallible;
 
-    async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error> {
+    async fn clear_bond_data(&self) -> Result<(), <Self as WirelessReporterDriver>::Error> {
         Ok(())
     }
 }

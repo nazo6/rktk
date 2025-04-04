@@ -4,9 +4,9 @@ use crate::{
         keymap::Keymap,
     },
     drivers::interface::{
-        ble::BleDriver, debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
+        debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
         mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver, storage::StorageDriver,
-        system::SystemDriver, usb::UsbDriver,
+        system::SystemDriver, usb::UsbReporterDriver, wireless::WirelessReporterDriver,
     },
     hooks::{
         Hooks,
@@ -28,8 +28,8 @@ mod split_handler;
 #[allow(clippy::too_many_arguments)]
 pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHooks>(
     system: &impl SystemDriver,
-    ble: Option<impl BleDriver>,
-    usb: Option<impl UsbDriver>,
+    ble: Option<impl WirelessReporterDriver>,
+    usb: Option<impl UsbReporterDriver>,
     mut keyscan: impl KeyscanDriver,
     debounce: &mut Option<impl DebounceDriver>,
     encoder: Option<impl EncoderDriver>,

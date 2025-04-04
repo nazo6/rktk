@@ -67,7 +67,6 @@ bitvec = { version = "1.0.1", default-features = false }
 ssmarshal = { workspace = true }
 smart-leds = { workspace = true }
 usbd-hid = { workspace = true }
-thiserror = { workspace = true }
 atomic-pool = "2.0.0"
 
 esb-ng = { git = "https://github.com/jamesmunns/esb", version = "0.1.0", optional = true }
@@ -85,7 +84,7 @@ _nrfxx = [
   "nrf-sdc?/nrf52840",
 ]
 
-_check = ["_nrfxx", "softdevice-ble", "esb", "sdc"]
+_check = ["_nrfxx", "softdevice-ble", "esb", "sdc", "defmt"]
 
 ## Use this feature to use embassy-executor's nightly features.
 nightly = ["embassy-executor/nightly"]

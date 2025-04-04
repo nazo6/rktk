@@ -2,7 +2,10 @@
 
 use core::fmt::Debug;
 use embedded_storage_async::nor_flash::{MultiwriteNorFlash, NorFlash, ReadNorFlash};
-use rktk::{drivers::interface::storage::StorageDriver, utils::Mutex};
+use rktk::{
+    drivers::interface::{Error, storage::StorageDriver},
+    utils::Mutex,
+};
 pub use sequential_storage;
 use sequential_storage::{
     cache::NoCache,
@@ -15,15 +18,16 @@ pub struct FlashSequentialMapStorage<'a, F: NorFlash + ReadNorFlash + Multiwrite
     pub cache: &'a Mutex<NoCache>,
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error<E: Debug> {
-    #[error("Storage error: {0:?}")]
-    Storage(sequential_storage::Error<E>),
-    #[error("Not found")]
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum FlashSequentialMapStorageError<E: Debug> {
+    Storage(#[cfg_attr(feature = "defmt", defmt(Debug2Format))] sequential_storage::Error<E>),
     NotFound,
 }
 
-impl<E: Debug> From<sequential_storage::Error<E>> for Error<E> {
+impl<E: Debug> Error for FlashSequentialMapStorageError<E> {}
+
+impl<E: Debug> From<sequential_storage::Error<E>> for FlashSequentialMapStorageError<E> {
     fn from(e: sequential_storage::Error<E>) -> Self {
         Self::Storage(e)
     }
@@ -32,7 +36,7 @@ impl<E: Debug> From<sequential_storage::Error<E>> for Error<E> {
 impl<F: NorFlash + ReadNorFlash + MultiwriteNorFlash> StorageDriver
     for FlashSequentialMapStorage<'_, F>
 {
-    type Error = Error<F::Error>;
+    type Error = FlashSequentialMapStorageError<F::Error>;
 
     async fn format(&self) -> Result<(), Self::Error> {
         let mut flash = self.flash.lock().await;
@@ -58,7 +62,7 @@ impl<F: NorFlash + ReadNorFlash + MultiwriteNorFlash> StorageDriver
             &key,
         )
         .await?
-        .ok_or(Error::NotFound)?;
+        .ok_or(FlashSequentialMapStorageError::NotFound)?;
         buf.copy_from_slice(&val);
         Ok(())
     }
