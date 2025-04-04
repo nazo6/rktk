@@ -1,3 +1,5 @@
+use core::sync::atomic::Ordering;
+
 use embassy_futures::select::{Either, Either4, select, select4};
 use embassy_time::{Duration, Instant};
 use rktk_keymanager::interface::state::output_event::EventType;
@@ -6,6 +8,7 @@ use rktk_keymanager::state::hid_report::Report;
 use rktk_log::{debug, helper::Debug2Format};
 
 use crate::config::keymap::prelude::RktkKeys;
+use crate::task::channels::report::{MOUSE_CHANGE_SIGNAL, MOUSE_CHANGE_X, MOUSE_CHANGE_Y};
 use crate::{
     config::{constant::RKTK_CONFIG, storage::StorageConfigManager},
     drivers::interface::{
@@ -16,9 +19,7 @@ use crate::{
         usb::UsbDriver,
     },
     hooks::interface::MasterHooks,
-    task::channels::report::{
-        ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL,
-    },
+    task::channels::report::{ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL},
     utils::display_state,
 };
 
@@ -50,7 +51,7 @@ pub async fn report_task<
 
     loop {
         let event = match select4(
-            MOUSE_EVENT_REPORT_CHANNEL.ready_to_receive(),
+            MOUSE_CHANGE_SIGNAL.wait(),
             KEYBOARD_EVENT_REPORT_CHANNEL.receive(),
             ENCODER_EVENT_REPORT_CHANNEL.receive(),
             select(
@@ -61,11 +62,10 @@ pub async fn report_task<
         .await
         {
             Either4::First(_) => {
-                let mut mouse_move: (i8, i8) = (0, 0);
-                while let Ok((x, y)) = MOUSE_EVENT_REPORT_CHANNEL.try_receive() {
-                    mouse_move.0 += x;
-                    mouse_move.1 += y;
-                }
+                let mut mouse_move: (i8, i8) = (
+                    MOUSE_CHANGE_X.swap(0, Ordering::Acquire),
+                    MOUSE_CHANGE_Y.swap(0, Ordering::Acquire),
+                );
 
                 if !master_hooks.on_mouse_event(&mut mouse_move).await {
                     continue;

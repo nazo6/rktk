@@ -16,10 +16,7 @@ pub struct Hooks<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, RH: RgbHooks>
 
 /// Collection of sender/receiver that can be used with hooks.
 pub mod channels {
-    pub use crate::task::channels::{
-        report::{encoder_event_sender, keyboard_event_sender, mouse_event_sender},
-        rgb::rgb_sender,
-    };
+    pub use crate::task::channels::*;
 }
 
 /// Collection of empty hooks and utility functions.

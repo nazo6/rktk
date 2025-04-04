@@ -23,6 +23,7 @@ embassy-futures = { workspace = true }
 embassy-executor = { workspace = true }
 
 critical-section = { workspace = true, optional = true }
+portable-atomic = { workspace = true }
 usbd-hid = { workspace = true }
 
 embedded-graphics = { workspace = true }

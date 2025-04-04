@@ -5,7 +5,7 @@ use crate::{
     drivers::interface::split::SlaveToMaster,
     interface::Hand,
     task::channels::{
-        report::{KEYBOARD_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
+        report::{KEYBOARD_EVENT_REPORT_CHANNEL, update_mouse},
         split::S2mRx,
     },
 };
@@ -39,7 +39,7 @@ pub async fn start(hand: Hand, s2m_rx: S2mRx<'_>) {
                     KEYBOARD_EVENT_REPORT_CHANNEL.send(ev).await;
                 }
                 SlaveToMaster::Mouse { x, y } => {
-                    MOUSE_EVENT_REPORT_CHANNEL.send((x, y)).await;
+                    update_mouse(x, y);
                 }
                 SlaveToMaster::Message(_) => {}
             }

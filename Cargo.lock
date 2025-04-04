@@ -5548,6 +5548,7 @@ dependencies = [
  "log",
  "macro_rules_attribute",
  "paste",
+ "portable-atomic",
  "postcard",
  "rktk-keymanager",
  "rktk-log",

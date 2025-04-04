@@ -1,11 +1,8 @@
-use rktk_log::warn;
-
 use crate::{
     config::constant::{RKTK_CONFIG, SCAN_INTERVAL_MOUSE},
     drivers::interface::mouse::MouseDriver,
+    task::channels::report::update_mouse,
 };
-
-use super::MOUSE_EVENT_REPORT_CHANNEL;
 
 pub async fn start(mut mouse: Option<impl MouseDriver>) {
     if let Some(mouse) = &mut mouse {
@@ -36,9 +33,9 @@ pub async fn start(mut mouse: Option<impl MouseDriver>) {
 
             if mouse_move == (0, 0) {
                 continue;
-            } else if MOUSE_EVENT_REPORT_CHANNEL.try_send(mouse_move).is_err() {
-                warn!("Mouse full");
             }
+
+            update_mouse(mouse_move.0, mouse_move.1);
 
             latest = embassy_time::Instant::now();
         }

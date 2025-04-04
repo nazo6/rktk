@@ -15,7 +15,7 @@ use crate::{
     hooks::interface::MasterHooks,
     interface::Hand,
     task::channels::{
-        report::{ENCODER_EVENT_REPORT_CHANNEL, MOUSE_EVENT_REPORT_CHANNEL},
+        report::ENCODER_EVENT_REPORT_CHANNEL,
         split::{M2sTx, S2mRx},
     },
     utils::Mutex,

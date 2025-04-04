@@ -37,21 +37,23 @@ pub mod split {
 }
 
 pub mod report {
+    use core::sync::atomic::Ordering;
 
+    use portable_atomic::AtomicI8;
     use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
-    use crate::task::RKTK_CONFIG;
+    use crate::{task::RKTK_CONFIG, utils::Signal};
 
     use super::*;
 
-    pub(crate) static MOUSE_EVENT_REPORT_CHANNEL: Channel<
-        (i8, i8),
-        { RKTK_CONFIG.mouse_event_buffer_size },
-    > = Channel::new();
+    pub(crate) static MOUSE_CHANGE_X: AtomicI8 = AtomicI8::new(0);
+    pub(crate) static MOUSE_CHANGE_Y: AtomicI8 = AtomicI8::new(0);
+    pub(crate) static MOUSE_CHANGE_SIGNAL: Signal<()> = Signal::new();
 
-    /// Get [`DynamicSender`] that can be used to report mouse events.
-    pub fn mouse_event_sender() -> DynamicSender<'static, (i8, i8)> {
-        MOUSE_EVENT_REPORT_CHANNEL.dyn_sender()
+    pub fn update_mouse(x: i8, y: i8) {
+        MOUSE_CHANGE_X.fetch_add(x, Ordering::Release);
+        MOUSE_CHANGE_Y.fetch_add(y, Ordering::Release);
+        MOUSE_CHANGE_SIGNAL.signal(());
     }
 
     pub(crate) static KEYBOARD_EVENT_REPORT_CHANNEL: Channel<

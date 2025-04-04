@@ -37,9 +37,7 @@ embassy-executor = { workspace = true, features = [
   "executor-interrupt",
 ] }
 
-portable-atomic = { version = "1.6.0", features = [
-  "unsafe-assume-single-core",
-] }
+portable-atomic = { workspace = true, features = ["unsafe-assume-single-core"] }
 
 [features]
 default = ["right"]
