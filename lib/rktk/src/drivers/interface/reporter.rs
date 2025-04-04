@@ -6,7 +6,7 @@ pub trait ReporterDriver {
     async fn wait_ready(&self) {}
 
     /// Read a keyboard report from the device and return leds data.
-    async fn read_keyboard_report(&self) -> Result<u8, Self::Error> {
+    async fn recv_keyboard_report(&self) -> Result<u8, Self::Error> {
         let _: () = core::future::pending().await;
         unreachable!()
     }
@@ -20,7 +20,7 @@ pub trait ReporterDriver {
     fn try_send_mouse_report(&self, _report: MouseReport) -> Result<(), Self::Error>;
 
     async fn send_rrp_data(&self, _data: &[u8]) -> Result<(), Self::Error>;
-    async fn read_rrp_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
+    async fn recv_rrp_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
         let _: () = core::future::pending().await;
         unreachable!()
     }
@@ -28,7 +28,7 @@ pub trait ReporterDriver {
     async fn send_raw_hid_data(&self, _data: &[u8]) -> Result<(), Self::Error> {
         Ok(())
     }
-    async fn read_raw_hid_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
+    async fn recv_raw_hid_data(&self, _buf: &mut [u8]) -> Result<usize, Self::Error> {
         let _: () = core::future::pending().await;
         unreachable!()
     }

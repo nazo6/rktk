@@ -243,7 +243,7 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
     let report = match output {
         Output::Usb => {
             if let Some(usb) = usb {
-                usb.read_keyboard_report().await.map_err(|e| {
+                usb.recv_keyboard_report().await.map_err(|e| {
                     rktk_log::warn!("Failed to read keyboard report: {:?}", Debug2Format(&e));
                 })?
             } else {
@@ -253,7 +253,7 @@ async fn read_keyboard_report<USB: UsbDriver, BLE: BleDriver>(
         }
         Output::Ble => {
             if let Some(usb) = ble {
-                usb.read_keyboard_report().await.map_err(|e| {
+                usb.recv_keyboard_report().await.map_err(|e| {
                     rktk_log::warn!("Failed to read keyboard report: {:?}", Debug2Format(&e));
                 })?
             } else {

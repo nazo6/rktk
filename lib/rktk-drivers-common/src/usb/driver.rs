@@ -33,7 +33,7 @@ impl ReporterDriver for CommonUsbDriver {
         self.ready_signal.wait().await;
     }
 
-    async fn read_keyboard_report(&self) -> Result<u8, Self::Error> {
+    async fn recv_keyboard_report(&self) -> Result<u8, Self::Error> {
         Ok(KEYBOARD_LED_SIGNAL.wait().await)
     }
 
@@ -74,7 +74,7 @@ impl ReporterDriver for CommonUsbDriver {
         Ok(())
     }
 
-    async fn read_rrp_data(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+    async fn recv_rrp_data(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         let read = RRP_RECV_PIPE.read(buf).await;
         Ok(read)
     }
@@ -91,7 +91,7 @@ impl ReporterDriver for CommonUsbDriver {
         Ok(())
     }
 
-    async fn read_raw_hid_data(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+    async fn recv_raw_hid_data(&self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         if buf.len() < RAW_HID_BUFFER_SIZE {
             return Err(Self::Error::BufSmall);
         }

@@ -42,7 +42,7 @@ impl ReporterDriver for NrfBleDriver {
         Ok(())
     }
 
-    async fn read_keyboard_report(&self) -> Result<u8, Self::Error> {
+    async fn recv_keyboard_report(&self) -> Result<u8, Self::Error> {
         let leds = KB_OUTPUT_LED_SIGNAL.wait().await;
         Ok(leds)
     }

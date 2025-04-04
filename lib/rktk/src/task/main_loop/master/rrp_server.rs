@@ -180,7 +180,7 @@ impl<R: ReporterDriver> ReadTransport for ServerTransport<'_, R> {
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
         self.reporter
-            .read_rrp_data(buf)
+            .recv_rrp_data(buf)
             .await
             .map_err(|_| "Read failed")
     }
