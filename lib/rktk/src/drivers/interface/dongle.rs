@@ -99,4 +99,4 @@ pub trait DongleDriver {
     async fn recv(&mut self) -> Result<DongleData, Self::Error>;
 }
 
-super::generate_builder!(with_task, DongleDriver);
+super::generate_builder!(DongleDriver);

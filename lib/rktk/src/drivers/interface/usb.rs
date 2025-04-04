@@ -6,4 +6,4 @@ pub trait UsbDriver: ReporterDriver {
     async fn vbus_detect(&self) -> Result<bool, <Self as UsbDriver>::Error>;
 }
 
-super::generate_builder!(with_task, UsbDriver);
+super::generate_builder!(UsbDriver);

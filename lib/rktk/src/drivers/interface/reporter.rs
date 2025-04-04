@@ -1,7 +1,7 @@
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 pub trait ReporterDriver {
-    type Error: core::error::Error;
+    type Error: core::fmt::Display + rktk_log::MaybeFormat;
 
     async fn wait_ready(&self) {}
 
@@ -50,4 +50,4 @@ pub enum Output {
     Ble,
 }
 
-super::generate_builder!(with_task, ReporterDriver);
+super::generate_builder!(ReporterDriver);

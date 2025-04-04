@@ -10,4 +10,4 @@ pub trait BleDriver: ReporterDriver {
     async fn clear_bond_data(&self) -> Result<(), <Self as BleDriver>::Error>;
 }
 
-super::generate_builder!(with_task, BleDriver);
+super::generate_builder!(BleDriver);

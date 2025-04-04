@@ -1,10 +1,6 @@
 use embassy_futures::select::{Either, select};
 use postcard::{from_bytes_cobs, to_slice_cobs};
-use rktk_log::{
-    debug,
-    helper::{Debug2Format, MaybeFormat},
-    warn,
-};
+use rktk_log::{MaybeFormat, debug, helper::Debug2Format, warn};
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
