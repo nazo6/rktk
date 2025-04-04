@@ -1,4 +1,3 @@
-use embassy_time::Timer;
 use rktk_log::{debug, warn};
 
 use crate::{
@@ -16,8 +15,12 @@ pub async fn start(
     debounce: &mut Option<impl DebounceDriver>,
 ) {
     debug!("keyscan start");
+    let mut latest = embassy_time::Instant::from_millis(0);
     loop {
-        Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+        let elapsed = latest.elapsed();
+        if elapsed < SCAN_INTERVAL_KEYBOARD {
+            embassy_time::Timer::after(SCAN_INTERVAL_KEYBOARD - elapsed).await;
+        }
 
         keyscan
             .scan(|mut event| {
@@ -34,5 +37,7 @@ pub async fn start(
                 }
             })
             .await;
+
+        latest = embassy_time::Instant::now();
     }
 }

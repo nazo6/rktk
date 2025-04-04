@@ -1,4 +1,3 @@
-use embassy_time::Timer;
 use rktk_log::warn;
 
 use crate::{
@@ -10,8 +9,12 @@ use super::MOUSE_EVENT_REPORT_CHANNEL;
 
 pub async fn start(mut mouse: Option<impl MouseDriver>) {
     if let Some(mouse) = &mut mouse {
+        let mut latest = embassy_time::Instant::from_millis(0);
         loop {
-            Timer::after(SCAN_INTERVAL_MOUSE).await;
+            let elapsed = latest.elapsed();
+            if elapsed < SCAN_INTERVAL_MOUSE {
+                embassy_time::Timer::after(SCAN_INTERVAL_MOUSE - elapsed).await;
+            }
 
             let mouse_move = match mouse.read().await {
                 Ok(m) => {
@@ -36,6 +39,8 @@ pub async fn start(mut mouse: Option<impl MouseDriver>) {
             } else if MOUSE_EVENT_REPORT_CHANNEL.try_send(mouse_move).is_err() {
                 warn!("Mouse full");
             }
+
+            latest = embassy_time::Instant::now();
         }
     }
 }
