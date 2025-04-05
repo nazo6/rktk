@@ -19,7 +19,7 @@ use super::{
 };
 
 /// General usb driver using embassy-usb.
-pub struct CommonUsbReporterDriverBuilder<D: Driver<'static>> {
+pub struct CommonUsbReporterBuilder<D: Driver<'static>> {
     builder: Builder<'static, D>,
     keyboard_hid: HidReaderWriter<'static, D, 1, 8>,
     mouse_hid: HidWriter<'static, D, 8>,
@@ -35,7 +35,7 @@ pub struct CommonUsbReporterDriverBuilder<D: Driver<'static>> {
     defmt_usb_use_dtr: bool,
 }
 
-impl<D: Driver<'static>> CommonUsbReporterDriverBuilder<D> {
+impl<D: Driver<'static>> CommonUsbReporterBuilder<D> {
     pub fn new(opts: CommonUsbDriverConfig<D>) -> Self {
         #[cfg(feature = "usb-remote-wakeup")]
         let wakeup_signal = singleton!(super::RemoteWakeupSignal::new(), super::RemoteWakeupSignal);
@@ -136,7 +136,7 @@ impl<D: Driver<'static>> CommonUsbReporterDriverBuilder<D> {
     }
 }
 
-impl<D: Driver<'static> + 'static> UsbReporterDriverBuilder for CommonUsbReporterDriverBuilder<D> {
+impl<D: Driver<'static> + 'static> UsbReporterDriverBuilder for CommonUsbReporterBuilder<D> {
     type Output = CommonUsbDriver;
 
     type Error = embassy_executor::SpawnError;

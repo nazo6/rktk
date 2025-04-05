@@ -16,7 +16,7 @@ type RemoteWakeupSignal = rktk::utils::Signal<()>;
 type ReadySignal = rktk::utils::Signal<()>;
 static SUSPENDED: AtomicBool = AtomicBool::new(false);
 
-pub use builder::CommonUsbReporterDriverBuilder;
+pub use builder::CommonUsbReporterBuilder;
 /// Re-export of underlying embassy-usb driver's config type
 pub use embassy_usb::Config as UsbDriverConfig;
 

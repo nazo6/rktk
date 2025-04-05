@@ -21,7 +21,7 @@ use rktk::{
 
 use rktk_drivers_common::{
     keyscan::matrix::Matrix,
-    usb::{CommonUsbReporterDriverBuilder, CommonUsbDriverConfig, UsbDriverConfig},
+    usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig},
 };
 use rktk_drivers_nrf::system::NrfSystemDriver;
 
@@ -83,7 +83,7 @@ async fn main(_spawner: Spawner) {
             driver_config.product = Some("corne");
             let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);
 
-            CommonUsbReporterDriverBuilder::new(opts)
+            CommonUsbReporterBuilder::new(opts)
         }),
         display: dummy::display(),
         split: dummy::split(),

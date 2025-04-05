@@ -37,14 +37,14 @@ pub fn init_ble_server(sd: &mut Softdevice, device_info: DeviceInformation) -> S
     server::Server::new(sd, device_info).unwrap()
 }
 
-pub struct NrfWirelessReporterDriverBuilder {
+pub struct SoftdeviceBleReporterBuilder {
     sd: &'static Softdevice,
     server: Server,
     name: &'static str,
     flash: &'static SharedFlash,
 }
 
-impl NrfWirelessReporterDriverBuilder {
+impl SoftdeviceBleReporterBuilder {
     pub fn new(
         sd: &'static Softdevice,
         server: Server,
@@ -60,14 +60,14 @@ impl NrfWirelessReporterDriverBuilder {
     }
 }
 
-impl WirelessReporterDriverBuilder for NrfWirelessReporterDriverBuilder {
-    type Output = driver::NrfBleDriver;
+impl WirelessReporterDriverBuilder for SoftdeviceBleReporterBuilder {
+    type Output = driver::SoftdeviceBleReporterDriver;
 
     type Error = ();
 
     async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         Ok((
-            driver::NrfBleDriver {},
+            driver::SoftdeviceBleReporterDriver {},
             task::softdevice_task(self.sd, self.server, self.name, self.flash),
         ))
     }

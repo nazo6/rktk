@@ -3,7 +3,7 @@ use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
 use super::{INPUT_REPORT_CHAN, InputReport, KB_OUTPUT_LED_SIGNAL, bonder::BOND_FLASH};
 
-pub struct NrfBleDriver {}
+pub struct SoftdeviceBleReporterDriver {}
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -21,7 +21,7 @@ impl rktk::drivers::interface::Error for BleError {
     }
 }
 
-impl ReporterDriver for NrfBleDriver {
+impl ReporterDriver for SoftdeviceBleReporterDriver {
     type Error = BleError;
 
     fn try_send_keyboard_report(&self, report: KeyboardReport) -> Result<(), Self::Error> {
@@ -63,7 +63,7 @@ impl ReporterDriver for NrfBleDriver {
         Err(BleError::NotSupported)
     }
 }
-impl WirelessReporterDriver for NrfBleDriver {
+impl WirelessReporterDriver for SoftdeviceBleReporterDriver {
     type Error = BleError;
 
     async fn clear_bond_data(&self) -> Result<(), <Self as WirelessReporterDriver>::Error> {
