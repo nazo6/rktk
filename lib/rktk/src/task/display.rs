@@ -1,13 +1,14 @@
-use core::fmt::Write as _;
-
-use embassy_futures::select::{Either, select};
+use embedded_graphics::{draw_target::DrawTarget, pixelcolor::BinaryColor};
 use rktk_log::error;
 
 use crate::{
+    config::constant::RKTK_CONFIG,
     drivers::interface::{display::DisplayDriver, reporter::Output},
     interface::Hand,
     utils::{Channel, Signal},
 };
+
+pub mod default_display;
 
 pub enum DisplayMessage {
     Clear,
@@ -16,7 +17,7 @@ pub enum DisplayMessage {
     MouseAvailable(bool),
     MouseMove((i8, i8)),
     Output(Output),
-    HighestLayer(u8),
+    LayerState([bool; RKTK_CONFIG.layer_count as usize]),
     Hand(Option<Hand>),
     NumLock(bool),
     CapsLock(bool),
@@ -24,105 +25,32 @@ pub enum DisplayMessage {
     On(bool),
 }
 
+pub trait DisplayConfig {
+    async fn start<D: DisplayDriver, const N1: usize, const N2: usize>(
+        &mut self,
+        display: &mut D,
+        display_controller: &Channel<DisplayMessage, N1>,
+        display_dynamic_message_controller: &Signal<heapless::String<N2>>,
+    );
+}
+
 pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
 pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Signal<heapless::String<256>> = Signal::new();
 
-pub(super) async fn start<D: DisplayDriver>(display: &mut D) {
+pub(super) async fn start<D: DisplayDriver, C: DisplayConfig>(display: &mut D, config: &mut C) {
     if display.init().await.is_err() {
         error!("Failed to initialize display");
         return;
     }
-    let _ = display.clear_flush().await;
 
-    loop {
-        match select(
-            DISPLAY_CONTROLLER.receive(),
-            DISPLAY_DYNAMIC_MESSAGE_CONTROLLER.wait(),
+    display.as_mut().clear(BinaryColor::Off);
+    let _ = display.flush().await;
+
+    config
+        .start(
+            display,
+            &DISPLAY_CONTROLLER,
+            &DISPLAY_DYNAMIC_MESSAGE_CONTROLLER,
         )
-        .await
-        {
-            Either::First(mes) => match mes {
-                DisplayMessage::Clear => {
-                    display.clear_flush().await.unwrap();
-                }
-                DisplayMessage::Message(msg) => {
-                    let _ = display.print_message(msg).await;
-                }
-
-                // (1,1) to (4,1): status
-                DisplayMessage::Master(master) => {
-                    let _ = display
-                        .update_text(
-                            match master {
-                                Some(true) => "M",
-                                Some(false) => "S",
-                                None => "_",
-                            },
-                            D::calculate_point(1, 1),
-                        )
-                        .await;
-                }
-                DisplayMessage::MouseAvailable(mouse) => {
-                    let _ = display
-                        .update_text(if mouse { "m" } else { "x" }, D::calculate_point(2, 1))
-                        .await;
-                }
-                DisplayMessage::Hand(hand) => {
-                    let _ = display
-                        .update_text(
-                            match hand {
-                                Some(Hand::Left) => "L",
-                                Some(Hand::Right) => "R",
-                                None => "_",
-                            },
-                            D::calculate_point(3, 1),
-                        )
-                        .await;
-                }
-                DisplayMessage::Output(output) => {
-                    let text = match output {
-                        Output::Usb => "U",
-                        Output::Ble => "B",
-                    };
-                    let _ = display.update_text(text, D::calculate_point(4, 1)).await;
-                }
-
-                // (6,1): highest layer
-                DisplayMessage::HighestLayer(layer) => {
-                    let mut str = heapless::String::<2>::new();
-                    write!(str, "{:1}", layer).unwrap();
-                    let _ = display.update_text(&str, D::calculate_point(6, 1)).await;
-                }
-
-                // (8,1): mouse position
-                DisplayMessage::MouseMove((x, y)) => {
-                    let mut str = heapless::String::<12>::new();
-                    write!(str, "[{:3},{:3}]", x, y).unwrap();
-                    let _ = display.update_text(&str, D::calculate_point(8, 1)).await;
-                }
-
-                // (18,1): num lock
-                DisplayMessage::NumLock(num_lock) => {
-                    let _ = display
-                        .update_text(if num_lock { "N" } else { "n" }, D::calculate_point(18, 1))
-                        .await;
-                }
-                // (19,1): caps lock
-                DisplayMessage::CapsLock(caps_lock) => {
-                    let _ = display
-                        .update_text(if caps_lock { "C" } else { "c" }, D::calculate_point(19, 1))
-                        .await;
-                }
-                DisplayMessage::Brightness(brightness) => {
-                    let _ = display.set_brightness(brightness).await;
-                }
-                DisplayMessage::On(on) => {
-                    let _ = display.set_display_on(on).await;
-                }
-            },
-            Either::Second(str) => {
-                let _ = display.print_message(&str).await;
-            }
-        }
-    }
+        .await;
 }

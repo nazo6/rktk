@@ -125,6 +125,10 @@ impl<
         &self.config
     }
 
+    pub fn get_layer_active(&self) -> &shared::LayerActive<LAYER> {
+        &self.shared.layer_active
+    }
+
     pub fn get_keymap_info() -> KeymapInfo {
         KeymapInfo {
             layer_count: LAYER as u8,

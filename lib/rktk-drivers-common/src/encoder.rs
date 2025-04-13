@@ -1,6 +1,6 @@
 //! Encoder driver implementations.
 
-use embassy_futures::select::{select, select_slice, Either};
+use embassy_futures::select::{Either, select, select_slice};
 use embassy_time::Timer;
 use embedded_hal::digital::InputPin;
 use embedded_hal_async::digital::Wait;

@@ -112,11 +112,11 @@ pub async fn report_task<
             power_off: false,
         };
 
-        let mut state_report =
-            state
-                .lock()
-                .await
-                .update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
+        let (mut state_report, layer_active) = {
+            let mut s = state.lock().await;
+
+            (
+                s.update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
                     if let OutputEvent::Custom(1, (id, et)) = ev {
                         if et == EventType::Pressed {
                             if let Ok(k) = TryInto::<RktkKeys>::try_into(id) {
@@ -133,7 +133,10 @@ pub async fn report_task<
                     } else {
                         master_hooks.on_keymanager_event(ev);
                     }
-                });
+                }),
+                s.inner().get_layer_active().clone(),
+            )
+        };
 
         prev_update_time = embassy_time::Instant::now();
 
@@ -145,7 +148,7 @@ pub async fn report_task<
             continue;
         }
 
-        crate::utils::display_state!(HighestLayer, state_report.highest_layer);
+        crate::utils::display_state!(LayerState, layer_active);
 
         if rktk_key_state.bootloader {
             system.reset_to_bootloader();

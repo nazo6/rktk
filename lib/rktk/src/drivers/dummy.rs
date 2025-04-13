@@ -72,19 +72,18 @@ pub fn display() -> Option<impl DisplayDriver> {
             unreachable!()
         }
     }
+    impl AsMut<Self> for Display {
+        fn as_mut(&mut self) -> &mut Self {
+            self
+        }
+    }
+    impl AsRef<Self> for Display {
+        fn as_ref(&self) -> &Self {
+            self
+        }
+    }
     impl DisplayDriver for Display {
-        const TEXT_STYLE: MonoTextStyle<'static, BinaryColor> = MonoTextStyleBuilder::new().build();
-        const MAX_TEXT_WIDTH: usize = 10;
-
-        fn clear_buffer(&mut self) {
-            unreachable!()
-        }
-        async fn flush(&mut self) -> Result<(), DisplayError> {
-            unreachable!()
-        }
-        fn calculate_point(_col: i32, _row: i32) -> Point {
-            unreachable!()
-        }
+        type Display = Self;
     }
 
     Option::<Display>::None

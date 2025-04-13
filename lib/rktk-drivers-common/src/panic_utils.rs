@@ -84,26 +84,26 @@ pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
         if display.init().await.is_ok() {
             let str = parse_panic_message(&panic_info);
 
-            if str.len() > D::MAX_TEXT_WIDTH {
-                let mut idx = 0;
-                loop {
-                    let _ = display
-                        .update_text(
-                            &str[idx..],
-                            embedded_graphics::prelude::Point { x: 0, y: 0 },
-                        )
-                        .await;
-                    if str.len() - idx <= D::MAX_TEXT_WIDTH {
-                        embassy_time::Timer::after_millis(600).await;
-                        idx = 0;
-                    } else {
-                        idx += 1;
-                    }
-                    embassy_time::Timer::after_millis(200).await;
-                }
-            } else {
-                let _ = display.update_text(str, D::calculate_point(1, 1)).await;
-            }
+            // if str.len() > D::MAX_TEXT_WIDTH {
+            //     let mut idx = 0;
+            //     loop {
+            //         let _ = display
+            //             .update_text(
+            //                 &str[idx..],
+            //                 embedded_graphics::prelude::Point { x: 0, y: 0 },
+            //             )
+            //             .await;
+            //         if str.len() - idx <= D::MAX_TEXT_WIDTH {
+            //             embassy_time::Timer::after_millis(600).await;
+            //             idx = 0;
+            //         } else {
+            //             idx += 1;
+            //         }
+            //         embassy_time::Timer::after_millis(200).await;
+            //     }
+            // } else {
+            //     let _ = display.update_text(str, D::calculate_point(1, 1)).await;
+            // }
         }
     }
 }
