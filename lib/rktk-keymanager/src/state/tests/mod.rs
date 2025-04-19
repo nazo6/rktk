@@ -4,6 +4,7 @@ mod combo;
 mod encoder;
 mod keycode;
 mod keymap;
+mod layer;
 mod mouse;
 
 #[allow(unused_imports)]
