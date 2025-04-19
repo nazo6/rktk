@@ -173,7 +173,11 @@ pub async fn start<
         },
         async move {
             if let Some(mut display) = drivers.display {
-                display::start(&mut display).await;
+                display::start(
+                    &mut display,
+                    &mut display::default_display::DefaultDisplayConfig,
+                )
+                .await;
             }
         }
     );
@@ -237,7 +241,11 @@ pub async fn dongle_start(
         dongle_task,
         async move {
             if let Some(mut display) = display {
-                display::start(&mut display).await;
+                display::start(
+                    &mut display,
+                    &mut display::default_display::DefaultDisplayConfig,
+                )
+                .await;
             }
         }
     );

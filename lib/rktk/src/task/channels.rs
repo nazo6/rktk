@@ -1,4 +1,4 @@
-// NOTE: Be careful not to leak receiver to public
+// WARN: Do not make a receiver public unless there is a special reason (only one receiver can receive a value)
 
 use crate::utils::{Channel, Receiver, Sender};
 use embassy_sync::channel::DynamicSender;
