@@ -9,6 +9,7 @@ use crate::{
 };
 
 pub mod default_display;
+pub mod utils;
 
 pub enum DisplayMessage {
     Clear,
