@@ -1,21 +1,14 @@
-use core::fmt::Write as _;
-
 use embassy_futures::select::{Either, select};
 use embedded_graphics::{
-    mono_font::{
-        MonoTextStyle, MonoTextStyleBuilder,
-        ascii::{FONT_8X13, FONT_10X20},
-    },
+    mono_font::{MonoTextStyleBuilder, ascii::FONT_8X13},
     pixelcolor::BinaryColor,
     prelude::*,
-    primitives::{Circle, Line, PrimitiveStyle, Rectangle, StyledDrawable, Triangle},
     text::{Baseline, Text},
 };
 use images::*;
 
 use crate::{
     drivers::interface::{display::DisplayDriver, reporter::Output},
-    interface::Hand,
     utils::{Channel, Signal},
 };
 
@@ -48,9 +41,9 @@ impl DisplayConfig for DefaultDisplayConfig {
                     DisplayMessage::Clear => {
                         let _ = display.as_mut().clear(BinaryColor::Off);
                     }
-                    DisplayMessage::Message(msg) => {}
-                    DisplayMessage::Master(master) => {}
-                    DisplayMessage::Hand(hand) => {}
+                    DisplayMessage::Message(_msg) => {
+                        // TODO: Implement this
+                    }
                     DisplayMessage::Output(output) => {
                         let image = match output {
                             Output::Usb => IMAGE_USB,
@@ -87,54 +80,6 @@ impl DisplayConfig for DefaultDisplayConfig {
                                 .translate(Point::new(16, 35))
                                 .draw(display.as_mut());
                         }
-                    }
-                    DisplayMessage::MouseMove((x, y)) => {
-                        // let arrow = match (x.cmp(&0), y.cmp(&0)) {
-                        //     // 0
-                        //     (core::cmp::Ordering::Equal, core::cmp::Ordering::Greater) => {
-                        //         Line::new(Point::new(0, 0), Point::new(0, 8))
-                        //     }
-                        //     // 45
-                        //     (core::cmp::Ordering::Greater, core::cmp::Ordering::Greater) => {
-                        //         Line::new(Point::new(0, 0), Point::new(5, 5))
-                        //     }
-                        //     // 90
-                        //     (core::cmp::Ordering::Greater, core::cmp::Ordering::Equal) => {
-                        //         Line::new(Point::new(0, 0), Point::new(8, 0))
-                        //     }
-                        //     // 135
-                        //     (core::cmp::Ordering::Greater, core::cmp::Ordering::Less) => {
-                        //         Line::new(Point::new(0, 0), Point::new(5, -5))
-                        //     }
-                        //     // 180
-                        //     (core::cmp::Ordering::Equal, core::cmp::Ordering::Less) => {
-                        //         Line::new(Point::new(0, 0), Point::new(0, -8))
-                        //     }
-                        //     // 225
-                        //     (core::cmp::Ordering::Less, core::cmp::Ordering::Less) => {
-                        //         Line::new(Point::new(0, 0), Point::new(-5, -5))
-                        //     }
-                        //     // 270
-                        //     (core::cmp::Ordering::Less, core::cmp::Ordering::Equal) => {
-                        //         Line::new(Point::new(0, 0), Point::new(-8, 0))
-                        //     }
-                        //     // 315
-                        //     (core::cmp::Ordering::Less, core::cmp::Ordering::Greater) => {
-                        //         Line::new(Point::new(0, 0), Point::new(-5, 5))
-                        //     }
-                        //     // None
-                        //     (core::cmp::Ordering::Equal, core::cmp::Ordering::Equal) => {
-                        //         Line::new(Point::new(0, 0), Point::new(0, 0))
-                        //     }
-                        // };
-                        // let _ = Rectangle::new(Point::new(14, 55), Size::new(17, 17))
-                        //     .into_styled(PrimitiveStyle::with_fill(BinaryColor::Off))
-                        //     .draw(display.as_mut());
-                        // let _ = arrow
-                        //     .translate(Point::new(8, 8))
-                        //     .translate(Point::new(14, 55))
-                        //     .into_styled(PrimitiveStyle::with_stroke(BinaryColor::On, 2))
-                        //     .draw(display.as_mut());
                     }
                     DisplayMessage::NumLock(num_lock) => {
                         let _ = Text::with_baseline(
@@ -184,8 +129,11 @@ impl DisplayConfig for DefaultDisplayConfig {
                     DisplayMessage::On(on) => {
                         let _ = display.set_display_on(on).await;
                     }
+                    _ => {}
                 },
-                Either::Second(str) => {}
+                Either::Second(_str) => {
+                    // TODO: Implement this
+                }
             }
 
             let _ = display.flush().await;

@@ -2,12 +2,10 @@
 
 use core::convert::Infallible;
 
-use display_interface::DisplayError;
 use embedded_graphics::{
     Pixel,
-    mono_font::{MonoTextStyle, MonoTextStyleBuilder},
     pixelcolor::BinaryColor,
-    prelude::{Dimensions, DrawTarget, Point},
+    prelude::{Dimensions, DrawTarget},
 };
 use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 

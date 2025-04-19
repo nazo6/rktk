@@ -134,7 +134,7 @@ pub async fn report_task<
                         master_hooks.on_keymanager_event(ev);
                     }
                 }),
-                s.inner().get_layer_active().clone(),
+                *s.inner().get_layer_active(),
             )
         };
 

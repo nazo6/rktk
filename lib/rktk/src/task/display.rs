@@ -25,6 +25,7 @@ pub enum DisplayMessage {
     On(bool),
 }
 
+#[allow(async_fn_in_trait)]
 pub trait DisplayConfig {
     async fn start<D: DisplayDriver, const N1: usize, const N2: usize>(
         &mut self,
@@ -43,7 +44,7 @@ pub(super) async fn start<D: DisplayDriver, C: DisplayConfig>(display: &mut D, c
         return;
     }
 
-    display.as_mut().clear(BinaryColor::Off);
+    let _ = display.as_mut().clear(BinaryColor::Off);
     let _ = display.flush().await;
 
     config
