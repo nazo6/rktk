@@ -23,6 +23,9 @@ pub struct KeyManagerConfig {
 #[derive(SmartDefault)]
 #[serde(default)]
 pub struct KeymanagerConstantConfig {
+    #[default(8)]
+    pub normal_max_pressed_keys: usize,
+
     #[default(4)]
     pub oneshot_state_size: usize,
 
