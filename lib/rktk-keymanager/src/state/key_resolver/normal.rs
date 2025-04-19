@@ -11,11 +11,11 @@ struct NormalKeyState {
 }
 
 /// State management for Normal and Normal2 action
-pub struct NormalState {
-    pressed: heapless::Vec<NormalKeyState, 8>,
+pub struct NormalState<const MAX_PRESSED_KEYS: usize> {
+    pressed: heapless::Vec<NormalKeyState, MAX_PRESSED_KEYS>,
 }
 
-impl NormalState {
+impl<const MAX_PRESSED_KEYS: usize> NormalState<MAX_PRESSED_KEYS> {
     pub fn new() -> Self {
         Self {
             pressed: heapless::Vec::new(),

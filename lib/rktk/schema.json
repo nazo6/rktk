@@ -168,6 +168,12 @@
           "format": "uint",
           "minimum": 0.0
         },
+        "normal_max_pressed_keys": {
+          "default": 8,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
         "oneshot_state_size": {
           "default": 4,
           "type": "integer",

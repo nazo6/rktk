@@ -26,6 +26,7 @@ pub struct State<
     const ROW: usize,
     const COL: usize,
     const ENCODER_COUNT: usize,
+    const NORMAL_MAX_PRESSED_KEYS: usize,
     const ONESHOT_STATE_SIZE: usize,
     const TAP_DANCE_MAX_DEFINITIONS: usize,
     const TAP_DANCE_MAX_REPEATS: usize,
@@ -33,6 +34,7 @@ pub struct State<
     const COMBO_KEY_MAX_SOURCES: usize,
 > {
     key_resolver: key_resolver::KeyResolver<
+        NORMAL_MAX_PRESSED_KEYS,
         ONESHOT_STATE_SIZE,
         TAP_DANCE_MAX_DEFINITIONS,
         TAP_DANCE_MAX_REPEATS,
@@ -58,6 +60,7 @@ impl<
     const ROW: usize,
     const COL: usize,
     const ENCODER_COUNT: usize,
+    const NORMAL_MAX_PRESSED_KEYS: usize,
     const ONESHOT_STATE_SIZE: usize,
     const TAP_DANCE_MAX_DEFINITIONS: usize,
     const TAP_DANCE_MAX_REPEATS: usize,
@@ -69,6 +72,7 @@ impl<
         ROW,
         COL,
         ENCODER_COUNT,
+        NORMAL_MAX_PRESSED_KEYS,
         ONESHOT_STATE_SIZE,
         TAP_DANCE_MAX_DEFINITIONS,
         TAP_DANCE_MAX_REPEATS,

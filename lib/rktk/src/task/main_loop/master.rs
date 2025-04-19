@@ -35,6 +35,7 @@ type ConfiguredState = HidReportState<
     { KEYBOARD.rows as usize },
     { KEYBOARD.cols as usize },
     { KEYBOARD.encoder_count as usize },
+    { KM_CONFIG.constant.normal_max_pressed_keys },
     { KM_CONFIG.constant.oneshot_state_size },
     { KM_CONFIG.constant.tap_dance_max_definitions },
     { KM_CONFIG.constant.tap_dance_max_repeats },

@@ -94,7 +94,7 @@ mod prelude {
 
     pub fn new_state(
         keymap: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3>,
-    ) -> HidReportState<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 5, 2, 4, 2, 3> {
+    ) -> HidReportState<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 8, 5, 2, 4, 2, 3> {
         HidReportState::new(
             keymap,
             StateConfig {

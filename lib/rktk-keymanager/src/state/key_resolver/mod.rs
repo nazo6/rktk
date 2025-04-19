@@ -15,13 +15,14 @@ mod tap_hold;
 
 /// Handles layer related events and resolve physical key position to keycode.
 pub struct KeyResolver<
+    const NORMAL_MAX_PRESSED_KEYS: usize,
     const ONESHOT_BUFFER_SIZE: usize,
     const TAP_DANCE_MAX_DEFINITIONS: usize,
     const TAP_DANCE_MAX_REPEATS: usize,
     const COMBO_KEY_MAX_DEFINITIONS: usize,
     const COMBO_KEY_MAX_SOURCES: usize,
 > {
-    normal_state: normal::NormalState,
+    normal_state: normal::NormalState<NORMAL_MAX_PRESSED_KEYS>,
     tap_dance: tap_dance::TapDanceState<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
     oneshot: oneshot::OneshotState<ONESHOT_BUFFER_SIZE>,
     tap_hold: tap_hold::TapHoldState,
@@ -29,13 +30,15 @@ pub struct KeyResolver<
 }
 
 impl<
-        const ONESHOT_BUFFER_SIZE: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >
+    const NORMAL_MAX_PRESSED_KEYS: usize,
+    const ONESHOT_BUFFER_SIZE: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+>
     KeyResolver<
+        NORMAL_MAX_PRESSED_KEYS,
         ONESHOT_BUFFER_SIZE,
         TAP_DANCE_MAX_DEFINITIONS,
         TAP_DANCE_MAX_REPEATS,
