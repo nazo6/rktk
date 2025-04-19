@@ -61,6 +61,16 @@ impl Default for PanicMessage {
     }
 }
 
+impl PanicMessage {
+    fn reset() -> Self {
+        Self {
+            magic: 0,
+            len: 0,
+            data: [0; 1024],
+        }
+    }
+}
+
 /// Save panic info to uninit section.
 ///
 /// This function should be called in panic_handler.
@@ -78,10 +88,7 @@ fn read_panic_message() -> Option<PanicMessage> {
         let info = core::ptr::read(&raw const PANIC_INFO);
         let info = info.assume_init();
         if info.magic == PANIC_INFO_MAGIC {
-            write_volatile(
-                &raw mut PANIC_INFO,
-                MaybeUninit::new(PanicMessage::default()),
-            );
+            write_volatile(&raw mut PANIC_INFO, MaybeUninit::new(PanicMessage::reset()));
             Some(info)
         } else {
             None
@@ -159,6 +166,7 @@ pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
                 }
             } else {
                 display_mes(display, str, Point::zero(), rotation).await;
+                Timer::after_secs(100000000).await;
             }
         }
     }
