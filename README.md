@@ -116,7 +116,9 @@ You can find examples in the `examples` directory.
 
 ## Dependencies
 
-`rust-objcopy` is required to generate uf2 file.
+In addition to the dependencies specified [here](https://rktk.nazo6.dev/docs), to develop rktk, you need to install the following dependencies:
+- [cargo-hack](https://github.com/taiki-e/cargo-hack)
+- [dioxus cli](https://crates.io/crates/dioxus-cli)
 
 ### MSRV
 
