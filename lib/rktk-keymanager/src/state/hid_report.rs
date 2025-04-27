@@ -40,6 +40,7 @@ pub struct HidReportState<
         COMBO_KEY_MAX_SOURCES,
     >,
     next_send_keyboard_report: bool,
+    next_send_mkb_report: bool,
 }
 
 impl<
@@ -83,6 +84,7 @@ impl<
         Self {
             state: super::State::new(keymap, config),
             next_send_keyboard_report: false,
+            next_send_mkb_report: false,
         }
     }
 
@@ -106,7 +108,7 @@ impl<
         let mut scroll = (0, 0);
         let mut mouse_buttons = 0u8;
 
-        let mut media_keyboard_change = false;
+        let mut media_keyboard_change = self.next_send_mkb_report;
         let mut media_keys = 0u16;
 
         self.state.update(event, since_last_update, |ev| {
@@ -124,6 +126,17 @@ impl<
                         self.next_send_keyboard_report = true;
                     }
                 }
+                OutputEvent::MediaKey((m, ev)) => {
+                    if ev != EventType::Pressing {
+                        media_keyboard_change = true;
+                    }
+                    if ev != EventType::Released {
+                        media_keys = m as u16;
+                    }
+                    if ev == EventType::Released && media_keys == m as u16 {
+                        self.next_send_mkb_report = true;
+                    }
+                }
                 OutputEvent::Modifier((m, ev)) => {
                     if ev != EventType::Pressing {
                         keyboard_change = true;
@@ -138,14 +151,6 @@ impl<
                     }
                     if ev != EventType::Released {
                         mouse_buttons |= m as u8;
-                    }
-                }
-                OutputEvent::MediaKey((m, ev)) => {
-                    if ev != EventType::Pressing {
-                        media_keyboard_change = true;
-                    }
-                    if ev != EventType::Released {
-                        media_keys = m as u16;
                     }
                 }
                 OutputEvent::MouseMove(m) => {

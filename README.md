@@ -117,8 +117,9 @@ You can find examples in the `examples` directory.
 ## Dependencies
 
 In addition to the dependencies specified [here](https://rktk.nazo6.dev/docs), to develop rktk, you need to install the following dependencies:
-- [cargo-hack](https://github.com/taiki-e/cargo-hack)
-- [dioxus cli](https://crates.io/crates/dioxus-cli)
+- [cargo-hack](https://github.com/taiki-e/cargo-hack) - To run matrix check
+- [dioxus cli](https://crates.io/crates/dioxus-cli) - To run rktk-client
+- [cargo-check-delta](https://github.com/nazo6/cargo-check-delta) - Used by rust-analyzer
 
 ### MSRV
 
