@@ -9,8 +9,6 @@ const PUBLISH_ORDER: &[(&str, bool)] = &[
     ("rktk-drivers-common", false),
     ("rktk-drivers-nrf", true),
     ("rktk-drivers-rp", false),
-    ("rktk-rrp-client-webhid", false),
-    ("rktk-cli", false),
 ];
 
 pub fn start(

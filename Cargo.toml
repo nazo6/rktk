@@ -6,8 +6,7 @@ members = [
   "examples/corne-rp",
   "examples/corne-nrf",
   "examples/dummy-kb",
-  "tools/cli",
-  "tools/rktk-client",
+  "tools/*",
 ]
 resolver = "3"
 

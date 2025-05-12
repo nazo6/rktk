@@ -1,5 +1,5 @@
-# This config is used by internal `cargo rktk` command.
-# For more detail, see `tools/cli`
+# This config is used by internal `cargo xtask` command.
+# For more detail, see `tools/xtask`
 
 check_skip_global = ["_check", "default"]
 check_env = { DEFMT_LOG = "trace" }
@@ -58,7 +58,7 @@ check_at_least_one_of = ["web", "native"]
 check_mutually_exclusive_features = [["web", "native"]]
 doc_disabled = true
 
-[crates.rktk-cli]
+[crates.xtask]
 doc_disabled = true
 check_no_powerset = true
 

@@ -2,8 +2,8 @@ use std::{path::PathBuf, sync::LazyLock};
 
 use anyhow::Context as _;
 use cargo_metadata::{
-    Package,
     camino::{Utf8Path, Utf8PathBuf},
+    Package,
 };
 use duct::cmd;
 use sha2::{Digest, Sha256};
