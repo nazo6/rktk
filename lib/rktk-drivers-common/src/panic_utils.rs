@@ -36,7 +36,7 @@ pub fn save_panic_info(info: &core::panic::PanicInfo) {
         magic: PANIC_INFO_MAGIC,
         data: heapless::Vec::new(),
     };
-    write!(panic_info, "{}", info).ok();
+    write!(panic_info, "{info}").ok();
 
     unsafe {
         write_volatile(&raw mut PANIC_INFO, MaybeUninit::new(panic_info));

@@ -32,7 +32,7 @@ impl<const ROWS: usize, const COLS: usize> Pressed<ROWS, COLS> {
 impl<const ROWS: usize, const COLS: usize> core::fmt::Debug for Pressed<ROWS, COLS> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         for (row, col) in self.iter() {
-            write!(f, "{},{} ", row, col)?;
+            write!(f, "{row},{col} ")?;
         }
         Ok(())
     }

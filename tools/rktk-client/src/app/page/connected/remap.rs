@@ -107,7 +107,7 @@ pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData, refetch: Callback<
                             }
                             Err(e) => {
                                 push_notification(Notification {
-                                    message: format!("Cannot connect to device: {:?}", e),
+                                    message: format!("Cannot connect to device: {e:?}"),
                                     level: NotificationLevel::Error,
                                     ..Default::default()
                                 });

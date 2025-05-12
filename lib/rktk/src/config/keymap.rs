@@ -30,7 +30,7 @@ pub mod rktk_keys {
     impl Display for RktkKeys {
         fn fmt(&self, f: &mut Formatter) -> fmt::Result {
             let s: &'static str = self.into();
-            write!(f, "{}", s)
+            write!(f, "{s}")
         }
     }
 

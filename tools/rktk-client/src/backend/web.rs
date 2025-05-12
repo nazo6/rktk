@@ -5,9 +5,9 @@ use futures::StreamExt as _;
 use rktk_rrp::client::Client;
 use rktk_rrp::transport::ReadTransport;
 use rktk_rrp::transport::WriteTransport;
-use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
+use wasm_bindgen::prelude::Closure;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::HidDevice;
 use web_sys::HidInputReportEvent;
@@ -189,10 +189,10 @@ impl WriteTransport for HidWriter {
             let p = self
                 .device
                 .send_report_with_u8_slice(0, &mut data)
-                .map_err(|e| format!("{:?}", e))?;
+                .map_err(|e| format!("{e:?}"))?;
             wasm_bindgen_futures::JsFuture::from(p)
                 .await
-                .map_err(|e| format!("{:?}", e))?;
+                .map_err(|e| format!("{e:?}"))?;
         }
 
         Ok(buf.len())

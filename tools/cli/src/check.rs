@@ -1,8 +1,8 @@
 use anyhow::Context;
-use cargo_metadata::{camino::Utf8Path, Package};
+use cargo_metadata::{Package, camino::Utf8Path};
 use duct::cmd;
 
-use crate::utils::{xprintln, METADATA};
+use crate::utils::{METADATA, xprintln};
 
 use super::config::CRATES_CONFIG;
 
@@ -66,7 +66,7 @@ fn run_check(package: &Package) -> (&Utf8Path, Result<std::process::Output, std:
 
     let mut cmd = cmd("cargo", build_args(&package.name));
 
-    eprintln!("command: {:?}, envs: {:?}", cmd, envs);
+    eprintln!("command: {cmd:?}, envs: {envs:?}");
 
     for (key, value) in envs {
         cmd = cmd.env(key, value);
@@ -140,7 +140,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         if !failed.is_empty() {
             let mut msg = "Some crates failed to pass clippy: ".to_string();
             for (crate_path, name) in failed {
-                msg.push_str(&format!("\n  - {} ({})", name, crate_path));
+                msg.push_str(&format!("\n  - {name} ({crate_path})"));
             }
             anyhow::bail!(msg);
         }
@@ -156,7 +156,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
 
         run_check(package)
             .1
-            .with_context(|| format!("Failed to run clippy for crate: {}", dir))?;
+            .with_context(|| format!("Failed to run clippy for crate: {dir}"))?;
     }
 
     Ok(())

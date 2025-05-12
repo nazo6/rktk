@@ -90,14 +90,14 @@ pub(super) async fn start<D: DisplayDriver>(display: &mut D) {
                 // (6,1): highest layer
                 DisplayMessage::HighestLayer(layer) => {
                     let mut str = heapless::String::<2>::new();
-                    write!(str, "{:1}", layer).unwrap();
+                    write!(str, "{layer:1}").unwrap();
                     let _ = display.update_text(&str, D::calculate_point(6, 1)).await;
                 }
 
                 // (8,1): mouse position
                 DisplayMessage::MouseMove((x, y)) => {
                     let mut str = heapless::String::<12>::new();
-                    write!(str, "[{:3},{:3}]", x, y).unwrap();
+                    write!(str, "[{x:3},{y:3}]").unwrap();
                     let _ = display.update_text(&str, D::calculate_point(8, 1)).await;
                 }
 

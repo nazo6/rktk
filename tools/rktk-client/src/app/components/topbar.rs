@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::app::{
-    components::notification::{push_notification, Notification, NotificationLevel},
+    components::notification::{Notification, NotificationLevel, push_notification},
     disconnect::disconnect,
     state::CONN,
 };
@@ -25,7 +25,7 @@ pub fn Topbar() -> Element {
                                     }
                                     Err(e) => {
                                         push_notification(Notification {
-                                            message: format!("Cannot disconnect from device: {:?}", e),
+                                            message: format!("Cannot disconnect from device: {e:?}"),
                                             level: NotificationLevel::Error,
                                             ..Default::default()
                                         });

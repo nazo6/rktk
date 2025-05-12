@@ -63,7 +63,7 @@ fn main() -> ExitCode {
             ExitCode::from(0)
         }
         Err(err) => {
-            xprintln!("{} {}", " ERROR ".on_red(), format!("{:?}", err).red());
+            xprintln!("{} {}", " ERROR ".on_red(), format!("{err:?}").red());
             ExitCode::from(1)
         }
     }
