@@ -26,7 +26,7 @@ pub fn encoder_clockwise() {
         "In first report, key `A` should be sent"
     );
 
-    let report = update!(state, time(0));
+    let report = update!(state, time(10));
     assert_eq!(
         report, KEYBOARD_ONLY_REPORT,
         "In second send, empty should not be sent"

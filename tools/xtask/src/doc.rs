@@ -2,8 +2,8 @@ use std::{path::PathBuf, sync::LazyLock};
 
 use anyhow::Context as _;
 use cargo_metadata::{
-    Package,
     camino::{Utf8Path, Utf8PathBuf},
+    Package,
 };
 use duct::cmd;
 use sha2::{Digest, Sha256};
@@ -18,7 +18,7 @@ static HTML_BEFORE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     hasher.update(BEFORE_CONTENT);
     let hash = hex::encode(hasher.finalize());
 
-    let path = std::env::temp_dir().join(format!("doc_header_{}.html", hash));
+    let path = std::env::temp_dir().join(format!("doc_header_{hash}.html"));
     std::fs::write(&path, BEFORE_CONTENT).unwrap();
     path
 });
@@ -28,7 +28,7 @@ static HTML_AFTER_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     hasher.update(AFTER_CONTENT);
     let hash = hex::encode(hasher.finalize());
 
-    let path = std::env::temp_dir().join(format!("doc_header_{}.html", hash));
+    let path = std::env::temp_dir().join(format!("doc_header_{hash}.html"));
     std::fs::write(&path, AFTER_CONTENT).unwrap();
     path
 });
@@ -166,7 +166,7 @@ pub fn start() -> anyhow::Result<()> {
     ];
 
     for (doc_dir, part_dir, src_dir) in doc_dirs {
-        rustdoc_args.push(format!("--include-parts-dir={}", part_dir));
+        rustdoc_args.push(format!("--include-parts-dir={part_dir}"));
         let crate_name = doc_dir.file_name().unwrap().to_str().unwrap();
         // copy doc html
         dircpy::CopyBuilder::new::<&str, &str>(

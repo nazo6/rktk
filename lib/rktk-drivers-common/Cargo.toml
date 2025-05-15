@@ -40,7 +40,8 @@ document-features = { workspace = true }
 static_cell = { workspace = true, optional = true }
 ssmarshal = { workspace = true, optional = true }
 
-trouble-host = { git = "https://github.com/embassy-rs/trouble/", version = "0.1.0", optional = true, features = [
+# Due to compatibility with nrf-sdc, the revision is currently locked.
+trouble-host = { git = "https://github.com/embassy-rs/trouble/", rev = "d17132618413f0fa840fee32af4ab23ca125bec2", version = "0.1.0", optional = true, features = [
   "security",
 ] }
 rand_core = { version = "0.6", optional = true }

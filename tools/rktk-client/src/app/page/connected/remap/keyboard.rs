@@ -120,7 +120,7 @@ pub fn Key(
 
 mod utils {
     use rktk::config::keymap::prelude::RktkKeys;
-    use rktk_keymanager::keycode::{layer::LayerOp, KeyAction, KeyCode};
+    use rktk_keymanager::keycode::{KeyAction, KeyCode, layer::LayerOp};
 
     pub fn key_str(key: &KeyAction) -> String {
         match key {
@@ -133,7 +133,7 @@ mod utils {
                 format!("{} / {}", keycode_str(key_code), keycode_str(key_code1))
             }
             KeyAction::OneShot(key_code) => format!("OS({})", keycode_str(key_code)),
-            KeyAction::TapDance(id) => format!("TD({})", id),
+            KeyAction::TapDance(id) => format!("TD({id})"),
         }
     }
 
@@ -141,19 +141,19 @@ mod utils {
         match key {
             KeyCode::None => "XXX".to_string(),
             KeyCode::Key(key) => Into::<&'static str>::into(key).to_string(),
-            KeyCode::Mouse(mouse) => format!("{}", mouse),
-            KeyCode::Modifier(modifier) => format!("{}", modifier),
+            KeyCode::Mouse(mouse) => format!("{mouse}"),
+            KeyCode::Modifier(modifier) => format!("{modifier}"),
             KeyCode::Layer(layer_op) => match layer_op {
-                LayerOp::Momentary(l) => format!("MO({})", l),
-                LayerOp::Toggle(l) => format!("TO({})", l),
+                LayerOp::Momentary(l) => format!("MO({l})"),
+                LayerOp::Toggle(l) => format!("TO({l})"),
             },
             KeyCode::Special(special) => Into::<&'static str>::into(special).to_string(),
             KeyCode::Media(media) => Into::<&'static str>::into(media).to_string(),
             KeyCode::Custom1(n) => {
                 Into::<&'static str>::into(TryInto::<RktkKeys>::try_into(*n).unwrap()).to_string()
             }
-            KeyCode::Custom2(n) => format!("C2({})", n),
-            KeyCode::Custom3(n) => format!("C3({})", n),
+            KeyCode::Custom2(n) => format!("C2({n})"),
+            KeyCode::Custom3(n) => format!("C3({n})"),
         }
     }
 }

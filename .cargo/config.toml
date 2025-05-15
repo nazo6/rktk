@@ -12,7 +12,7 @@ inherits = "dev"
 inherits = "dev"
 
 [alias]
-rktk = "run -p rktk-cli --"
+xtask = "run -p xtask --"
 
 [env]
 RKTK_CONFIG_PATH = { value = "rktk.dev.json", relative = true }

@@ -34,7 +34,7 @@ fn main() {
         .expect("Failed to write schema.json");
 
         let config_path = env::var("RKTK_CONFIG_PATH").expect("RKTK_CONFIG_PATH is not set");
-        println!("cargo:rerun-if-changed={}", config_path);
+        println!("cargo:rerun-if-changed={config_path}");
         fs::read_to_string(config_path).expect("Failed to read config file")
     };
 

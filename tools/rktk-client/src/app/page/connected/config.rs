@@ -3,7 +3,7 @@ use rktk_keymanager::interface::state::config::StateConfig;
 
 use crate::app::{
     cache::{invalidate_cache, use_cache, with_cache},
-    components::notification::{push_notification, Notification, NotificationLevel},
+    components::notification::{Notification, NotificationLevel, push_notification},
 };
 
 #[component]
@@ -109,7 +109,7 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
                         let result = fetcher::set_config(config).await;
                         if let Err(e) = result {
                             push_notification(Notification {
-                                message: format!("Could not set config: {:?}", e),
+                                message: format!("Could not set config: {e:?}"),
                                 level: NotificationLevel::Error,
                                 ..Default::default()
                             });

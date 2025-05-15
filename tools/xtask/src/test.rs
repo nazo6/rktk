@@ -92,7 +92,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         if !failed.is_empty() {
             let mut msg = "Some crates failed to pass test: ".to_string();
             for (crate_path, name) in failed {
-                msg.push_str(&format!("\n  - {} ({})", name, crate_path));
+                msg.push_str(&format!("\n  - {name} ({crate_path})"));
             }
             anyhow::bail!(msg);
         }

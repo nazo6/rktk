@@ -9,8 +9,6 @@ const PUBLISH_ORDER: &[(&str, bool)] = &[
     ("rktk-drivers-common", false),
     ("rktk-drivers-nrf", true),
     ("rktk-drivers-rp", false),
-    ("rktk-rrp-client-webhid", false),
-    ("rktk-cli", false),
 ];
 
 pub fn start(
@@ -84,7 +82,7 @@ pub fn start(
     if !failed.is_empty() {
         let mut msg = "Some crates failed to pass clippy: ".to_string();
         for package in failed {
-            msg.push_str(&format!("\n  - {}", package));
+            msg.push_str(&format!("\n  - {package}"));
         }
         anyhow::bail!(msg);
     }

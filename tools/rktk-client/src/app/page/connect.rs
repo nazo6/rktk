@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::app::{
-    components::notification::{push_notification, Notification, NotificationLevel},
+    components::notification::{Notification, NotificationLevel, push_notification},
     state::CONN,
 };
 
@@ -25,7 +25,7 @@ pub fn Connect() -> Element {
                             }
                             Err(e) => {
                                 push_notification(Notification {
-                                    message: format!("Cannot connect to device: {:?}", e),
+                                    message: format!("Cannot connect to device: {e:?}"),
                                     level: NotificationLevel::Error,
                                     ..Default::default()
                                 });
@@ -44,7 +44,7 @@ mod conn {
     use futures::lock::Mutex;
 
     use crate::{
-        app::{state::ConnectedState, BACKEND},
+        app::{BACKEND, state::ConnectedState},
         backend::{RrpHidBackend, RrpHidDevice as _},
     };
 

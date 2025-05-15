@@ -31,7 +31,7 @@ jobs:
     - uses: r7kamura/rust-problem-matchers@v1
 
     - name: Generate docs
-      run: cargo rktk doc
+      run: cargo xtask doc
 
     - name: Upload static files as artifact
       id: deployment
