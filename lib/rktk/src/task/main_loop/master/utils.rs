@@ -3,7 +3,10 @@ use rktk_log::helper::Debug2Format;
 
 use crate::{
     config::{
-        constant::{KEYBOARD, KM_CONFIG},
+        constant::{
+            CONST_CONFIG,
+            schema::{DynamicConfig, KeyManagerConfig},
+        },
         keymap::Keymap,
         storage::StorageConfigManager,
     },
@@ -11,24 +14,24 @@ use crate::{
     interface::Hand,
 };
 
-use super::{ConfiguredState, RKTK_CONFIG, SharedState};
+use super::{ConfiguredState, SharedState};
 
-const SPLIT_RIGHT_SHIFT: u8 = {
-    if let Some(val) = KEYBOARD.split_right_shift {
+pub fn get_split_right_shift(config: &DynamicConfig) -> u8 {
+    if let Some(val) = config.keyboard.split_right_shift {
         val
     } else {
         assert!(
-            KEYBOARD.cols % 2 == 0,
+            CONST_CONFIG.keyboard.cols % 2 == 0,
             "Split right shift is not defined, but the keyboard has odd number of columns."
         );
-        KEYBOARD.cols / 2
+        CONST_CONFIG.keyboard.cols / 2
     }
-};
+}
 
 /// Resolves one-handed coordinates to two-handed coordinates using split_right_shift.
-pub fn resolve_entire_key_pos(ev: &mut KeyChangeEvent, hand: Hand) {
+pub fn resolve_entire_key_pos(ev: &mut KeyChangeEvent, hand: Hand, shift: u8) {
     if hand == Hand::Right {
-        ev.col += SPLIT_RIGHT_SHIFT;
+        ev.col += shift;
     }
 }
 
@@ -68,12 +71,13 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
 /// Loads config from storage and return it as state.
 /// If storage doesn't exist or read fails, uses provided static config value insted.
 pub async fn load_state(
+    km_config: &KeyManagerConfig,
     config_store: &Option<StorageConfigManager<impl StorageDriver>>,
     keymap: &Keymap,
 ) -> SharedState {
     let mut keymap = keymap.clone();
     let (state_config, keymap) = if let Some(storage) = &config_store {
-        for l in 0..RKTK_CONFIG.layer_count {
+        for l in 0..CONST_CONFIG.key_manager.layer_count {
             if let Ok(layer) = storage.read_keymap(l).await {
                 keymap.layers[l as usize] = layer;
             }
@@ -87,8 +91,8 @@ pub async fn load_state(
     };
 
     let state_config = state_config.unwrap_or(StateConfig {
-        mouse: KM_CONFIG.mouse,
-        key_resolver: KM_CONFIG.key_resolver,
+        mouse: km_config.mouse.clone(),
+        key_resolver: km_config.key_resolver.clone(),
     });
 
     SharedState::new(ConfiguredState::new(keymap, state_config))

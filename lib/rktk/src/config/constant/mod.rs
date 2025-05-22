@@ -12,15 +12,6 @@
 //!
 //! For each configuration, see the [`schema`] module.
 
-use embassy_time::Duration;
-
 include!(concat!(env!("OUT_DIR"), "/config.rs"));
 
-pub(crate) const KEYBOARD: schema::Keyboard = CONFIG.keyboard;
-pub(crate) const RKTK_CONFIG: schema::RktkConfig = CONFIG.rktk;
-pub(crate) const KM_CONFIG: schema::KeyManagerConfig = CONFIG.key_manager;
-
-pub(crate) const SCAN_INTERVAL_KEYBOARD: Duration =
-    Duration::from_millis(RKTK_CONFIG.scan_interval_keyboard);
-pub(crate) const SCAN_INTERVAL_MOUSE: Duration =
-    Duration::from_millis(RKTK_CONFIG.scan_interval_mouse);
+pub(crate) const CONST_CONFIG: schema::ConstantConfig = CONFIG.constant;

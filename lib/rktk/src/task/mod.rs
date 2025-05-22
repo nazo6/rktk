@@ -1,7 +1,6 @@
 //! Program entrypoint.
 
 use crate::{
-    config::constant::RKTK_CONFIG,
     drivers::interface::{
         debounce::DebounceDriver,
         display::DisplayDriver,
@@ -20,11 +19,11 @@ use crate::{
     interface::Hand,
 };
 use crate::{
-    config::keymap::Keymap,
     drivers::{Drivers, interface::system::SystemDriver},
     hooks::interface::*,
     utils::sjoin,
 };
+use display::DisplayConfig;
 use embassy_time::Duration;
 use rktk_log::{debug, helper::Debug2Format, info};
 
@@ -58,6 +57,8 @@ pub async fn start<
     MH: MasterHooks,
     SH: SlaveHooks,
     BH: RgbHooks,
+    //
+    DC: DisplayConfig + 'static,
 >(
     mut drivers: Drivers<
         System,
@@ -72,9 +73,8 @@ pub async fn start<
         Display,
         Mouse,
     >,
-    keymap: &'static Keymap,
-    hand: Option<Hand>,
     hooks: Hooks<CH, MH, SH, BH>,
+    opts: crate::config::RktkOpts<DC>,
 ) {
     #[cfg(feature = "rrp-log")]
     {
@@ -97,7 +97,7 @@ pub async fn start<
 
     drivers
         .system
-        .double_reset_usb_boot(Duration::from_millis(RKTK_CONFIG.double_tap_threshold))
+        .double_reset_usb_boot(Duration::from_millis(opts.config.rktk.split_usb_timeout))
         .await;
 
     sjoin::join!(
@@ -107,7 +107,7 @@ pub async fn start<
 
                 match mouse.init().await {
                     Ok(_) => {
-                        let _ = mouse.set_cpi(RKTK_CONFIG.default_cpi).await;
+                        let _ = mouse.set_cpi(opts.config.rktk.default_cpi).await;
                         Some(mouse)
                     }
                     Err(e) => {
@@ -153,9 +153,10 @@ pub async fn start<
                         drivers.storage,
                         drivers.split,
                         drivers.rgb,
-                        keymap,
+                        opts.config,
+                        opts.keymap,
                         hooks,
-                        hand.unwrap_or(Hand::Left),
+                        opts.hand.unwrap_or(Hand::Left),
                     )
                     .await;
                 },
@@ -173,22 +174,27 @@ pub async fn start<
         },
         async move {
             if let Some(mut display) = drivers.display {
-                display::start(
-                    &mut display,
-                    &mut display::default_display::DefaultDisplayConfig,
-                )
-                .await;
+                if let Some(mut display_config) = opts.display {
+                    display::start(&mut display, &mut display_config).await;
+                } else {
+                    display::start(
+                        &mut display,
+                        &mut display::default_display::DefaultDisplayConfig,
+                    )
+                    .await;
+                }
             }
         }
     );
 }
 
 /// Runs dongle with the given drivers.
-pub async fn dongle_start(
+pub async fn dongle_start<D: display::DisplayConfig + 'static>(
     usb: impl UsbReporterDriverBuilder,
     dongle: impl DongleDriverBuilder,
     mut hooks: impl dongle::DongleHooks,
     display: Option<impl DisplayDriver>,
+    mut display_config: impl display::DisplayConfig + 'static,
 ) {
     let (usb, usb_task) = usb.build().await.unwrap();
     let (mut dongle, dongle_task) = dongle.build().await.unwrap();
@@ -241,11 +247,7 @@ pub async fn dongle_start(
         dongle_task,
         async move {
             if let Some(mut display) = display {
-                display::start(
-                    &mut display,
-                    &mut display::default_display::DefaultDisplayConfig,
-                )
-                .await;
+                display::start(&mut display, &mut display_config).await;
             }
         }
     );

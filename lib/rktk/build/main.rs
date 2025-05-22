@@ -68,10 +68,14 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
     definitions!(
         text,
         schema::Config,
-        schema::keyboard::Keyboard,
-        schema::rktk::RktkConfig,
-        schema::key_manager::KeyManagerConfig,
-        schema::key_manager::KeymanagerConstantConfig
+        schema::constant::ConstantConfig,
+        schema::constant::BufferSizeConfig,
+        schema::constant::KeyboardConstantConfig,
+        schema::constant::KeymanagerConstantConfig,
+        schema::dynamic::DynamicConfig,
+        schema::dynamic::rktk::RktkConfig,
+        schema::dynamic::keyboard::KeyboardConfig,
+        schema::dynamic::key_manager::KeyManagerConfig
     );
     text.push("}".to_string());
     text.push("use schema::*;".to_string());

@@ -1,25 +1,31 @@
 use rktk_log::{debug, warn};
 
 use crate::{
-    config::constant::SCAN_INTERVAL_KEYBOARD,
+    config::constant::schema::DynamicConfig,
     drivers::interface::{debounce::DebounceDriver, keyscan::KeyscanDriver},
     interface::Hand,
-    task::channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
+    task::{
+        channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
+        main_loop::master::utils::get_split_right_shift,
+    },
 };
 
 use super::utils::resolve_entire_key_pos;
 
 pub async fn start(
+    config: &'static DynamicConfig,
     hand: Hand,
     mut keyscan: impl KeyscanDriver,
     debounce: &mut Option<impl DebounceDriver>,
 ) {
     debug!("keyscan start");
     let mut latest = embassy_time::Instant::from_millis(0);
+    let interval = embassy_time::Duration::from_millis(config.rktk.scan_interval_keyboard);
+    let shift = get_split_right_shift(config);
     loop {
         let elapsed = latest.elapsed();
-        if elapsed < SCAN_INTERVAL_KEYBOARD {
-            embassy_time::Timer::after(SCAN_INTERVAL_KEYBOARD - elapsed).await;
+        if elapsed < interval {
+            embassy_time::Timer::after(interval - elapsed).await;
         }
 
         keyscan
@@ -30,7 +36,7 @@ pub async fn start(
                         return;
                     }
                 }
-                resolve_entire_key_pos(&mut event, hand);
+                resolve_entire_key_pos(&mut event, hand, shift);
 
                 if KEYBOARD_EVENT_REPORT_CHANNEL.try_send(event).is_err() {
                     warn!("Keyboard full");

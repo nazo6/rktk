@@ -18,19 +18,19 @@ pub mod rgb {
 
 pub mod split {
     use crate::{
+        config::constant::CONST_CONFIG,
         drivers::interface::split::{MasterToSlave, SlaveToMaster},
-        task::RKTK_CONFIG,
     };
 
     use super::*;
 
-    type S2mChannel = Channel<SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
-    pub type S2mRx<'a> = Receiver<'a, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
-    pub type S2mTx<'a> = Sender<'a, SlaveToMaster, { RKTK_CONFIG.split_channel_size }>;
+    type S2mChannel = Channel<SlaveToMaster, { CONST_CONFIG.buffer.split_channel }>;
+    pub type S2mRx<'a> = Receiver<'a, SlaveToMaster, { CONST_CONFIG.buffer.split_channel }>;
+    pub type S2mTx<'a> = Sender<'a, SlaveToMaster, { CONST_CONFIG.buffer.split_channel }>;
 
-    type M2sChannel = Channel<MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
-    pub type M2sRx<'a> = Receiver<'a, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
-    pub type M2sTx<'a> = Sender<'a, MasterToSlave, { RKTK_CONFIG.split_channel_size }>;
+    type M2sChannel = Channel<MasterToSlave, { CONST_CONFIG.buffer.split_channel }>;
+    pub type M2sRx<'a> = Receiver<'a, MasterToSlave, { CONST_CONFIG.buffer.split_channel }>;
+    pub type M2sTx<'a> = Sender<'a, MasterToSlave, { CONST_CONFIG.buffer.split_channel }>;
 
     pub(crate) static M2S_CHANNEL: M2sChannel = Channel::new();
     pub(crate) static S2M_CHANNEL: S2mChannel = Channel::new();
@@ -42,7 +42,7 @@ pub mod report {
     use portable_atomic::AtomicI8;
     use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
-    use crate::{task::RKTK_CONFIG, utils::Signal};
+    use crate::{config::constant::CONST_CONFIG, utils::Signal};
 
     use super::*;
 
@@ -58,7 +58,7 @@ pub mod report {
 
     pub(crate) static KEYBOARD_EVENT_REPORT_CHANNEL: Channel<
         KeyChangeEvent,
-        { RKTK_CONFIG.keyboard_event_buffer_size },
+        { CONST_CONFIG.buffer.keyboard_event },
     > = Channel::new();
 
     /// Get [`DynamicSender`] that can be used to report keyboard events.
@@ -68,7 +68,7 @@ pub mod report {
 
     pub(crate) static ENCODER_EVENT_REPORT_CHANNEL: Channel<
         (u8, EncoderDirection),
-        { RKTK_CONFIG.encoder_event_buffer_size },
+        { CONST_CONFIG.buffer.encoder_event },
     > = Channel::new();
 
     /// Get [`DynamicSender`] that can be used to report encoder events.

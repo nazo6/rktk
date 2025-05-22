@@ -1,5 +1,6 @@
 //! Keymap related configs.
-use crate::config::constant::{KEYBOARD, KM_CONFIG, RKTK_CONFIG};
+
+use super::constant::CONST_CONFIG;
 
 /// Re-exports of raw [`rktk_keymanager`] types.
 ///
@@ -69,21 +70,23 @@ pub mod prelude {
 }
 
 pub type Keymap = rktk_keymanager::keymap::Keymap<
-    { RKTK_CONFIG.layer_count as usize },
-    { KEYBOARD.rows as usize },
-    { KEYBOARD.cols as usize },
-    { KEYBOARD.encoder_count as usize },
-    { KM_CONFIG.constant.tap_dance_max_definitions },
-    { KM_CONFIG.constant.tap_dance_max_repeats },
-    { KM_CONFIG.constant.combo_key_max_definitions },
-    { KM_CONFIG.constant.combo_key_max_sources },
+    { CONST_CONFIG.key_manager.layer_count as usize },
+    { CONST_CONFIG.keyboard.rows as usize },
+    { CONST_CONFIG.keyboard.cols as usize },
+    { CONST_CONFIG.keyboard.encoder_count as usize },
+    { CONST_CONFIG.key_manager.tap_dance_max_definitions },
+    { CONST_CONFIG.key_manager.tap_dance_max_repeats },
+    { CONST_CONFIG.key_manager.combo_key_max_definitions },
+    { CONST_CONFIG.key_manager.combo_key_max_sources },
 >;
 
 pub type Layer = rktk_keymanager::keymap::Layer<
-    { KEYBOARD.rows as usize },
-    { KEYBOARD.cols as usize },
-    { KEYBOARD.encoder_count as usize },
+    { CONST_CONFIG.keyboard.rows as usize },
+    { CONST_CONFIG.keyboard.cols as usize },
+    { CONST_CONFIG.keyboard.encoder_count as usize },
 >;
 
-pub type LayerKeymap =
-    rktk_keymanager::keymap::LayerKeymap<{ KEYBOARD.rows as usize }, { KEYBOARD.cols as usize }>;
+pub type LayerKeymap = rktk_keymanager::keymap::LayerKeymap<
+    { CONST_CONFIG.keyboard.rows as usize },
+    { CONST_CONFIG.keyboard.cols as usize },
+>;
