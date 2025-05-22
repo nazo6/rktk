@@ -2,7 +2,7 @@ use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
 use rktk_log::debug;
 
 use crate::{
-    config::constant::schema::DynamicConfig,
+    config::schema::DynamicConfig,
     drivers::interface::split::SlaveToMaster,
     interface::Hand,
     task::{

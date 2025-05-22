@@ -2,7 +2,7 @@ use core::fmt::Write;
 
 use rktk_rrp::endpoints::get_log::{self, LogChunk};
 
-use crate::{config::constant::CONST_CONFIG, utils::Channel};
+use crate::{config::CONST_CONFIG, utils::Channel};
 
 pub struct LogWriter;
 

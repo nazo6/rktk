@@ -3,11 +3,9 @@ use rktk_log::helper::Debug2Format;
 
 use crate::{
     config::{
-        constant::{
-            CONST_CONFIG,
-            schema::{DynamicConfig, KeyManagerConfig},
-        },
+        CONST_CONFIG,
         keymap::Keymap,
+        schema::{DynamicConfig, KeyManagerConfig},
         storage::StorageConfigManager,
     },
     drivers::interface::storage::StorageDriver,

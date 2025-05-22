@@ -16,15 +16,21 @@ fn main() {
         // Also, writing file is not allowed, so schema.json generation is also skipped.
         println!("cargo:warning=Using demo json for docs.rs");
         r#####"
-                {
-                  "$schema": "../lib/rktk/schema.json",
-                  "keyboard": {
-                    "cols": 14,
-                    "rows": 5,
-                    "name": "test"
-                  }
+            {
+              "$schema": "./lib/rktk/schema.json",
+              "constant": {
+                "keyboard": {
+                  "cols": 14,
+                  "rows": 5
                 }
-            "#####
+              },
+              "dynamic": {
+                "keyboard": {
+                  "name": "test-keyboard"
+                }
+              }
+            }
+        "#####
             .to_string()
     } else {
         fs::write(
@@ -45,29 +51,21 @@ fn main() {
         .arg(&gen_path)
         .output()
         .expect("Failed to run rustfmt");
-
-    // println!("cargo:warning=Wrote generated code to {:?}", gen_path);
 }
 
 macro_rules! definitions {
-    ($vec:tt, $($path:path),* ) => {
-        $(
-            $vec.push(const_definition!(#[derive(Debug, serde::Serialize)] pub $path));
-        )*
+    ($name:ident, $($path:path),* ) => {
+        let $name = vec![$(
+            const_definition!(#[derive(Debug, serde::Serialize)] pub $path),
+        )*];
     };
 }
 
 pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
     let config: schema::Config = serde_json::from_str(value)?;
 
-    let mut text = vec![
-        "use rktk_keymanager::interface::state::config::*;".to_string(),
-        "pub mod schema {".to_string(),
-        "use rktk_keymanager::interface::state::config::*;".to_string(),
-    ];
     definitions!(
-        text,
-        schema::Config,
+        code_schemas,
         schema::constant::ConstantConfig,
         schema::constant::BufferSizeConfig,
         schema::constant::KeyboardConstantConfig,
@@ -77,13 +75,37 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
         schema::dynamic::keyboard::KeyboardConfig,
         schema::dynamic::key_manager::KeyManagerConfig
     );
-    text.push("}".to_string());
-    text.push("use schema::*;".to_string());
+    let code_schemas = code_schemas.join("\n");
 
-    text.push(const_declaration!(
-        #[doc = "Config generated from json"]
-        pub(crate) CONFIG = config
-    ));
+    let code_const_config = const_declaration!(
+        #[doc = "Config generated from `constant` key of json"]
+        pub CONST_CONFIG = config.constant
+    );
 
-    Ok(text.join("\n"))
+    let code_dynamic_config = const_declaration!(
+        #[doc = "Config generated from `dynamic` key of json"]
+        pub DYNAMIC_CONFIG_FROM_FILE = config.dynamic
+    );
+
+    let code = format!(
+        r#"
+        pub mod schema {{
+            use rktk_keymanager::interface::state::config::*;
+
+            {code_schemas}
+        }}
+        mod generate_config {{
+            use super::schema::*;
+            use rktk_keymanager::interface::state::config::*;
+
+            {code_const_config}
+
+            {code_dynamic_config}
+        }}
+
+        pub use generate_config::{{CONST_CONFIG, DYNAMIC_CONFIG_FROM_FILE}};
+    "#
+    );
+
+    Ok(code)
 }

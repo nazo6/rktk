@@ -74,7 +74,7 @@ pub async fn start<
         Mouse,
     >,
     hooks: Hooks<CH, MH, SH, BH>,
-    opts: crate::config::RktkOpts<DC>,
+    mut opts: crate::config::RktkOpts<DC>,
 ) {
     #[cfg(feature = "rrp-log")]
     {
@@ -174,15 +174,7 @@ pub async fn start<
         },
         async move {
             if let Some(mut display) = drivers.display {
-                if let Some(mut display_config) = opts.display {
-                    display::start(&mut display, &mut display_config).await;
-                } else {
-                    display::start(
-                        &mut display,
-                        &mut display::default_display::DefaultDisplayConfig,
-                    )
-                    .await;
-                }
+                display::start(&mut display, &mut opts.display).await;
             }
         }
     );

@@ -1,6 +1,6 @@
 //! Keymap related configs.
 
-use super::constant::CONST_CONFIG;
+use super::CONST_CONFIG;
 
 /// Re-exports of raw [`rktk_keymanager`] types.
 ///

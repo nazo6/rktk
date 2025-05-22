@@ -1,7 +1,7 @@
 use embassy_time::Duration;
 
 use crate::{
-    config::constant::schema::DynamicConfig, drivers::interface::mouse::MouseDriver,
+    config::schema::DynamicConfig, drivers::interface::mouse::MouseDriver,
     task::channels::report::update_mouse,
 };
 

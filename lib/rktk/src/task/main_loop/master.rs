@@ -5,8 +5,8 @@ use utils::{init_storage, load_state};
 
 use crate::{
     config::{
-        constant::{CONST_CONFIG, schema::DynamicConfig},
         keymap::Keymap,
+        {CONST_CONFIG, schema::DynamicConfig},
     },
     drivers::interface::{
         debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,

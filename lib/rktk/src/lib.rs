@@ -31,7 +31,7 @@
 //! These types are actually not hardcoded, but are configurable using json file.
 //! Just a random value is provided because it is required to generate docs.
 //!
-//! For more detail, see [`config::constant`].
+//! For more detail, see [`config`].
 //!
 #![no_std]
 

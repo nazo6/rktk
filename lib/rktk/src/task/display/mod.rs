@@ -2,7 +2,7 @@ use embedded_graphics::{draw_target::DrawTarget, pixelcolor::BinaryColor};
 use rktk_log::error;
 
 use crate::{
-    config::constant::CONST_CONFIG,
+    config::CONST_CONFIG,
     drivers::interface::{display::DisplayDriver, reporter::Output},
     interface::Hand,
     utils::{Channel, Signal},

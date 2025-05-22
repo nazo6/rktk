@@ -9,8 +9,8 @@ use rktk_rrp::{
 
 use crate::{
     config::{
-        constant::{CONST_CONFIG, schema::DynamicConfig},
         storage::StorageConfigManager,
+        {CONST_CONFIG, schema::DynamicConfig},
     },
     drivers::interface::{
         reporter::ReporterDriver, storage::StorageDriver, usb::UsbReporterDriver,

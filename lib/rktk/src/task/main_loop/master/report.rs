@@ -7,7 +7,7 @@ use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::O
 use rktk_keymanager::state::hid_report::Report;
 use rktk_log::{debug, helper::Debug2Format};
 
-use crate::config::constant::schema::DynamicConfig;
+use crate::config::schema::DynamicConfig;
 use crate::config::keymap::prelude::RktkKeys;
 use crate::task::channels::report::{MOUSE_CHANGE_SIGNAL, MOUSE_CHANGE_X, MOUSE_CHANGE_Y};
 use crate::{

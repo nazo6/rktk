@@ -13,8 +13,7 @@ attribute_alias! {
     ;
 }
 
-#[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
-#[inherit_docs]
+#[derive(serde::Deserialize, schemars::JsonSchema)]
 pub struct Config {
     pub constant: constant::ConstantConfig,
     pub dynamic: dynamic::DynamicConfig,

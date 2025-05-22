@@ -18,7 +18,7 @@ pub mod rgb {
 
 pub mod split {
     use crate::{
-        config::constant::CONST_CONFIG,
+        config::CONST_CONFIG,
         drivers::interface::split::{MasterToSlave, SlaveToMaster},
     };
 
@@ -42,7 +42,7 @@ pub mod report {
     use portable_atomic::AtomicI8;
     use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
-    use crate::{config::constant::CONST_CONFIG, utils::Signal};
+    use crate::{config::CONST_CONFIG, utils::Signal};
 
     use super::*;
 

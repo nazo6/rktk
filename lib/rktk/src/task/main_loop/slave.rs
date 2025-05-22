@@ -3,7 +3,7 @@ use embassy_time::{Duration, Timer};
 use rktk_log::debug;
 
 use crate::{
-    config::constant::schema::DynamicConfig,
+    config::schema::DynamicConfig,
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::KeyscanDriver,

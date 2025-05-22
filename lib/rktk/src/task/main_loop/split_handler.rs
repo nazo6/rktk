@@ -4,7 +4,7 @@ use rktk_log::{MaybeFormat, debug, helper::Debug2Format, warn};
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
-    config::constant::CONST_CONFIG,
+    config::CONST_CONFIG,
     drivers::interface::split::SplitDriver,
     utils::{Receiver, Sender},
 };
