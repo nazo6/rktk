@@ -82,7 +82,7 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
 
     text.push(const_declaration!(
         #[doc = "Config generated from json"]
-        pub CONFIG = config
+        pub(crate) CONFIG = config
     ));
 
     Ok(text.join("\n"))

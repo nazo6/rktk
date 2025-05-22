@@ -16,6 +16,7 @@ use crate::{
 
 use super::{ConfiguredState, SharedState};
 
+#[allow(clippy::assertions_on_constants)]
 pub fn get_split_right_shift(config: &DynamicConfig) -> u8 {
     if let Some(val) = config.keyboard.split_right_shift {
         val
