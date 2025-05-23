@@ -16,7 +16,7 @@ use crate::{
         wireless::WirelessReporterDriverBuilder,
     },
     hooks::Hooks,
-    interface::Hand,
+    config::Hand,
 };
 use crate::{
     drivers::{Drivers, interface::system::SystemDriver},

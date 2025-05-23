@@ -4,7 +4,7 @@ use rktk_log::error;
 use crate::{
     config::CONST_CONFIG,
     drivers::interface::{display::DisplayDriver, reporter::Output},
-    interface::Hand,
+    config::Hand,
     utils::{Channel, Signal},
 };
 

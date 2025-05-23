@@ -9,7 +9,7 @@ use crate::{
         storage::StorageConfigManager,
     },
     drivers::interface::storage::StorageDriver,
-    interface::Hand,
+    config::Hand,
 };
 
 use super::{ConfiguredState, SharedState};

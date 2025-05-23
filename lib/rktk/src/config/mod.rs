@@ -73,7 +73,7 @@
 //! Configuration is written to storage via rrp or other actions.
 //! If the configuration is found in storage at startup, the above config will be overwritten with the contents of storage.
 
-use crate::{interface::Hand, task::display::default_display::DefaultDisplayConfig};
+use crate::task::display::default_display::DefaultDisplayConfig;
 
 include!(concat!(env!("OUT_DIR"), "/config.rs"));
 
@@ -102,12 +102,27 @@ pub struct RktkOpts<D: crate::task::display::DisplayConfig> {
 /// the JSON file.
 pub fn new_rktk_opts(
     keymap: &'static keymap::Keymap,
-    hand: Option<crate::interface::Hand>,
+    hand: Option<Hand>,
 ) -> RktkOpts<DefaultDisplayConfig> {
     RktkOpts {
         keymap,
         config: &DYNAMIC_CONFIG_FROM_FILE,
         display: DefaultDisplayConfig,
         hand,
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Hand {
+    Left,
+    Right,
+}
+
+impl Hand {
+    pub fn other(&self) -> Hand {
+        match self {
+            Hand::Left => Hand::Right,
+            Hand::Right => Hand::Left,
+        }
     }
 }

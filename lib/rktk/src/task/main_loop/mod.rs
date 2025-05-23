@@ -12,7 +12,7 @@ use crate::{
         Hooks,
         interface::{CommonHooks, MasterHooks, RgbHooks, SlaveHooks},
     },
-    interface::Hand,
+    config::Hand,
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
     utils::sjoin,
 };

@@ -2,7 +2,7 @@
 
 use embassy_time::Duration;
 use embedded_hal::digital::{InputPin, OutputPin};
-use rktk::interface::Hand;
+use rktk::config::Hand;
 
 pub mod duplex_matrix;
 pub mod flex_pin;

@@ -14,7 +14,7 @@ use rktk::{
     config::{CONST_CONFIG, new_rktk_opts},
     drivers::{Drivers, dummy},
     hooks::empty_hooks::create_empty_hooks,
-    interface::Hand,
+    config::Hand,
 };
 
 use rktk_drivers_common::{

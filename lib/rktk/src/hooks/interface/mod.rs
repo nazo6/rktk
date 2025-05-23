@@ -14,7 +14,7 @@ pub use slave::SlaveHooks;
 mod common {
     use crate::{
         drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver, storage::StorageDriver},
-        interface::Hand,
+        config::Hand,
     };
 
     /// Hooks common for both master and slave side

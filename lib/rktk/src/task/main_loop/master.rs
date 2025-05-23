@@ -14,7 +14,7 @@ use crate::{
         wireless::WirelessReporterDriver,
     },
     hooks::interface::MasterHooks,
-    interface::Hand,
+    config::Hand,
     task::channels::{
         report::ENCODER_EVENT_REPORT_CHANNEL,
         split::{M2sTx, S2mRx},

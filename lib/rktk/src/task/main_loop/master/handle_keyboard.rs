@@ -3,7 +3,7 @@ use rktk_log::{debug, warn};
 use crate::{
     config::schema::DynamicConfig,
     drivers::interface::{debounce::DebounceDriver, keyscan::KeyscanDriver},
-    interface::Hand,
+    config::Hand,
     task::{
         channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
         main_loop::master::utils::get_split_right_shift,

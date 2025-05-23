@@ -4,7 +4,7 @@ use rktk_log::debug;
 use crate::{
     config::schema::DynamicConfig,
     drivers::interface::split::SlaveToMaster,
-    interface::Hand,
+    config::Hand,
     task::{
         channels::{
             report::{KEYBOARD_EVENT_REPORT_CHANNEL, update_mouse},
