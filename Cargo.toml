@@ -78,8 +78,6 @@ macro_rules_attribute = "0.2.0"
 thiserror = { version = "2.0.3", default-features = false }
 strum = { version = "0.27.1", default-features = false }
 
-# cli tools
-duct = "0.13.7"
 anyhow = "1.0.90"
 
 # rtkk-client related
