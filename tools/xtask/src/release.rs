@@ -2,8 +2,13 @@ use duct::cmd;
 
 use crate::utils::xprintln;
 
+// Second value in tuple indicates if the crate should be published with the `_release` feature.
+// If true, the `_release` feature is used, otherwise `_release_check` is used.
+//
+// This is used to publish the crate that has optional git dependencies.
 const PUBLISH_ORDER: &[(&str, bool)] = &[
     ("rktk-keymanager", false),
+    ("rktk-log", false),
     ("rktk-rrp", false),
     ("rktk", false),
     ("rktk-drivers-common", false),
@@ -29,12 +34,14 @@ pub fn start(
     xprintln!("Publishing...");
 
     let mut results = Vec::new();
-    for (package, disable_default_feature) in publish_crates {
+    for (package, use_release_feature) in publish_crates {
         let now = std::time::Instant::now();
 
-        let mut args = vec!["publish", "-p", &package, "--features", "_check"];
-        if disable_default_feature {
-            args.push("--no-default-features");
+        let mut args = vec!["publish", "-p", &package, "--features"];
+        if use_release_feature {
+            args.push("_release_check");
+        } else {
+            args.push("_check");
         }
         if !execute {
             args.push("-n");

@@ -1,5 +1,6 @@
 [package]
 name = "rktk-log"
+description = "rktk log management"
 authors.workspace = true
 license.workspace = true
 version.workspace = true
