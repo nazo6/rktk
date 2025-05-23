@@ -2444,7 +2444,8 @@ dependencies = [
 [[package]]
 name = "esb-ng"
 version = "0.1.0"
-source = "git+https://github.com/jamesmunns/esb#8c4b91f49df564fd991be135a2d533e80ca13634"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58efe494d834c791206e0997b13a9e568848cb642020eb041d04de02e060eeff"
 dependencies = [
  "bbq2",
  "cortex-m",
