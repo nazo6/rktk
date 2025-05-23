@@ -12,10 +12,10 @@ use embassy_nrf::{
     usb::vbus_detect::SoftwareVbusDetect,
 };
 use rktk::{
-    config::constant::CONFIG,
+    config::{CONST_CONFIG, new_rktk_opts},
     drivers::{Drivers, dummy},
     hooks::empty_hooks::create_empty_hooks,
-    interface::Hand,
+    config::Hand,
     singleton,
 };
 
@@ -61,8 +61,8 @@ async fn main(_spawner: Spawner) {
             _,
             6,
             4,
-            { CONFIG.keyboard.rows as usize },
-            { CONFIG.keyboard.cols as usize },
+            { CONST_CONFIG.keyboard.rows as usize },
+            { CONST_CONFIG.keyboard.cols as usize },
         >::new(
             outputs,
             [
@@ -96,8 +96,8 @@ async fn main(_spawner: Spawner) {
 
     rktk::task::start(
         drivers,
-        &keymap::KEYMAP,
-        {
+        create_empty_hooks(),
+        new_rktk_opts(&keymap::KEYMAP, {
             #[cfg(feature = "left")]
             {
                 Some(Hand::Left)
@@ -106,8 +106,7 @@ async fn main(_spawner: Spawner) {
             {
                 Some(Hand::Right)
             }
-        },
-        create_empty_hooks(),
+        }),
     )
     .await;
 }

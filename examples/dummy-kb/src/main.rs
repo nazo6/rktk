@@ -9,6 +9,7 @@ use core::panic::PanicInfo;
 
 use embassy_executor::Spawner;
 use rktk::{
+    config::new_rktk_opts,
     drivers::{
         Drivers, dummy,
         interface::keyscan::{KeyChangeEvent, KeyscanDriver},
@@ -43,7 +44,12 @@ async fn main(_spawner: Spawner) {
         encoder: dummy::encoder(),
     };
 
-    rktk::task::start(drivers, &keymap::KEYMAP, None, create_empty_hooks()).await;
+    rktk::task::start(
+        drivers,
+        create_empty_hooks(),
+        new_rktk_opts(&keymap::KEYMAP, None),
+    )
+    .await;
 }
 
 #[panic_handler]

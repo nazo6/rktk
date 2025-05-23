@@ -1,21 +1,23 @@
+use embassy_time::Duration;
+
 use crate::{
-    config::constant::{RKTK_CONFIG, SCAN_INTERVAL_MOUSE},
-    drivers::interface::mouse::MouseDriver,
+    config::schema::DynamicConfig, drivers::interface::mouse::MouseDriver,
     task::channels::report::update_mouse,
 };
 
-pub async fn start(mut mouse: Option<impl MouseDriver>) {
+pub async fn start(config: &'static DynamicConfig, mut mouse: Option<impl MouseDriver>) {
     if let Some(mouse) = &mut mouse {
         let mut latest = embassy_time::Instant::from_millis(0);
+        let interval = Duration::from_millis(config.rktk.scan_interval_mouse);
         loop {
             let elapsed = latest.elapsed();
-            if elapsed < SCAN_INTERVAL_MOUSE {
-                embassy_time::Timer::after(SCAN_INTERVAL_MOUSE - elapsed).await;
+            if elapsed < interval {
+                embassy_time::Timer::after(interval - elapsed).await;
             }
 
             let mouse_move = match mouse.read().await {
                 Ok(m) => {
-                    if RKTK_CONFIG.swap_mouse_x_y {
+                    if config.rktk.swap_mouse_x_y {
                         (m.1, m.0)
                     } else {
                         m

@@ -1,8 +1,14 @@
 {
   "$schema": "./lib/rktk/schema.json",
-  "keyboard": {
-    "cols": 14,
-    "rows": 5,
-    "name": "dev"
+  "constant": {
+    "keyboard": {
+      "cols": 14,
+      "rows": 5
+    }
+  },
+  "dynamic": {
+    "keyboard": {
+      "name": "test-keyboard"
+    }
   }
 }

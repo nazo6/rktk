@@ -2,9 +2,7 @@ use core::fmt::Write;
 
 use rktk_rrp::endpoints::get_log::{self, LogChunk};
 
-use crate::utils::Channel;
-
-use super::RKTK_CONFIG;
+use crate::{config::CONST_CONFIG, utils::Channel};
 
 pub struct LogWriter;
 
@@ -26,7 +24,7 @@ impl Write for LogWriter {
     }
 }
 
-pub static LOG_CHANNEL: Channel<LogChunk, { RKTK_CONFIG.log_channel_size }> = Channel::new();
+pub static LOG_CHANNEL: Channel<LogChunk, { CONST_CONFIG.buffer.log_channel }> = Channel::new();
 
 pub struct RrpLogger;
 

@@ -2,9 +2,9 @@ use embedded_graphics::{draw_target::DrawTarget, pixelcolor::BinaryColor};
 use rktk_log::error;
 
 use crate::{
-    config::constant::RKTK_CONFIG,
+    config::CONST_CONFIG,
     drivers::interface::{display::DisplayDriver, reporter::Output},
-    interface::Hand,
+    config::Hand,
     utils::{Channel, Signal},
 };
 
@@ -18,7 +18,7 @@ pub enum DisplayMessage {
     MouseAvailable(bool),
     MouseMove((i8, i8)),
     Output(Output),
-    LayerState([bool; RKTK_CONFIG.layer_count as usize]),
+    LayerState([bool; CONST_CONFIG.key_manager.layer_count as usize]),
     Hand(Option<Hand>),
     NumLock(bool),
     CapsLock(bool),

@@ -4,7 +4,7 @@ use rktk_log::{MaybeFormat, debug, helper::Debug2Format, warn};
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
-    config::constant::RKTK_CONFIG,
+    config::CONST_CONFIG,
     drivers::interface::split::SplitDriver,
     utils::{Receiver, Sender},
 };
@@ -81,8 +81,8 @@ pub async fn start<
     S: Serialize + MaybeFormat,
 >(
     mut split: SP,
-    received_sender: Sender<'a, R, { RKTK_CONFIG.split_channel_size }>,
-    to_send_receiver: Receiver<'a, S, { RKTK_CONFIG.split_channel_size }>,
+    received_sender: Sender<'a, R, { CONST_CONFIG.buffer.split_channel }>,
+    to_send_receiver: Receiver<'a, S, { CONST_CONFIG.buffer.split_channel }>,
     is_master: bool,
 ) {
     debug!("split handler start");

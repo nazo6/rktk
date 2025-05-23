@@ -7,10 +7,11 @@ use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::O
 use rktk_keymanager::state::hid_report::Report;
 use rktk_log::{debug, helper::Debug2Format};
 
+use crate::config::schema::DynamicConfig;
 use crate::config::keymap::prelude::RktkKeys;
 use crate::task::channels::report::{MOUSE_CHANGE_SIGNAL, MOUSE_CHANGE_X, MOUSE_CHANGE_Y};
 use crate::{
-    config::{constant::RKTK_CONFIG, storage::StorageConfigManager},
+    config::storage::StorageConfigManager,
     drivers::interface::{
         reporter::{Output, ReporterDriver},
         storage::StorageDriver,
@@ -32,6 +33,7 @@ pub async fn report_task<
     Usb: UsbReporterDriver,
     MH: MasterHooks,
 >(
+    config: &'static DynamicConfig,
     system: &System,
     state: &SharedState,
     config_store: &Option<StorageConfigManager<S>>,
@@ -47,7 +49,8 @@ pub async fn report_task<
     } else {
         Output::Ble
     };
-    let mut display_off = DisplayOffController::new();
+    let mut display_off =
+        DisplayOffController::new(Duration::from_millis(config.rktk.display_timeout));
 
     loop {
         let event = match select4(
@@ -56,7 +59,9 @@ pub async fn report_task<
             ENCODER_EVENT_REPORT_CHANNEL.receive(),
             select(
                 read_keyboard_report(usb, ble, current_output),
-                embassy_time::Timer::after_millis(RKTK_CONFIG.state_update_interval),
+                embassy_time::Timer::after(Duration::from_millis(
+                    config.rktk.state_update_interval,
+                )),
             ),
         )
         .await
@@ -272,13 +277,15 @@ async fn read_keyboard_report<USB: UsbReporterDriver, BLE: WirelessReporterDrive
 struct DisplayOffController {
     display_off: bool,
     latest_report_time: Instant,
+    display_timeout: Duration,
 }
 
 impl DisplayOffController {
-    fn new() -> Self {
+    fn new(timeout: Duration) -> Self {
         Self {
             display_off: false,
             latest_report_time: Instant::now(),
+            display_timeout: timeout,
         }
     }
     fn update(&mut self, reported: bool) {
@@ -286,9 +293,7 @@ impl DisplayOffController {
             self.latest_report_time = Instant::now();
         }
 
-        if Instant::now() - self.latest_report_time
-            > Duration::from_millis(RKTK_CONFIG.display_timeout)
-        {
+        if Instant::now() - self.latest_report_time > self.display_timeout {
             if !self.display_off {
                 display_state!(On, false);
                 self.display_off = true;

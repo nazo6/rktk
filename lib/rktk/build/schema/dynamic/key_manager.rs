@@ -6,9 +6,6 @@ use smart_default::SmartDefault;
 
 #[doc = r#"
 Config for key manager.
-
-Note that these values are "default value" expect for `constant` fields. If storage is enabled in your firmware, these
-values can be overwritten by the values stored in the storage.
 "#]
 #[macro_rules_attribute::apply(crate::schema::common_derive)]
 #[derive(Default)]
@@ -16,30 +13,6 @@ values can be overwritten by the values stored in the storage.
 pub struct KeyManagerConfig {
     pub mouse: MouseConfig,
     pub key_resolver: KeyResolverConfig,
-    pub constant: KeymanagerConstantConfig,
-}
-
-#[macro_rules_attribute::apply(crate::schema::common_derive)]
-#[derive(SmartDefault)]
-#[serde(default)]
-pub struct KeymanagerConstantConfig {
-    #[default(8)]
-    pub normal_max_pressed_keys: usize,
-
-    #[default(4)]
-    pub oneshot_state_size: usize,
-
-    #[default(2)]
-    pub tap_dance_max_definitions: usize,
-
-    #[default(4)]
-    pub tap_dance_max_repeats: usize,
-
-    #[default(2)]
-    pub combo_key_max_definitions: usize,
-
-    #[default(3)]
-    pub combo_key_max_sources: usize,
 }
 
 #[macro_rules_attribute::apply(crate::schema::common_derive)]

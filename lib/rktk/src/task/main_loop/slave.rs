@@ -1,9 +1,9 @@
 use embassy_futures::join::join3;
-use embassy_time::Timer;
+use embassy_time::{Duration, Timer};
 use rktk_log::debug;
 
 use crate::{
-    config::constant::{SCAN_INTERVAL_KEYBOARD, SCAN_INTERVAL_MOUSE},
+    config::schema::DynamicConfig,
     drivers::interface::{
         debounce::DebounceDriver,
         keyscan::KeyscanDriver,
@@ -18,6 +18,7 @@ use crate::{
 };
 
 pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: SlaveHooks>(
+    config: &'static DynamicConfig,
     s2m_tx: S2mTx<'_>,
     m2s_rx: M2sRx<'_>,
     mut keyscan: KS,
@@ -35,6 +36,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
         async {
             if let Some(mouse) = &mut mouse {
                 debug!("mouse start");
+                let interval = Duration::from_millis(config.rktk.scan_interval_mouse);
                 loop {
                     let start = embassy_time::Instant::now();
 
@@ -50,16 +52,17 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
                     }
 
                     let took = start.elapsed();
-                    if took < SCAN_INTERVAL_MOUSE {
-                        Timer::after(SCAN_INTERVAL_MOUSE - took).await;
+                    if took < interval {
+                        Timer::after(interval - took).await;
                     }
                 }
             }
         },
         async {
             debug!("keyscan start");
+            let interval = Duration::from_millis(config.rktk.scan_interval_keyboard);
             loop {
-                Timer::after(SCAN_INTERVAL_KEYBOARD).await;
+                Timer::after(interval).await;
 
                 keyscan
                     .scan(|event| {

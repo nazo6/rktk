@@ -1,7 +1,7 @@
 //! Debounce driver implementations.
 
 use rktk::{
-    config::constant::CONFIG,
+    config::CONST_CONFIG,
     drivers::interface::debounce::{DebounceDriver, KeyChangeEvent},
 };
 
@@ -11,8 +11,8 @@ use rktk::{
 /// Ignores all events related to a key for a certain period of time after that event is reported.
 /// ref: [Debouncing | ZMK](https://zmk.dev/docs/features/debouncing#eager-debouncing)
 pub struct EagerDebounceDriver {
-    last: [[Option<embassy_time::Instant>; CONFIG.keyboard.cols as usize];
-        CONFIG.keyboard.rows as usize],
+    last: [[Option<embassy_time::Instant>; CONST_CONFIG.keyboard.cols as usize];
+        CONST_CONFIG.keyboard.rows as usize],
     debounce_time: embassy_time::Duration,
     deboune_only_pressed: bool,
 }
@@ -25,7 +25,8 @@ impl EagerDebounceDriver {
     /// * deboune_only_pressed - If true, only debounce pressed events.
     pub const fn new(debounce_time: embassy_time::Duration, deboune_only_pressed: bool) -> Self {
         Self {
-            last: [[None; CONFIG.keyboard.cols as usize]; CONFIG.keyboard.rows as usize],
+            last: [[None; CONST_CONFIG.keyboard.cols as usize];
+                CONST_CONFIG.keyboard.rows as usize],
             debounce_time,
             deboune_only_pressed,
         }

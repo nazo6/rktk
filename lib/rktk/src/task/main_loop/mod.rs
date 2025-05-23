@@ -1,7 +1,7 @@
 use crate::{
     config::{
-        constant::{KEYBOARD, RKTK_CONFIG},
         keymap::Keymap,
+        {CONST_CONFIG, schema::DynamicConfig},
     },
     drivers::interface::{
         debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
@@ -12,7 +12,7 @@ use crate::{
         Hooks,
         interface::{CommonHooks, MasterHooks, RgbHooks, SlaveHooks},
     },
-    interface::Hand,
+    config::Hand,
     task::channels::split::{M2S_CHANNEL, S2M_CHANNEL},
     utils::sjoin,
 };
@@ -37,6 +37,7 @@ pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHook
     mut storage: Option<impl StorageDriver>,
     split: Option<impl SplitDriver>,
     rgb: Option<impl RgbDriver>,
+    config: &'static DynamicConfig,
     key_config: &Keymap,
     mut hooks: Hooks<CH, MH, SH, BH>,
     hand: Hand,
@@ -58,7 +59,7 @@ pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHook
     let usb_available = if let Some(usb) = &usb {
         match select(
             usb.wait_ready(),
-            Timer::after(Duration::from_millis(RKTK_CONFIG.split_usb_timeout)),
+            Timer::after(Duration::from_millis(config.rktk.split_usb_timeout)),
         )
         .await
         {
@@ -108,11 +109,21 @@ pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHook
                     key_config,
                     hand,
                     hooks.master,
+                    config,
                 )
                 .await;
             } else {
                 debug!("slave start");
-                slave::start(s2m_tx, m2s_rx, keyscan, debounce, mouse, hooks.slave).await;
+                slave::start(
+                    config,
+                    s2m_tx,
+                    m2s_rx,
+                    keyscan,
+                    debounce,
+                    mouse,
+                    hooks.slave,
+                )
+                .await;
             }
         },
         async move {
@@ -132,10 +143,16 @@ pub async fn start<CH: CommonHooks, MH: MasterHooks, SH: SlaveHooks, BH: RgbHook
                 debug!("rgb init");
                 match hand {
                     Hand::Right => {
-                        rgb::start::<{ KEYBOARD.right_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                        rgb::start::<{ CONST_CONFIG.keyboard.right_rgb_count }>(
+                            rgb, hooks.rgb, rgb_m2s_tx,
+                        )
+                        .await
                     }
                     Hand::Left => {
-                        rgb::start::<{ KEYBOARD.left_rgb_count }>(rgb, hooks.rgb, rgb_m2s_tx).await
+                        rgb::start::<{ CONST_CONFIG.keyboard.left_rgb_count }>(
+                            rgb, hooks.rgb, rgb_m2s_tx,
+                        )
+                        .await
                     }
                 }
             } else {

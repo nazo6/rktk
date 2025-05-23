@@ -5,8 +5,8 @@ use utils::{init_storage, load_state};
 
 use crate::{
     config::{
-        constant::{KEYBOARD, KM_CONFIG, RKTK_CONFIG},
         keymap::Keymap,
+        {CONST_CONFIG, schema::DynamicConfig},
     },
     drivers::interface::{
         debounce::DebounceDriver, encoder::EncoderDriver, keyscan::KeyscanDriver,
@@ -14,7 +14,7 @@ use crate::{
         wireless::WirelessReporterDriver,
     },
     hooks::interface::MasterHooks,
-    interface::Hand,
+    config::Hand,
     task::channels::{
         report::ENCODER_EVENT_REPORT_CHANNEL,
         split::{M2sTx, S2mRx},
@@ -31,16 +31,16 @@ mod rrp_server;
 mod utils;
 
 type ConfiguredState = HidReportState<
-    { RKTK_CONFIG.layer_count as usize },
-    { KEYBOARD.rows as usize },
-    { KEYBOARD.cols as usize },
-    { KEYBOARD.encoder_count as usize },
-    { KM_CONFIG.constant.normal_max_pressed_keys },
-    { KM_CONFIG.constant.oneshot_state_size },
-    { KM_CONFIG.constant.tap_dance_max_definitions },
-    { KM_CONFIG.constant.tap_dance_max_repeats },
-    { KM_CONFIG.constant.combo_key_max_definitions },
-    { KM_CONFIG.constant.combo_key_max_sources },
+    { CONST_CONFIG.key_manager.layer_count as usize },
+    { CONST_CONFIG.keyboard.rows as usize },
+    { CONST_CONFIG.keyboard.cols as usize },
+    { CONST_CONFIG.keyboard.encoder_count as usize },
+    { CONST_CONFIG.key_manager.normal_max_pressed_keys },
+    { CONST_CONFIG.key_manager.oneshot_state_size },
+    { CONST_CONFIG.key_manager.tap_dance_max_definitions },
+    { CONST_CONFIG.key_manager.tap_dance_max_repeats },
+    { CONST_CONFIG.key_manager.combo_key_max_definitions },
+    { CONST_CONFIG.key_manager.combo_key_max_sources },
 >;
 
 type SharedState = Mutex<ConfiguredState>;
@@ -60,9 +60,10 @@ pub async fn start<'a, MH: MasterHooks>(
     key_config: &Keymap,
     hand: Hand,
     mut master_hooks: MH,
+    config: &'static DynamicConfig,
 ) {
     let config_store = init_storage(storage).await;
-    let state = load_state(&config_store, key_config).await;
+    let state = load_state(&config.key_manager, &config_store, key_config).await;
 
     info!("Master side task start");
 
@@ -72,11 +73,19 @@ pub async fn start<'a, MH: MasterHooks>(
 
     join(
         join(
-            report::report_task(system, &state, &config_store, &ble, &usb, master_hooks),
+            report::report_task(
+                config,
+                system,
+                &state,
+                &config_store,
+                &ble,
+                &usb,
+                master_hooks,
+            ),
             join4(
-                handle_slave::start(hand, s2m_rx),
-                handle_keyboard::start(hand, keyscan, debounce),
-                handle_mouse::start(mouse),
+                handle_slave::start(config, hand, s2m_rx),
+                handle_keyboard::start(config, hand, keyscan, debounce),
+                handle_mouse::start(config, mouse),
                 async {
                     if let Some(encoder) = &mut encoder {
                         loop {
@@ -91,7 +100,7 @@ pub async fn start<'a, MH: MasterHooks>(
         ),
         async {
             #[cfg(feature = "rrp")]
-            rrp_server::start(&usb, &ble, &state, &config_store).await;
+            rrp_server::start(config, &usb, &ble, &state, &config_store).await;
         },
     )
     .await;

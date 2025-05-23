@@ -1,23 +1,68 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Config",
-  "description": "Root configuration struct\n\nJSON schema of config is available at `schema.json`.",
   "type": "object",
   "required": [
-    "keyboard"
+    "constant",
+    "dynamic"
   ],
   "properties": {
-    "key_manager": {
-      "$ref": "#/definitions/KeyManagerConfig"
+    "constant": {
+      "$ref": "#/definitions/ConstantConfig"
     },
-    "keyboard": {
-      "$ref": "#/definitions/Keyboard"
-    },
-    "rktk": {
-      "$ref": "#/definitions/RktkConfig"
+    "dynamic": {
+      "$ref": "#/definitions/DynamicConfig"
     }
   },
   "definitions": {
+    "BufferSizeConfig": {
+      "type": "object",
+      "properties": {
+        "encoder_event": {
+          "description": "Size of the encoder event buffer",
+          "default": 4,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "keyboard_event": {
+          "description": "Size of the keyboard event buffer",
+          "default": 4,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "log_channel": {
+          "description": "Size of the log channel buffer",
+          "default": 64,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "mouse_event": {
+          "description": "Size of the mouse event buffer",
+          "default": 4,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "rrp": {
+          "description": "Size of the buffer used by rrp",
+          "default": 512,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "split_channel": {
+          "description": "Size of the split channel buffer",
+          "default": 64,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false
+    },
     "ComboConfig": {
       "type": "object",
       "properties": {
@@ -30,13 +75,47 @@
       },
       "additionalProperties": false
     },
-    "KeyManagerConfig": {
-      "description": "Config for key manager.\n\nNote that these values are \"default value\" expect for `constant` fields. If storage is enabled in your firmware, these values can be overwritten by the values stored in the storage.",
+    "ConstantConfig": {
+      "description": "Root struct of the \"constant\" config",
       "type": "object",
+      "required": [
+        "keyboard"
+      ],
       "properties": {
-        "constant": {
+        "buffer": {
+          "$ref": "#/definitions/BufferSizeConfig"
+        },
+        "key_manager": {
           "$ref": "#/definitions/KeymanagerConstantConfig"
         },
+        "keyboard": {
+          "$ref": "#/definitions/KeyboardConstantConfig"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DynamicConfig": {
+      "description": "Root struct of the \"dynamic\" config",
+      "type": "object",
+      "required": [
+        "keyboard"
+      ],
+      "properties": {
+        "key_manager": {
+          "$ref": "#/definitions/KeyManagerConfig"
+        },
+        "keyboard": {
+          "$ref": "#/definitions/KeyboardConfig"
+        },
+        "rktk": {
+          "$ref": "#/definitions/RktkConfig"
+        }
+      }
+    },
+    "KeyManagerConfig": {
+      "description": "Config for key manager.",
+      "type": "object",
+      "properties": {
         "key_resolver": {
           "$ref": "#/definitions/KeyResolverConfig"
         },
@@ -61,12 +140,45 @@
       },
       "additionalProperties": false
     },
-    "Keyboard": {
+    "KeyboardConfig": {
       "description": "Keyboard layout and informations.\n\nThis struct is used to - Defines keyboard basic informations (ex: name, cols, rows, ...) - Defines keyboard physical layout which is used by remapper (layout property)\n\n# Coordination of the keyboard matrix\n\nThe rktk coordinate system has the top left as (0,0), and the coordinate values increase toward the bottom right.\n\n## Split keyboard coordinates For `col` in keyboard config, specify the coordinates of the entire keyboard. In other words, for a split keyboard with 7 columns on the left hand side and 7 columns on the right hand side, specify 14.\n\nInternally, the key scan driver returns the coordinates of \"only one hand.\" In other words, in this case, x=0-6. Therefore, it is necessary to convert the coordinates received from the key scan driver into the coordinates of both hands, and for this purpose the `split_right_shift` property is used.\n\nBelow is an example of a split keyboard with 14 columns and 4 rows. ```ignored [    Left    ]   [     Right     ] 0 1 2 3 4 5 6    0 1 2  3  4  5  6 ← One-handed coordinates ↓ split_right_shift=7 (or None) col=14 →   0 1 2 3 4 5 6    7 8 9 10 11 12 13 ← Two-handed coordinates 0 _ Q W E R T _    _ Y U  I  O  P  _ 1 ... 2 ... 3 ... ↑ row=4 ```",
       "type": "object",
       "required": [
+        "name"
+      ],
+      "properties": {
+        "layout": {
+          "description": "Defines the layout of the keyboard used in the remapper.\n\nThis is a JSON object that represents the layout of the keyboard and compatible with via's json layout format.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/KeyboardLayout"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "description": "The name of the keyboard.",
+          "type": "string"
+        },
+        "split_right_shift": {
+          "description": "A number representing the row number that the right col starts on in a split keyboard.\n\nIf not set, `cols / 2` will be automatically set, so there is no need to set it if the number of columns on the right and left sides is the same. Also, there is no need to set it in the case of a non-split keyboard, as it is not used.",
+          "default": null,
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint8",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "KeyboardConstantConfig": {
+      "type": "object",
+      "required": [
         "cols",
-        "name",
         "rows"
       ],
       "properties": {
@@ -83,27 +195,12 @@
           "format": "uint8",
           "minimum": 0.0
         },
-        "layout": {
-          "description": "Defines the layout of the keyboard used in the remapper.\n\nThis is a JSON object that represents the layout of the keyboard and compatible with via's json layout format.",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/KeyboardLayout"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "left_rgb_count": {
           "description": "RGB led count for left side. This is also used for non-split keyboard.",
           "default": 0,
           "type": "integer",
           "format": "uint",
           "minimum": 0.0
-        },
-        "name": {
-          "description": "The name of the keyboard.",
-          "type": "string"
         },
         "right_rgb_count": {
           "description": "RGB led count for right side",
@@ -115,16 +212,6 @@
         "rows": {
           "description": "The number of rows in the keyboard matrix.",
           "type": "integer",
-          "format": "uint8",
-          "minimum": 0.0
-        },
-        "split_right_shift": {
-          "description": "A number representing the row number that the right col starts on in a split keyboard.\n\nIf not set, `cols / 2` will be automatically set, so there is no need to set it if the number of columns on the right and left sides is the same. Also, there is no need to set it in the case of a non-split keyboard, as it is not used.",
-          "default": null,
-          "type": [
-            "integer",
-            "null"
-          ],
           "format": "uint8",
           "minimum": 0.0
         }
@@ -166,6 +253,12 @@
           "default": 3,
           "type": "integer",
           "format": "uint",
+          "minimum": 0.0
+        },
+        "layer_count": {
+          "default": 5,
+          "type": "integer",
+          "format": "uint8",
           "minimum": 0.0
         },
         "normal_max_pressed_keys": {
@@ -230,6 +323,7 @@
       "additionalProperties": false
     },
     "RktkConfig": {
+      "description": "RKTK behavior config",
       "type": "object",
       "properties": {
         "default_auto_mouse_duration": {
@@ -260,48 +354,6 @@
           "format": "uint64",
           "minimum": 0.0
         },
-        "encoder_event_buffer_size": {
-          "description": "Size of the encoder event buffer",
-          "default": 4,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "keyboard_event_buffer_size": {
-          "description": "Size of the keyboard event buffer",
-          "default": 4,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "layer_count": {
-          "description": "The number of layers in the keyboard.",
-          "default": 5,
-          "type": "integer",
-          "format": "uint8",
-          "minimum": 0.0
-        },
-        "log_channel_size": {
-          "description": "Size of the log channel buffer",
-          "default": 64,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "mouse_event_buffer_size": {
-          "description": "Size of the mouse event buffer",
-          "default": 4,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "rrp_buffer_size": {
-          "description": "Size of the buffer used by rrp",
-          "default": 512,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
         "scan_interval_keyboard": {
           "description": "Time (ms) to wait for the next keyboard scan",
           "default": 5,
@@ -314,13 +366,6 @@
           "default": 5,
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
-        },
-        "split_channel_size": {
-          "description": "Size of the split channel buffer",
-          "default": 64,
-          "type": "integer",
-          "format": "uint",
           "minimum": 0.0
         },
         "split_usb_timeout": {
