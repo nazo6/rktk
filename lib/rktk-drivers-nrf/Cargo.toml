@@ -17,8 +17,7 @@ doctest = false
 bench = false
 
 [package.metadata.docs.rs]
-no-default-features = true
-features = ["embassy-nrf/nrf52840"]
+features = ["_release_check"]
 default-target = "thumbv7em-none-eabihf"
 
 [dependencies]
@@ -85,6 +84,7 @@ _nrfxx = [
 ]
 
 _check = ["_nrfxx", "softdevice-ble", "esb", "sdc", "defmt"]
+_release_check = ["_nrfxx", "esb", "defmt"]
 
 ## Use this feature to use embassy-executor's nightly features.
 nightly = ["embassy-executor/nightly"]

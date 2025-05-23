@@ -8,7 +8,9 @@ authors.workspace = true
 repository.workspace = true
 
 [package.metadata.docs.rs]
-# default-target = "thumbv6m-none-eabi"
+features = ["embassy-rp/rp2350"]
+default-target = "thumbv6m-none-eabi"
+
 
 [dependencies]
 rktk = { workspace = true }
