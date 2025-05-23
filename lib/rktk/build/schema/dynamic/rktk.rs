@@ -1,3 +1,4 @@
+/// RKTK behavior config
 #[macro_rules_attribute::apply(crate::schema::common_derive)]
 #[derive(smart_default::SmartDefault)]
 #[serde(default)]

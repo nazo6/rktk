@@ -76,6 +76,7 @@
       "additionalProperties": false
     },
     "ConstantConfig": {
+      "description": "Root struct of the \"constant\" config",
       "type": "object",
       "required": [
         "keyboard"
@@ -94,7 +95,7 @@
       "additionalProperties": false
     },
     "DynamicConfig": {
-      "description": "Root configuration struct\n\nJSON schema of config is available at `schema.json`.",
+      "description": "Root struct of the \"dynamic\" config",
       "type": "object",
       "required": [
         "keyboard"
@@ -112,7 +113,7 @@
       }
     },
     "KeyManagerConfig": {
-      "description": "Config for key manager.\n\nNote that these values are \"default value\" expect for `constant` fields. If storage is enabled in your firmware, these values can be overwritten by the values stored in the storage.",
+      "description": "Config for key manager.",
       "type": "object",
       "properties": {
         "key_resolver": {
@@ -322,6 +323,7 @@
       "additionalProperties": false
     },
     "RktkConfig": {
+      "description": "RKTK behavior config",
       "type": "object",
       "properties": {
         "default_auto_mouse_duration": {

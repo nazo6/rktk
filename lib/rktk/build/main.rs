@@ -89,6 +89,7 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
 
     let code = format!(
         r#"
+        /// Configuration schema
         pub mod schema {{
             use rktk_keymanager::interface::state::config::*;
 

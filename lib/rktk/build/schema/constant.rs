@@ -1,5 +1,6 @@
 use smart_default::SmartDefault;
 
+/// Root struct of the "constant" config
 #[macro_rules_attribute::apply(crate::schema::common_derive)]
 pub struct ConstantConfig {
     pub keyboard: KeyboardConstantConfig,

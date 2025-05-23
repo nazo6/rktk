@@ -37,8 +37,8 @@ pub(crate) mod main_loop;
 ///
 /// # Parameters
 /// - `drivers`: Drivers for the keyboard.
-/// - `key_config`: Key configuration such as keymaps.
 /// - `hooks`: Hooks for the keyboard. See [`Hooks`] for detail.
+/// - `opts`: Other options such as keymap. See [`crate::config`] for detail.
 #[allow(clippy::type_complexity)]
 pub async fn start<
     System: SystemDriver,

@@ -2,9 +2,7 @@ pub mod key_manager;
 pub mod keyboard;
 pub mod rktk;
 
-/// Root configuration struct
-///
-/// JSON schema of config is available at `schema.json`.
+/// Root struct of the "dynamic" config
 #[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
 #[inherit_docs]
 pub struct DynamicConfig {
