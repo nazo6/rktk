@@ -2484,7 +2484,7 @@ dependencies = [
 
 [[package]]
 name = "example-corne"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
@@ -2498,7 +2498,7 @@ dependencies = [
 
 [[package]]
 name = "example-corne-nrf"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
@@ -2512,7 +2512,7 @@ dependencies = [
 
 [[package]]
 name = "example-dummy-kb-rp"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
@@ -5500,7 +5500,7 @@ dependencies = [
 
 [[package]]
 name = "rktk"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "const-gen",
  "critical-section",
@@ -5536,7 +5536,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-client"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "anyhow",
  "async-hid",
@@ -5563,7 +5563,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-common"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "critical-section",
  "defmt 1.0.1",
@@ -5593,7 +5593,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-nrf"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "atomic-pool",
  "bitvec",
@@ -5629,7 +5629,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-drivers-rp"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "defmt 1.0.1",
  "display-interface",
@@ -5655,7 +5655,7 @@ dependencies = [
 
 [[package]]
 name = "rktk-keymanager"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "critical-section",
  "defmt 1.0.1",
@@ -5674,14 +5674,14 @@ dependencies = [
 
 [[package]]
 name = "rktk-log"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "defmt 1.0.1",
 ]
 
 [[package]]
 name = "rktk-rrp"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "embedded-io-async",
  "futures",
@@ -8036,7 +8036,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.2.0-beta.1"
 dependencies = [
  "anyhow",
  "cargo_metadata",

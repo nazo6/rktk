@@ -4,6 +4,7 @@ use crate::utils::xprintln;
 
 const PUBLISH_ORDER: &[(&str, bool)] = &[
     ("rktk-keymanager", false),
+    ("rktk-log", false),
     ("rktk-rrp", false),
     ("rktk", false),
     ("rktk-drivers-common", false),
