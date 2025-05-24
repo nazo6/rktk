@@ -3,8 +3,8 @@ use std::sync::LazyLock;
 use dioxus::prelude::*;
 
 use crate::{
-    backend::{Backend, RrpHidBackend as _},
     TAILWIND_CSS,
+    backend::{Backend, RrpHidBackend as _},
 };
 
 mod cache;
@@ -15,7 +15,7 @@ mod state;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 
-static BACKEND: LazyLock<Backend> = LazyLock::new(Backend::new);
+static BACKEND: LazyLock<(Backend, async_channel::Receiver<()>)> = LazyLock::new(Backend::new);
 
 #[component]
 pub fn App() -> Element {
@@ -34,13 +34,12 @@ pub fn App() -> Element {
 #[component]
 fn Home() -> Element {
     use_effect(move || {
-        if Backend::available() {
-            BACKEND.set_ondisconnect(Some(move || {
-                spawn_forever(async move {
-                    let _ = disconnect::disconnect().await;
-                });
-            }));
-        }
+        let mut rx = BACKEND.1.clone();
+        spawn_forever(async move {
+            while let Ok(_) = rx.recv().await {
+                let _ = disconnect::disconnect().await;
+            }
+        });
     });
 
     rsx! {
