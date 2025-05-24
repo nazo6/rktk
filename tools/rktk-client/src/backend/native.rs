@@ -1,11 +1,13 @@
 use async_hid::{AsyncHidRead as _, AsyncHidWrite as _, DeviceReader, DeviceWriter, HidBackend};
 use futures::stream::StreamExt;
 use rktk_rrp::transport::{ReadTransport, WriteTransport};
+use smol::Task;
 
 use super::{RrpHidBackend, RrpHidDevice};
 
 pub struct NativeBackend {
     backend: HidBackend,
+    watch_task: Task<()>,
 }
 
 impl RrpHidBackend for NativeBackend {
@@ -47,14 +49,21 @@ impl RrpHidBackend for NativeBackend {
         let (tx, rx) = async_channel::unbounded();
         let backend = HidBackend::default();
 
-        let mut watcher = backend.watch().unwrap();
-        smol::spawn(async move {
+        let mut watcher = backend.watch().expect("Failed to create hid watcher");
+        let watch_task = smol::spawn(async move {
             while let Some(_event) = watcher.next().await {
+                dbg!(_event);
                 let _ = tx.send(()).await;
             }
         });
 
-        (Self { backend }, rx)
+        (
+            Self {
+                backend,
+                watch_task,
+            },
+            rx,
+        )
     }
 }
 
@@ -69,7 +78,7 @@ impl RrpHidDevice for NativeHidDevice {
     type WriteTransport = HidWriter;
 
     async fn close(&mut self) -> Result<(), Self::Error> {
-        todo!()
+        Ok(())
     }
 
     fn get_client(
