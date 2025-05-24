@@ -1,10 +1,14 @@
 use async_hid::{AsyncHidRead as _, AsyncHidWrite as _, DeviceReader, DeviceWriter, HidBackend};
 use futures::stream::StreamExt;
 use rktk_rrp::transport::{ReadTransport, WriteTransport};
+use smol::Task;
 
 use super::{RrpHidBackend, RrpHidDevice};
 
-pub struct NativeBackend {}
+pub struct NativeBackend {
+    backend: HidBackend,
+    watch_task: Task<()>,
+}
 
 impl RrpHidBackend for NativeBackend {
     type Error = anyhow::Error;
@@ -16,10 +20,8 @@ impl RrpHidBackend for NativeBackend {
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error> {
-        let backend = HidBackend::default();
-
         let mut device = None;
-        let mut devices = backend.enumerate().await?;
+        let mut devices = self.backend.enumerate().await?;
         while let Some(info) = devices.next().await {
             if info.usage_page == usage_page && info.usage_id == usage {
                 device = Some(info);
@@ -43,11 +45,25 @@ impl RrpHidBackend for NativeBackend {
         })
     }
 
-    // TODO: Implement this after event system is implemented for async-hid
-    fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>) {}
+    fn new() -> (Self, async_channel::Receiver<()>) {
+        let (tx, rx) = async_channel::unbounded();
+        let backend = HidBackend::default();
 
-    fn new() -> Self {
-        Self {}
+        let mut watcher = backend.watch().expect("Failed to create hid watcher");
+        let watch_task = smol::spawn(async move {
+            while let Some(_event) = watcher.next().await {
+                dbg!(_event);
+                let _ = tx.send(()).await;
+            }
+        });
+
+        (
+            Self {
+                backend,
+                watch_task,
+            },
+            rx,
+        )
     }
 }
 
@@ -62,7 +78,7 @@ impl RrpHidDevice for NativeHidDevice {
     type WriteTransport = HidWriter;
 
     async fn close(&mut self) -> Result<(), Self::Error> {
-        todo!()
+        Ok(())
     }
 
     fn get_client(

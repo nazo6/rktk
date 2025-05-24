@@ -14,7 +14,11 @@ pub trait RrpHidBackend: Sized {
     type Error: std::fmt::Display + std::fmt::Debug;
     type HidDevice: RrpHidDevice;
 
-    fn new() -> Self;
+    /// Creates a new backend instance.
+    ///
+    /// Returns a tuple containing the backend instance and a stream that emits when device is
+    /// disconnected.
+    fn new() -> (Self, async_channel::Receiver<()>);
 
     fn available() -> bool {
         true
@@ -25,8 +29,6 @@ pub trait RrpHidBackend: Sized {
         usage_page: u16,
         usage: u16,
     ) -> Result<Self::HidDevice, Self::Error>;
-
-    fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>);
 }
 
 pub trait RrpHidDevice {

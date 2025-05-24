@@ -52,10 +52,11 @@ serde-wasm-bindgen = { version = "0.6.5", optional = true }
 
 # native deps
 smol = { version = "2.0.2", optional = true }
-async-hid = { version = "0.3.0", optional = true }
+async-hid = { version = "0.4.0", optional = true }
+async-channel = "2.3.1"
 
 [features]
-_check = ["native"]
+_check = ["web"]
 
 web = [
   "dioxus/web",

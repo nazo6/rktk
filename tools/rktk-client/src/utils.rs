@@ -1,5 +1,8 @@
 use std::time::Duration;
 
+// NOTE: If [this](https://github.com/smol-rs/async-io/issues/89) issue is resolved, platform
+// specific implementations can be removed.
+
 #[cfg(feature = "web")]
 pub async fn sleep(delay: Duration) {
     let mut cb = |resolve: js_sys::Function, _reject: js_sys::Function| {

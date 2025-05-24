@@ -14,13 +14,34 @@ use web_sys::HidInputReportEvent;
 
 pub struct WebHidBackend {}
 
+impl Drop for WebHidBackend {
+    fn drop(&mut self) {
+        let window = web_sys::window().context("Missing Window").unwrap();
+        let hid = window.navigator().hid();
+        hid.set_ondisconnect(None);
+    }
+}
+
 impl RrpHidBackend for WebHidBackend {
     type Error = anyhow::Error;
 
     type HidDevice = WebHidDevice;
 
-    fn new() -> Self {
-        Self {}
+    fn new() -> (Self, async_channel::Receiver<()>) {
+        let (tx, rx) = async_channel::unbounded();
+
+        let window = web_sys::window().context("Missing Window").unwrap();
+        let hid = window.navigator().hid();
+
+        let cb = Closure::wrap(Box::new(move || {
+            let _ = tx.try_send(());
+        }) as Box<dyn FnMut()>);
+        hid.set_ondisconnect(Some(cb.as_ref().unchecked_ref()));
+        // NOTE: With this, if many WebHidBackend is created, memory leak occurs. However, usually
+        // only one WebHidBackend is created, so it is not a big problem.
+        cb.forget();
+
+        (Self {}, rx)
     }
 
     fn available() -> bool {
@@ -66,18 +87,6 @@ impl RrpHidBackend for WebHidBackend {
         );
 
         Ok(Self::HidDevice { client, device })
-    }
-
-    fn set_ondisconnect(&self, fun: Option<impl FnMut() + 'static>) {
-        let window = web_sys::window().expect("Missing Window");
-        let hid = window.navigator().hid();
-
-        if let Some(fun) = fun {
-            let cb = Closure::wrap(Box::new(fun) as Box<dyn FnMut()>);
-            hid.set_ondisconnect(Some(cb.as_ref().unchecked_ref()));
-        } else {
-            hid.set_ondisconnect(None);
-        };
     }
 }
 

@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
-    "dev:dioxus": "dx serve -i true --platform web --features web",
-    "dev": "conc -r -c auto npm:dev:*",
+    "dev:web:dioxus": "dx serve -i true --platform web --features web",
+    "dev": "conc -r -c auto npm:dev:tailwind npm:dev:web:dioxus",
+    "dev:desktop:dioxus": "dx serve -i true --platform desktop --features native",
+    "dev:desktop": "conc -r -c auto npm:dev:tailwind npm:dev:desktop:dioxus",
     "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release --platform web --features web"
   },
   "keywords": [],
