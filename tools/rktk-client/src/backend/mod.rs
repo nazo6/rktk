@@ -1,5 +1,3 @@
-use futures::Stream;
-
 #[cfg(feature = "web")]
 pub mod web;
 

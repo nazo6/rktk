@@ -34,9 +34,9 @@ pub fn App() -> Element {
 #[component]
 fn Home() -> Element {
     use_effect(move || {
-        let mut rx = BACKEND.1.clone();
+        let rx = BACKEND.1.clone();
         spawn_forever(async move {
-            while let Ok(_) = rx.recv().await {
+            while (rx.recv().await).is_ok() {
                 let _ = disconnect::disconnect().await;
             }
         });
