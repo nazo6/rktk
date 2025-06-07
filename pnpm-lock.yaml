@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      wrangler:
+        specifier: ^3.112.0
+        version: 3.114.9
 
   site:
     dependencies:
