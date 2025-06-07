@@ -1,7 +1,7 @@
 import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 import remarkDirective from "remark-directive";
 import { remarkDirectiveDriverTable } from "./lib/remarkDirectiveDriverTable";
-import mdxMermaid from "mdx-mermaid";
+// import mdxMermaid from "mdx-mermaid";
 
 export const docs = defineDocs({
   dir: "content/docs",
@@ -12,7 +12,7 @@ export default defineConfig({
     remarkPlugins: (
       v,
     ) => [
-      [mdxMermaid, { output: "svg" }],
+      // [mdxMermaid, { output: "svg" }],
       remarkDirective,
       remarkDirectiveDriverTable,
       ...v,

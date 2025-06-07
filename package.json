@@ -1,11 +1,6 @@
 {
   "name": "rktk",
   "packageManager": "pnpm@10.6.3",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "puppeteer"
-    ]
-  },
   "devDependencies": {
     "wrangler": "^4.19.1"
   }
