@@ -6,6 +6,7 @@ on:
     paths:
       - "site/**"
       - ".github/workflows/site-deploy.yml"
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -17,17 +18,8 @@ jobs:
         with:
           fetch-depth: 0 # Required to generate update time
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: pnpm install
-        run: pnpm install -r
+      - name: Setup pnpm
+        uses: ./.github/workflows/setup-pnpm
 
       - name: Next build cache
         uses: actions/cache@v4

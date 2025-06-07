@@ -9,6 +9,7 @@ on:
       - "lib/rktk-rrp/**.rs"
       - ".github/workflows/rktk-client.yml"
       - ".github/workflows/setup-rust/action.yaml"
+  pull_request:
   workflow_dispatch:
 
 env:
@@ -31,17 +32,8 @@ jobs:
         with:
           tool: wasm-pack,dioxus-cli
 
-      - uses: pnpm/action-setup@v4
-        name: Setup pnpm
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: pnpm install
-        run: pnpm install
+      - name: Setup pnpm
+        uses: ./.github/workflows/setup-pnpm
 
       - name: Build
         run: cd tools/rktk-client && pnpm build
