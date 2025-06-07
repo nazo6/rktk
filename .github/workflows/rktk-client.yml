@@ -9,7 +9,6 @@ on:
       - "lib/rktk-rrp/**.rs"
       - ".github/workflows/rktk-client.yml"
       - ".github/workflows/setup-rust/action.yaml"
-  pull_request:
   workflow_dispatch:
 
 env:
