@@ -1,0 +1,73 @@
+---
+title: Keymap
+---
+
+'Keymap' is Rust struct passed to `rktk::task::start`. You can see definition at [docs](https://rktk-docs.nazo6.dev/rktk/config/keymap/type.Keymap.html).
+
+## Keymap by example
+
+Let's look at each item using the example below.
+
+```rust
+use rktk::config::keymap::prelude::*;
+
+const L2SPC: KeyAction = KeyAction::TapHold(
+    KeyCode::Key(Key::Enter),
+    KeyCode::Layer(LayerOp::Momentary(2)),
+);
+
+pub const KEYMAP: Keymap = Keymap {
+    layers: [
+        Layer {
+            keymap: [
+              [  TAB  , Q     , W     , E     , R     , T     , /**/  Y     , U     , I     , O     , P    , MINUS],
+              [  ESC  , A     , S     , D     , F     , G     , /**/  H     , J     , K     , L     , SCLN , QUOTE],
+              [ L_SHFT, Z     , X     , C     , V     , B     , /**/  N     , M     , COMM  , DOT   , SLASH, BSLSH],
+              [ L_CTRL, L_GUI , TG(2) , L_ALT , L2SPC , SPACE , /**/  BS    , ENTER , _____ , _____ ,R_SHFT,R_CTRL],
+            ],
+            ..Layer::const_default()
+        },
+    ],
+    ..Keymap::const_default()
+};
+
+...
+
+async fn main() {
+    ...
+
+    rktk::task::start(drivers, &KEYMAP, ...).await;
+}
+
+```
+
+### Prelude
+
+The first line imports prelude. This imports many items that are commonly used in keymap. You can see full list of prelude [here](https://rktk-docs.nazo6.dev/rktk/config/keymap/prelude/index.html)
+
+### KeyAction
+
+Next, we define a key called L2SPC. Since the keymap is just an array, we can define the key using Rust.
+
+Now, a key in the RKTK keymap refers to a Key Action; a Key Action is a unit of operation, and a `Normal` Action is used for a normal key.
+The action used in this key definition is the `TapHold` Action. This action has two key codes, the first defines the key to be pressed on tap and the second defines the key to be pressed on hold.
+
+[KeyAction](https://rktk-docs.nazo6.dev/rktk/config/keymap/prelude/enum.KeyAction.html)
+
+### Keycode
+
+A keycode is a unit of key. For clarity, they are classified as enums, and `KeyCode::Key` is a so-called “normal key”. In other words, the first key is the normal Enter key.
+
+The next key is designated as `KeyCode::Layer`. This represents a key related to a layer. Here `LayerOp::Momentary(2)` is specified, which means that Layer2 is activated only while it is pressed.
+
+[KeyCode](https://rktk-docs.nazo6.dev/rktk/config/keymap/prelude/enum.KeyCode.html)
+
+From what we have seen so far, we know that L2SPC is a “tap to Enter, hold to Activate Layer 2” key.
+
+### Keymap
+
+And finally, the overall Keymap is defined. The so-called per-layer keymap is defined as an array in the `layers` field.
+
+Rust requires the length of the array to be fixed at compile time, which is read from the `rktk.layer_count` in the config file (rktk.json). If the value specified in the config file does not match the array length, a compile error will occur.
+
+Here, fields that are not specified are omitted using the `const_default` related functions.

@@ -1,65 +1,44 @@
-name: rktk-client
+name: Build and deploy rktk-client
 
 on:
   push:
     branches: ["master"]
     paths:
-      - 'tools/rktk-client/**'
-      - 'lib/rktk-keymanager/**.rs'
-      - 'lib/rktk-rrp/**.rs'
-      - '.github/workflows/rktk-client.yml'
-      - '.github/workflows/setup-rust/action.yaml'
-  pull_request:
-    paths:
-      - 'tools/rktk-client/**'
-      - 'lib/rktk-keymanager/**.rs'
-      - 'lib/rktk-rrp/**.rs'
-      - '.github/workflows/rktk-client.yml'
-      - '.github/workflows/setup-rust/action.yaml'
+      - "tools/rktk-client/**"
+      - "lib/rktk-keymanager/**.rs"
+      - "lib/rktk-rrp/**.rs"
+      - ".github/workflows/rktk-client.yml"
+      - ".github/workflows/setup-rust/action.yaml"
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check-and-deploy:
+  check-and-deploy-rktk-client:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup rust
-      uses: ./.github/workflows/setup-rust
-      with:
-        components: "rust-src"
-        target: "wasm32-unknown-unknown"
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          components: "rust-src"
+          target: "wasm32-unknown-unknown"
 
-    - uses: taiki-e/install-action@v2
-      with:
-        tool: wasm-pack,dioxus-cli
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack,dioxus-cli
 
-    - uses: pnpm/action-setup@v4
-      name: Setup pnpm
-      with:
-        version: 9
-        run_install: false
+      - name: Setup pnpm
+        uses: ./.github/workflows/setup-pnpm
 
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'pnpm'
-        cache-dependency-path: tools/rktk-client/pnpm-lock.yaml
+      - name: Build
+        run: cd tools/rktk-client && pnpm build
 
-    - name: pnpm install
-      run: cd tools/rktk-client && pnpm install
-
-    - name: Build
-      run: cd tools/rktk-client && pnpm build
-
-    - name: Deploy
-      uses: cloudflare/wrangler-action@v3
-      with:
-        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        command: pages deploy ../../target/dx/rktk-client/release/web/public --project-name=rktk-client
-        workingDirectory: "tools/rktk-client"
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --assets ./target/dx/rktk-client/release/web/public --name rktk-client --compatibility-date 2025-06-07

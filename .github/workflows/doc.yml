@@ -1,15 +1,16 @@
-name: doc
+name: Build and deploy rktk rust api docs
 
 on:
   push:
     branches: ["master"]
     paths:
-      - '.github/workflows/doc.yml'
-      - '.github/workflows/setup-rust/action.yaml'
-      - '**.toml'
-      - '**.rs'
-      - '**.lock'
-      - '**.md'
+      - ".github/workflows/doc.yml"
+      - ".github/workflows/setup-rust/action.yaml"
+      - "lib/rktk/wrangler.jsonc"
+      - "**.toml"
+      - "**.rs"
+      - "**.lock"
+      - "**.md"
   workflow_dispatch:
 
 env:
@@ -17,38 +18,27 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  generate-doc:
+  build-and-deploy-docs:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup rust
-      uses: ./.github/workflows/setup-rust
-      with:
-        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
-    - uses: r7kamura/rust-problem-matchers@v1
+      - uses: r7kamura/rust-problem-matchers@v1
 
-    - name: Generate docs
-      run: cargo xtask doc
+      - name: Build docs
+        run: cargo xtask doc
 
-    - name: Upload static files as artifact
-      id: deployment
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: target/doc.merged/
+      - name: Setup pnpm
+        uses: ./.github/workflows/setup-pnpm
 
-  deploy:
-    permissions:
-      id-token: write
-      pages: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: generate-doc
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --assets ./target/doc.merged/ --name rktk-rust-docs --compatibility-date 2025-06-07

@@ -1,53 +1,47 @@
-name: lib
+name: Run rust check and test
 
 on:
   push:
     branches: ["master"]
     paths:
-      - '.github/workflows/lib.yml'
-      - '.github/workflows/setup-rust/action.yaml'
-      - '**.toml'
-      - '**.rs'
-      - '**.lock'
-  pull_request:
-    paths:
-      - '.github/workflows/lib.yml'
-      - '.github/workflows/setup-rust/action.yaml'
-      - '**.toml'
-      - '**.rs'
-      - '**.lock'
+      - ".github/workflows/lib.yml"
+      - ".github/workflows/setup-rust/action.yaml"
+      - "**.toml"
+      - "**.rs"
+      - "**.lock"
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
   CLICOLOR_FORCE: 1
 
 jobs:
-  check-test:
+  rust-check-and-test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup rust
-      uses: ./.github/workflows/setup-rust
-      with:
-        components: "clippy,rust-src"
-        target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          components: "clippy,rust-src"
+          target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
-    - name: Install deps
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-        version: 1.0
+      - name: Install deps
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          version: 1.0
 
-    - uses: taiki-e/install-action@v2
-      with:
-        tool: cargo-hack
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
 
-    - uses: r7kamura/rust-problem-matchers@v1
+      - uses: r7kamura/rust-problem-matchers@v1
 
-    - name: Run rust check
-      run: cargo xtask check all
+      - name: Run rust check
+        run: cargo xtask check all
 
-    - name: Run rust test
-      run: cargo xtask test all
+      - name: Run rust test
+        run: cargo xtask test all

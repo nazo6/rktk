@@ -1,0 +1,18 @@
+{
+  "title": "RKTK",
+  "root": true,
+  "pages": [
+    "---Guide---",
+    "index",
+    "guide-first-keyboard",
+    "guide-driver",
+    "---Customization---",
+    "customize-keymap",
+    "---Reference---",
+    "reference-project-overview",
+    "reference-features",
+    "reference-device",
+    "reference-platform",
+    "reference-tips"
+  ]
+}

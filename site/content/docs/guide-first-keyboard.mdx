@@ -1,0 +1,35 @@
+---
+title: Create keyboard
+---
+
+<Callout>
+  Follow the [Setup section](./) to set up your environment before proceeding.
+</Callout>
+
+The fastest way to develop keyboard firmware using rktk is to use templates.
+To use a template, you need [cargo-generate](https://github.com/cargo-generate/cargo-generate). Install it with the following command.
+
+```sh
+cargo install cargo-generate
+```
+
+Then, you can create a new keyboard firmware project with the following command.
+
+```sh
+cargo generate https://github.com/nazo6/rktk-template
+```
+
+When executed, you will be asked about the crate name, MCU to build, etc. After you answer, a crate will be created for your keyboard in a new directory.
+Now let's go to this directory and build the firmware.
+
+```sh
+cd <your-keyboard-name>
+cargo run --release --features right
+```
+
+Using the `cargo run` command will build the firmware into a UF2 file, and if your microcontroller is connected to a PC in bootloader mode, the firmware will be copied automatically.
+
+Note that the `--release` option is used here. Without it, unoptimized binaries will be generated.
+
+The template comes with default settings for corne keyboard. Since this is a split keyboard, left and right must be specified. This can be specified with `--features right`.
+This feature is one example of following the Rust way. This behavior can be easily customized.

@@ -1,0 +1,47 @@
+---
+title: Optimize binary size
+---
+
+## Adjust build config (`.cargo/config.toml`)
+
+Here is an example of a binary size-optimized `.cargo/config.toml`. If you use [rktk-template](https://github.com/nazo6/rktk-template), you don't need modify it, as it is already included in the template.
+
+```toml title=".cargo/config.toml"
+[profile.release]
+debug = true
+opt-level = "z"
+lto = "fat"
+panic = "abort"
+rustflags = ["-Zlocation-detail=none"]
+codegen-units = 1
+
+[unstable]
+build-std = ["core", "alloc"]
+build-std-features = ["panic_immediate_abort", "optimize_for_size"]
+```
+
+- `debug = true`
+
+  This enables debug info. This make _ELF_ binary big, but the final binary flashed to mcu (UF2 file) is not affected. So it is recommended to enable this.
+
+- `opt-level = "z"`
+
+  This enables size optimization of compiler. This is the most important option to reduce binary size. For other options, see [cargo book](https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level).
+  The documents suggets that `"s"` sometimes produces smaller binaries than `"z"`, but in my experience, `"z"` is always smaller than `"s"`.
+
+- `lto = "fat"`
+
+  This enables link time optimization. This is also important to reduce binary size.
+
+- `panic = "abort"` and `rustflags = ["-Zlocation-detail=none"]`
+
+  These two lines allow the program to simply stop at panic. This reduces the binary size.
+  However, you will no longer receive messages in case of panic.
+
+  Note that second line is only available in nightly rust.
+
+- `build-std` and `build-std-features`
+
+  By default, program will be compiled with precompiled `core` and `alloc` crates. By enabling this, these crates are compiled from source code with size optimization.
+
+  These options are only available in nightly rust. Note that [these options cannot be used with `per-package-target` unstable feature](https://github.com/rust-lang/cargo/issues/11898)

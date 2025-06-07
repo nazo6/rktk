@@ -1,0 +1,28 @@
+---
+title: Split
+---
+
+Split drivers are used to control devices that require a split connection, such as TRRS or TRS connections.
+
+## Driver list
+
+### nRF
+
+:::drivers_table
+
+| name             | crate            | path                   | description                     |
+| ---------------- | ---------------- | ---------------------- | ------------------------------- |
+| UART full-duplex | rktk-drivers-nrf | split/uart_full_duplex | Uses two pins and TRRS cable    |
+| UART half-duplex | rktk-drivers-nrf | split/uart_half_duplex | Uses only one pin and TRS cable |
+
+:::
+
+### RP
+
+:::drivers_table
+
+| name            | crate           | path                  | description                     |
+| --------------- | --------------- | --------------------- | ------------------------------- |
+| PIO half-duplex | rktk-drivers-rp | split/pio_half_duplex | Uses only one pin and TRS cable |
+
+:::

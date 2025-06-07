@@ -1,0 +1,14 @@
+---
+title: RP series
+---
+
+RP chip such as RP2040 and RP2350 is used by microcontroller such as ProMicro
+RP2040.
+
+## RP2040 and CAS
+
+When compiling rktk for RP2040, you may see errors related to Atomic. This is because RP2040 has old architecture (thumbv6) and this architecture does not support feature called atomic CAS.
+
+Fortunately, polyfill for such old architecture is provided by [portable-atomic](https://github.com/taiki-e/portable-atomic). But to use this, you have to manually add `portable-atomic` as dependency with `unsafe-assume-single-core` or `critical-section` feature.
+
+Usually, `unsafe-assume-single-core` should be OK as rktk does not use multiple core. Although, if you have other dependencies that utilize multiple core, you have to use `critical-section` feature instead.

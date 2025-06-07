@@ -1,0 +1,19 @@
+name: Setup pnpm
+
+description: "Setup node,pnpm and install deps"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: "pnpm"
+
+    - name: pnpm install
+      shell: bash
+      run: pnpm install -r

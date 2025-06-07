@@ -1,0 +1,13 @@
+---
+title: Nordic nRF
+---
+
+nRF is widely used for wireless microcontroller such as nice!nano.
+
+## Softdevice
+
+Softdevice is a binary blob that provides Bluetooth stack provided by Nordic.
+
+The softdevice has several interrupt levels and peripherals that are proprietary and accessing them from outside the softdevice will cause a crash.
+
+Please follow the [nrf-softdevice documentation](https://github.com/embassy-rs/nrf-softdevice) and be careful not to access resources that are proprietary to the softdevice.

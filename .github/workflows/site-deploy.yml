@@ -1,0 +1,39 @@
+name: Build and deploy site
+
+on:
+  push:
+    branches: ["master"]
+    paths:
+      - "site/**"
+      - ".github/workflows/site-deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required to generate update time
+
+      - name: Setup pnpm
+        uses: ./.github/workflows/setup-pnpm
+
+      - name: Next build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            site/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx', 'content/**.mdx', 'content/**.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+      - name: Build with Next.js
+        run: cd site && pnpm build
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --assets ./site/out/ --name rktk-site --compatibility-date 2025-06-07
