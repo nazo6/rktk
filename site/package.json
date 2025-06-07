@@ -14,7 +14,7 @@
     "fumadocs-ui": "^15.2.4",
     "mdx-mermaid": "^2.0.3",
     "next": "15.2.4",
-    "puppeteer": "^24.6.0",
+    "puppeteer": "^24.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",

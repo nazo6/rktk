@@ -33,7 +33,7 @@ importers:
         specifier: 15.2.4
         version: 15.2.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       puppeteer:
-        specifier: ^24.6.0
+        specifier: ^24.9.0
         version: 24.9.0(typescript@5.8.3)
       react:
         specifier: ^19.1.0
