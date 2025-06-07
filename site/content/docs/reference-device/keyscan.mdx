@@ -1,0 +1,23 @@
+---
+title: Keyscan
+---
+
+The key scanner is responsible for detecting key press information from GPIOs
+and other devices.
+
+Typical keyscanners include matrix, matrix with shift register, and duplex
+matrix, all of which are provided as official drivers.
+
+## Driver list
+
+### Common
+
+:::drivers_table
+
+| name                       | crate               | path                          | description                |
+| -------------------------- | ------------------- | ----------------------------- | -------------------------- |
+| Matrix                     | rktk-drivers-common | keyscan/matrix                | Normal matrix              |
+| Duplex-Matrix              | rktk-drivers-common | keyscan/duplex_matrix         | Duplex matrix              |
+| Matrix with shift register | rktk-drivers-common | keyscan/shift_register_matrix | Matrix with shift register |
+
+:::

@@ -1,0 +1,17 @@
+---
+title: Storage
+---
+
+Storage drivers are used to manage data storage on devices. They provide an interface for reading and writing data to various types of storage media, such as flash memory, SD cards, and other forms of non-volatile memory.
+
+## Driver list
+
+### Common
+
+:::drivers_table
+
+| name                       | crate               | path                         | description                                                                                               |
+| -------------------------- | ------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Flash (sequential-storage) | rktk-drivers-common | storage/flash_sequential_map | General storage driver that can be used with any platform that has embedded_storage_async implementation. |
+
+:::

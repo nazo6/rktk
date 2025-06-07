@@ -1,0 +1,7 @@
+{
+  "name": "rktk-client",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "../../target/dx/rktk-client/release/web/public"
+  }
+}

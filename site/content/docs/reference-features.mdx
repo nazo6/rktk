@@ -1,0 +1,86 @@
+---
+title: Features
+---
+
+This page gives an overview of the features supported by rktk.
+
+- ✅ : Working
+- 🟡 : Basic implementation only or known bugs.
+- 🔴 : Planned.
+- (blank): N/A.
+
+## Core features
+
+| Feature                | Status | Note                       |
+| ---------------------- | ------ | -------------------------- |
+| Keyscan                | ✅     |                            |
+| Key mapping            | 🟡     | See below table for detail |
+| Mouse                  | ✅     |                            |
+| Encoder                | 🟡     |                            |
+| Hook system            | 🟡     |                            |
+| USB                    | ✅     |                            |
+| Bluetooth              | 🟡     |                            |
+| Split keyboard         | ✅     |                            |
+| Display                | 🟡     |                            |
+| Storage                | 🟡     |                            |
+| RGB led                | 🟡     |                            |
+| Remapper (rktk-client) | 🟡     |                            |
+
+## Key mapping features
+
+Key mapping features is implemented in `rktk-keymanager` and this crate does not
+depend on rktk or embassy.
+
+| Feature name           | Status | Note                                      |
+| ---------------------- | ------ | ----------------------------------------- |
+| **Key action**         |        |                                           |
+| Tap-Hold               | ✅     | Called as `Mod-Tap` or `Layer-Tap` in QMK |
+| Tap Dance              | ✅     |                                           |
+| Oneshot key            | ✅     |                                           |
+| Combo key              | 🟡     |                                           |
+| **Key code**           |        |                                           |
+| Normal key             | ✅     |                                           |
+| Modifier key           | ✅     |                                           |
+| Media key              | ✅     |                                           |
+| Mouse key              | ✅     |                                           |
+| Mouse scroll momentary | ✅     |                                           |
+| Layer momentary (MO)   | ✅     |                                           |
+| Layer toggle (TG)      | ✅     |                                           |
+
+## Drivers
+
+This table shows the status of each driver for each platform.
+
+| Driver                         | Common | RP2040   | NRF52840        |
+| ------------------------------ | ------ | -------- | --------------- |
+| **Key scanner**                |        |          |                 |
+| Matrix                         | 🟡     | -        | -               |
+| Matrix with shift register     | ✅     | -        | -               |
+| (Japanese) Duplex-Matrix       | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
+| **Mouse**                      |        |          |                 |
+| PMW3360                        | ✅     | -        | -               |
+| PAW3395                        | ✅     | -        | -               |
+| &nbsp;                         |        |          |                 |
+| **Encoder**                    | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
+| **Debouncer**                  |        |          |                 |
+| Eager debouncer                | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
+| **Host communication**         |        |          |                 |
+| USB                            | ✅     | -        | -               |
+| Bluetooth                      |        |          | 🟡 (SoftDevice) |
+| &nbsp;                         |        |          |                 |
+| **Split communication**        |        |          |                 |
+| Half-duplex (single wire, TRS) |        | 🟡 (PIO) | 🟡 (UART)       |
+| Full-duplex (dual wire, TRRS)  |        |          | ✅ (UART)       |
+| Bluetooth                      |        |          | 🔴              |
+| &nbsp;                         |        |          |                 |
+| **Display**                    |        |          |                 |
+| SSD1306                        | ✅     | -        | -               |
+| &nbsp;                         |        |          |                 |
+| **Storage**                    |        |          |                 |
+| sequential-storage (NorFlash)  | 🟡     | -        | -               |
+| &nbsp;                         |        |          |                 |
+| **RGB led**                    |        |          |                 |
+| WS2812                         |        | ✅ (PIO) | ✅ (PWM)        |

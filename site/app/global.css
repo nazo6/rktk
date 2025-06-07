@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+:root {
+  --fd-layout-width: 1400px;
+
+  --color-fd-primary: hsl(340, 40%, 48%);
+}
+
+.dark {
+  --color-fd-background: hsl(0, 0%, 0%);
+}
