@@ -1,4 +1,4 @@
-name: Run rust check
+name: Run rust check and test
 
 on:
   push:
@@ -15,7 +15,7 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  check-test:
+  rust-check-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

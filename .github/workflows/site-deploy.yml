@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy-site:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,8 +29,6 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
-        with:
-          run_install: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -57,5 +55,4 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy
-          workingDirectory: "site"
+          command: deploy --assets ./site/out/ --name rktk-site

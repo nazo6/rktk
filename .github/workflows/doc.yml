@@ -19,7 +19,7 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  generate-doc:
+  build-and-deploy-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,5 +39,4 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy
-          workingDirectory: "lib/rktk"
+          command: deploy --assets ./target/doc.merged/ --name rktk-rust-docs
