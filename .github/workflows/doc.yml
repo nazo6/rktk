@@ -39,4 +39,4 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy --assets ./target/doc.merged/ --name rktk-rust-docs
+          command: deploy --assets ./target/doc.merged/ --name rktk-rust-docs --compatibility-date 2025-06-07

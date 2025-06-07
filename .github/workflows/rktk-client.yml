@@ -51,4 +51,4 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy --assets ./target/dx/rktk-client/release/web/public --name rktk-client
+          command: deploy --assets ./target/dx/rktk-client/release/web/public --name rktk-client --compatibility-date 2025-06-07
