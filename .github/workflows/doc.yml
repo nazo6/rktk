@@ -35,6 +35,9 @@ jobs:
       - name: Build docs
         run: cargo xtask doc
 
+      - uses: pnpm/action-setup@v4
+        name: Setup pnpm
+
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
