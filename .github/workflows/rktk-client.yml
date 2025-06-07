@@ -1,4 +1,4 @@
-name: rktk-client
+name: Build and deploy rktk-client
 
 on:
   push:

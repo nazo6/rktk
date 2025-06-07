@@ -1,4 +1,4 @@
-name: lib
+name: Run rust check
 
 on:
   push:

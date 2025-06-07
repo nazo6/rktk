@@ -1,4 +1,4 @@
-name: doc
+name: Build and deploy rktk rust api docs
 
 on:
   push:
