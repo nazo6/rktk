@@ -5,7 +5,8 @@ on:
     branches: ["master"]
     paths:
       - "site/**"
-
+      - ".github/workflows/site-deploy.yml"
+  pull_request:
   workflow_dispatch:
 
 permissions:
