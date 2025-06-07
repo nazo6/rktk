@@ -35,14 +35,14 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Setup pnpm
 
-      - name: Install Node.js
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
       - name: pnpm install
-        run: cd tools/rktk-client && pnpm install
+        run: pnpm install
 
       - name: Build
         run: cd tools/rktk-client && pnpm build

@@ -9,15 +9,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   build-and-deploy-site:
     runs-on: ubuntu-latest
@@ -33,11 +24,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
           cache: "pnpm"
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: pnpm install
+        run: pnpm install
 
       - name: Next build cache
         uses: actions/cache@v4
