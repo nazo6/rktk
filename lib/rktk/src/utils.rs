@@ -52,33 +52,26 @@ pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;
 /// sjoin or "spawn or join"
 pub(crate) mod sjoin {
     macro_rules! join {
-        (async move $f1:expr, $($future:expr),* ) => {
-            let _async_move = ();
-
+        ($f1:expr, $($future:expr),* ) => {
             $crate::utils::sjoin::join!(@alloc {$f1}, $($future),* );
-            $crate::utils::sjoin::join!(@no_alloc async move {$f1}, $($future),* );
-        };
-        (async $f1:expr, $($future:expr),* ) => {
-            let _async = ();
-            $crate::utils::sjoin::join!(@alloc {$f1}, $($future),* );
-            $crate::utils::sjoin::join!(@no_alloc async {$f1}, $($future),* );
+            $crate::utils::sjoin::join!(@no_alloc {$f1}, $($future),* );
         };
         (@alloc $f1:expr, $($future:expr),* ) => {
             #[cfg(feature = "alloc")]
             {
-                use alloc::boxed::Box;
                 {
+                    use ::alloc::boxed::Box;
                     let ex = embassy_executor::Spawner::for_current_executor().await;
                     {
                         $(
                             let ts = Box::leak(Box::new(embassy_executor::raw::TaskStorage::new()));
-                            let st = ts.spawn(|| $future);
+                            let st = ts.spawn(move || $future);
                             ex.spawn(st).unwrap();
                         )*
                     }
                 }
 
-                $f1
+                $f1.await
             };
         };
         (@no_alloc $f1:expr, $($future:expr),* ) => {

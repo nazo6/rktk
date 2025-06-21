@@ -10,6 +10,26 @@ pub(super) mod report;
 pub(super) mod rrp_server;
 pub(super) mod utils;
 
+pub(super) mod handle_encoder {
+    use rktk_log::warn;
+
+    use crate::{
+        drivers::interface::encoder::EncoderDriver,
+        task::channels::report::ENCODER_EVENT_REPORT_CHANNEL,
+    };
+
+    pub async fn start(enc: &mut Option<impl EncoderDriver>) {
+        if let Some(encoder) = enc.as_mut() {
+            loop {
+                let (id, dir) = encoder.read_wait().await;
+                if ENCODER_EVENT_REPORT_CHANNEL.try_send((id, dir)).is_err() {
+                    warn!("enc full");
+                }
+            }
+        }
+    }
+}
+
 type ConfiguredState = HidReportState<
     { CONST_CONFIG.key_manager.layer_count as usize },
     { CONST_CONFIG.keyboard.rows as usize },
