@@ -9,14 +9,13 @@ use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
 use rktk::drivers::interface::rgb::RgbDriver;
-use smart_leds::RGB8;
 
-pub struct Ws2812Pio<'a, I: Instance> {
+pub struct Ws2812Pio<'a, const MAX_LED_COUNT: usize, I: Instance> {
     dma: PeripheralRef<'a, AnyChannel>,
     sm: StateMachine<'a, I, 0>,
 }
 
-impl<'a, I: Instance> Ws2812Pio<'a, I> {
+impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I> {
     pub fn new<'b: 'a>(
         mut pio: Pio<'a, I>,
         data_pin: impl Peripheral<P = impl PioPin> + 'b,
@@ -86,17 +85,20 @@ impl<'a, I: Instance> Ws2812Pio<'a, I> {
     }
 }
 
-impl<I: Instance + 'static> RgbDriver for Ws2812Pio<'static, I> {
+impl<const MAX_LED_COUNT: usize, I: Instance + 'static> RgbDriver
+    for Ws2812Pio<'static, MAX_LED_COUNT, I>
+{
     type Error = Infallible;
 
-    async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error> {
-        // Precompute the word bytes from the colors
-        let mut words = [0u32; N];
-        for i in 0..N {
-            let word = (u32::from(colors[i].g) << 24)
-                | (u32::from(colors[i].r) << 16)
-                | (u32::from(colors[i].b) << 8);
-            words[i] = word;
+    async fn write<IT: IntoIterator<Item = rktk::drivers::interface::rgb::Rgb8>>(
+        &mut self,
+        pixels: IT,
+        brightness: f32,
+        correction: rktk::drivers::interface::rgb::ColorCorrection,
+    ) -> Result<(), Self::Error> {
+        let mut words = [0u32; MAX_LED_COUNT];
+        for (p, w) in pixels.into_iter().zip(words.iter_mut()) {
+            *w = (u32::from(p.green) << 24) | (u32::from(p.red) << 16) | (u32::from(p.blue) << 8);
         }
 
         // DMA transfer
