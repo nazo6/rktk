@@ -3,17 +3,9 @@
 use crate::{
     config::{CONST_CONFIG, Hand},
     drivers::interface::{
-        debounce::DebounceDriver,
-        display::DisplayDriver,
-        dongle::{DongleData, DongleDriver, DongleDriverBuilder},
-        encoder::EncoderDriver,
-        keyscan::KeyscanDriver,
-        mouse::MouseDriver,
-        reporter::ReporterDriver,
-        rgb::RgbDriver,
-        split::SplitDriver,
-        storage::StorageDriver,
-        usb::UsbReporterDriverBuilder,
+        debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
+        keyscan::KeyscanDriver, mouse::MouseDriver, reporter::ReporterDriver, rgb::RgbDriver,
+        split::SplitDriver, storage::StorageDriver, usb::UsbReporterDriverBuilder,
         wireless::WirelessReporterDriverBuilder,
     },
     hooks::Hooks,
@@ -36,7 +28,7 @@ use embassy_time::{Duration, Timer};
 use rktk_log::{debug, helper::Debug2Format, info, warn};
 
 pub(crate) mod channels;
-pub mod display;
+pub(crate) mod display;
 #[cfg(feature = "rrp-log")]
 mod logger;
 pub(crate) mod master;
@@ -344,71 +336,6 @@ pub async fn start<
         async move {
             if let Some(mut display) = drivers.display {
                 display::start(&mut display, &mut opts.display).await;
-            }
-        }
-    );
-}
-
-/// Runs dongle with the given drivers.
-pub async fn dongle_start<D: display::DisplayConfig + 'static>(
-    usb: impl UsbReporterDriverBuilder,
-    dongle: impl DongleDriverBuilder,
-    mut hooks: impl dongle::DongleHooks,
-    display: Option<impl DisplayDriver>,
-    mut display_config: impl display::DisplayConfig + 'static,
-) {
-    let (usb, usb_task) = usb.build().await.unwrap();
-    let (mut dongle, dongle_task) = dongle.build().await.unwrap();
-
-    sjoin::join!(
-        async move {
-            loop {
-                let data = dongle.recv().await;
-                match data {
-                    Ok(mut data) => {
-                        if !hooks.on_dongle_data(&mut data).await {
-                            continue;
-                        }
-                        match data {
-                            DongleData::Keyboard(report) => {
-                                if let Err(e) = usb.try_send_keyboard_report(report.into()) {
-                                    rktk_log::warn!(
-                                        "Failed to send keyboard report: {:?}",
-                                        Debug2Format(&e)
-                                    );
-                                }
-                            }
-                            DongleData::Mouse(report) => {
-                                if let Err(e) = usb.try_send_mouse_report(report.into()) {
-                                    rktk_log::warn!(
-                                        "Failed to send mouse report: {:?}",
-                                        Debug2Format(&e)
-                                    );
-                                }
-                            }
-                            DongleData::MediaKeyboard(report) => {
-                                if let Err(e) = usb.try_send_media_keyboard_report(report.into()) {
-                                    rktk_log::warn!(
-                                        "Failed to send media keyboard report: {:?}",
-                                        Debug2Format(&e)
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
-                        embassy_time::Timer::after_millis(100).await;
-                        continue;
-                    }
-                }
-            }
-        },
-        usb_task,
-        dongle_task,
-        async move {
-            if let Some(mut display) = display {
-                display::start(&mut display, &mut display_config).await;
             }
         }
     );

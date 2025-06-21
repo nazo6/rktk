@@ -39,6 +39,7 @@
 extern crate alloc;
 
 pub mod config;
+pub mod dongle_task;
 pub mod drivers;
 pub mod hooks;
 pub mod task;
