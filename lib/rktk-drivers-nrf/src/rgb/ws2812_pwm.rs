@@ -12,7 +12,7 @@ use embassy_nrf::{
     },
 };
 use embassy_time::Timer;
-use rktk::drivers::interface::rgb::{ColorCorrection, LinearSrgb, RgbDriver};
+use rktk::drivers::interface::rgb::{ColorCorrection, Rgb8, RgbDriver};
 
 pub struct Ws2812Pwm<
     PWM: Instance,
@@ -49,7 +49,7 @@ impl<
 {
     type Error = Infallible;
 
-    async fn write<I: IntoIterator<Item = LinearSrgb>>(
+    async fn write<I: IntoIterator<Item = Rgb8>>(
         &mut self,
         pixels: I,
         brightness: f32,
@@ -68,11 +68,12 @@ impl<
         let mut words = heapless::Vec::<u16, 1024>::from_slice(&[RES; 100]).unwrap();
 
         for color in pixels {
-            for bit in float_to_u8(color.green)
+            for bit in color
+                .green
                 .view_bits::<Msb0>()
                 .iter()
-                .chain(float_to_u8(color.red).view_bits())
-                .chain(float_to_u8(color.blue).view_bits())
+                .chain(color.red.view_bits())
+                .chain(color.blue.view_bits())
             {
                 words.push(if *bit { T1H } else { T0H }).unwrap();
             }
@@ -88,8 +89,4 @@ impl<
 
         Ok(())
     }
-}
-
-fn float_to_u8(value: f32) -> u8 {
-    (value * 255.0) as u8
 }

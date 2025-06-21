@@ -5713,7 +5713,6 @@ dependencies = [
  "rktk-log",
  "sequential-storage",
  "serde",
- "smart-leds",
  "ssmarshal",
  "static_cell",
  "usbd-hid",

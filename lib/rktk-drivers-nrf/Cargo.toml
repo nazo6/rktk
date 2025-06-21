@@ -64,7 +64,6 @@ static_cell = { workspace = true }
 heapless = { workspace = true }
 bitvec = { version = "1.0.1", default-features = false }
 ssmarshal = { workspace = true }
-smart-leds = { workspace = true }
 usbd-hid = { workspace = true }
 atomic-pool = "2.0.0"
 
