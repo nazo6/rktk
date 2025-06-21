@@ -5,7 +5,7 @@ use crate::{
     hooks::interface::RgbHooks,
 };
 
-use super::super::channels::{rgb::RGB_CHANNEL, split::M2sTx};
+use super::channels::{rgb::RGB_CHANNEL, split::M2sTx};
 
 pub async fn start<const LED_COUNT: usize>(
     mut bl: impl RgbDriver,
