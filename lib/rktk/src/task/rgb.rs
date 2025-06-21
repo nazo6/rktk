@@ -1,5 +1,6 @@
 use embassy_futures::select::{Either, select};
 use embassy_time::Duration;
+use rktk_log::debug;
 
 use crate::{
     drivers::interface::{
@@ -12,17 +13,21 @@ use crate::{
 use super::channels::{rgb::RGB_CHANNEL, split::M2sTx};
 use blinksy::{
     color::{ColorCorrection, IntoColor, LinearSrgb},
-    dimension::Dim2d,
     layout::Layout2d,
     pattern::Pattern,
     patterns::rainbow::{Rainbow, RainbowParams},
 };
 
 pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
-    mut driver: Driver,
+    driver: Option<Driver>,
     mut hook: impl RgbHooks,
-    m2s_tx: M2sTx<'_>,
+    m2s_tx: Option<M2sTx<'_>>,
 ) {
+    let Some(mut driver) = driver else {
+        debug!("No rgb");
+        return;
+    };
+
     hook.on_rgb_init(&mut driver).await;
 
     let mut current_rgb_mode = RgbMode::Off;
@@ -97,7 +102,9 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
         .await;
 
         if let Either::First(new_ctrl) = res {
-            let _ = m2s_tx.send(MasterToSlave::Rgb(new_ctrl.clone())).await;
+            if let Some(m2s_tx) = m2s_tx {
+                m2s_tx.send(MasterToSlave::Rgb(new_ctrl.clone())).await;
+            }
             match new_ctrl {
                 RgbCommand::Start(rgb_mode) => {
                     current_rgb_mode = rgb_mode;
@@ -105,25 +112,5 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
                 RgbCommand::Reset => {}
             }
         }
-    }
-}
-
-struct TimeGradPat;
-impl<L: Layout2d> Pattern<Dim2d, L> for TimeGradPat {
-    type Params = ();
-    type Color = LinearSrgb;
-
-    fn new(_params: Self::Params) -> Self {
-        Self
-    }
-
-    fn tick(&self, time_in_ms: u64) -> impl Iterator<Item = Self::Color> {
-        (0..L::PIXEL_COUNT).map(move |i| {
-            LinearSrgb::new(
-                ((time_in_ms / 5 + i as u64 * 5) % 255) as f32 / 255.0,
-                (255 - (time_in_ms / 5 + i as u64 * 5) % 255) as f32 / 255.0,
-                0.0,
-            )
-        })
     }
 }
