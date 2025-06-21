@@ -28,7 +28,6 @@ usbd-hid = { workspace = true }
 
 embedded-graphics = { workspace = true }
 display-interface = { workspace = true }
-smart-leds = { workspace = true }
 
 heapless = { workspace = true }
 static_cell = { workspace = true }

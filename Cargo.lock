@@ -5618,7 +5618,6 @@ dependencies = [
  "serde",
  "serde_json",
  "smart-default",
- "smart-leds",
  "ssmarshal",
  "static_cell",
  "strum",
@@ -5739,7 +5738,6 @@ dependencies = [
  "rktk",
  "rktk-drivers-common",
  "rktk-log",
- "smart-leds",
  "ssd1306",
  "static_cell",
 ]
