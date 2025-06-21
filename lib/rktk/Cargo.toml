@@ -42,6 +42,7 @@ document-features = { workspace = true }
 strum = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
 paste = { workspace = true }
+blinksy = "0.4.0"
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }

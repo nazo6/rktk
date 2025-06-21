@@ -5,15 +5,14 @@ use core::convert::Infallible;
 
 use bitvec::prelude::*;
 use embassy_nrf::{
+    Peripheral,
     gpio::{OutputDrive, Pin},
     pwm::{
         Config, Instance, Prescaler, SequenceLoad, SequencePwm, SingleSequenceMode, SingleSequencer,
     },
-    Peripheral,
 };
 use embassy_time::Timer;
-use rktk::drivers::interface::rgb::RgbDriver;
-use smart_leds::RGB8;
+use rktk::drivers::interface::rgb::{ColorCorrection, LinearSrgb, RgbDriver};
 
 pub struct Ws2812Pwm<
     PWM: Instance,
@@ -26,15 +25,15 @@ pub struct Ws2812Pwm<
 }
 
 const T1H: u16 = 0x8000 | 13;
-const T0H: u16 = 0x8000 | 6;
+const T0H: u16 = 0x8000 | 7;
 const RES: u16 = 0x8000;
 
 impl<
-        PWM: Instance + 'static,
-        PWMP: Peripheral<P = PWM> + 'static,
-        DATA: Pin,
-        DATAP: Peripheral<P = DATA> + 'static,
-    > Ws2812Pwm<PWM, PWMP, DATA, DATAP>
+    PWM: Instance + 'static,
+    PWMP: Peripheral<P = PWM> + 'static,
+    DATA: Pin,
+    DATAP: Peripheral<P = DATA> + 'static,
+> Ws2812Pwm<PWM, PWMP, DATA, DATAP>
 {
     pub fn new(pwm: PWMP, data: DATAP) -> Self {
         Self { pwm, pin: data }
@@ -42,15 +41,20 @@ impl<
 }
 
 impl<
-        PWM: Instance + 'static,
-        PWMP: Peripheral<P = PWM> + 'static,
-        DATA: Pin,
-        DATAP: Peripheral<P = DATA> + 'static,
-    > RgbDriver for Ws2812Pwm<PWM, PWMP, DATA, DATAP>
+    PWM: Instance + 'static,
+    PWMP: Peripheral<P = PWM> + 'static,
+    DATA: Pin,
+    DATAP: Peripheral<P = DATA> + 'static,
+> RgbDriver for Ws2812Pwm<PWM, PWMP, DATA, DATAP>
 {
     type Error = Infallible;
 
-    async fn write<const N: usize>(&mut self, colors: &[RGB8; N]) -> Result<(), Self::Error> {
+    async fn write<I: IntoIterator<Item = LinearSrgb>>(
+        &mut self,
+        pixels: I,
+        brightness: f32,
+        correction: ColorCorrection,
+    ) -> Result<(), Self::Error> {
         let mut pwm_config = Config::default();
         pwm_config.sequence_load = SequenceLoad::Common;
         pwm_config.prescaler = Prescaler::Div1; // 16MHz
@@ -63,13 +67,12 @@ impl<
 
         let mut words = heapless::Vec::<u16, 1024>::from_slice(&[RES; 100]).unwrap();
 
-        for color in colors {
-            for bit in color
-                .g
+        for color in pixels {
+            for bit in float_to_u8(color.green)
                 .view_bits::<Msb0>()
                 .iter()
-                .chain(color.r.view_bits())
-                .chain(color.b.view_bits())
+                .chain(float_to_u8(color.red).view_bits())
+                .chain(float_to_u8(color.blue).view_bits())
             {
                 words.push(if *bit { T1H } else { T0H }).unwrap();
             }
@@ -81,8 +84,12 @@ impl<
 
         // Wait for a long time is important. Otherwise, the PWM will be stopped before the
         // sequence is finished.
-        Timer::after_millis(50).await;
+        Timer::after_millis(5).await;
 
         Ok(())
     }
+}
+
+fn float_to_u8(value: f32) -> u8 {
+    (value * 255.0) as u8
 }
