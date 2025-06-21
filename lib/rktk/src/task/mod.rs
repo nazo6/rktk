@@ -1,22 +1,14 @@
 //! Program entrypoint.
 
 use crate::{
+    config::{CONST_CONFIG, Hand},
     drivers::interface::{
-        debounce::DebounceDriver,
-        display::DisplayDriver,
-        dongle::{DongleData, DongleDriver, DongleDriverBuilder},
-        encoder::EncoderDriver,
-        keyscan::KeyscanDriver,
-        mouse::MouseDriver,
-        reporter::ReporterDriver,
-        rgb::RgbDriver,
-        split::SplitDriver,
-        storage::StorageDriver,
-        usb::UsbReporterDriverBuilder,
+        debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
+        keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,
+        storage::StorageDriver, usb::UsbReporterDriverBuilder,
         wireless::WirelessReporterDriverBuilder,
     },
     hooks::Hooks,
-    config::Hand,
 };
 use crate::{
     drivers::{Drivers, interface::system::SystemDriver},
@@ -24,14 +16,20 @@ use crate::{
     utils::sjoin,
 };
 use display::DisplayConfig;
+use embassy_futures::join::{join, join5};
 use embassy_time::Duration;
-use rktk_log::{debug, helper::Debug2Format, info};
+use rktk_log::{debug, info};
 
 pub(crate) mod channels;
+// `display` module is public as internally used by macros
 pub mod display;
+mod initializers;
 #[cfg(feature = "rrp-log")]
 mod logger;
-pub(crate) mod main_loop;
+mod master;
+mod rgb;
+mod slave;
+mod split_handler;
 
 /// Runs rktk with the given drivers and key configuration.
 ///
@@ -73,7 +71,7 @@ pub async fn start<
         Display,
         Mouse,
     >,
-    hooks: Hooks<CH, MH, SH, BH>,
+    mut hooks: Hooks<CH, MH, SH, BH>,
     mut opts: crate::config::RktkOpts<DC>,
 ) {
     #[cfg(feature = "rrp-log")]
@@ -102,63 +100,153 @@ pub async fn start<
 
     sjoin::join!(
         async {
-            let mouse = if let Some(mut mouse) = drivers.mouse {
-                debug!("Mouse init");
-
-                match mouse.init().await {
-                    Ok(_) => {
-                        let _ = mouse.set_cpi(opts.config.rktk.default_cpi).await;
-                        Some(mouse)
-                    }
-                    Err(e) => {
-                        rktk_log::warn!("Failed to build mouse driver: {:?}", Debug2Format(&e));
-                        None
-                    }
-                }
-            } else {
-                debug!("no mouse");
-                None
-            };
-
-            crate::utils::display_state!(MouseAvailable, mouse.is_some());
-
-            let (ble, ble_task) = if let Some(ble_builder) = drivers.ble_builder {
-                debug!("BLE init");
-                let (ble, ble_task) = ble_builder.build().await.expect("Failed to build ble");
-                (Some(ble), Some(ble_task))
-            } else {
-                debug!("no BLE driver");
-                (None, None)
-            };
-
-            let (usb, usb_task) = if let Some(usb_builder) = drivers.usb_builder {
-                debug!("USB init");
-                let (usb, usb_task) = usb_builder.build().await.expect("Failed to build usb");
-                (Some(usb), Some(usb_task))
-            } else {
-                debug!("no USB driver");
-                (None, None)
-            };
+            initializers::init_mouse(&mut drivers.mouse, opts.config).await;
+            let ((wireless, wireless_task), (usb, usb_task)) =
+                initializers::init_reporters(drivers.ble_builder, drivers.usb_builder).await;
 
             sjoin::join!(
                 async {
-                    main_loop::start(
-                        &drivers.system,
-                        ble,
-                        usb,
-                        drivers.keyscan,
-                        &mut drivers.debounce,
-                        drivers.encoder,
-                        mouse,
-                        drivers.storage,
-                        drivers.split,
-                        drivers.rgb,
-                        opts.config,
-                        opts.keymap,
-                        hooks,
-                        opts.hand.unwrap_or(Hand::Left),
-                    )
-                    .await;
+                    let hand = opts.hand.unwrap_or(Hand::Left);
+                    crate::utils::display_state!(Hand, Some(hand));
+
+                    let role =
+                        initializers::init_split(opts.config, drivers.split, &usb, &wireless).await;
+
+                    hooks
+                        .common
+                        .on_init(
+                            hand,
+                            &mut drivers.keyscan,
+                            drivers.mouse.as_mut(),
+                            drivers.storage.as_mut(),
+                        )
+                        .await;
+
+                    crate::utils::display_state!(Master, Some(role.is_master()));
+
+                    match role {
+                        initializers::KeyboardRoleRes::Master {
+                            sender,
+                            receiver,
+                            task,
+                        } => {
+                            sjoin::join!(
+                                async {
+                                    let config_store =
+                                        master::utils::init_storage(drivers.storage).await;
+                                    let state = master::utils::load_state(
+                                        &opts.config.key_manager,
+                                        &config_store,
+                                        opts.keymap,
+                                    )
+                                    .await;
+
+                                    info!("Master side task start");
+
+                                    hooks
+                                        .master
+                                        .on_master_init(
+                                            &mut drivers.keyscan,
+                                            drivers.mouse.as_mut(),
+                                        )
+                                        .await;
+
+                                    join(
+                                        join5(
+                                            master::report::report_task(
+                                                opts.config,
+                                                &drivers.system,
+                                                &state,
+                                                &config_store,
+                                                &wireless,
+                                                &usb,
+                                                hooks.master,
+                                            ),
+                                            master::handle_slave::start(
+                                                opts.config,
+                                                hand,
+                                                receiver,
+                                            ),
+                                            master::handle_keyboard::start(
+                                                opts.config,
+                                                hand,
+                                                drivers.keyscan,
+                                                &mut drivers.debounce,
+                                            ),
+                                            master::handle_mouse::start(opts.config, drivers.mouse),
+                                            master::handle_encoder::start(&mut drivers.encoder),
+                                        ),
+                                        async {
+                                            #[cfg(feature = "rrp")]
+                                            master::rrp_server::start(
+                                                opts.config,
+                                                &usb,
+                                                &wireless,
+                                                &state,
+                                                &config_store,
+                                            )
+                                            .await;
+                                        },
+                                    )
+                                    .await;
+                                },
+                                async move {
+                                    if let Some(rgb) = drivers.rgb {
+                                        debug!("rgb init");
+                                        match hand {
+                                            Hand::Right => {
+                                                rgb::start::<
+                                                    { CONST_CONFIG.keyboard.right_rgb_count },
+                                                >(
+                                                    rgb, hooks.rgb, sender
+                                                )
+                                                .await
+                                            }
+                                            Hand::Left => rgb::start::<
+                                                { CONST_CONFIG.keyboard.left_rgb_count },
+                                            >(
+                                                rgb, hooks.rgb, sender
+                                            )
+                                            .await,
+                                        }
+                                    } else {
+                                        debug!("no rgb");
+                                    }
+                                },
+                                async move {
+                                    if let Some(task) = task {
+                                        task.await;
+                                    }
+                                }
+                            );
+                        }
+                        initializers::KeyboardRoleRes::Slave {
+                            sender,
+                            receiver,
+                            task,
+                        } => {
+                            debug!("slave start");
+                            sjoin::join!(
+                                async move {
+                                    slave::start(
+                                        opts.config,
+                                        sender,
+                                        receiver,
+                                        drivers.keyscan,
+                                        &mut drivers.debounce,
+                                        drivers.mouse,
+                                        hooks.slave,
+                                    )
+                                    .await
+                                },
+                                async move {
+                                    if let Some(task) = task {
+                                        task.await;
+                                    }
+                                }
+                            );
+                        }
+                    }
                 },
                 async {
                     if let Some(usb_task) = usb_task {
@@ -166,8 +254,8 @@ pub async fn start<
                     }
                 },
                 async {
-                    if let Some(ble_task) = ble_task {
-                        ble_task.await
+                    if let Some(wireless_task) = wireless_task {
+                        wireless_task.await
                     }
                 }
             );
@@ -175,71 +263,6 @@ pub async fn start<
         async move {
             if let Some(mut display) = drivers.display {
                 display::start(&mut display, &mut opts.display).await;
-            }
-        }
-    );
-}
-
-/// Runs dongle with the given drivers.
-pub async fn dongle_start<D: display::DisplayConfig + 'static>(
-    usb: impl UsbReporterDriverBuilder,
-    dongle: impl DongleDriverBuilder,
-    mut hooks: impl dongle::DongleHooks,
-    display: Option<impl DisplayDriver>,
-    mut display_config: impl display::DisplayConfig + 'static,
-) {
-    let (usb, usb_task) = usb.build().await.unwrap();
-    let (mut dongle, dongle_task) = dongle.build().await.unwrap();
-
-    sjoin::join!(
-        async move {
-            loop {
-                let data = dongle.recv().await;
-                match data {
-                    Ok(mut data) => {
-                        if !hooks.on_dongle_data(&mut data).await {
-                            continue;
-                        }
-                        match data {
-                            DongleData::Keyboard(report) => {
-                                if let Err(e) = usb.try_send_keyboard_report(report.into()) {
-                                    rktk_log::warn!(
-                                        "Failed to send keyboard report: {:?}",
-                                        Debug2Format(&e)
-                                    );
-                                }
-                            }
-                            DongleData::Mouse(report) => {
-                                if let Err(e) = usb.try_send_mouse_report(report.into()) {
-                                    rktk_log::warn!(
-                                        "Failed to send mouse report: {:?}",
-                                        Debug2Format(&e)
-                                    );
-                                }
-                            }
-                            DongleData::MediaKeyboard(report) => {
-                                if let Err(e) = usb.try_send_media_keyboard_report(report.into()) {
-                                    rktk_log::warn!(
-                                        "Failed to send media keyboard report: {:?}",
-                                        Debug2Format(&e)
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    Err(e) => {
-                        rktk_log::warn!("Dongle recv fail: {:?}", Debug2Format(&e));
-                        embassy_time::Timer::after_millis(100).await;
-                        continue;
-                    }
-                }
-            }
-        },
-        usb_task,
-        dongle_task,
-        async move {
-            if let Some(mut display) = display {
-                display::start(&mut display, &mut display_config).await;
             }
         }
     );

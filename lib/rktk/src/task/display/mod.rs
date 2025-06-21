@@ -3,8 +3,8 @@ use rktk_log::error;
 
 use crate::{
     config::CONST_CONFIG,
-    drivers::interface::{display::DisplayDriver, reporter::Output},
     config::Hand,
+    drivers::interface::{display::DisplayDriver, reporter::Output},
     utils::{Channel, Signal},
 };
 
@@ -39,7 +39,7 @@ pub trait DisplayConfig {
 pub static DISPLAY_CONTROLLER: Channel<DisplayMessage, 5> = Channel::new();
 pub static DISPLAY_DYNAMIC_MESSAGE_CONTROLLER: Signal<heapless::String<256>> = Signal::new();
 
-pub(super) async fn start<D: DisplayDriver, C: DisplayConfig>(display: &mut D, config: &mut C) {
+pub(crate) async fn start<D: DisplayDriver, C: DisplayConfig>(display: &mut D, config: &mut C) {
     if display.init().await.is_err() {
         error!("Failed to initialize display");
         return;

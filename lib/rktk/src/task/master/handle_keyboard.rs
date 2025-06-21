@@ -1,13 +1,11 @@
 use rktk_log::{debug, warn};
 
+use super::utils::get_split_right_shift;
 use crate::{
+    config::Hand,
     config::schema::DynamicConfig,
     drivers::interface::{debounce::DebounceDriver, keyscan::KeyscanDriver},
-    config::Hand,
-    task::{
-        channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
-        main_loop::master::utils::get_split_right_shift,
-    },
+    task::channels::report::KEYBOARD_EVENT_REPORT_CHANNEL,
 };
 
 use super::utils::resolve_entire_key_pos;

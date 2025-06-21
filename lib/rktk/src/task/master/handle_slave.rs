@@ -1,16 +1,14 @@
 use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
 use rktk_log::debug;
 
+use super::utils::get_split_right_shift;
 use crate::{
+    config::Hand,
     config::schema::DynamicConfig,
     drivers::interface::split::SlaveToMaster,
-    config::Hand,
-    task::{
-        channels::{
-            report::{KEYBOARD_EVENT_REPORT_CHANNEL, update_mouse},
-            split::S2mRx,
-        },
-        main_loop::master::utils::get_split_right_shift,
+    task::channels::{
+        report::{KEYBOARD_EVENT_REPORT_CHANNEL, update_mouse},
+        split::S2mRx,
     },
 };
 
