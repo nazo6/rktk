@@ -15,24 +15,21 @@ use crate::drivers::interface::{
     encoder::EncoderDriver,
     mouse::MouseDriver,
     reporter::ReporterDriver,
-    rgb::{Rgb8, RgbDriver},
+    rgb::RgbDriver,
     split::SplitDriver,
     storage::StorageDriver,
     usb::{UsbReporterDriver, UsbReporterDriverBuilder},
     wireless::{WirelessReporterDriver, WirelessReporterDriverBuilder},
 };
 
-// Rgb
 pub fn rgb() -> Option<impl RgbDriver> {
     pub enum Rgb {}
     impl RgbDriver for Rgb {
         type Error = Infallible;
 
-        async fn write<I: IntoIterator<Item = Rgb8>>(
+        async fn write<I: IntoIterator<Item = blinksy::color::LedRgb<u8>>>(
             &mut self,
             _pixels: I,
-            _brightness: f32,
-            _correction: blinksy::color::ColorCorrection,
         ) -> Result<(), Self::Error> {
             unreachable!()
         }

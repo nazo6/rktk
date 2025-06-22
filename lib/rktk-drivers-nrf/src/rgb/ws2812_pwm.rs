@@ -12,7 +12,7 @@ use embassy_nrf::{
     },
 };
 use embassy_time::Timer;
-use rktk::drivers::interface::rgb::{ColorCorrection, Rgb8, RgbDriver};
+use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
 
 /// WS2812 NeoPixel driver using PWM on nRF.
 ///
@@ -59,11 +59,9 @@ impl<
 {
     type Error = Infallible;
 
-    async fn write<I: IntoIterator<Item = Rgb8>>(
+    async fn write<I: IntoIterator<Item = LedRgb<u8>>>(
         &mut self,
         pixels: I,
-        brightness: f32,
-        correction: ColorCorrection,
     ) -> Result<(), Self::Error> {
         let mut pwm_config = Config::default();
         pwm_config.sequence_load = SequenceLoad::Common;
@@ -78,12 +76,11 @@ impl<
         let mut words = heapless::Vec::<u16, BUFFER_SIZE>::from_slice(&[RES; 100]).unwrap();
 
         'outer: for color in pixels {
-            for bit in color
-                .green
+            for bit in color[1]
                 .view_bits::<Msb0>()
                 .iter()
-                .chain(color.red.view_bits())
-                .chain(color.blue.view_bits())
+                .chain(color[0].view_bits())
+                .chain(color[2].view_bits())
             {
                 if words.push(if *bit { T1H } else { T0H }).is_err() {
                     rktk_log::warn!("WS2812Pwm buffer size is not enough. Increase BUFFER_SIZE.");

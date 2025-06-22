@@ -8,7 +8,7 @@ use embassy_rp::{Peripheral, PeripheralRef, clocks, into_ref};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
-use rktk::drivers::interface::rgb::RgbDriver;
+use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
 
 pub struct Ws2812Pio<'a, const MAX_LED_COUNT: usize, I: Instance> {
     dma: PeripheralRef<'a, AnyChannel>,
@@ -90,15 +90,13 @@ impl<const MAX_LED_COUNT: usize, I: Instance + 'static> RgbDriver
 {
     type Error = Infallible;
 
-    async fn write<IT: IntoIterator<Item = rktk::drivers::interface::rgb::Rgb8>>(
+    async fn write<IT: IntoIterator<Item = LedRgb<u8>>>(
         &mut self,
         pixels: IT,
-        brightness: f32,
-        correction: rktk::drivers::interface::rgb::ColorCorrection,
     ) -> Result<(), Self::Error> {
         let mut words = [0u32; MAX_LED_COUNT];
         for (p, w) in pixels.into_iter().zip(words.iter_mut()) {
-            *w = (u32::from(p.green) << 24) | (u32::from(p.red) << 16) | (u32::from(p.blue) << 8);
+            *w = (u32::from(p[1]) << 24) | (u32::from(p[0]) << 16) | (u32::from(p[2]) << 8);
         }
 
         // DMA transfer

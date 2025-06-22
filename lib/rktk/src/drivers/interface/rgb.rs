@@ -2,50 +2,44 @@
 
 // TODO: Split backlight and underglow
 
-pub use blinksy::color::ColorCorrection;
-use blinksy::color::LinearSrgb;
+pub use blinksy::color::{ColorCorrection, LedChannels, LedRgb, LinearSrgb};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Copy)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct Rgb8 {
-    pub red: u8,
-    pub green: u8,
-    pub blue: u8,
-}
-impl Rgb8 {
-    pub fn new(red: u8, green: u8, blue: u8) -> Self {
-        Self { red, green, blue }
-    }
-}
-
-impl From<LinearSrgb> for Rgb8 {
-    fn from(color: LinearSrgb) -> Self {
-        Self {
-            red: (color.red * 255.0) as u8,
-            green: (color.green * 255.0) as u8,
-            blue: (color.blue * 255.0) as u8,
-        }
-    }
-}
-
+/// Commands for controlling RGB LEDs.
+///
+/// This value can be send using [`crate::hooks::channels::rgb::rgb_sender`].
+/// In master side, command sent from above channel will also be sent to slave side.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbCommand {
+    /// Set RGB mode and start it
     Start(RgbMode),
+    /// Set brightness
+    ///
+    /// Range: 0.0 to 1.0
+    Brightness(f32),
+    /// Reset RGB state and restart current RgbMode
     Reset,
 }
 
+/// RGB mode for controlling RGB LEDs.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbMode {
+    /// Turn off RGB
     Off,
-    /// Color (rgb)
+    /// Set solid color
+    ///
+    /// Value range: 0 to 255
+    /// (Red, Green, Blue)
     SolidColor(u8, u8, u8),
+    /// Set built-in RGB pattern
     Pattern(RgbPattern),
+    /// Call user-defined RGB hook
     Custom,
 }
 
+/// Built-in RGB patterns.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbPattern {
@@ -62,10 +56,8 @@ pub trait RgbDriver: 'static {
     type Error: super::Error;
 
     // Required method
-    async fn write<I: IntoIterator<Item = Rgb8>>(
+    async fn write<I: IntoIterator<Item = LedRgb<u8>>>(
         &mut self,
         pixels: I,
-        brightness: f32,
-        correction: ColorCorrection,
     ) -> Result<(), Self::Error>;
 }
