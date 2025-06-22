@@ -30,7 +30,7 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
         return;
     };
 
-    hook.on_rgb_init(&mut driver).await;
+    hook.on_rgb_init(&mut driver, m2s_tx.is_some()).await;
 
     let mut current_rgb_mode = RgbMode::Off;
     let mut brightness = config.rktk.rgb.default_brightness;
@@ -107,7 +107,7 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
                     }
                 }
                 RgbMode::Custom => {
-                    // TODO: Implement this
+                    hook.custom_rgb(&mut driver, brightness).await;
                 }
             }
             core::future::pending::<()>().await;

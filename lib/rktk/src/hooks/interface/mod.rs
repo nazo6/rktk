@@ -3,8 +3,8 @@
 #![allow(async_fn_in_trait)]
 
 pub mod dongle;
-pub mod master;
-pub mod rgb;
+mod master;
+mod rgb;
 
 pub use common::CommonHooks;
 pub use master::MasterHooks;
@@ -13,8 +13,8 @@ pub use slave::SlaveHooks;
 
 mod common {
     use crate::{
-        drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver, storage::StorageDriver},
         config::Hand,
+        drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver, storage::StorageDriver},
     };
 
     /// Hooks common for both master and slave side
