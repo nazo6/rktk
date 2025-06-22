@@ -3,6 +3,8 @@
 #[derive(smart_default::SmartDefault)]
 #[serde(default)]
 pub struct RktkConfig {
+    pub rgb: RktkRgbConfig,
+
     /// Threshold for double tap (ms).
     #[default(500)]
     pub double_tap_threshold: u64,
@@ -42,4 +44,24 @@ pub struct RktkConfig {
     /// This setting specifies that interval. (ms)
     #[default(10)]
     pub state_update_interval: u64,
+}
+
+/// RKTK RGB config
+#[macro_rules_attribute::apply(crate::schema::common_derive)]
+#[derive(smart_default::SmartDefault)]
+#[serde(default)]
+pub struct RktkRgbConfig {
+    /// Time(ms) to wait for the next RGB pattern update
+    ///
+    /// Lower values will result in smoother animations, but may increase power consumption.
+    /// Also, for heavy patterns, it may cause the MCU to be busy for a long time, which affects
+    /// mouse latency (especially).
+    #[default(16)]
+    pub pattern_update_interval: u64,
+
+    /// Initial RGB blightness
+    ///
+    /// Range: 0.0 to 1.0
+    #[default(0.5)]
+    pub default_brightness: f32,
 }

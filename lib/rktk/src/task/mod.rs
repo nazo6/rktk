@@ -182,7 +182,12 @@ pub async fn start<
                                     )
                                     .await;
                                 },
-                                rgb::start::<RL, _>(drivers.rgb, hooks.rgb, Some(sender)),
+                                rgb::start::<RL, _>(
+                                    opts.config,
+                                    drivers.rgb,
+                                    hooks.rgb,
+                                    Some(sender)
+                                ),
                                 async move {
                                     if let Some(task) = task {
                                         task.await;
@@ -209,7 +214,7 @@ pub async fn start<
                                     )
                                     .await
                                 },
-                                rgb::start::<RL, _>(drivers.rgb, hooks.rgb, None),
+                                rgb::start::<RL, _>(opts.config, drivers.rgb, hooks.rgb, None),
                                 async move {
                                     if let Some(task) = task {
                                         task.await;

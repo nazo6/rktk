@@ -347,6 +347,9 @@
           "format": "uint64",
           "minimum": 0.0
         },
+        "rgb": {
+          "$ref": "#/definitions/RktkRgbConfig"
+        },
         "scan_interval_keyboard": {
           "description": "Time (ms) to wait for the next keyboard scan",
           "default": 5,
@@ -379,6 +382,26 @@
           "description": "Swap the x and y values obtained from the mouse driver. This also affects the scroll direction.",
           "default": false,
           "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "RktkRgbConfig": {
+      "description": "RKTK RGB config",
+      "type": "object",
+      "properties": {
+        "default_brightness": {
+          "description": "Initial RGB blightness\n\nRange: 0.0 to 1.0",
+          "default": 0.5,
+          "type": "number",
+          "format": "float"
+        },
+        "pattern_update_interval": {
+          "description": "Time(ms) to wait for the next RGB pattern update\n\nLower values will result in smoother animations, but may increase power consumption. Also, for heavy patterns, it may cause the MCU to be busy for a long time, which affects mouse latency (especially).",
+          "default": 16,
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
         }
       },
       "additionalProperties": false

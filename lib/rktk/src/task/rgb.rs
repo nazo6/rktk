@@ -3,6 +3,7 @@ use embassy_time::Duration;
 use rktk_log::debug;
 
 use crate::{
+    config::schema::DynamicConfig,
     drivers::interface::{
         rgb::{RgbCommand, RgbDriver, RgbMode, RgbPattern},
         split::MasterToSlave,
@@ -19,6 +20,7 @@ use blinksy::{
 };
 
 pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
+    config: &'static DynamicConfig,
     driver: Option<Driver>,
     mut hook: impl RgbHooks,
     m2s_tx: Option<M2sTx<'_>>,
@@ -31,7 +33,7 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
     hook.on_rgb_init(&mut driver).await;
 
     let mut current_rgb_mode = RgbMode::Off;
-    let mut brightness = 1.0;
+    let mut brightness = config.rktk.rgb.default_brightness;
     let color_correction = ColorCorrection::default();
     loop {
         let res = select(RGB_CHANNEL.receive(), async {
@@ -68,7 +70,7 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
                         .await;
                 }
                 RgbMode::Pattern(pat) => {
-                    let interval = Duration::from_millis(16);
+                    let interval = Duration::from_millis(config.rktk.rgb.pattern_update_interval);
                     let mut i = 0;
                     let mut t = embassy_time::Ticker::every(interval);
 
