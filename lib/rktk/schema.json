@@ -46,6 +46,13 @@
           "format": "uint",
           "minimum": 0.0
         },
+        "rgb_channel": {
+          "description": "Size of the rgb command channel buffer",
+          "default": 3,
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
         "rrp": {
           "description": "Size of the buffer used by rrp",
           "default": 512,

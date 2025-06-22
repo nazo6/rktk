@@ -39,6 +39,10 @@ pub struct BufferSizeConfig {
     #[default(64)]
     pub split_channel: usize,
 
+    /// Size of the rgb command channel buffer
+    #[default(3)]
+    pub rgb_channel: usize,
+
     /// Size of the mouse event buffer
     #[default(4)]
     pub mouse_event: usize,
