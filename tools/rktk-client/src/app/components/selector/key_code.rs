@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use rktk::config::keymap::prelude::RktkKeys;
 use rktk_keymanager::keycode::{
-    key::Key, layer::LayerOp, media::Media, modifier::Modifier, mouse::Mouse, special::Special,
-    KeyCode,
+    KeyCode, key::Key, layer::LayerOp, media::Media, modifier::Modifier, mouse::Mouse,
+    special::Special,
 };
 use strum::IntoEnumIterator as _;
 
@@ -142,8 +142,8 @@ pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) ->
                     },
                     KeyCode::Custom1(id) => rsx! {
                         KeySelector {
-                            items: rktk::config::keymap::rktk_keys::RktkKeys::iter().collect(),
-                            selected_key: id.try_into().unwrap(),
+                            items: RktkKeys::iter().collect(),
+                            selected_key: RktkKeys::from_repr(id).expect("Invalid rktk key id"),
                             select_key: Callback::new(move |k| select_key_code(KeyCode::Custom1(k as u8))),
                         }
                     },

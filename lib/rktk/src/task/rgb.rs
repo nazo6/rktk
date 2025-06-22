@@ -121,11 +121,12 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
                     current_rgb_mode = rgb_mode;
                 }
                 RgbCommand::Reset => {}
-                RgbCommand::Brightness(mut brightness_value) => {
-                    if brightness_value > 1.0 {
-                        brightness_value = 1.0;
-                    }
-                    brightness = brightness_value;
+                RgbCommand::Brightness(brightness_value) => {
+                    brightness = brightness_value.clamp(0.0, 1.0);
+                }
+                RgbCommand::BrightnessDelta(delta) => {
+                    brightness += delta;
+                    brightness = brightness.clamp(0.0, 1.0);
                 }
             }
         }

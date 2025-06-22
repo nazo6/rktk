@@ -17,7 +17,10 @@ pub mod rktk_keys {
     /// It must be used with `Custom1` variant of [`rktk_keymanager::keycode::KeyCode`]
     ///
     /// Custom2 and Custom3 can be used by user.
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumIter, strum::IntoStaticStr)]
+    #[derive(
+        Debug, Clone, Copy, PartialEq, Eq, strum::EnumIter, strum::IntoStaticStr, strum::FromRepr,
+    )]
+    #[repr(u8)]
     pub enum RktkKeys {
         FlashClear = 0,
         OutputBle = 1,
@@ -25,6 +28,10 @@ pub mod rktk_keys {
         BleBondClear = 3,
         Bootloader = 4,
         PowerOff = 5,
+        RgbOff = 6,
+        RgbBrightnessUp = 7,
+        RgbBrightnessDown = 8,
+        RgbPatternRainbow = 9,
     }
 
     use core::fmt::{self, Display, Formatter};
@@ -34,23 +41,6 @@ pub mod rktk_keys {
             write!(f, "{s}")
         }
     }
-
-    impl TryFrom<u8> for RktkKeys {
-        type Error = ();
-
-        fn try_from(value: u8) -> Result<Self, Self::Error> {
-            match value {
-                0 => Ok(Self::FlashClear),
-                1 => Ok(Self::OutputBle),
-                2 => Ok(Self::OutputUsb),
-                3 => Ok(Self::BleBondClear),
-                4 => Ok(Self::Bootloader),
-                5 => Ok(Self::PowerOff),
-                _ => Err(()),
-            }
-        }
-    }
-
     pub const FLASH_CLEAR: KeyAction =
         KeyAction::Normal(KeyCode::Custom1(RktkKeys::FlashClear as u8));
     pub const OUTPUT_BLE: KeyAction =

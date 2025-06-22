@@ -18,6 +18,7 @@ pub enum RgbCommand {
     ///
     /// Range: 0.0 to 1.0
     Brightness(f32),
+    BrightnessDelta(f32),
     /// Reset RGB state and restart current RgbMode
     Reset,
 }

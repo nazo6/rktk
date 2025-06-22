@@ -7,9 +7,11 @@ use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::O
 use rktk_keymanager::state::hid_report::Report;
 use rktk_log::{debug, helper::Debug2Format};
 
-use crate::config::schema::DynamicConfig;
 use crate::config::keymap::prelude::RktkKeys;
+use crate::config::schema::DynamicConfig;
+use crate::drivers::interface::rgb::{RgbCommand, RgbMode, RgbPattern};
 use crate::task::channels::report::{MOUSE_CHANGE_SIGNAL, MOUSE_CHANGE_X, MOUSE_CHANGE_Y};
+use crate::task::channels::rgb::RGB_CHANNEL;
 use crate::{
     config::storage::StorageConfigManager,
     drivers::interface::{
@@ -124,7 +126,7 @@ pub async fn report_task<
                 s.update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
                     if let OutputEvent::Custom(1, (id, et)) = ev {
                         if et == EventType::Pressed {
-                            if let Ok(k) = TryInto::<RktkKeys>::try_into(id) {
+                            if let Some(k) = RktkKeys::from_repr(id) {
                                 match k {
                                     RktkKeys::FlashClear => rktk_key_state.flash_clear = true,
                                     RktkKeys::OutputBle => current_output = Output::Ble,
@@ -132,6 +134,26 @@ pub async fn report_task<
                                     RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
                                     RktkKeys::Bootloader => rktk_key_state.bootloader = true,
                                     RktkKeys::PowerOff => rktk_key_state.power_off = true,
+                                    RktkKeys::RgbOff => {
+                                        let _ = RGB_CHANNEL
+                                            .sender()
+                                            .try_send(RgbCommand::Start(RgbMode::Off));
+                                    }
+                                    RktkKeys::RgbBrightnessUp => {
+                                        let _ = RGB_CHANNEL
+                                            .sender()
+                                            .try_send(RgbCommand::BrightnessDelta(0.05));
+                                    }
+                                    RktkKeys::RgbBrightnessDown => {
+                                        let _ = RGB_CHANNEL
+                                            .sender()
+                                            .try_send(RgbCommand::BrightnessDelta(-0.05));
+                                    }
+                                    RktkKeys::RgbPatternRainbow => {
+                                        let _ = RGB_CHANNEL.sender().try_send(RgbCommand::Start(
+                                            RgbMode::Pattern(RgbPattern::Rainbow(0.3 / 1e3, 1.0)),
+                                        ));
+                                    }
                                 }
                             }
                         }
