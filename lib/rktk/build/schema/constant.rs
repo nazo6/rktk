@@ -21,14 +21,6 @@ pub struct KeyboardConstantConfig {
     /// The number of encoder keys.
     #[serde(default)]
     pub encoder_count: u8,
-
-    /// RGB led count for right side
-    #[serde(default)]
-    pub right_rgb_count: usize,
-
-    /// RGB led count for left side. This is also used for non-split keyboard.
-    #[serde(default)]
-    pub left_rgb_count: usize,
 }
 
 #[macro_rules_attribute::apply(crate::schema::common_derive)]

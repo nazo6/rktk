@@ -36,8 +36,6 @@
 //!     "keyboard": {
 //!       "cols": 12,
 //!       "rows": 4,
-//!       "right_rgb_count": 27,
-//!       "left_rgb_count": 27
 //!     }
 //!   },
 //!   "dynamic": {

@@ -195,20 +195,6 @@
           "format": "uint8",
           "minimum": 0.0
         },
-        "left_rgb_count": {
-          "description": "RGB led count for left side. This is also used for non-split keyboard.",
-          "default": 0,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "right_rgb_count": {
-          "description": "RGB led count for right side",
-          "default": 0,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
-        },
         "rows": {
           "description": "The number of rows in the keyboard matrix.",
           "type": "integer",
