@@ -125,7 +125,7 @@ async-channel = "2.3.1"
 clap = { version = "4.5.20", features = ["derive"] }
 duct = "1.0.0"
 colored = "3.0.0"
-cargo_metadata = "0.19.0"
+cargo_metadata = "0.20.0"
 toml = "0.8.19"
 dircpy = { version = "0.3.19", default-features = false }
 sha2 = "0.10.8"

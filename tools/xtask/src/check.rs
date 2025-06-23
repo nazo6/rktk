@@ -148,7 +148,7 @@ pub fn start(name: String) -> anyhow::Result<()> {
         let package = metadata
             .workspace_packages()
             .into_iter()
-            .find(|p| p.name == name)
+            .find(|p| p.name.as_str() == name)
             .context("no such crate")?;
         let dir = package.manifest_path.parent().context("no parent dir")?;
 

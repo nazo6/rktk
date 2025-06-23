@@ -2,8 +2,8 @@ use std::{path::PathBuf, sync::LazyLock};
 
 use anyhow::Context as _;
 use cargo_metadata::{
-    camino::{Utf8Path, Utf8PathBuf},
     Package,
+    camino::{Utf8Path, Utf8PathBuf},
 };
 use duct::cmd;
 use sha2::{Digest, Sha256};
@@ -37,7 +37,7 @@ fn run_doc(
     p: &Package,
     parts_root: &Utf8Path,
 ) -> Result<(PathBuf, Utf8PathBuf, PathBuf), anyhow::Error> {
-    let part_dir = parts_root.join(&p.name);
+    let part_dir = parts_root.join(p.name.as_str());
     let mut args = vec![
         "doc".to_string(),
         "--no-deps".to_string(),
@@ -135,7 +135,7 @@ pub fn start() -> anyhow::Result<()> {
     for package in packages {
         let config = CRATES_CONFIG
             .crates
-            .get(&package.name)
+            .get(package.name.as_str())
             .cloned()
             .unwrap_or_default();
         if config.doc_disabled {
