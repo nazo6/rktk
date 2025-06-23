@@ -528,7 +528,7 @@ dependencies = [
 [[package]]
 name = "blinksy"
 version = "0.4.0"
-source = "git+https://github.com/ahdinosaur/blinksy?branch=noise-functions#14d369c0727bcb8fb5214062f47b047322aa5b26"
+source = "git+https://github.com/ahdinosaur/blinksy#e58fcced312259ccb96fde9219a97a838b3f9796"
 dependencies = [
  "defmt 0.3.100",
  "embedded-hal 1.0.0",
