@@ -4,11 +4,12 @@ use crate::utils::{Channel, Receiver, Sender};
 use embassy_sync::channel::DynamicSender;
 
 pub mod rgb {
-    use crate::drivers::interface::rgb::RgbCommand;
+    use crate::{config::CONST_CONFIG, drivers::interface::rgb::RgbCommand};
 
     use super::*;
 
-    pub(crate) static RGB_CHANNEL: Channel<RgbCommand, 3> = Channel::new();
+    pub(crate) static RGB_CHANNEL: Channel<RgbCommand, { CONST_CONFIG.buffer.rgb_channel }> =
+        Channel::new();
 
     /// Get [`DynamicSender`] that can be used to control RGB.
     pub fn rgb_sender() -> DynamicSender<'static, RgbCommand> {

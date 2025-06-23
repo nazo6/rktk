@@ -13,18 +13,39 @@ pub mod keymanager {
 pub mod rktk_keys {
     use rktk_keymanager::keycode::prelude::*;
 
-    /// Custom key id of rktk-keymanager which is specific to rktk.
-    /// It must be used with `Custom1` variant of [`rktk_keymanager::keycode::KeyCode`]
-    ///
-    /// Custom2 and Custom3 can be used by user.
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumIter, strum::IntoStaticStr)]
-    pub enum RktkKeys {
+    macro_rules! gen_rktk_keys {
+        ($($name:ident = $value:literal),* $(,)?) => {
+            /// Custom key id of rktk-keymanager which is specific to rktk.
+            /// It must be used with `Custom1` variant of [`rktk_keymanager::keycode::KeyCode`]
+            ///
+            /// Custom2 and Custom3 can be used by user.
+            #[derive(
+                Debug, Clone, Copy, PartialEq, Eq, strum::EnumIter, strum::IntoStaticStr, strum::FromRepr,
+            )]
+            #[repr(u8)]
+            pub enum RktkKeys {
+                $(
+                    $name = $value,
+                )*
+            }
+
+            paste::paste! {
+                $(pub const [<$name:snake:upper>] : KeyAction = KeyAction::Normal(KeyCode::Custom1($value));)*
+            }
+        };
+    }
+
+    gen_rktk_keys! {
         FlashClear = 0,
         OutputBle = 1,
         OutputUsb = 2,
         BleBondClear = 3,
         Bootloader = 4,
         PowerOff = 5,
+        RgbOff = 6,
+        RgbBrightnessUp = 7,
+        RgbBrightnessDown = 8,
+        RgbPatternRainbow = 9,
     }
 
     use core::fmt::{self, Display, Formatter};
@@ -34,34 +55,6 @@ pub mod rktk_keys {
             write!(f, "{s}")
         }
     }
-
-    impl TryFrom<u8> for RktkKeys {
-        type Error = ();
-
-        fn try_from(value: u8) -> Result<Self, Self::Error> {
-            match value {
-                0 => Ok(Self::FlashClear),
-                1 => Ok(Self::OutputBle),
-                2 => Ok(Self::OutputUsb),
-                3 => Ok(Self::BleBondClear),
-                4 => Ok(Self::Bootloader),
-                5 => Ok(Self::PowerOff),
-                _ => Err(()),
-            }
-        }
-    }
-
-    pub const FLASH_CLEAR: KeyAction =
-        KeyAction::Normal(KeyCode::Custom1(RktkKeys::FlashClear as u8));
-    pub const OUTPUT_BLE: KeyAction =
-        KeyAction::Normal(KeyCode::Custom1(RktkKeys::OutputBle as u8));
-    pub const OUTPUT_USB: KeyAction =
-        KeyAction::Normal(KeyCode::Custom1(RktkKeys::OutputUsb as u8));
-    pub const BLE_BOND_CLEAR: KeyAction =
-        KeyAction::Normal(KeyCode::Custom1(RktkKeys::BleBondClear as u8));
-    pub const BOOTLOADER: KeyAction =
-        KeyAction::Normal(KeyCode::Custom1(RktkKeys::Bootloader as u8));
-    pub const POWER_OFF: KeyAction = KeyAction::Normal(KeyCode::Custom1(RktkKeys::PowerOff as u8));
 }
 
 pub mod prelude {

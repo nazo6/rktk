@@ -21,14 +21,6 @@ pub struct KeyboardConstantConfig {
     /// The number of encoder keys.
     #[serde(default)]
     pub encoder_count: u8,
-
-    /// RGB led count for right side
-    #[serde(default)]
-    pub right_rgb_count: usize,
-
-    /// RGB led count for left side. This is also used for non-split keyboard.
-    #[serde(default)]
-    pub left_rgb_count: usize,
 }
 
 #[macro_rules_attribute::apply(crate::schema::common_derive)]
@@ -46,6 +38,10 @@ pub struct BufferSizeConfig {
     /// Size of the split channel buffer
     #[default(64)]
     pub split_channel: usize,
+
+    /// Size of the rgb command channel buffer
+    #[default(3)]
+    pub rgb_channel: usize,
 
     /// Size of the mouse event buffer
     #[default(4)]

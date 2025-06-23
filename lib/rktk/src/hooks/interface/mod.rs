@@ -11,10 +11,10 @@ pub use master::MasterHooks;
 pub use rgb::RgbHooks;
 pub use slave::SlaveHooks;
 
-mod common {
+pub mod common {
     use crate::{
-        drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver, storage::StorageDriver},
         config::Hand,
+        drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver, storage::StorageDriver},
     };
 
     /// Hooks common for both master and slave side
@@ -30,7 +30,7 @@ mod common {
     }
 }
 
-mod slave {
+pub mod slave {
     use crate::drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver};
 
     pub trait SlaveHooks {

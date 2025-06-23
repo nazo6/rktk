@@ -1,7 +1,7 @@
 //! Program entrypoint.
 
 use crate::{
-    config::{CONST_CONFIG, Hand},
+    config::Hand,
     drivers::interface::{
         debounce::DebounceDriver, display::DisplayDriver, encoder::EncoderDriver,
         keyscan::KeyscanDriver, mouse::MouseDriver, rgb::RgbDriver, split::SplitDriver,
@@ -57,6 +57,7 @@ pub async fn start<
     BH: RgbHooks,
     //
     DC: DisplayConfig + 'static,
+    RL: blinksy::layout::Layout2d + 'static,
 >(
     mut drivers: Drivers<
         System,
@@ -72,7 +73,7 @@ pub async fn start<
         Mouse,
     >,
     mut hooks: Hooks<CH, MH, SH, BH>,
-    mut opts: crate::config::RktkOpts<DC>,
+    mut opts: crate::config::RktkOpts<DC, RL>,
 ) {
     #[cfg(feature = "rrp-log")]
     {
@@ -83,15 +84,7 @@ pub async fn start<
         });
     }
 
-    info!(
-        "RKTK Starting... (rgb: {}, ble: {}, usb: {}, storage: {}, mouse: {}, display: {})",
-        drivers.rgb.is_some(),
-        drivers.ble_builder.is_some(),
-        drivers.usb_builder.is_some(),
-        drivers.storage.is_some(),
-        drivers.mouse.is_some(),
-        drivers.display.is_some(),
-    );
+    info!("Booting rktk",);
 
     drivers
         .system
@@ -130,6 +123,7 @@ pub async fn start<
                             receiver,
                             task,
                         } => {
+                            info!("Master start");
                             sjoin::join!(
                                 async {
                                     let config_store =
@@ -140,8 +134,6 @@ pub async fn start<
                                         opts.keymap,
                                     )
                                     .await;
-
-                                    info!("Master side task start");
 
                                     hooks
                                         .master
@@ -190,29 +182,12 @@ pub async fn start<
                                     )
                                     .await;
                                 },
-                                async move {
-                                    if let Some(rgb) = drivers.rgb {
-                                        debug!("rgb init");
-                                        match hand {
-                                            Hand::Right => {
-                                                rgb::start::<
-                                                    { CONST_CONFIG.keyboard.right_rgb_count },
-                                                >(
-                                                    rgb, hooks.rgb, sender
-                                                )
-                                                .await
-                                            }
-                                            Hand::Left => rgb::start::<
-                                                { CONST_CONFIG.keyboard.left_rgb_count },
-                                            >(
-                                                rgb, hooks.rgb, sender
-                                            )
-                                            .await,
-                                        }
-                                    } else {
-                                        debug!("no rgb");
-                                    }
-                                },
+                                rgb::start::<RL, _>(
+                                    opts.config,
+                                    drivers.rgb,
+                                    hooks.rgb,
+                                    Some(sender)
+                                ),
                                 async move {
                                     if let Some(task) = task {
                                         task.await;
@@ -225,7 +200,7 @@ pub async fn start<
                             receiver,
                             task,
                         } => {
-                            debug!("slave start");
+                            debug!("Slave start");
                             sjoin::join!(
                                 async move {
                                     slave::start(
@@ -239,6 +214,7 @@ pub async fn start<
                                     )
                                     .await
                                 },
+                                rgb::start::<RL, _>(opts.config, drivers.rgb, hooks.rgb, None),
                                 async move {
                                     if let Some(task) = task {
                                         task.await;

@@ -22,14 +22,14 @@ use crate::drivers::interface::{
     wireless::{WirelessReporterDriver, WirelessReporterDriverBuilder},
 };
 
-// Rgb
 pub fn rgb() -> Option<impl RgbDriver> {
     pub enum Rgb {}
     impl RgbDriver for Rgb {
         type Error = Infallible;
-        async fn write<const N: usize>(
+
+        async fn write<I: IntoIterator<Item = blinksy::color::LedRgb<u8>>>(
             &mut self,
-            _colors: &[smart_leds::RGB8; N],
+            _pixels: I,
         ) -> Result<(), Self::Error> {
             unreachable!()
         }

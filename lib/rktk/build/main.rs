@@ -72,6 +72,7 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
         schema::constant::KeymanagerConstantConfig,
         schema::dynamic::DynamicConfig,
         schema::dynamic::rktk::RktkConfig,
+        schema::dynamic::rktk::RktkRgbConfig,
         schema::dynamic::keyboard::KeyboardConfig,
         schema::dynamic::key_manager::KeyManagerConfig
     );

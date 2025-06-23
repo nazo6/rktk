@@ -28,7 +28,6 @@ usbd-hid = { workspace = true }
 
 embedded-graphics = { workspace = true }
 display-interface = { workspace = true }
-smart-leds = { workspace = true }
 
 heapless = { workspace = true }
 static_cell = { workspace = true }
@@ -42,6 +41,7 @@ document-features = { workspace = true }
 strum = { workspace = true }
 itertools = { version = "0.14.0", default-features = false }
 paste = { workspace = true }
+blinksy = { git = "https://github.com/ahdinosaur/blinksy" }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }

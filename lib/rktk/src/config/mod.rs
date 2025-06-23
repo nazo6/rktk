@@ -36,8 +36,6 @@
 //!     "keyboard": {
 //!       "cols": 12,
 //!       "rows": 4,
-//!       "right_rgb_count": 27,
-//!       "left_rgb_count": 27
 //!     }
 //!   },
 //!   "dynamic": {
@@ -78,19 +76,21 @@ use crate::task::display::default_display::DefaultDisplayConfig;
 include!(concat!(env!("OUT_DIR"), "/config.rs"));
 
 pub mod keymap;
+pub mod rgb;
 pub mod storage;
 
 /// rktk launch options.
 ///
 /// Some properties of this struct requires `'static` lifetime. Even if the value you want to use
 /// is not statically defined, you can obtain static lifetime using [`static_cell`] crate.
-pub struct RktkOpts<D: crate::task::display::DisplayConfig> {
+pub struct RktkOpts<D: crate::task::display::DisplayConfig, R: blinksy::layout::Layout2d> {
     /// Keymap of keyboard
     pub keymap: &'static keymap::Keymap,
     /// "dynamic" config
     pub config: &'static schema::DynamicConfig,
     /// Display layout
     pub display: D,
+    pub rgb_layout: R,
     /// Hand of the keyboard. This is used for split keyboard. For non-split keyboard, set this
     /// value to `None`.
     ///
@@ -103,11 +103,12 @@ pub struct RktkOpts<D: crate::task::display::DisplayConfig> {
 pub fn new_rktk_opts(
     keymap: &'static keymap::Keymap,
     hand: Option<Hand>,
-) -> RktkOpts<DefaultDisplayConfig> {
+) -> RktkOpts<DefaultDisplayConfig, rgb::DummyLayout> {
     RktkOpts {
         keymap,
         config: &DYNAMIC_CONFIG_FROM_FILE,
         display: DefaultDisplayConfig,
+        rgb_layout: rgb::DummyLayout,
         hand,
     }
 }
