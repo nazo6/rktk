@@ -39,7 +39,7 @@ postcard = { workspace = true, features = [
 ] }
 document-features = { workspace = true }
 strum = { workspace = true }
-itertools = { version = "0.14.0", default-features = false }
+itertools = { workspace = true }
 paste = { workspace = true }
 blinksy = { git = "https://github.com/ahdinosaur/blinksy" }
 
@@ -49,9 +49,9 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 macro_rules_attribute = { workspace = true }
 
-smart-default = "0.7.1"
-const-gen = "1.6.5"
-schemars = "0.8.21"
+smart-default = { workspace = true }
+const-gen = { workspace = true }
+schemars = { workspace = true }
 
 [features]
 _check = ["alloc", "log", "defmt", "rrp-log"]

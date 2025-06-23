@@ -42,11 +42,11 @@ nrf-softdevice = { optional = true, workspace = true, features = [
 ] }
 
 # after this revision, unreleased breaking change of embassy-nrf is included
-nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc.git", rev = "e5dbb34d5509934490bf94e6eb466d7da8ce9ef4", version = "0.1.0", default-features = false, optional = true, features = [
+nrf-sdc = { workspace = true, default-features = false, optional = true, features = [
   "peripheral",
   "central",
 ] }
-nrf-mpsl = { git = "https://github.com/alexmoon/nrf-sdc.git", rev = "e5dbb34d5509934490bf94e6eb466d7da8ce9ef4", version = "0.1.0", default-features = false, optional = true, features = [
+nrf-mpsl = { workspace = true, default-features = false, optional = true, features = [
   "critical-section-impl",
 ] }
 
@@ -62,10 +62,10 @@ postcard = { workspace = true, optional = true }
 
 static_cell = { workspace = true }
 heapless = { workspace = true }
-bitvec = { version = "1.0.1", default-features = false }
+bitvec = { workspace = true, default-features = false }
 ssmarshal = { workspace = true }
 usbd-hid = { workspace = true }
-atomic-pool = "2.0.0"
+atomic-pool = { workspace = true }
 
 esb-ng = { version = "0.1.0", optional = true }
 

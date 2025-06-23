@@ -57,36 +57,81 @@ display-interface = "0.5.0"
 embedded-graphics = "0.8.1"
 ssd1306 = { version = "0.10.0", features = ["async"] }
 
-# embedded pattern
+trouble-host = { version = "0.1.0" }
+rand_core = { version = "0.6" }
 
-# update to 0.8 is blocked by postcard
+nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc.git", rev = "e5dbb34d5509934490bf94e6eb466d7da8ce9ef4", version = "0.1.0", default-features = false }
+nrf-mpsl = { git = "https://github.com/alexmoon/nrf-sdc.git", rev = "e5dbb34d5509934490bf94e6eb466d7da8ce9ef4", version = "0.1.0", default-features = false }
+
+pio = "0.3.0"
+
+# embedded pattern
 heapless = "0.7.0"
 static_cell = "2.1.0"
 fixed = "1.27.0"
 fixed-macro = "1.2.0"
 
-# common libraries
-serde_with = { version = "3.9.0", default-features = false }
-futures = { version = "0.3.30", default-features = false }
-serde = { version = "1.0.207", default-features = false }
-serde_json = "1.0.122"
-ssmarshal = { version = "1.0.0", default-features = false }
-postcard = "1.0.8"
-paste = "1.0.15"
-macro_rules_attribute = "0.2.0"
-thiserror = { version = "2.0.3", default-features = false }
-strum = { version = "0.27.1", default-features = false }
-
-anyhow = "1.0.90"
-
-# rtkk-client related
-web-sys = { version = "0.3.70" }
-wasm-bindgen = "0.2.99"
-wasm-bindgen-futures = "0.4.49"
-
+# logging
 defmt = "1.0.1"
 log = "0.4.25"
 
+# rktk-config related
+smart-default = "0.7.1"
+const-gen = "1.6.5"
+schemars = "0.8.21"
+
+
+# common libraries
+serde = { version = "1.0.207", default-features = false }
+serde_json = "1.0.122"
+serde_with = { version = "3.9.0", default-features = false }
+ssmarshal = { version = "1.0.0", default-features = false }
+postcard = "1.0.8"
+
+paste = "1.0.15"
+macro_rules_attribute = "0.2.0"
+
+futures = { version = "0.3.30", default-features = false }
+
+thiserror = { version = "2.0.3", default-features = false }
+anyhow = "1.0.90"
+
+strum = { version = "0.27.1", default-features = false }
+itertools = { version = "0.14.0", default-features = false }
+bitvec = { version = "1.0.1", default-features = false }
+atomic-pool = "2.0.0"
+
+tokio = { version = "1.41.1" }
+
+# rtkk-client related
+web-sys = { version = "0.3.70" }
+js-sys = { version = "0.3.77" }
+
+wasm-bindgen = "0.2.99"
+wasm-bindgen-futures = "0.4.49"
+serde-wasm-bindgen = { version = "0.6.5" }
+
+dioxus = { version = "0.6.0" }
+
+tracing-log = { version = "0.2.0" }
+jiff = { version = "0.2.1" }
+kle-serial = { version = "0.3.1" }
+
+smol = { version = "2.0.2" }
+async-hid = { version = "0.4.0" }
+async-channel = "2.3.1"
+
+# xtask
+clap = { version = "4.5.20", features = ["derive"] }
+duct = "1.0.0"
+colored = "3.0.0"
+cargo_metadata = "0.19.0"
+toml = "0.8.19"
+dircpy = { version = "0.3.19", default-features = false }
+sha2 = "0.10.8"
+hex = "0.4.3"
+
+# meta
 document-features = "0.2.11"
 pretty_assertions = "1.4.1"
 

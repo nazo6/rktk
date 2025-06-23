@@ -9,17 +9,17 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
-clap = { version = "4.5.20", features = ["derive"] }
+clap = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
-duct = "1.0.0"
-colored = "3.0.0"
-cargo_metadata = "0.19.0"
-toml = "0.8.19"
+duct = { workspace = true }
+colored = { workspace = true }
+cargo_metadata = { workspace = true }
+toml = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-dircpy = { version = "0.3.19", default-features = false }
-sha2 = "0.10.8"
-hex = "0.4.3"
+dircpy = { workspace = true, default-features = false }
+sha2 = { workspace = true }
+hex = { workspace = true }
 
 [features]
 _check = []

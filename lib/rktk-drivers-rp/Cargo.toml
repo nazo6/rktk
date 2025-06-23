@@ -34,7 +34,7 @@ embassy-rp = { workspace = true, features = [
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }
 
-pio = "0.3.0"
+pio = { workspace = true }
 
 fixed = { workspace = true }
 fixed-macro = { workspace = true }

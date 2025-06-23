@@ -28,7 +28,7 @@ embedded-io-async = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.41.1", features = ["io-std", "io-util", "macros", "rt"] }
+tokio = { workspace = true, features = ["io-std", "io-util", "macros", "rt"] }
 
 [features]
 default = []
