@@ -16,7 +16,10 @@ use blinksy::{
     color::{ColorCorrection, IntoColor, LedRgb, LinearSrgb},
     layout::Layout2d,
     pattern::Pattern,
-    patterns::rainbow::{Rainbow, RainbowParams},
+    patterns::{
+        noise::{Noise2d, NoiseParams, noise_fns::Perlin},
+        rainbow::{Rainbow, RainbowParams},
+    },
 };
 
 pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
@@ -103,6 +106,9 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
                                     position_scalar: *position_scalar,
                                 }
                             );
+                        }
+                        RgbPattern::NoisePerlin => {
+                            process_pattern!(Noise2d<Perlin>, NoiseParams::default());
                         }
                     }
                 }

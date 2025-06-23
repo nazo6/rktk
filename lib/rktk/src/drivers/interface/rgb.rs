@@ -45,6 +45,7 @@ pub enum RgbMode {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbPattern {
     Rainbow(f32, f32),
+    NoisePerlin,
 }
 
 /// Driver for controlling the RGB leds.

@@ -3,15 +3,15 @@
 #![allow(async_fn_in_trait)]
 
 pub mod dongle;
-mod master;
-mod rgb;
+pub mod master;
+pub mod rgb;
 
 pub use common::CommonHooks;
 pub use master::MasterHooks;
 pub use rgb::RgbHooks;
 pub use slave::SlaveHooks;
 
-mod common {
+pub mod common {
     use crate::{
         config::Hand,
         drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver, storage::StorageDriver},
@@ -30,7 +30,7 @@ mod common {
     }
 }
 
-mod slave {
+pub mod slave {
     use crate::drivers::interface::{keyscan::KeyscanDriver, mouse::MouseDriver};
 
     pub trait SlaveHooks {
