@@ -1,71 +1,71 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Config",
   "type": "object",
+  "properties": {
+    "constant": {
+      "$ref": "#/$defs/ConstantConfig"
+    },
+    "dynamic": {
+      "$ref": "#/$defs/DynamicConfig"
+    }
+  },
   "required": [
     "constant",
     "dynamic"
   ],
-  "properties": {
-    "constant": {
-      "$ref": "#/definitions/ConstantConfig"
-    },
-    "dynamic": {
-      "$ref": "#/definitions/DynamicConfig"
-    }
-  },
-  "definitions": {
+  "$defs": {
     "BufferSizeConfig": {
       "type": "object",
       "properties": {
         "encoder_event": {
           "description": "Size of the encoder event buffer",
-          "default": 4,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 4,
+          "minimum": 0
         },
         "keyboard_event": {
           "description": "Size of the keyboard event buffer",
-          "default": 4,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 4,
+          "minimum": 0
         },
         "log_channel": {
           "description": "Size of the log channel buffer",
-          "default": 64,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 64,
+          "minimum": 0
         },
         "mouse_event": {
           "description": "Size of the mouse event buffer",
-          "default": 4,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 4,
+          "minimum": 0
         },
         "rgb_channel": {
           "description": "Size of the rgb command channel buffer",
-          "default": 3,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 3,
+          "minimum": 0
         },
         "rrp": {
           "description": "Size of the buffer used by rrp",
-          "default": 512,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 512,
+          "minimum": 0
         },
         "split_channel": {
           "description": "Size of the split channel buffer",
-          "default": 64,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 64,
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -74,10 +74,10 @@
       "type": "object",
       "properties": {
         "threshold": {
-          "default": 50,
           "type": "integer",
           "format": "uint32",
-          "minimum": 0.0
+          "default": 50,
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -85,49 +85,49 @@
     "ConstantConfig": {
       "description": "Root struct of the \"constant\" config",
       "type": "object",
-      "required": [
-        "keyboard"
-      ],
       "properties": {
         "buffer": {
-          "$ref": "#/definitions/BufferSizeConfig"
+          "$ref": "#/$defs/BufferSizeConfig"
         },
         "key_manager": {
-          "$ref": "#/definitions/KeymanagerConstantConfig"
+          "$ref": "#/$defs/KeymanagerConstantConfig"
         },
         "keyboard": {
-          "$ref": "#/definitions/KeyboardConstantConfig"
+          "$ref": "#/$defs/KeyboardConstantConfig"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "keyboard"
+      ]
     },
     "DynamicConfig": {
       "description": "Root struct of the \"dynamic\" config",
       "type": "object",
-      "required": [
-        "keyboard"
-      ],
       "properties": {
         "key_manager": {
-          "$ref": "#/definitions/KeyManagerConfig"
+          "$ref": "#/$defs/KeyManagerConfig"
         },
         "keyboard": {
-          "$ref": "#/definitions/KeyboardConfig"
+          "$ref": "#/$defs/KeyboardConfig"
         },
         "rktk": {
-          "$ref": "#/definitions/RktkConfig"
+          "$ref": "#/$defs/RktkConfig"
         }
-      }
+      },
+      "required": [
+        "keyboard"
+      ]
     },
     "KeyManagerConfig": {
       "description": "Config for key manager.",
       "type": "object",
       "properties": {
         "key_resolver": {
-          "$ref": "#/definitions/KeyResolverConfig"
+          "$ref": "#/$defs/KeyResolverConfig"
         },
         "mouse": {
-          "$ref": "#/definitions/MouseConfig"
+          "$ref": "#/$defs/MouseConfig"
         }
       },
       "additionalProperties": false
@@ -136,29 +136,26 @@
       "type": "object",
       "properties": {
         "combo": {
-          "$ref": "#/definitions/ComboConfig"
+          "$ref": "#/$defs/ComboConfig"
         },
         "tap_dance": {
-          "$ref": "#/definitions/TapDanceConfig"
+          "$ref": "#/$defs/TapDanceConfig"
         },
         "tap_hold": {
-          "$ref": "#/definitions/TapHoldConfig"
+          "$ref": "#/$defs/TapHoldConfig"
         }
       },
       "additionalProperties": false
     },
     "KeyboardConfig": {
-      "description": "Keyboard layout and informations.\n\nThis struct is used to - Defines keyboard basic informations (ex: name, cols, rows, ...) - Defines keyboard physical layout which is used by remapper (layout property)\n\n# Coordination of the keyboard matrix\n\nThe rktk coordinate system has the top left as (0,0), and the coordinate values increase toward the bottom right.\n\n## Split keyboard coordinates For `col` in keyboard config, specify the coordinates of the entire keyboard. In other words, for a split keyboard with 7 columns on the left hand side and 7 columns on the right hand side, specify 14.\n\nInternally, the key scan driver returns the coordinates of \"only one hand.\" In other words, in this case, x=0-6. Therefore, it is necessary to convert the coordinates received from the key scan driver into the coordinates of both hands, and for this purpose the `split_right_shift` property is used.\n\nBelow is an example of a split keyboard with 14 columns and 4 rows. ```ignored [    Left    ]   [     Right     ] 0 1 2 3 4 5 6    0 1 2  3  4  5  6 ← One-handed coordinates ↓ split_right_shift=7 (or None) col=14 →   0 1 2 3 4 5 6    7 8 9 10 11 12 13 ← Two-handed coordinates 0 _ Q W E R T _    _ Y U  I  O  P  _ 1 ... 2 ... 3 ... ↑ row=4 ```",
+      "description": "Keyboard layout and informations.\n\nThis struct is used to\n- Defines keyboard basic informations (ex: name, cols, rows, ...)\n- Defines keyboard physical layout which is used by remapper (layout property)\n\n# Coordination of the keyboard matrix\n\nThe rktk coordinate system has the top left as (0,0), and the coordinate values increase toward the bottom right.\n\n## Split keyboard coordinates\nFor `col` in keyboard config, specify the coordinates of the entire keyboard.\nIn other words, for a split keyboard with 7 columns on the left hand side and 7 columns on the right hand side, specify 14.\n\nInternally, the key scan driver returns the coordinates of \"only one hand.\" In other words, in this case, x=0-6.\nTherefore, it is necessary to convert the coordinates received from the key scan driver into the coordinates of both hands,\nand for this purpose the `split_right_shift` property is used.\n\nBelow is an example of a split keyboard with 14 columns and 4 rows.\n```ignored\n           [    Left    ]   [     Right     ]\n           0 1 2 3 4 5 6    0 1 2  3  4  5  6 ← One-handed coordinates\n                            ↓ split_right_shift=7 (or None)\ncol=14 →   0 1 2 3 4 5 6    7 8 9 10 11 12 13 ← Two-handed coordinates\n         0 _ Q W E R T _    _ Y U  I  O  P  _\n         1 ...\n         2 ...\n         3 ...\n         ↑ row=4\n```",
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "layout": {
-          "description": "Defines the layout of the keyboard used in the remapper.\n\nThis is a JSON object that represents the layout of the keyboard and compatible with via's json layout format.",
+          "description": "Defines the layout of the keyboard used in the remapper.\n\nThis is a JSON object that represents the layout of the keyboard and compatible with via's\njson layout format.",
           "anyOf": [
             {
-              "$ref": "#/definitions/KeyboardLayout"
+              "$ref": "#/$defs/KeyboardLayout"
             },
             {
               "type": "null"
@@ -170,60 +167,64 @@
           "type": "string"
         },
         "split_right_shift": {
-          "description": "A number representing the row number that the right col starts on in a split keyboard.\n\nIf not set, `cols / 2` will be automatically set, so there is no need to set it if the number of columns on the right and left sides is the same. Also, there is no need to set it in the case of a non-split keyboard, as it is not used.",
-          "default": null,
+          "description": "A number representing the row number that the right col starts on in a split keyboard.\n \n If not set, `cols / 2` will be automatically set,\n so there is no need to set it if the number of columns on the right and left sides is the same.\n Also, there is no need to set it in the case of a non-split keyboard, as it is not used.",
           "type": [
             "integer",
             "null"
           ],
           "format": "uint8",
-          "minimum": 0.0
+          "default": null,
+          "maximum": 255,
+          "minimum": 0
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
     },
     "KeyboardConstantConfig": {
       "type": "object",
-      "required": [
-        "cols",
-        "rows"
-      ],
       "properties": {
         "cols": {
           "description": "The number of columns in the keyboard matrix.",
           "type": "integer",
           "format": "uint8",
-          "minimum": 0.0
+          "maximum": 255,
+          "minimum": 0
         },
         "encoder_count": {
           "description": "The number of encoder keys.",
-          "default": 0,
           "type": "integer",
           "format": "uint8",
-          "minimum": 0.0
+          "default": 0,
+          "maximum": 255,
+          "minimum": 0
         },
         "rows": {
           "description": "The number of rows in the keyboard matrix.",
           "type": "integer",
           "format": "uint8",
-          "minimum": 0.0
+          "maximum": 255,
+          "minimum": 0
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "cols",
+        "rows"
+      ]
     },
     "KeyboardLayout": {
       "type": "object",
-      "required": [
-        "keymap"
-      ],
       "properties": {
         "keymap": {
           "description": "Keymap json data.\n\nThis is basically kle's json but logical key location data is added as legend."
         },
         "labels": {
           "description": "Currently, this is unused in rktk.",
-          "default": [],
           "type": "array",
+          "default": [],
           "items": {
             "type": "array",
             "items": {
@@ -231,52 +232,56 @@
             }
           }
         }
-      }
+      },
+      "required": [
+        "keymap"
+      ]
     },
     "KeymanagerConstantConfig": {
       "type": "object",
       "properties": {
         "combo_key_max_definitions": {
-          "default": 2,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 2,
+          "minimum": 0
         },
         "combo_key_max_sources": {
-          "default": 3,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 3,
+          "minimum": 0
         },
         "layer_count": {
-          "default": 5,
           "type": "integer",
           "format": "uint8",
-          "minimum": 0.0
+          "default": 5,
+          "maximum": 255,
+          "minimum": 0
         },
         "normal_max_pressed_keys": {
-          "default": 8,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 8,
+          "minimum": 0
         },
         "oneshot_state_size": {
-          "default": 4,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 4,
+          "minimum": 0
         },
         "tap_dance_max_definitions": {
-          "default": 2,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 2,
+          "minimum": 0
         },
         "tap_dance_max_repeats": {
-          "default": 4,
           "type": "integer",
           "format": "uint",
-          "minimum": 0.0
+          "default": 4,
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -285,32 +290,38 @@
       "type": "object",
       "properties": {
         "auto_mouse_duration": {
-          "default": 500,
           "type": "integer",
           "format": "uint32",
-          "minimum": 0.0
+          "default": 500,
+          "minimum": 0
         },
         "auto_mouse_layer": {
-          "default": 1,
           "type": "integer",
           "format": "uint8",
-          "minimum": 0.0
+          "default": 1,
+          "maximum": 255,
+          "minimum": 0
         },
         "auto_mouse_threshold": {
-          "default": 0,
           "type": "integer",
           "format": "uint8",
-          "minimum": 0.0
+          "default": 0,
+          "maximum": 255,
+          "minimum": 0
         },
         "scroll_divider_x": {
-          "default": 20,
           "type": "integer",
-          "format": "int8"
+          "format": "int8",
+          "default": 20,
+          "maximum": 127,
+          "minimum": -128
         },
         "scroll_divider_y": {
-          "default": -12,
           "type": "integer",
-          "format": "int8"
+          "format": "int8",
+          "default": -12,
+          "maximum": 127,
+          "minimum": -128
         }
       },
       "additionalProperties": false
@@ -321,67 +332,68 @@
       "properties": {
         "default_auto_mouse_duration": {
           "description": "Default duration of auto mouse mode (ms)",
-          "default": 500,
           "type": "integer",
           "format": "uint32",
-          "minimum": 0.0
+          "default": 500,
+          "minimum": 0
         },
         "default_cpi": {
           "description": "Default CPI value for mouse",
-          "default": 600,
           "type": "integer",
           "format": "uint16",
-          "minimum": 0.0
+          "default": 600,
+          "maximum": 65535,
+          "minimum": 0
         },
         "display_timeout": {
           "description": "Time(ms) until the display is turned off if there is no activity",
-          "default": 20000,
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 20000,
+          "minimum": 0
         },
         "double_tap_threshold": {
           "description": "Threshold for double tap (ms).",
-          "default": 500,
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 500,
+          "minimum": 0
         },
         "rgb": {
-          "$ref": "#/definitions/RktkRgbConfig"
+          "$ref": "#/$defs/RktkRgbConfig"
         },
         "scan_interval_keyboard": {
           "description": "Time (ms) to wait for the next keyboard scan",
-          "default": 5,
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 5,
+          "minimum": 0
         },
         "scan_interval_mouse": {
           "description": "Time (ms) to wait for the next mouse scan",
-          "default": 5,
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 5,
+          "minimum": 0
         },
         "split_usb_timeout": {
           "description": "Timeout for detecting split USB connection (ms).",
-          "default": 1000,
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 1000,
+          "minimum": 0
         },
         "state_update_interval": {
-          "description": "rktk basically updates the keyboard state only when it receives an event from the hardware. However, many states are time-dependent and can change even without an event. Polling at regular time intervals is necessary to monitor such changes.\n\nThis setting specifies that interval. (ms)",
-          "default": 10,
+          "description": "rktk basically updates the keyboard state only when it receives an event from the hardware.\nHowever, many states are time-dependent and can change even without an event.\nPolling at regular time intervals is necessary to monitor such changes.\n\nThis setting specifies that interval. (ms)",
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 10,
+          "minimum": 0
         },
         "swap_mouse_x_y": {
           "description": "Swap the x and y values obtained from the mouse driver. This also affects the scroll direction.",
-          "default": false,
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false
@@ -392,16 +404,16 @@
       "properties": {
         "default_brightness": {
           "description": "Initial RGB blightness\n\nRange: 0.0 to 1.0",
-          "default": 0.5,
           "type": "number",
-          "format": "float"
+          "format": "float",
+          "default": 0.5
         },
         "pattern_update_interval": {
-          "description": "Time(ms) to wait for the next RGB pattern update\n\nLower values will result in smoother animations, but may increase power consumption. Also, for heavy patterns, it may cause the MCU to be busy for a long time, which affects mouse latency (especially).",
-          "default": 16,
+          "description": "Time(ms) to wait for the next RGB pattern update\n\nLower values will result in smoother animations, but may increase power consumption.\nAlso, for heavy patterns, it may cause the MCU to be busy for a long time, which affects\nmouse latency (especially).",
           "type": "integer",
           "format": "uint64",
-          "minimum": 0.0
+          "default": 16,
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -410,10 +422,10 @@
       "type": "object",
       "properties": {
         "threshold": {
-          "default": 200,
           "type": "integer",
           "format": "uint32",
-          "minimum": 0.0
+          "default": 200,
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -422,14 +434,14 @@
       "type": "object",
       "properties": {
         "hold_on_other_key": {
-          "default": true,
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "threshold": {
-          "default": 200,
           "type": "integer",
           "format": "uint32",
-          "minimum": 0.0
+          "default": 200,
+          "minimum": 0
         }
       },
       "additionalProperties": false

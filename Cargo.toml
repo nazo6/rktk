@@ -78,7 +78,7 @@ log = "0.4.25"
 # rktk-config related
 smart-default = "0.7.1"
 const-gen = "1.6.5"
-schemars = "0.8.21"
+schemars = "1.0.0"
 
 
 # common libraries
