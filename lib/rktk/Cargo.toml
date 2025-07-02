@@ -41,7 +41,7 @@ document-features = { workspace = true }
 strum = { workspace = true }
 itertools = { workspace = true }
 paste = { workspace = true }
-blinksy = { git = "https://github.com/ahdinosaur/blinksy" }
+blinksy = { workspace = true }
 
 [build-dependencies]
 ssmarshal = { workspace = true, default-features = true }
