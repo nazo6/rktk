@@ -50,16 +50,8 @@ pub enum RgbPattern {
 
 /// Driver for controlling the RGB leds.
 ///
-/// Basically, this is just async version trait of [`blinksy::driver::Driver`]. But color is
-/// limited to LinearSrgb to avoid complexity.
-/// TODO: When blinksy implements async drivers, remove this trait and use the blinksy one
-/// directly.
-pub trait RgbDriver: 'static {
-    type Error: super::Error;
+/// This trait essentially 'type alias' for blinksy's `DriverAsync` with `Color` is limited to
+/// `LinearSrgb`.
+pub trait RgbDriver: blinksy::driver::DriverAsync<Color = LinearSrgb> {}
 
-    // Required method
-    async fn write<I: IntoIterator<Item = LedRgb<u8>>>(
-        &mut self,
-        pixels: I,
-    ) -> Result<(), Self::Error>;
-}
+impl<T: blinksy::driver::DriverAsync<Color = LinearSrgb>> RgbDriver for T {}

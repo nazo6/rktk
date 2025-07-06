@@ -24,14 +24,22 @@ use crate::drivers::interface::{
 
 pub fn rgb() -> Option<impl RgbDriver> {
     pub enum Rgb {}
-    impl RgbDriver for Rgb {
+    impl blinksy::driver::DriverAsync for Rgb {
         type Error = Infallible;
 
-        async fn write<I: IntoIterator<Item = blinksy::color::LedRgb<u8>>>(
+        type Color = blinksy::color::LinearSrgb;
+
+        async fn write<I, C>(
             &mut self,
             _pixels: I,
-        ) -> Result<(), Self::Error> {
-            unreachable!()
+            _brightness: f32,
+            _correction: blinksy::color::ColorCorrection,
+        ) -> Result<(), Self::Error>
+        where
+            I: IntoIterator<Item = C>,
+            Self::Color: blinksy::color::FromColor<C>,
+        {
+            todo!()
         }
     }
 
