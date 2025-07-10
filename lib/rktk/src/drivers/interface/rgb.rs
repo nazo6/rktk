@@ -2,7 +2,8 @@
 
 // TODO: Split backlight and underglow
 
-pub use blinksy::color::{ColorCorrection, LedChannels, LedRgb, LinearSrgb};
+pub use blinksy;
+use blinksy::color::LinearSrgb;
 use serde::{Deserialize, Serialize};
 
 /// Commands for controlling RGB LEDs.
