@@ -38,15 +38,14 @@ impl TapHoldState {
         now: Instant,
         mut cb: impl FnMut(EventType, KeyCode),
     ) {
-        if let Some(event) = event {
-            if event.pressed && self.hold_on_other_key {
+        if let Some(event) = event
+            && event.pressed && self.hold_on_other_key {
                 for (key, state) in self.pressed.iter_mut() {
                     if *key != (event.row, event.col) {
                         state.pending = None;
                     }
                 }
             }
-        }
 
         for (_, state) in self.pressed.iter_mut() {
             if let Some(press_start) = state.pending {

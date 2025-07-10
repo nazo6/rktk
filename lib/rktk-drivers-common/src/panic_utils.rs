@@ -76,7 +76,7 @@ impl PanicMessage {
 /// This function should be called in panic_handler.
 pub fn save_panic_info(info: &core::panic::PanicInfo) {
     let mut panic_info = PanicMessage::default();
-    write!(panic_info, "{}", info).ok();
+    write!(panic_info, "{info}").ok();
 
     unsafe {
         write_volatile(&raw mut PANIC_INFO, MaybeUninit::new(panic_info));
@@ -119,8 +119,8 @@ const FONT: MonoFont = FONT_8X13;
 ///
 /// When None is returned, caller can stop execution using something like [`cortex_m::asm::udf`]
 pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
-    if let Some(panic_info) = read_panic_message() {
-        if display.init().await.is_ok() {
+    if let Some(panic_info) = read_panic_message()
+        && display.init().await.is_ok() {
             let char_width = FONT.character_size.width as usize;
 
             let str = parse_panic_message(&panic_info);
@@ -169,7 +169,6 @@ pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
                 Timer::after_secs(100000000).await;
             }
         }
-    }
 }
 pub async fn display_mes<D: DisplayDriver>(
     display: &mut D,

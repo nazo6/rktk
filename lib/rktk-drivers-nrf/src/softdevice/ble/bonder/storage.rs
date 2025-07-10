@@ -44,11 +44,10 @@ pub async fn bonder_save_task(flash: &'static SharedFlash) {
             loop {
                 let data = BOND_SAVE.wait().await;
 
-                if let Some(prev_data) = &prev_data {
-                    if *prev_data == data {
+                if let Some(prev_data) = &prev_data
+                    && *prev_data == data {
                         info!("Bond data save is skipped");
                     }
-                }
 
                 let mut buf = [0; DEVICES_MAX_SIZE];
                 let Ok(data_slice) = postcard::to_slice(&data, &mut buf) else {

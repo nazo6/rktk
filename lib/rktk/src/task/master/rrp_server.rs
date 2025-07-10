@@ -114,13 +114,12 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
 
         while let Some(Ok(key)) = req.next().await {
             keymap.layers[key.layer as usize].keymap[key.row as usize][key.col as usize] = key.key;
-            if let Some(storage) = self.storage {
-                if let Err(_e) = storage
+            if let Some(storage) = self.storage
+                && let Err(_e) = storage
                     .write_keymap(key.layer, &keymap.layers[key.layer as usize])
                     .await
-                {
-                    crate::print!("set_keymaps failed");
-                }
+            {
+                crate::print!("set_keymaps failed");
             }
         }
         *self.state.lock().await = ConfiguredState::new(keymap, config);
@@ -141,10 +140,10 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
     ) -> Result<set_keymap_config::Response, Self::Error> {
         let keymap = self.state.lock().await.inner().get_keymap().clone();
 
-        if let Some(storage) = self.storage {
-            if let Err(_e) = storage.write_state_config(&req).await {
-                crate::print!("set_keymap_config failed");
-            }
+        if let Some(storage) = self.storage
+            && let Err(_e) = storage.write_state_config(&req).await
+        {
+            crate::print!("set_keymap_config failed");
         }
         *self.state.lock().await = ConfiguredState::new(keymap, req);
         Ok(())

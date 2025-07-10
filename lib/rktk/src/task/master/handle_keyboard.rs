@@ -28,11 +28,11 @@ pub async fn start(
 
         keyscan
             .scan(|mut event| {
-                if let Some(debounce) = debounce.as_mut() {
-                    if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
-                        debug!("Debounced");
-                        return;
-                    }
+                if let Some(debounce) = debounce.as_mut()
+                    && debounce.should_ignore_event(&event, embassy_time::Instant::now())
+                {
+                    debug!("Debounced");
+                    return;
                 }
                 resolve_entire_key_pos(&mut event, hand, shift);
 

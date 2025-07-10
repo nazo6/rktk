@@ -38,10 +38,10 @@ impl interrupt::typelevel::Handler<<DongleTimer as timer::Instance>::Interrupt>
     for TimerInterruptHandler
 {
     unsafe fn on_interrupt() {
-        if let Ok(mut irq_timer) = IRQ_TIMER.try_lock() {
-            if let Some(irq_timer) = &mut *irq_timer {
-                irq_timer.timer_interrupt();
-            }
+        if let Ok(mut irq_timer) = IRQ_TIMER.try_lock()
+            && let Some(irq_timer) = &mut *irq_timer
+        {
+            irq_timer.timer_interrupt();
         }
     }
 }
@@ -59,12 +59,11 @@ impl interrupt::typelevel::Handler<<DongleRadio as radio::Instance>::Interrupt>
     for EsbInterruptHandler
 {
     unsafe fn on_interrupt() {
-        if let Ok(mut esb_irq) = ESB_IRQ.try_lock() {
-            if let Some(esb_irq) = &mut *esb_irq {
-                if let Err(e) = esb_irq.radio_interrupt() {
-                    rktk_log::warn!("Irq error: {:?}", Debug2Format(&e));
-                }
-            }
+        if let Ok(mut esb_irq) = ESB_IRQ.try_lock()
+            && let Some(esb_irq) = &mut *esb_irq
+            && let Err(e) = esb_irq.radio_interrupt()
+        {
+            rktk_log::warn!("Irq error: {:?}", Debug2Format(&e));
         }
     }
 }

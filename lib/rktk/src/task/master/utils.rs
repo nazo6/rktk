@@ -2,6 +2,7 @@ use rktk_keymanager::interface::state::{config::StateConfig, input_event::KeyCha
 use rktk_log::helper::Debug2Format;
 
 use crate::{
+    config::Hand,
     config::{
         CONST_CONFIG,
         keymap::Keymap,
@@ -9,7 +10,6 @@ use crate::{
         storage::StorageConfigManager,
     },
     drivers::interface::storage::StorageDriver,
-    config::Hand,
 };
 
 use super::{ConfiguredState, SharedState};
@@ -20,7 +20,7 @@ pub fn get_split_right_shift(config: &DynamicConfig) -> u8 {
         val
     } else {
         assert!(
-            CONST_CONFIG.keyboard.cols % 2 == 0,
+            CONST_CONFIG.keyboard.cols.is_multiple_of(2),
             "Split right shift is not defined, but the keyboard has odd number of columns."
         );
         CONST_CONFIG.keyboard.cols / 2

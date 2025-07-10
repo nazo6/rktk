@@ -4,24 +4,24 @@ description: "Setup Rust toolchain"
 
 inputs:
   components:
-    description: 'rustup components to install'
+    description: "rustup components to install"
     required: true
   target:
-    description: 'rustup target to install'
+    description: "rustup target to install"
     required: true
 
 runs:
   using: "composite"
   steps:
-  - uses: dtolnay/rust-toolchain@master
-    id: toolchain
-    with:
-      toolchain: "nightly-2025-03-10"
-      components: "${{ inputs.components }}"
-      targets: "${{ inputs.target }}"
+    - uses: dtolnay/rust-toolchain@master
+      id: toolchain
+      with:
+        toolchain: "nightly-2025-07-09"
+        components: "${{ inputs.components }}"
+        targets: "${{ inputs.target }}"
 
-  - id: rust-override
-    shell: bash
-    run: "rustup override set ${{steps.toolchain.outputs.name}}"
+    - id: rust-override
+      shell: bash
+      run: "rustup override set ${{steps.toolchain.outputs.name}}"
 
-  - uses: Swatinem/rust-cache@v2
+    - uses: Swatinem/rust-cache@v2

@@ -7,7 +7,7 @@ use super::{RrpHidBackend, RrpHidDevice};
 
 pub struct NativeBackend {
     backend: HidBackend,
-    watch_task: Task<()>,
+    _watch_task: Task<()>,
 }
 
 impl RrpHidBackend for NativeBackend {
@@ -50,7 +50,7 @@ impl RrpHidBackend for NativeBackend {
         let backend = HidBackend::default();
 
         let mut watcher = backend.watch().expect("Failed to create hid watcher");
-        let watch_task = smol::spawn(async move {
+        let _watch_task = smol::spawn(async move {
             while let Some(_event) = watcher.next().await {
                 dbg!(_event);
                 let _ = tx.send(()).await;
@@ -60,7 +60,7 @@ impl RrpHidBackend for NativeBackend {
         (
             Self {
                 backend,
-                watch_task,
+                _watch_task,
             },
             rx,
         )

@@ -57,13 +57,11 @@ impl<
     }
 
     pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
-        if let Some(layer) = self.layers.get(layer) {
-            if let Some(row) = layer.keymap.get(row) {
-                if let Some(key) = row.get(col) {
+        if let Some(layer) = self.layers.get(layer)
+            && let Some(row) = layer.keymap.get(row)
+                && let Some(key) = row.get(col) {
                     return Some(key);
                 }
-            }
-        }
         None
     }
 

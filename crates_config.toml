@@ -7,7 +7,7 @@ test_features_global = ["_check"]
 doc_features_global = ["_check"]
 
 [crates.rktk]
-check_at_least_one_of = ["defmt", "log"]
+check_group_features = [["defmt", "log"]]
 
 [crates.rktk-rrp]
 check_at_least_one_of = ["server", "client"]
@@ -15,7 +15,7 @@ test_enabled = true
 
 [crates.rktk-drivers-nrf]
 check_features = ["_nrfxx", "nightly", "power"]
-check_group_features = [["softdevice", "softdevice-ble"]]
+check_group_features = [["softdevice", "softdevice-ble"], ["defmt", "log"]]
 check_mutually_exclusive_features = [
   [
     "softdevice-ble",
@@ -40,6 +40,7 @@ check_group_features = [
   [
     "defmt",
     "defmt-timestamp",
+    "defmt-usb",
   ],
   [
     "trouble",

@@ -40,15 +40,15 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
                 loop {
                     let start = embassy_time::Instant::now();
 
-                    if let Ok(data) = mouse.read().await {
-                        if data != (0, 0) {
-                            let e = SlaveToMaster::Mouse {
-                                // x and y are swapped
-                                x: data.0,
-                                y: data.1,
-                            };
-                            s2m_tx.send(e).await;
-                        }
+                    if let Ok(data) = mouse.read().await
+                        && data != (0, 0)
+                    {
+                        let e = SlaveToMaster::Mouse {
+                            // x and y are swapped
+                            x: data.0,
+                            y: data.1,
+                        };
+                        s2m_tx.send(e).await;
                     }
 
                     let took = start.elapsed();
@@ -67,11 +67,11 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
                 keyscan
                     .scan(|event| {
                         debug!("keyscan event: {:?}", event);
-                        if let Some(debounce) = debounce.as_mut() {
-                            if debounce.should_ignore_event(&event, embassy_time::Instant::now()) {
-                                debug!("keyscan event ignored");
-                                return;
-                            }
+                        if let Some(debounce) = debounce.as_mut()
+                            && debounce.should_ignore_event(&event, embassy_time::Instant::now())
+                        {
+                            debug!("keyscan event ignored");
+                            return;
                         }
 
                         let event = if event.pressed {
