@@ -6,8 +6,8 @@ use crate::utils::{METADATA, xprintln};
 use super::config::CRATES_CONFIG;
 
 fn build_args(crate_name: &str) -> Option<Vec<String>> {
-    if let Some(c) = CRATES_CONFIG.crates.get(crate_name) {
-        if c.test_enabled {
+    if let Some(c) = CRATES_CONFIG.crates.get(crate_name)
+        && c.test_enabled {
             let mut args = vec!["test".to_string()];
 
             let features = if let Some(crate_features) = c.test_features.as_ref() {
@@ -26,7 +26,6 @@ fn build_args(crate_name: &str) -> Option<Vec<String>> {
 
             return Some(args);
         }
-    }
 
     None
 }

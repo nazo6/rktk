@@ -80,8 +80,8 @@ impl<
             embassy_time::Timer::after(self.scan_delay).await;
 
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
-                if let Some((row, col)) = (self.map_key_pos)(input_idx, output_idx) {
-                    if let Some(change) =
+                if let Some((row, col)) = (self.map_key_pos)(input_idx, output_idx)
+                    && let Some(change) =
                         self.pressed
                             .set_pressed(input_pin.is_high().unwrap(), row, col)
                     {
@@ -91,7 +91,6 @@ impl<
                             pressed: change,
                         });
                     }
-                }
             }
 
             let _ = self.output_pins[output_idx].set_low();

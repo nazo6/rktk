@@ -125,35 +125,35 @@ pub async fn report_task<
             (
                 s.update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
                     if let OutputEvent::Custom(1, (id, et)) = ev {
-                        if et == EventType::Pressed {
-                            if let Some(k) = RktkKeys::from_repr(id) {
-                                match k {
-                                    RktkKeys::FlashClear => rktk_key_state.flash_clear = true,
-                                    RktkKeys::OutputBle => current_output = Output::Ble,
-                                    RktkKeys::OutputUsb => current_output = Output::Usb,
-                                    RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
-                                    RktkKeys::Bootloader => rktk_key_state.bootloader = true,
-                                    RktkKeys::PowerOff => rktk_key_state.power_off = true,
-                                    RktkKeys::RgbOff => {
-                                        let _ = RGB_CHANNEL
-                                            .sender()
-                                            .try_send(RgbCommand::Start(RgbMode::Off));
-                                    }
-                                    RktkKeys::RgbBrightnessUp => {
-                                        let _ = RGB_CHANNEL
-                                            .sender()
-                                            .try_send(RgbCommand::BrightnessDelta(0.05));
-                                    }
-                                    RktkKeys::RgbBrightnessDown => {
-                                        let _ = RGB_CHANNEL
-                                            .sender()
-                                            .try_send(RgbCommand::BrightnessDelta(-0.05));
-                                    }
-                                    RktkKeys::RgbPatternRainbow => {
-                                        let _ = RGB_CHANNEL.sender().try_send(RgbCommand::Start(
-                                            RgbMode::Pattern(RgbPattern::Rainbow(0.3 / 1e3, 1.0)),
-                                        ));
-                                    }
+                        if et == EventType::Pressed
+                            && let Some(k) = RktkKeys::from_repr(id)
+                        {
+                            match k {
+                                RktkKeys::FlashClear => rktk_key_state.flash_clear = true,
+                                RktkKeys::OutputBle => current_output = Output::Ble,
+                                RktkKeys::OutputUsb => current_output = Output::Usb,
+                                RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
+                                RktkKeys::Bootloader => rktk_key_state.bootloader = true,
+                                RktkKeys::PowerOff => rktk_key_state.power_off = true,
+                                RktkKeys::RgbOff => {
+                                    let _ = RGB_CHANNEL
+                                        .sender()
+                                        .try_send(RgbCommand::Start(RgbMode::Off));
+                                }
+                                RktkKeys::RgbBrightnessUp => {
+                                    let _ = RGB_CHANNEL
+                                        .sender()
+                                        .try_send(RgbCommand::BrightnessDelta(0.05));
+                                }
+                                RktkKeys::RgbBrightnessDown => {
+                                    let _ = RGB_CHANNEL
+                                        .sender()
+                                        .try_send(RgbCommand::BrightnessDelta(-0.05));
+                                }
+                                RktkKeys::RgbPatternRainbow => {
+                                    let _ = RGB_CHANNEL.sender().try_send(RgbCommand::Start(
+                                        RgbMode::Pattern(RgbPattern::Rainbow(0.3 / 1e3, 1.0)),
+                                    ));
                                 }
                             }
                         }
@@ -180,25 +180,25 @@ pub async fn report_task<
         if rktk_key_state.bootloader {
             system.reset_to_bootloader();
         }
-        if rktk_key_state.flash_clear {
-            if let Some(storage) = config_store.as_ref() {
-                match storage.storage.format().await {
-                    Ok(_) => {
-                        rktk_log::info!("Storage formatted by report");
-                        crate::print!("Storage formatted")
-                    }
-                    Err(e) => {
-                        rktk_log::error!("Failed to format storage: {:?}", Debug2Format(&e));
-                        crate::print!("Failed to format storage: {:?}", Debug2Format(&e));
-                    }
+        if rktk_key_state.flash_clear
+            && let Some(storage) = config_store.as_ref()
+        {
+            match storage.storage.format().await {
+                Ok(_) => {
+                    rktk_log::info!("Storage formatted by report");
+                    crate::print!("Storage formatted")
+                }
+                Err(e) => {
+                    rktk_log::error!("Failed to format storage: {:?}", Debug2Format(&e));
+                    crate::print!("Failed to format storage: {:?}", Debug2Format(&e));
                 }
             }
         }
 
-        if rktk_key_state.ble_bond_clear {
-            if let Some(ble) = &ble {
-                let _ = ble.clear_bond_data().await;
-            }
+        if rktk_key_state.ble_bond_clear
+            && let Some(ble) = &ble
+        {
+            let _ = ble.clear_bond_data().await;
         }
 
         if rktk_key_state.power_off {

@@ -44,9 +44,9 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
 
     pub fn pre_resolve(&mut self, now: Instant, mut cb_direct: impl FnMut(EventType, KeyCode)) {
         for unit in self.state.iter_mut() {
-            if let Some(def) = &mut unit.def {
-                if let ComboUnitState::Pending((start, state)) = unit.state {
-                    if now - start > Duration::from_millis(self.config.threshold) {
+            if let Some(def) = &mut unit.def
+                && let ComboUnitState::Pending((start, state)) = unit.state
+                    && now - start > Duration::from_millis(self.config.threshold) {
                         for (i, enabled) in state.iter().enumerate() {
                             if *enabled {
                                 cb_direct(EventType::Pressed, def.src[i].unwrap());
@@ -54,8 +54,6 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
                         }
                         unit.state = ComboUnitState::None;
                     }
-                }
-            }
         }
     }
 
@@ -63,8 +61,8 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
         for unit in self.state.iter_mut() {
             if let Some(def) = &mut unit.def {
                 for (i, key) in def.src.iter().enumerate() {
-                    if let Some(key) = key {
-                        if *keycode == *key {
+                    if let Some(key) = key
+                        && *keycode == *key {
                             #[cfg(test)]
                             match (event_type, &unit.state) {
                                 (EventType::Pressed, ComboUnitState::None) => {
@@ -109,7 +107,6 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
                                 _ => {}
                             }
                         }
-                    }
                 }
             }
         }

@@ -10,11 +10,10 @@ pub async fn with_cache<T: Clone + 'static, E, F: Future<Output = Result<T, E>>>
     key: &'static str,
     fut: F,
 ) -> Result<T, E> {
-    if let Some(val) = cache.0.borrow_mut().get(key) {
-        if let Some(val) = val.downcast_ref::<T>() {
+    if let Some(val) = cache.0.borrow_mut().get(key)
+        && let Some(val) = val.downcast_ref::<T>() {
             return Ok(val.clone());
         }
-    }
 
     let res = fut.await;
     if let Ok(val) = &res {

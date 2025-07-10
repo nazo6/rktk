@@ -36,15 +36,14 @@ impl EagerDebounceDriver {
 impl DebounceDriver for EagerDebounceDriver {
     fn should_ignore_event(&mut self, event: &KeyChangeEvent, now: embassy_time::Instant) -> bool {
         let last = self.last[event.row as usize][event.col as usize];
-        if let Some(last) = last {
-            if now - last < self.debounce_time {
+        if let Some(last) = last
+            && now - last < self.debounce_time {
                 if self.deboune_only_pressed {
                     return event.pressed;
                 } else {
                     return true;
                 }
             }
-        }
         self.last[event.row as usize][event.col as usize] = Some(now);
         false
     }

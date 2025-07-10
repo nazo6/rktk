@@ -82,8 +82,8 @@ fn run_doc(
 
     let mut doc_index_html = None;
     for line in stdout.lines().rev() {
-        if let Ok(val) = serde_json::from_str::<CargoDocCompilerArtifactLog>(line) {
-            if val.reason == "compiler-artifact" && val.package_id == p.id.repr {
+        if let Ok(val) = serde_json::from_str::<CargoDocCompilerArtifactLog>(line)
+            && val.reason == "compiler-artifact" && val.package_id == p.id.repr {
                 doc_index_html = val
                     .filenames
                     .iter()
@@ -91,7 +91,6 @@ fn run_doc(
                     .cloned();
                 break;
             }
-        }
     }
 
     let Some(doc_index_html) = doc_index_html else {
