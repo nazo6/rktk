@@ -130,14 +130,23 @@ to develop rktk, you need to install the following dependencies:
 
 ### MSRV
 
-rktk actually doesn't depends on nightly feature of _rustc_, but uses nightly
-cargo features like `per-package-target`. So, it requires nightly toolchain.
+#### As library
+
+Unless you enable a specific feature, rktk's MSRV is the latest stable version
+of Rust.
+
+In addition, a nightly compiler is required to minimize the binary size.
+
+#### For development
+
+As a library, rktk does not depend on stable, but the rktk repository workspace
+depends on cargo's unstable feature. Therefore, nightly is required to develop
+rktk.
 
 ## Credits & Acknowledgements
 
 - [rumcake](https://github.com/Univa/rumcake): RP2040 double-tap-reset driver
-- [uf2](https://github.com/microsoft/uf2): uf2conv.py, uf2families.json
 - [rust-dilemma](https://github.com/simmsb/rusty-dilemma): RP2040 Half-duplex
   communication
 - [qmk](https://github.com/qmk/qmk_firmware): RP2040 Half-duplex communication
-- [rmk](https://github.com/HaoboGu/rmk): bluetooth implemention
+- [rmk](https://github.com/HaoboGu/rmk): BLE implemention
