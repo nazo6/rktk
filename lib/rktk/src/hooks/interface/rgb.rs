@@ -1,5 +1,3 @@
-use blinksy::driver::DriverAsync;
-
 use crate::drivers::interface::rgb::*;
 
 /// Hooks related to RGB functionality.
