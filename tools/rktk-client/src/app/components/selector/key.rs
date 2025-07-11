@@ -10,16 +10,14 @@ pub fn KeySelector<I: Display + PartialEq + Clone + 'static>(
     select_key: Callback<I>,
 ) -> Element {
     rsx! {
-        select {
-            class: "select select-sm w-full",
-            onchange: move |evt| {
-                let Ok(idx) = evt.data().value().parse::<usize>() else {
-                    return;
-                };
-                select_key(items[idx].clone());
-            },
-            for (i , item) in items.iter().enumerate() {
-                option { value: i, selected: item == &selected_key, "{item}" }
+        div { class: "flex flex-row flex-wrap items-center gap-2 max-h-72 overflow-y-auto justify-center text",
+            for item in items.into_iter() {
+                div {
+                    class: "border-2 p-1 text-sm font-bold cursor-pointer w-18 h-10 overflow-clip hover:bg-gray-500/20 ",
+                    class: if item == selected_key { "border-accent" } else { "border-base-content" },
+                    onclick: move |_| select_key(item.clone()),
+                    "{item}"
+                }
             }
         }
     }

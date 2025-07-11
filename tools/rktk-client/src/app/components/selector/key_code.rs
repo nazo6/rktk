@@ -13,7 +13,7 @@ use super::key::KeySelector;
 #[component]
 pub fn KeyCodeSelector(key_code: KeyCode, select_key_code: Callback<KeyCode>) -> Element {
     rsx! {
-        div { class: "flex flex-col gap-2",
+        div { class: "flex flex-col gap-2 items-center",
             form { class: "join",
                 input {
                     r#type: "radio",

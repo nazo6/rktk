@@ -131,7 +131,7 @@ pub fn RemapInner(keyboard: KeyboardInfo, keymap: KeymapData, refetch: Callback<
                 select_signal: selected,
                 keymap_changes,
             }
-            div {
+            div { class: "w-[80%]",
                 match *selected.read() {
                     Some((row, col)) => {
                         let orig_key = keymap[*layer.read()][row][col].clone();
