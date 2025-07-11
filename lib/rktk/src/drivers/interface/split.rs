@@ -1,3 +1,4 @@
+use postcard::experimental::max_size::MaxSize;
 use serde::{Deserialize, Serialize};
 
 use super::rgb::RgbCommand;
@@ -20,25 +21,18 @@ pub trait SplitDriver: 'static {
     async fn send_all(&mut self, buf: &[u8], is_master: bool) -> Result<(), Self::Error>;
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, MaxSize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum MasterToSlave {
     Rgb(RgbCommand),
     Message(u8),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, MaxSize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SlaveToMaster {
     Pressed(u8, u8),
     Released(u8, u8),
     Mouse { x: i8, y: i8 },
     Message(u8),
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub enum KeyChangeType {
-    Pressed,
-    Released,
 }

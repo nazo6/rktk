@@ -3,13 +3,14 @@
 // TODO: Split backlight and underglow
 
 pub use blinksy::color::{ColorCorrection, LedChannels, LedRgb, LinearSrgb};
+use postcard::experimental::max_size::MaxSize;
 use serde::{Deserialize, Serialize};
 
 /// Commands for controlling RGB LEDs.
 ///
 /// This value can be send using [`crate::hooks::channels::rgb::rgb_sender`].
 /// In master side, command sent from above channel will also be sent to slave side.
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, MaxSize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbCommand {
     /// Set RGB mode and start it
@@ -24,7 +25,7 @@ pub enum RgbCommand {
 }
 
 /// RGB mode for controlling RGB LEDs.
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, MaxSize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbMode {
     /// Turn off RGB
@@ -41,7 +42,7 @@ pub enum RgbMode {
 }
 
 /// Built-in RGB patterns.
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, MaxSize)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum RgbPattern {
     Rainbow(f32, f32),
