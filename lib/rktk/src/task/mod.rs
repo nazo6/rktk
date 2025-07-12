@@ -43,7 +43,7 @@ pub async fn start<
     KeyScan: KeyscanDriver,
     Debounce: DebounceDriver,
     Encoder: EncoderDriver,
-    Rgb: RgbDriver,
+    Rgb: RgbDriver + 'static,
     Storage: StorageDriver,
     Split: SplitDriver,
     Ble: WirelessReporterDriverBuilder,

@@ -13,7 +13,7 @@ use crate::{
 
 use super::channels::{rgb::RGB_CHANNEL, split::M2sTx};
 use blinksy::{
-    color::{ColorCorrection, IntoColor, LedRgb, LinearSrgb},
+    color::{ColorCorrection, IntoColor, LinearSrgb},
     layout::Layout2d,
     pattern::Pattern,
     patterns::{
@@ -46,30 +46,30 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
             match &current_rgb_mode {
                 RgbMode::Off => {
                     let _ = driver
-                        .write(core::iter::repeat_n(
-                            LedRgb::from_linear_srgb(
+                        .write(
+                            core::iter::repeat_n(
                                 LinearSrgb::new(0.0, 0.0, 0.0),
-                                brightness,
-                                color_correction,
+                                Layout::PIXEL_COUNT,
                             ),
-                            Layout::PIXEL_COUNT,
-                        ))
+                            brightness,
+                            color_correction,
+                        )
                         .await;
                 }
                 RgbMode::SolidColor(r, g, b) => {
                     let _ = driver
-                        .write(core::iter::repeat_n(
-                            LedRgb::from_linear_srgb(
+                        .write(
+                            core::iter::repeat_n(
                                 LinearSrgb::new(
                                     (*r as f32) / 255.0,
                                     (*g as f32) / 255.0,
                                     (*b as f32) / 255.0,
                                 ),
-                                brightness,
-                                color_correction,
+                                Layout::PIXEL_COUNT,
                             ),
-                            Layout::PIXEL_COUNT,
-                        ))
+                            brightness,
+                            color_correction,
+                        )
                         .await;
                 }
                 RgbMode::Pattern(pat) => {
@@ -89,10 +89,10 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
                                 )
                                 .map(|color| {
                                     let srgb: LinearSrgb = color.into_color();
-                                    LedRgb::from_linear_srgb(srgb, brightness, color_correction)
+                                    srgb
                                 });
 
-                                let _ = driver.write(led_data).await;
+                                let _ = driver.write(led_data, brightness, color_correction).await;
                             }
                         }};
                     }

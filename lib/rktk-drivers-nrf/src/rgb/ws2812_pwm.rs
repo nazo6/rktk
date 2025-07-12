@@ -12,7 +12,10 @@ use embassy_nrf::{
     },
 };
 use embassy_time::Timer;
-use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
+use rktk::drivers::interface::rgb::blinksy::{
+    color::{ColorCorrection, FromColor, LedChannels, LinearSrgb, RgbChannels},
+    driver::DriverAsync,
+};
 
 /// WS2812 NeoPixel driver using PWM on nRF.
 ///
@@ -55,14 +58,22 @@ impl<
     PWMP: Peripheral<P = PWM> + 'static,
     DATA: Pin,
     DATAP: Peripheral<P = DATA> + 'static,
-> RgbDriver for Ws2812Pwm<BUFFER_SIZE, PWM, PWMP, DATA, DATAP>
+> DriverAsync for Ws2812Pwm<BUFFER_SIZE, PWM, PWMP, DATA, DATAP>
 {
     type Error = Infallible;
 
-    async fn write<I: IntoIterator<Item = LedRgb<u8>>>(
+    type Color = LinearSrgb;
+
+    async fn write<I, C>(
         &mut self,
         pixels: I,
-    ) -> Result<(), Self::Error> {
+        brightness: f32,
+        correction: ColorCorrection,
+    ) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = C>,
+        Self::Color: FromColor<C>,
+    {
         let mut pwm_config = Config::default();
         pwm_config.sequence_load = SequenceLoad::Common;
         pwm_config.prescaler = Prescaler::Div1; // 16MHz
@@ -76,15 +87,20 @@ impl<
         let mut words = heapless::Vec::<u16, BUFFER_SIZE>::from_slice(&[RES; 100]).unwrap();
 
         'outer: for color in pixels {
-            for bit in color[1]
-                .view_bits::<Msb0>()
-                .iter()
-                .chain(color[0].view_bits())
-                .chain(color[2].view_bits())
-            {
-                if words.push(if *bit { T1H } else { T0H }).is_err() {
-                    rktk_log::warn!("WS2812Pwm buffer size is not enough. Increase BUFFER_SIZE.");
-                    break 'outer;
+            let linear_srgb: LinearSrgb = FromColor::from_color(color);
+            let data = linear_srgb.to_led::<u8>(
+                LedChannels::Rgb(RgbChannels::GRB),
+                brightness,
+                correction,
+            );
+            for byte in data.as_ref() {
+                for bit in byte.view_bits::<Msb0>() {
+                    if words.push(if *bit { T1H } else { T0H }).is_err() {
+                        rktk_log::warn!(
+                            "WS2812Pwm buffer size is not enough. Increase BUFFER_SIZE."
+                        );
+                        break 'outer;
+                    }
                 }
             }
         }

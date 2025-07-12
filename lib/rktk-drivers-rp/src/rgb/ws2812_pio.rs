@@ -8,7 +8,10 @@ use embassy_rp::{Peripheral, PeripheralRef, clocks, into_ref};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
-use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
+use rktk::drivers::interface::rgb::blinksy::color::{
+    ColorCorrection, FromColor, LedChannels, LinearSrgb, RgbChannels,
+};
+use rktk::drivers::interface::rgb::blinksy::driver::DriverAsync;
 
 pub struct Ws2812Pio<'a, const MAX_LED_COUNT: usize, I: Instance> {
     dma: PeripheralRef<'a, AnyChannel>,
@@ -85,18 +88,35 @@ impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I
     }
 }
 
-impl<const MAX_LED_COUNT: usize, I: Instance + 'static> RgbDriver
-    for Ws2812Pio<'static, MAX_LED_COUNT, I>
+impl<const MAX_LED_COUNT: usize, PIO: Instance + 'static> DriverAsync
+    for Ws2812Pio<'static, MAX_LED_COUNT, PIO>
 {
     type Error = Infallible;
 
-    async fn write<IT: IntoIterator<Item = LedRgb<u8>>>(
+    type Color = LinearSrgb;
+
+    async fn write<I, C>(
         &mut self,
-        pixels: IT,
-    ) -> Result<(), Self::Error> {
+        pixels: I,
+        brightness: f32,
+        correction: ColorCorrection,
+    ) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = C>,
+        Self::Color: rktk::drivers::interface::rgb::blinksy::color::FromColor<C>,
+    {
         let mut words = [0u32; MAX_LED_COUNT];
-        for (p, w) in pixels.into_iter().zip(words.iter_mut()) {
-            *w = (u32::from(p[1]) << 24) | (u32::from(p[0]) << 16) | (u32::from(p[2]) << 8);
+        for (color, w) in pixels.into_iter().zip(words.iter_mut()) {
+            let linear_srgb: LinearSrgb = FromColor::from_color(color);
+            let data = linear_srgb.to_led::<u8>(
+                LedChannels::Rgb(RgbChannels::GRB),
+                brightness,
+                correction,
+            );
+            let data = data.as_ref();
+
+            *w =
+                (u32::from(data[0]) << 24) | (u32::from(data[1]) << 16) | (u32::from(data[2]) << 8);
         }
 
         // DMA transfer

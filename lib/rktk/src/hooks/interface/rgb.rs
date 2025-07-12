@@ -7,7 +7,7 @@ use crate::drivers::interface::rgb::*;
 pub trait RgbHooks: 'static {
     /// Invoked after the RGB driver is initialized.
     ///
-    /// * `_driver`: [`RgbDriver`] instance to control RGB.
+    /// * `_driver`: [`DriverAsync`] instance to control RGB.
     /// * `_is_master`: If true, this is the master side of the keyboard.
     async fn on_rgb_init(&mut self, _driver: &mut impl RgbDriver, _is_master: bool) {}
 
@@ -17,7 +17,7 @@ pub trait RgbHooks: 'static {
     ///
     /// You can use this hook to modify the RGB mode before the RGB task processes.
     ///
-    /// * `_driver`: [`RgbDriver`] instance to control RGB.
+    /// * `_driver`: [`DriverAsync`] instance to control RGB.
     /// * `_rgb_mode`: [`RgbMode`] to be processed.
     async fn on_rgb_process(&mut self, _driver: &mut impl RgbDriver, _rgb_mode: &mut RgbMode) {}
     async fn custom_rgb(&mut self, _driver: &mut impl RgbDriver, _brightness: f32) {}
