@@ -1,15 +1,21 @@
 use embassy_futures::select::{Either, select};
-use postcard::{from_bytes_cobs, to_slice_cobs};
+use postcard::{experimental::max_size::MaxSize, from_bytes_cobs, to_slice_cobs};
 use rktk_log::{MaybeFormat, debug, helper::Debug2Format, warn};
 use serde::{Serialize, de::DeserializeOwned};
 
 use crate::{
     config::CONST_CONFIG,
-    drivers::interface::split::SplitDriver,
+    drivers::interface::split::{MasterToSlave, SlaveToMaster, SplitDriver},
     utils::{Receiver, Sender},
 };
 
-pub const MAX_DATA_SIZE: usize = 16;
+pub const MAX_DATA_SIZE: usize = const {
+    if MasterToSlave::POSTCARD_MAX_SIZE > SlaveToMaster::POSTCARD_MAX_SIZE {
+        MasterToSlave::POSTCARD_MAX_SIZE
+    } else {
+        SlaveToMaster::POSTCARD_MAX_SIZE
+    }
+};
 
 pub struct CobsReceiver {
     remained: heapless::Deque<u8, 64>,

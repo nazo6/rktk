@@ -183,7 +183,7 @@ impl<I: Instance + 'static> SplitDriver for PioHalfDuplexSplitDriver<'static, I>
             *b = data;
 
             if end {
-                return Ok(i);
+                return Ok(i + 2);
             }
         }
 

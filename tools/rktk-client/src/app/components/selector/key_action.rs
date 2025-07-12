@@ -10,7 +10,7 @@ pub fn KeyActionSelector(
     discard: Callback<()>,
 ) -> Element {
     rsx! {
-        div { class: "flex flex-col gap-2 p-2 rounded-md border-2",
+        div { class: "flex flex-col gap-2 p-2 rounded-md border-2 items-center",
             div { class: "flex gap-2",
                 form { class: "join",
                     input {
@@ -72,7 +72,7 @@ pub fn KeyActionSelector(
                     "Discard"
                 }
             }
-            div { class: "border-2 rounded-md p-2",
+            div { class: "border-2 rounded-md p-2 w-full",
                 match key_action {
                     KeyAction::Inherit => rsx! { "Inherit" },
                     KeyAction::Normal(key_code) => rsx! {
@@ -105,14 +105,14 @@ pub fn KeyActionSelector(
                     },
                     KeyAction::TapHold(key_code, key_code1) => rsx! {
                         div { class: "flex-col",
-                            p { class: "text-xs", "Tap key" }
+                            p { class: "text-center", "Tap key" }
                             KeyCodeSelector {
                                 key_code,
                                 select_key_code: Callback::new(move |kc| {
                                     select_key_action(KeyAction::TapHold(kc, key_code1));
                                 }),
                             }
-                            p { class: "pt-4 text-xs", "Hold key" }
+                            p { class: "pt-4 text-center", "Hold key" }
                             KeyCodeSelector {
                                 key_code: key_code1,
                                 select_key_code: Callback::new(move |kc| {

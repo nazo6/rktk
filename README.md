@@ -139,9 +139,9 @@ In addition, a nightly compiler is required to minimize the binary size.
 
 #### For development
 
-As a library, rktk does not depend on stable, but the rktk repository workspace
-depends on cargo's unstable feature. Therefore, nightly is required to develop
-rktk.
+As a library, rktk does not depend on unstable feature, but the rktk repository
+workspace depends on cargo's unstable feature. Therefore, nightly is required to
+develop rktk.
 
 ## Credits & Acknowledgements
 
