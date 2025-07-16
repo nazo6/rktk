@@ -1,6 +1,6 @@
 use embassy_nrf::{
+    Peri,
     gpio::{Flex, OutputDrive, Pin, Pull as NrfPull},
-    Peripheral,
 };
 pub use rktk_drivers_common::keyscan::duplex_matrix::ScanDir;
 use rktk_drivers_common::keyscan::flex_pin::{FlexPin, Pull};
@@ -13,7 +13,7 @@ pub struct NrfFlexPin<'a> {
 }
 
 impl<'a> NrfFlexPin<'a> {
-    pub fn new(pin: impl Peripheral<P = impl Pin> + 'a) -> Self {
+    pub fn new(pin: Peri<'a, impl Pin>) -> Self {
         Self {
             pin: Flex::new(pin),
             pull: NrfPull::None,

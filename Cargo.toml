@@ -58,7 +58,7 @@ embedded-graphics = "0.8.1"
 ssd1306 = { version = "0.10.0", features = ["async"] }
 
 trouble-host = { version = "0.2.4" }
-rand_core = { version = "0.9.3" }
+rand_core = { version = "0.6.4" }
 
 nrf-sdc = { version = "0.1.1", default-features = false }
 nrf-mpsl = { version = "0.1.1", default-features = false }
