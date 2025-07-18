@@ -27,8 +27,12 @@ pub async fn run<
     let address: Address = Address::random([0xff, 0x8f, 0x1a, 0x05, 0xe4, 0xff]);
     info!("Our address = {:?}", address);
 
-    let mut resources: HostResources<CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU> =
-        HostResources::new();
+    let mut resources: HostResources<
+        DefaultPacketPool,
+        CONNECTIONS_MAX,
+        L2CAP_CHANNELS_MAX,
+        L2CAP_MTU,
+    > = HostResources::new();
     let stack = trouble_host::new(controller, &mut resources)
         .set_random_address(address)
         .set_random_generator_seed(rng);
@@ -75,7 +79,7 @@ pub async fn run<
     }
 }
 
-async fn ble_task<C: Controller>(mut runner: Runner<'_, C>) {
+async fn ble_task<C: Controller, P: PacketPool>(mut runner: Runner<'_, C, P>) {
     loop {
         if let Err(e) = runner.run().await {
             #[cfg(feature = "defmt")]
@@ -86,50 +90,46 @@ async fn ble_task<C: Controller>(mut runner: Runner<'_, C>) {
     }
 }
 
-async fn gatt_events_task(conn: &GattConnection<'_, '_>) -> Result<(), Error> {
+async fn gatt_events_task<P: PacketPool>(conn: &GattConnection<'_, '_, P>) -> Result<(), Error> {
     loop {
         match conn.next().await {
             GattConnectionEvent::Disconnected { reason } => {
                 info!("[gatt] disconnected: {:?}", reason);
                 break;
             }
-            GattConnectionEvent::Gatt { event } => match event {
-                Ok(event) => {
-                    let result = match &event {
-                        GattEvent::Read(_event) => {
-                            if conn.raw().encrypted() {
-                                None
-                            } else {
-                                Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
-                            }
-                        }
-                        GattEvent::Write(_event) => {
-                            if conn.raw().encrypted() {
-                                None
-                            } else {
-                                Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
-                            }
-                        }
-                    };
-
-                    let result = if let Some(code) = result {
-                        event.reject(code)
-                    } else {
-                        event.accept()
-                    };
-                    match result {
-                        Ok(reply) => {
-                            reply.send().await;
-                        }
-                        Err(e) => {
-                            warn!("[gatt] error sending response: {:?}", e);
+            GattConnectionEvent::Gatt { event } => {
+                let result = match &event {
+                    GattEvent::Read(_event) => {
+                        if conn.raw().encrypted() {
+                            None
+                        } else {
+                            Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
                         }
                     }
+                    GattEvent::Write(_event) => {
+                        if conn.raw().encrypted() {
+                            None
+                        } else {
+                            Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
+                        }
+                    }
+                    _ => None,
+                };
+
+                let result = if let Some(code) = result {
+                    event.reject(code)
+                } else {
+                    event.accept()
+                };
+                match result {
+                    Ok(reply) => {
+                        reply.send().await;
+                    }
+                    Err(e) => {
+                        warn!("[gatt] error sending response: {:?}", e);
+                    }
                 }
-                Err(e) => {
-                    warn!("[gatt] error processing event: {:?}", e);
-                }
-            },
+            }
             _ => {}
         }
     }
@@ -138,10 +138,10 @@ async fn gatt_events_task(conn: &GattConnection<'_, '_>) -> Result<(), Error> {
 }
 
 /// Create an advertiser to use to connect to a BLE Central, and wait for it to connect.
-async fn advertise<'a, C: Controller>(
+async fn advertise<'a, C: Controller, P: PacketPool>(
     name: &'a str,
-    peripheral: &mut Peripheral<'a, C>,
-) -> Result<Connection<'a>, BleHostError<C::Error>> {
+    peripheral: &mut Peripheral<'a, C, P>,
+) -> Result<Connection<'a, P>, BleHostError<C::Error>> {
     let mut advertiser_data = [0; 31];
     AdStructure::encode_slice(
         &[
@@ -166,10 +166,10 @@ async fn advertise<'a, C: Controller>(
     Ok(conn)
 }
 
-async fn hid_task<C: Controller>(
+async fn hid_task<C: Controller, P: PacketPool>(
     server: &Server<'_>,
-    conn: &GattConnection<'_, '_>,
-    _stack: &Stack<'_, C>,
+    conn: &GattConnection<'_, '_, P>,
+    _stack: &Stack<'_, C, P>,
     output_rx: &Receiver<'static, Report, 4>,
 ) {
     loop {

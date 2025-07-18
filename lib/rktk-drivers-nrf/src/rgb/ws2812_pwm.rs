@@ -5,7 +5,7 @@ use core::convert::Infallible;
 
 use bitvec::prelude::*;
 use embassy_nrf::{
-    Peripheral,
+    Peri,
     gpio::{OutputDrive, Pin},
     pwm::{
         Config, Instance, Prescaler, SequenceLoad, SequencePwm, SingleSequenceMode, SingleSequencer,
@@ -21,41 +21,25 @@ use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
 /// It should be larger than `led_count * 24 + 100` to ensure enough space for the sequence.
 ///
 /// Even buffer size is not enough, pixels will be written, but the driver will log a warning.
-pub struct Ws2812Pwm<
-    const BUFFER_SIZE: usize,
-    PWM: Instance,
-    PWMP: Peripheral<P = PWM>,
-    DATA: Pin,
-    DATAP: Peripheral<P = DATA>,
-> {
-    pwm: PWMP,
-    pin: DATAP,
+pub struct Ws2812Pwm<const BUFFER_SIZE: usize, PWM: Instance, DATA: Pin> {
+    pwm: Peri<'static, PWM>,
+    pin: Peri<'static, DATA>,
 }
 
 const T1H: u16 = 0x8000 | 13;
 const T0H: u16 = 0x8000 | 7;
 const RES: u16 = 0x8000;
 
-impl<
-    const BUFFER_SIZE: usize,
-    PWM: Instance + 'static,
-    PWMP: Peripheral<P = PWM> + 'static,
-    DATA: Pin,
-    DATAP: Peripheral<P = DATA> + 'static,
-> Ws2812Pwm<BUFFER_SIZE, PWM, PWMP, DATA, DATAP>
+impl<const BUFFER_SIZE: usize, PWM: Instance + 'static, DATA: Pin>
+    Ws2812Pwm<BUFFER_SIZE, PWM, DATA>
 {
-    pub fn new(pwm: PWMP, data: DATAP) -> Self {
+    pub fn new(pwm: Peri<'static, PWM>, data: Peri<'static, DATA>) -> Self {
         Self { pwm, pin: data }
     }
 }
 
-impl<
-    const BUFFER_SIZE: usize,
-    PWM: Instance + 'static,
-    PWMP: Peripheral<P = PWM> + 'static,
-    DATA: Pin,
-    DATAP: Peripheral<P = DATA> + 'static,
-> RgbDriver for Ws2812Pwm<BUFFER_SIZE, PWM, PWMP, DATA, DATAP>
+impl<const BUFFER_SIZE: usize, PWM: Instance + 'static, DATA: Pin> RgbDriver
+    for Ws2812Pwm<BUFFER_SIZE, PWM, DATA>
 {
     type Error = Infallible;
 
@@ -68,7 +52,9 @@ impl<
         pwm_config.prescaler = Prescaler::Div1; // 16MHz
         pwm_config.max_duty = 20; // 1.25us (1s / 16Mhz * 20)
         pwm_config.ch0_drive = OutputDrive::HighDrive;
-        let Ok(mut seq_pwm) = SequencePwm::new_1ch(&mut self.pwm, &mut self.pin, pwm_config) else {
+        let Ok(mut seq_pwm) =
+            SequencePwm::new_1ch(self.pwm.reborrow(), self.pin.reborrow(), pwm_config)
+        else {
             // TODO: Handle error
             return Ok(());
         };

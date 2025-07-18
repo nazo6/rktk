@@ -1,6 +1,6 @@
 use embassy_rp::{
+    Peri,
     gpio::{Flex, Pin},
-    Peripheral,
 };
 use rktk_drivers_common::keyscan::flex_pin::{FlexPin, Pull};
 
@@ -8,7 +8,7 @@ use rktk_drivers_common::keyscan::flex_pin::{FlexPin, Pull};
 pub struct RpFlexPin<'a>(Flex<'a>);
 
 impl<'a> RpFlexPin<'a> {
-    pub fn new(pin: impl Peripheral<P = impl Pin> + 'a) -> Self {
+    pub fn new(pin: Peri<'a, impl Pin>) -> Self {
         Self(Flex::new(pin))
     }
 }

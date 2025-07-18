@@ -1,6 +1,6 @@
 use embassy_futures::yield_now;
 use embassy_rp::{
-    Peripheral,
+    Peri,
     pio::{Common, Config, Instance, Pin, Pio, PioPin, ShiftDirection, StateMachine},
 };
 use embassy_sync::semaphore::{FairSemaphore, Semaphore};
@@ -93,7 +93,7 @@ static COMM_SEMAPHORE: FairSemaphore<RawMutex, 3> = FairSemaphore::new(1);
 impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
     pub fn new<'b: 'a>(
         pio: Pio<'static, I>,
-        data_pin: impl Peripheral<P = impl PioPin + 'a> + 'a,
+        data_pin: Peri<'a, impl PioPin>,
     ) -> PioHalfDuplexSplitDriver<'a, I> {
         let mut common = pio.common;
         let mut sm0 = pio.sm0;

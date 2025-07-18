@@ -5,11 +5,10 @@
 //! However, due to its nature, it is relatively prone to transmission and reception errors. I checked on the receiving side and confirmed that reception failed at a rate of about 0.3%. This is a relatively high figure for a keyboard.
 
 use embassy_nrf::{
-    Peripheral,
+    Peri,
     buffered_uarte::{BufferedUarteRx, BufferedUarteTx, InterruptHandler},
-    gpio::{AnyPin, Flex},
+    gpio::{Flex, Pin},
     interrupt,
-    ppi::AnyGroup,
     uarte::{Baudrate, Instance, Parity},
 };
 use embedded_io_async::{Read as _, Write};
@@ -24,50 +23,46 @@ pub enum UartHalfDuplexSplitDriverError {
 impl rktk::drivers::interface::Error for UartHalfDuplexSplitDriverError {}
 
 pub struct UartHalfDuplexSplitDriver<
+    PIN: Pin,
     UARTE: Instance,
-    UARTEP: Peripheral<P = UARTE>,
     IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>>,
     TIMER: embassy_nrf::timer::Instance,
-    TIMERP: Peripheral<P = TIMER>,
     CH1: embassy_nrf::ppi::ConfigurableChannel,
-    CH1P: Peripheral<P = CH1>,
     CH2: embassy_nrf::ppi::ConfigurableChannel,
-    CH2P: Peripheral<P = CH2>,
+    GROUP: embassy_nrf::ppi::Group,
 > {
-    pin: AnyPin,
-    uarte: UARTEP,
+    pin: Peri<'static, PIN>,
+    uarte: Peri<'static, UARTE>,
     irq: IRQ,
-    timer: TIMERP,
-    ppi_ch1: CH1P,
-    ppi_ch2: CH2P,
-    ppi_group: AnyGroup,
+    timer: Peri<'static, TIMER>,
+    ppi_ch1: Peri<'static, CH1>,
+    ppi_ch2: Peri<'static, CH2>,
+    ppi_group: Peri<'static, GROUP>,
     read_buffer: [u8; 256],
     write_buffer: [u8; 256],
 }
 
 impl<
+    PIN: Pin,
     UARTE: Instance,
-    UARTEP: Peripheral<P = UARTE>,
     IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone,
     TIMER: embassy_nrf::timer::Instance,
-    TIMERP: Peripheral<P = TIMER>,
     CH1: embassy_nrf::ppi::ConfigurableChannel,
-    CH1P: Peripheral<P = CH1>,
     CH2: embassy_nrf::ppi::ConfigurableChannel,
-    CH2P: Peripheral<P = CH2>,
-> UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
+    GROUP: embassy_nrf::ppi::Group,
+> UartHalfDuplexSplitDriver<PIN, UARTE, IRQ, TIMER, CH1, CH2, GROUP>
 {
     pub fn new(
-        mut pin: AnyPin,
-        uarte: UARTEP,
+        mut pin: Peri<'static, PIN>,
+        uarte: Peri<'static, UARTE>,
         irq: IRQ,
-        timer: TIMERP,
-        ppi_ch1: CH1P,
-        ppi_ch2: CH2P,
-        ppi_group: AnyGroup,
+        timer: Peri<'static, TIMER>,
+        ppi_ch1: Peri<'static, CH1>,
+        ppi_ch2: Peri<'static, CH2>,
+        ppi_group: Peri<'static, GROUP>,
     ) -> Self {
         {
-            let mut pin = Flex::new(&mut pin);
+            let mut pin = Flex::new(pin.reborrow());
             pin.set_as_input_output(
                 embassy_nrf::gpio::Pull::Up,
                 embassy_nrf::gpio::OutputDrive::HighDrive0Disconnect1,
@@ -88,17 +83,14 @@ impl<
 }
 
 impl<
+    PIN: Pin,
     UARTE: Instance,
-    UARTEP: Peripheral<P = UARTE> + 'static,
     IRQ: interrupt::typelevel::Binding<UARTE::Interrupt, InterruptHandler<UARTE>> + Clone + 'static,
     TIMER: embassy_nrf::timer::Instance,
-    TIMERP: Peripheral<P = TIMER> + 'static,
     CH1: embassy_nrf::ppi::ConfigurableChannel,
-    CH1P: Peripheral<P = CH1> + 'static,
     CH2: embassy_nrf::ppi::ConfigurableChannel,
-    CH2P: Peripheral<P = CH2> + 'static,
-> SplitDriver
-    for UartHalfDuplexSplitDriver<UARTE, UARTEP, IRQ, TIMER, TIMERP, CH1, CH1P, CH2, CH2P>
+    GROUP: embassy_nrf::ppi::Group,
+> SplitDriver for UartHalfDuplexSplitDriver<PIN, UARTE, IRQ, TIMER, CH1, CH2, GROUP>
 {
     type Error = UartHalfDuplexSplitDriverError;
 
@@ -107,13 +99,13 @@ impl<
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
         let mut rx = BufferedUarteRx::new(
-            &mut self.uarte,
-            &mut self.timer,
-            &mut self.ppi_ch1,
-            &mut self.ppi_ch2,
-            &mut self.ppi_group,
+            self.uarte.reborrow(),
+            self.timer.reborrow(),
+            self.ppi_ch1.reborrow(),
+            self.ppi_ch2.reborrow(),
+            self.ppi_group.reborrow(),
             self.irq.clone(),
-            &mut self.pin,
+            self.pin.reborrow(),
             config,
             &mut self.read_buffer,
         );
@@ -141,9 +133,9 @@ impl<
         config.baudrate = Baudrate::BAUD1M;
         config.parity = Parity::EXCLUDED;
         let mut tx = BufferedUarteTx::new(
-            &mut self.uarte,
+            self.uarte.reborrow(),
+            self.pin.reborrow(),
             self.irq.clone(),
-            &mut self.pin,
             config,
             &mut self.write_buffer,
         );

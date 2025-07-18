@@ -4,25 +4,23 @@ use embassy_rp::dma::{AnyChannel, Channel};
 use embassy_rp::pio::{
     Config, FifoJoin, Instance, Pio, PioPin, ShiftConfig, ShiftDirection, StateMachine,
 };
-use embassy_rp::{Peripheral, PeripheralRef, clocks, into_ref};
+use embassy_rp::{Peri, clocks};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
 use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
 
 pub struct Ws2812Pio<'a, const MAX_LED_COUNT: usize, I: Instance> {
-    dma: PeripheralRef<'a, AnyChannel>,
+    dma: Peri<'a, AnyChannel>,
     sm: StateMachine<'a, I, 0>,
 }
 
 impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I> {
     pub fn new<'b: 'a>(
         mut pio: Pio<'a, I>,
-        data_pin: impl Peripheral<P = impl PioPin> + 'b,
-        dma: impl Peripheral<P = impl Channel> + 'a,
+        data_pin: Peri<'b, impl PioPin>,
+        dma: Peri<'a, impl Channel>,
     ) -> Self {
-        into_ref!(dma);
-
         // Setup sm0
 
         // prepare the PIO program
@@ -79,7 +77,7 @@ impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I
         pio.sm0.set_enable(true);
 
         Self {
-            dma: dma.map_into(),
+            dma: dma.into(),
             sm: pio.sm0,
         }
     }
