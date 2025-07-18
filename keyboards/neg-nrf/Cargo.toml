@@ -1,0 +1,105 @@
+cargo-features = ["per-package-target"]
+
+[package]
+name = "neg-nrf"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+forced-target = "thumbv7em-none-eabihf"
+
+[lib]
+path = "src/lib.rs"
+test = false
+doctest = false
+bench = false
+
+[dependencies]
+rktk-drivers-nrf = { workspace = true, features = ["nightly"] }
+rktk-drivers-common = { workspace = true }
+rktk = { workspace = true }
+rktk-log = { workspace = true }
+
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+embassy-embedded-hal = { workspace = true }
+embassy-time = { workspace = true }
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+  "nightly",
+] }
+embassy-nrf = { workspace = true, features = [
+  "gpiote",
+  "time-driver-rtc1",
+  "nrf52840",
+  "nfc-pins-as-gpio",
+] }
+embassy-sync = { workspace = true }
+
+once_cell = { version = "1.19.0", default-features = false, features = [
+  "atomic-polyfill",
+] }
+static_cell = { workspace = true }
+cfg-if = "1.0.0"
+
+log = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
+
+# alloc
+embedded-alloc = { version = "0.6.0", optional = true }
+
+# sd
+nrf-softdevice = { workspace = true, features = [
+  "critical-section-impl",
+  "s140",
+  "nrf52840",
+], optional = true }
+
+# trouble
+rand_chacha = { version = "0.3", default-features = false, optional = true }
+nrf-sdc = { workspace = true, optional = true, features = ["nrf52840"] }
+
+[features]
+_check = ["trouble", "sd", "log", "left"]
+
+default = ["defmt", "rrp", "paw3395"]
+
+alloc = ["dep:embedded-alloc", "rktk/alloc"]
+right = []
+left = []
+
+rrp = ["rktk/rrp"]
+
+defmt = [
+  "dep:defmt",
+  "rktk/defmt",
+  "rktk-log/defmt",
+  "rktk-drivers-common/defmt-usb",
+  "rktk-drivers-common/defmt-timestamp",
+  "rktk-drivers-nrf/defmt",
+]
+log = [
+  "dep:log",
+  "rktk/log",
+  "rktk-log/log",
+  "rktk-drivers-common/log",
+  "rktk-drivers-nrf/log",
+]
+
+sd = ["rktk-drivers-nrf/softdevice-ble", "dep:nrf-softdevice"]
+trouble = [
+  "dep:rand_chacha",
+  "dep:nrf-sdc",
+  "rktk-drivers-nrf/sdc",
+  "rktk-drivers-common/reporter-trouble",
+]
+cs-impl = ["cortex-m/critical-section-single-core"]
+
+paw3395 = []
+pmw3360 = []
+
+reversed-split-pins = []

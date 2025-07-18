@@ -1,0 +1,21 @@
+[build]
+target = "thumbv7em-none-eabihf"
+
+[env]
+RKTK_CONFIG_PATH = { value = "rktk.json", relative = true }
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+linker = "flip-link"
+runner = "uf2deploy deploy -f nrf52840 -p auto"
+
+[profile.release]
+debug = true
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+rustflags = ["-Zlocation-detail=none"]
+
+[unstable]
+build-std = ["core", "alloc"]
+build-std-features = ["panic_immediate_abort", "optimize_for_size"]
