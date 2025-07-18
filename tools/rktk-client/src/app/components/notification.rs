@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use dioxus::prelude::*;
+use dioxus::{core::spawn_forever, prelude::*};
 
 use crate::utils::sleep;
 

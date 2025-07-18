@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use dioxus::prelude::*;
+use dioxus::{core::spawn_forever, prelude::*};
 
 use crate::{
     TAILWIND_CSS,
