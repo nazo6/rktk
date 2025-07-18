@@ -441,8 +441,7 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "bbq2"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b5bbde0e5324bc9c282e869a2f544166ac94bbb82b26afd2ca82ac7b0742a89"
+source = "git+https://github.com/jamesmunns/bbq2?tag=bbq2%2F0.1.0#9f2673f665ff2aa08567bc78ed939ca68d5876c8"
 dependencies = [
  "critical-section",
  "maitake-sync",
@@ -2211,35 +2210,6 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "critical-section",
- "document-features",
- "embassy-embedded-hal",
- "embassy-hal-internal 0.3.0",
- "embassy-sync 0.7.0",
- "embassy-usb-driver 0.1.0",
- "embedded-hal 0.2.7",
- "embedded-hal 1.0.0",
- "embedded-hal-async",
- "embedded-io 0.6.1",
- "embedded-io-async",
- "embedded-storage",
- "embedded-storage-async",
- "fixed",
- "nrf-pac",
- "rand_core 0.6.4",
- "rand_core 0.9.3",
-]
-
-[[package]]
-name = "embassy-nrf"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ae20388606f23184ab567537b9c7758eef5ac20cf5f94db3d936a641b9f4b9e"
-dependencies = [
- "bitflags 2.9.1",
- "cfg-if",
- "cortex-m",
- "cortex-m-rt",
- "critical-section",
  "defmt 1.0.1",
  "document-features",
  "embassy-embedded-hal",
@@ -2247,7 +2217,7 @@ dependencies = [
  "embassy-sync 0.7.0",
  "embassy-time-driver",
  "embassy-time-queue-utils",
- "embassy-usb-driver 0.2.0",
+ "embassy-usb-driver",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
@@ -2263,9 +2233,9 @@ dependencies = [
 
 [[package]]
 name = "embassy-rp"
-version = "0.6.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d298ea0ae8797fbbc835d7ef321b1762916879b9df49695826f54d31c487f5de"
+checksum = "072b67770701fdedfdb79c95ef6c8f81d8290ec3f8892910894a903be428e134"
 dependencies = [
  "atomic-polyfill",
  "cfg-if",
@@ -2280,7 +2250,7 @@ dependencies = [
  "embassy-time",
  "embassy-time-driver",
  "embassy-time-queue-utils",
- "embassy-usb-driver 0.2.0",
+ "embassy-usb-driver",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
@@ -2367,16 +2337,15 @@ dependencies = [
 
 [[package]]
 name = "embassy-usb"
-version = "0.5.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb69c7ca7fa90b9ae590e3dea985ef80df06d900a350f9cc9d3f3c8113fc4370"
+checksum = "6e651b9b7b47b514e6e6d1940a6e2e300891a2c33641917130643602a0cb6386"
 dependencies = [
- "defmt 1.0.1",
+ "defmt 0.3.100",
  "embassy-futures",
  "embassy-net-driver-channel",
- "embassy-sync 0.7.0",
- "embassy-usb-driver 0.2.0",
- "embedded-io-async",
+ "embassy-sync 0.6.2",
+ "embassy-usb-driver",
  "heapless 0.8.0",
  "ssmarshal",
  "usbd-hid",
@@ -2387,15 +2356,8 @@ name = "embassy-usb-driver"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fc247028eae04174b6635104a35b1ed336aabef4654f5e87a8f32327d231970"
-
-[[package]]
-name = "embassy-usb-driver"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17119855ccc2d1f7470a39756b12068454ae27a3eabb037d940b5c03d9c77b7a"
 dependencies = [
- "defmt 1.0.1",
- "embedded-io-async",
+ "defmt 0.3.100",
 ]
 
 [[package]]
@@ -2648,7 +2610,7 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "embassy-executor",
- "embassy-nrf 0.5.0",
+ "embassy-nrf",
  "nrf-softdevice",
  "rktk",
  "rktk-drivers-common",
@@ -4551,7 +4513,7 @@ dependencies = [
  "cortex-m",
  "critical-section",
  "defmt 1.0.1",
- "embassy-nrf 0.4.1",
+ "embassy-nrf",
  "embassy-sync 0.7.0",
  "embedded-io 0.6.1",
  "embedded-storage",
@@ -4589,7 +4551,7 @@ dependencies = [
  "critical-section",
  "defmt 1.0.1",
  "embassy-hal-internal 0.2.0",
- "embassy-nrf 0.4.1",
+ "embassy-nrf",
  "embassy-sync 0.7.0",
  "embedded-io 0.6.1",
  "embedded-io-async",
@@ -5935,7 +5897,7 @@ dependencies = [
  "embassy-embedded-hal",
  "embassy-executor",
  "embassy-futures",
- "embassy-nrf 0.5.0",
+ "embassy-nrf",
  "embassy-sync 0.7.0",
  "embassy-time",
  "embassy-usb",
