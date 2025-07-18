@@ -12,7 +12,7 @@ pub use write::WriteTransport;
 // so I gave up using it.
 
 #[derive(Debug, PartialEq, Eq)]
-pub(crate) enum Indicator {
+pub enum Indicator {
     Start = 0x55,
     Continue = 0xFF,
     End = 0x00,
