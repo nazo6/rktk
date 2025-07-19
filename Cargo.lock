@@ -3914,6 +3914,51 @@ dependencies = [
 ]
 
 [[package]]
+name = "keyball61-common"
+version = "0.2.0"
+dependencies = [
+ "rktk",
+ "rktk-drivers-common",
+]
+
+[[package]]
+name = "keyball61-nrf"
+version = "0.2.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-nrf",
+ "embassy-sync 0.7.0",
+ "embassy-time",
+ "keyball61-common",
+ "nrf-softdevice",
+ "once_cell",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-nrf",
+]
+
+[[package]]
+name = "keyball61-rp"
+version = "0.2.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.0.1",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-rp",
+ "embassy-sync 0.7.0",
+ "embassy-time",
+ "keyball61-common",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-rp",
+]
+
+[[package]]
 name = "keyboard-types"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

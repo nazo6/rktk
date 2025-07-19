@@ -7,7 +7,10 @@ members = [
   "examples/corne-nrf",
   "examples/dummy-kb",
   "tools/*",
-  "keyboards/*",
+  "keyboards/neg-nrf",
+  "keyboards/keyball61/keyball61-common",
+  "keyboards/keyball61/keyball61-nrf",
+  "keyboards/keyball61/keyball61-rp",
 ]
 resolver = "3"
 
@@ -94,6 +97,7 @@ paste = "1.0.15"
 macro_rules_attribute = "0.2.0"
 
 futures = { version = "0.3.30", default-features = false }
+once_cell = { version = "1.21.3", default-features = false }
 
 thiserror = { version = "2.0.3", default-features = false }
 anyhow = "1.0.90"

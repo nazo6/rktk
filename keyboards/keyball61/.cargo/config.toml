@@ -1,0 +1,3 @@
+[env]
+# dummy config just to make rust-analyzer work
+RKTK_CONFIG_PATH = { value = "./rktk.json", relative = true }
