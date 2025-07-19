@@ -56,5 +56,6 @@ bind_interrupts!(pub struct Irqs {
     RTC0 => nrf_sdc::mpsl::HighPrioInterruptHandler;
 });
 
+pub use common::init_peri;
 pub use master::start_master;
 pub use slave::start_slave;

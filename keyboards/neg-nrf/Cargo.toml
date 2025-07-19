@@ -76,9 +76,9 @@ rand_chacha = { version = "0.3", default-features = false, optional = true }
 nrf-sdc = { workspace = true, optional = true, features = ["nrf52840"] }
 
 [features]
-_check = ["trouble", "sd", "log", "left"]
+_check = ["trouble", "sd", "log", "left", "pmw3360"]
 
-default = ["defmt", "rrp", "paw3395"]
+default = ["rrp"]
 
 alloc = ["dep:embedded-alloc", "rktk/alloc"]
 right = []

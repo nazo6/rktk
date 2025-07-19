@@ -7,15 +7,14 @@ use rktk::{
 };
 use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig};
 
-use crate::{common::init_peri, *};
+use crate::*;
 
 static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 pub async fn start_master(
+    p: embassy_nrf::Peripherals,
     hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
     keymap: &'static Keymap,
 ) {
-    let p = init_peri();
-
     // create shared SPI bus
     // NOTE: This must be done as soon as possible, otherwise the SPI device will start acting strangely.
     let spi = create_spi!(p);

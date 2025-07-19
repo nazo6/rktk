@@ -1,4 +1,4 @@
-pub(crate) fn init_peri() -> Peripherals {
+pub fn init_peri() -> Peripherals {
     let p = {
         let config = {
             let mut config = embassy_nrf::config::Config::default();
