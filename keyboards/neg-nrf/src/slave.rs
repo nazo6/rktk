@@ -1,3 +1,4 @@
+use embassy_nrf::Peripherals;
 use rktk::{
     config::keymap::Keymap,
     drivers::{Drivers, dummy},
@@ -6,15 +7,14 @@ use rktk::{
 
 #[cfg(feature = "sd")]
 use crate::common::init_sd;
-use crate::{common::init_peri, *};
+use crate::*;
 
 const EMPTY_KM: Keymap = Keymap::const_default();
 
 pub async fn start_slave(
+    p: Peripherals,
     hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
 ) {
-    let p = init_peri();
-
     #[cfg(feature = "sd")]
     let _ = init_sd().await;
 

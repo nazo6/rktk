@@ -3,7 +3,7 @@
 #![feature(impl_trait_in_assoc_type)]
 
 use embassy_executor::Spawner;
-use neg_nrf::start_master;
+use neg_nrf::{init_peri, start_master};
 use rktk::{config::keymap::Keymap, hooks::create_empty_hooks};
 
 // Empty keymap for demo.
@@ -12,5 +12,6 @@ static KM: Keymap = Keymap::const_default();
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
-    start_master(create_empty_hooks(), &KM).await;
+    let p = init_peri();
+    start_master(p, create_empty_hooks(), &KM).await;
 }
