@@ -15,14 +15,25 @@ test = false
 doctest = false
 bench = false
 
+[[bin]]
+name = "keyball61"
+test = false
+doctest = false
+bench = false
+
 [dependencies]
 keyball61-common = { path = "../keyball61-common/" }
 
 rktk = { workspace = true }
-rktk-drivers-nrf = { workspace = true }
+rktk-drivers-nrf = { workspace = true, features = ["nightly"] }
 rktk-drivers-common = { workspace = true }
 
-embassy-executor = { workspace = true }
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+  "nightly",
+] }
 embassy-sync = { workspace = true }
 embassy-time = { workspace = true }
 embassy-embedded-hal = { workspace = true }

@@ -1,3 +1,14 @@
 [env]
-# dummy config just to make rust-analyzer work
 RKTK_CONFIG_PATH = { value = "./rktk.json", relative = true }
+
+[profile.dev]
+debug = true
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+rustflags = ["-Zlocation-detail=none"]
+
+[unstable]
+build-std = ["core", "alloc"]
+build-std-features = ["panic_immediate_abort"]

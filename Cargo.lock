@@ -3953,6 +3953,7 @@ dependencies = [
  "embassy-sync 0.7.0",
  "embassy-time",
  "keyball61-common",
+ "portable-atomic",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-rp",
