@@ -20,8 +20,10 @@ fn build_args(crate_name: &str) -> Vec<String> {
         args.push("--feature-powerset".to_string());
 
         if let Some(at_least_one_of) = &config.check_at_least_one_of {
-            args.push("--at-least-one-of".to_string());
-            args.push(at_least_one_of.join(","));
+            for group in at_least_one_of {
+                args.push("--at-least-one-of".to_string());
+                args.push(group.join(","));
+            }
         }
 
         if let Some(group_features) = &config.check_group_features {

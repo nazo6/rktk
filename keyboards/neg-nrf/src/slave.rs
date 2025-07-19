@@ -8,9 +8,10 @@ use rktk::{
 use crate::common::init_sd;
 use crate::{common::init_peri, *};
 
+const EMPTY_KM: Keymap = Keymap::const_default();
+
 pub async fn start_slave(
     hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
-    keymap: &'static Keymap,
 ) {
     let p = init_peri();
 
@@ -32,5 +33,5 @@ pub async fn start_slave(
         debounce: Some(driver_debounce!()),
         encoder: Some(driver_encoder!(p)),
     };
-    rktk::task::start(drivers, hooks, misc::get_opts(keymap)).await;
+    rktk::task::start(drivers, hooks, misc::get_opts(&EMPTY_KM)).await;
 }

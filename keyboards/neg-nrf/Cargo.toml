@@ -16,6 +16,18 @@ test = false
 doctest = false
 bench = false
 
+[[bin]]
+name = "master"
+test = false
+doctest = false
+bench = false
+
+[[bin]]
+name = "slave"
+test = false
+doctest = false
+bench = false
+
 [dependencies]
 rktk-drivers-nrf = { workspace = true, features = ["nightly"] }
 rktk-drivers-common = { workspace = true }
@@ -101,5 +113,3 @@ cs-impl = ["cortex-m/critical-section-single-core"]
 
 paw3395 = []
 pmw3360 = []
-
-reversed-split-pins = []

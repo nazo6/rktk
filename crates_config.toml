@@ -6,12 +6,20 @@ check_env = { DEFMT_LOG = "trace" }
 test_features_global = ["_check"]
 doc_features_global = ["_check"]
 
+# =========== Core crates ============
+
 [crates.rktk]
 check_group_features = [["defmt", "log"]]
 
 [crates.rktk-rrp]
-check_at_least_one_of = ["server", "client"]
+check_at_least_one_of = [["server", "client"]]
 test_enabled = true
+
+[crates.rktk-keymanager]
+check_group_features = [["serde", "postcard"]]
+test_enabled = true
+
+# =========== Drivers ==========
 
 [crates.rktk-drivers-nrf]
 check_features = ["_nrfxx", "nightly", "power"]
@@ -50,12 +58,11 @@ check_group_features = [
 test_enabled = true
 test_features = []
 
-[crates.rktk-keymanager]
-check_group_features = [["serde", "postcard"]]
-test_enabled = true
+
+# ========== Tools ==========
 
 [crates.rktk-client]
-check_at_least_one_of = ["web", "native"]
+check_at_least_one_of = [["web", "native"]]
 check_mutually_exclusive_features = [["web", "native"]]
 doc_disabled = true
 
@@ -63,8 +70,7 @@ doc_disabled = true
 doc_disabled = true
 check_no_powerset = true
 
-[crates.rktk-log-macros]
-doc_disabled = true
+# ========== Keyboards ==========
 
 [crates.example-corne]
 check_no_powerset = true
@@ -77,3 +83,9 @@ doc_disabled = true
 [crates.example-dummy-kb-rp]
 doc_disabled = true
 check_no_powerset = true
+
+[crates.neg-nrf]
+check_features = ["left", "alloc", "paw3395", "log", "defmt"]
+check_at_least_one_of = [["sd", "trouble", "cs-impl"]]
+check_mutually_exclusive_features = [["sd", "trouble", "cs-impl"]]
+check_skip = ["_check", "default", "right", "pmw3360"]

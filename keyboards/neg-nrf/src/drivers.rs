@@ -26,9 +26,6 @@ macro_rules! driver_split {
 
         let uarte_config = embassy_nrf::uarte::Config::default();
 
-        #[cfg(feature = "reversed-split-pins")]
-        let (sp1, sp2) = ($p.P0_06, $p.P0_08);
-        #[cfg(not(feature = "reversed-split-pins"))]
         let (sp1, sp2) = ($p.P0_08, $p.P0_06);
 
         UartFullDuplexSplitDriver::new(BufferedUarte::new(

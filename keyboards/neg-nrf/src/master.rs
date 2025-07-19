@@ -7,10 +7,7 @@ use rktk::{
 };
 use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig};
 
-use crate::{
-    common::{init_peri, init_sd},
-    *,
-};
+use crate::{common::init_peri, *};
 
 static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 pub async fn start_master(
@@ -58,7 +55,7 @@ pub async fn start_master(
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "sd")] {
-            let ble_builder = Some(init_sd().await.0);
+            let ble_builder = Some(crate::common::init_sd().await.0);
         } else if #[cfg(feature = "trouble")] {
             let ble_builder = Some(trouble_ble_reporter);
         } else {
