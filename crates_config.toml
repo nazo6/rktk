@@ -89,3 +89,4 @@ check_features = ["left", "alloc", "paw3395", "log", "defmt"]
 check_at_least_one_of = [["sd", "trouble", "cs-impl"]]
 check_mutually_exclusive_features = [["sd", "trouble", "cs-impl"]]
 check_skip = ["_check", "default", "right", "pmw3360"]
+check_build = true

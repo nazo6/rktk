@@ -8,7 +8,7 @@ RKTK_CONFIG_PATH = { value = "rktk.json", relative = true }
 linker = "flip-link"
 runner = "uf2deploy deploy -f nrf52840 -p auto"
 
-[profile.release]
+[profile.dev]
 debug = true
 opt-level = "z"
 lto = "fat"

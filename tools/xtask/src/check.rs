@@ -7,15 +7,22 @@ use crate::utils::{METADATA, xprintln};
 use super::config::CRATES_CONFIG;
 
 fn build_args(crate_name: &str) -> Vec<String> {
-    let mut args = vec!["hack".to_string(), "clippy".to_string()];
-
-    let mut skip = CRATES_CONFIG.check_skip_global.clone().unwrap_or_default();
-
     let config = CRATES_CONFIG
         .crates
         .get(crate_name)
         .cloned()
         .unwrap_or_default();
+
+    let mut args = vec!["hack".to_string()];
+
+    if config.check_build {
+        args.push("build".to_string());
+    } else {
+        args.push("clippy".to_string());
+    }
+
+    let mut skip = CRATES_CONFIG.check_skip_global.clone().unwrap_or_default();
+
     if !config.check_no_powerset {
         args.push("--feature-powerset".to_string());
 
