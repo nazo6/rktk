@@ -83,14 +83,16 @@ fn run_doc(
     let mut doc_index_html = None;
     for line in stdout.lines().rev() {
         if let Ok(val) = serde_json::from_str::<CargoDocCompilerArtifactLog>(line)
-            && val.reason == "compiler-artifact" && val.package_id == p.id.repr {
-                doc_index_html = val
-                    .filenames
-                    .iter()
-                    .find(|f| f.ends_with("index.html"))
-                    .cloned();
-                break;
-            }
+            && val.reason == "compiler-artifact"
+            && val.package_id == p.id.repr
+        {
+            doc_index_html = val
+                .filenames
+                .iter()
+                .find(|f| f.ends_with("index.html"))
+                .cloned();
+            break;
+        }
     }
 
     let Some(doc_index_html) = doc_index_html else {
@@ -121,7 +123,7 @@ pub fn start() -> anyhow::Result<()> {
     };
 
     let packages = metadata.workspace_packages();
-    xprintln!("Documenting all {} crates...", packages.len());
+    xprintln!("Documenting...");
 
     let parts_root = metadata.target_directory.join("doc.parts");
     let merged_root = metadata.target_directory.join("doc.merged");
@@ -137,9 +139,7 @@ pub fn start() -> anyhow::Result<()> {
             .get(package.name.as_str())
             .cloned()
             .unwrap_or_default();
-        if config.doc_disabled {
-            eprintln!();
-            xprintln!("Skipping documentation for crate `{}`", package.name);
+        if !config.doc_enabled {
             continue;
         }
 

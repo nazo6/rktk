@@ -14,6 +14,7 @@ pub struct InternalCmdConfig {
 #[derive(Default, serde::Deserialize, Clone)]
 #[serde(default)]
 pub struct CrateConfig {
+    // Check configuration
     /// Disables feature powerset check
     pub check_no_powerset: bool,
     /// Features to check (these features will be always added).
@@ -27,13 +28,15 @@ pub struct CrateConfig {
     /// If true, `cargo build` will be used instead.`
     pub check_build: bool,
 
+    // Test configuration
     pub test_enabled: bool,
     pub test_features: Option<Vec<String>>,
 
-    pub doc_disabled: bool,
+    // Doc configuration
+    pub doc_enabled: bool,
 }
 
 pub static CRATES_CONFIG: LazyLock<InternalCmdConfig> = LazyLock::new(|| {
-    toml::from_str(include_str!("../../../crates_config.toml"))
-        .expect("Failed to parse CratesConfig.toml")
+    serde_json::from_str(include_str!("../../../crates_config.json"))
+        .expect("Failed to parse crate_config.json")
 });
