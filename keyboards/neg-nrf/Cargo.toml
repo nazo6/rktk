@@ -29,7 +29,7 @@ doctest = false
 bench = false
 
 [dependencies]
-rktk-drivers-nrf = { workspace = true, features = ["nightly"] }
+rktk-drivers-nrf = { workspace = true }
 rktk-drivers-common = { workspace = true }
 rktk = { workspace = true }
 rktk-log = { workspace = true }
@@ -42,7 +42,6 @@ embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
   "executor-thread",
   "executor-interrupt",
-  "nightly",
 ] }
 embassy-nrf = { workspace = true, features = [
   "gpiote",

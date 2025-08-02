@@ -55,7 +55,7 @@ bind_interrupts!(pub struct Irqs {
     UARTE0 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE0>;
 });
 
-pub async fn start(keymap: &'static Keymap) {
+pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) {
     let mut config = embassy_nrf::config::Config::default();
     config.gpiote_interrupt_priority = Priority::P2;
     config.time_interrupt_priority = Priority::P2;
@@ -150,7 +150,7 @@ pub async fn start(keymap: &'static Keymap) {
                 ..Default::default()
             },
         );
-        rktk_drivers_nrf::softdevice::start_softdevice(sd).await;
+        rktk_drivers_nrf::softdevice::start_softdevice(spawner, sd);
         embassy_time::Timer::after_millis(50).await;
         server
     };
@@ -162,6 +162,7 @@ pub async fn start(keymap: &'static Keymap) {
             flash, &cache,
         )),
         Some(ble::SoftdeviceBleReporterBuilder::new(
+            spawner,
             sd,
             server,
             "keyball61",
@@ -206,10 +207,22 @@ pub async fn start(keymap: &'static Keymap) {
 
     match hand {
         rktk::config::Hand::Left => {
-            rktk::task::start(drivers, create_empty_hooks(), get_opts_left(keymap)).await;
+            rktk::task::start(
+                spawner,
+                drivers,
+                create_empty_hooks(),
+                get_opts_left(keymap),
+            )
+            .await;
         }
         rktk::config::Hand::Right => {
-            rktk::task::start(drivers, create_empty_hooks(), get_opts_right(keymap)).await;
+            rktk::task::start(
+                spawner,
+                drivers,
+                create_empty_hooks(),
+                get_opts_right(keymap),
+            )
+            .await;
         }
     }
 }

@@ -29,7 +29,6 @@ embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
   "executor-thread",
   "executor-interrupt",
-  "nightly",
 ] }
 embassy-sync = { workspace = true }
 embassy-time = { workspace = true }
