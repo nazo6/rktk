@@ -3,19 +3,19 @@
 use core::cell::RefCell;
 
 use nrf_softdevice::ble::{
+    Connection, EncryptionInfo, IdentityKey, MasterId,
     gatt_server::{get_sys_attrs, set_sys_attrs},
     security::{IoCapabilities, SecurityHandler},
-    Connection, EncryptionInfo, IdentityKey, MasterId,
 };
 use rktk_log::{info, warn};
-use storage::{bonder_save_task, BOND_SAVE};
+use storage::{BOND_SAVE, bonder_save_task};
 
 use crate::softdevice::flash::SharedFlash;
 
 mod storage;
 mod types;
 
-pub use storage::{BondFlashCommand, BOND_FLASH};
+pub use storage::{BOND_FLASH, BondFlashCommand};
 use types::*;
 
 const MAX_PEER_COUNT: usize = 8;
@@ -132,10 +132,11 @@ impl SecurityHandler for Bonder {
 
 static SEC: static_cell::StaticCell<Bonder> = static_cell::StaticCell::new();
 
-pub async fn init_bonder(flash: &'static SharedFlash) -> &'static Bonder {
-    embassy_executor::Spawner::for_current_executor()
-        .await
-        .must_spawn(bonder_save_task(flash));
+pub async fn init_bonder(
+    spawner: embassy_executor::Spawner,
+    flash: &'static SharedFlash,
+) -> &'static Bonder {
+    spawner.must_spawn(bonder_save_task(flash));
 
     let bond_map = storage::read_bond_map(flash).await.unwrap_or_default();
 

@@ -42,10 +42,12 @@ pub struct SoftdeviceBleReporterBuilder {
     server: Server,
     name: &'static str,
     flash: &'static SharedFlash,
+    spawner: embassy_executor::Spawner,
 }
 
 impl SoftdeviceBleReporterBuilder {
     pub fn new(
+        spawner: embassy_executor::Spawner,
         sd: &'static Softdevice,
         server: Server,
         name: &'static str,
@@ -56,6 +58,7 @@ impl SoftdeviceBleReporterBuilder {
             server,
             name,
             flash,
+            spawner,
         }
     }
 }
@@ -68,7 +71,7 @@ impl WirelessReporterDriverBuilder for SoftdeviceBleReporterBuilder {
     async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         Ok((
             driver::SoftdeviceBleReporterDriver {},
-            task::softdevice_task(self.sd, self.server, self.name, self.flash),
+            task::softdevice_task(self.spawner, self.sd, self.server, self.name, self.flash),
         ))
     }
 }

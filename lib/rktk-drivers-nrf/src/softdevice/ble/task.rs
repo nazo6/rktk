@@ -15,6 +15,7 @@ use crate::softdevice::flash::SharedFlash;
 use super::server::Server;
 
 pub async fn softdevice_task(
+    spawner: embassy_executor::Spawner,
     sd: &'static Softdevice,
     server: Server,
     name: &'static str,
@@ -44,7 +45,7 @@ pub async fn softdevice_task(
         scan_data: &SCAN_DATA,
     };
 
-    let bonder = super::bonder::init_bonder(flash).await;
+    let bonder = super::bonder::init_bonder(spawner, flash).await;
 
     loop {
         rktk::print!("Advertising");

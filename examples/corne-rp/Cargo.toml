@@ -31,7 +31,6 @@ embassy-rp = { workspace = true, features = [
   "rp2040",
 ] }
 embassy-executor = { workspace = true, features = [
-  "task-arena-size-65536",
   "arch-cortex-m",
   "executor-thread",
   "executor-interrupt",

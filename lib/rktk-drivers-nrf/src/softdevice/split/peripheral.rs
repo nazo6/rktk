@@ -3,20 +3,20 @@ use core::marker::PhantomData;
 use embassy_futures::join::join;
 use embassy_sync::pipe::Pipe;
 use nrf_softdevice::{
+    Softdevice,
     ble::{
         advertisement_builder::{
             Flag, LegacyAdvertisementBuilder, LegacyAdvertisementPayload, ServiceList,
         },
         l2cap, peripheral,
     },
-    Softdevice,
 };
 use rktk::drivers::interface::split::SplitDriver;
 use rktk::utils::RawMutex;
 use rktk_log::error;
 
-use super::packet::Packet;
 use super::PSM;
+use super::packet::Packet;
 
 static TX_PIPE: Pipe<RawMutex, 128> = Pipe::new();
 static RX_PIPE: Pipe<RawMutex, 128> = Pipe::new();
@@ -87,11 +87,8 @@ pub struct SoftdeviceBlePeripheralSplitDriver {
 }
 
 impl SoftdeviceBlePeripheralSplitDriver {
-    pub async fn new(sd: &'static Softdevice) -> Self {
-        embassy_executor::Spawner::for_current_executor()
-            .await
-            .spawn(ble_split_peripheral_task(sd))
-            .unwrap();
+    pub async fn new(spawner: embassy_executor::Spawner, sd: &'static Softdevice) -> Self {
+        spawner.spawn(ble_split_peripheral_task(sd)).unwrap();
 
         Self {
             _phantom: PhantomData,

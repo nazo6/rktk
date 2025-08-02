@@ -24,6 +24,7 @@ pub enum SdcInitError {
 #[macro_export]
 macro_rules! init_sdc {
     (
+        $spawner:expr,
         $sdc_name:ident,
         $irqs:expr,
         $rng:expr,
@@ -40,9 +41,8 @@ macro_rules! init_sdc {
             $ppis11, $ppis12,
         );
         let $sdc_name = $crate::sdc::init_sdc(
-            __mpsl_p, __sdc_p, $rng, $l2cap_mtu, $l2cap_txq, $l2cap_rxq, $irqs,
-        )
-        .await;
+            $spawner, __mpsl_p, __sdc_p, $rng, $l2cap_mtu, $l2cap_txq, $l2cap_rxq, $irqs,
+        );
     };
 }
 
@@ -54,7 +54,8 @@ async fn mpsl_task(mpsl: &'static MultiprotocolServiceLayer<'static>) -> ! {
 /// Initialize softdevice controller(sdc) and starts mpsl task.
 ///
 /// This function must be called only once.
-pub async fn init_sdc<
+#[allow(clippy::too_many_arguments)]
+pub fn init_sdc<
     T: Interrupt,
     I: Binding<T, LowPrioInterruptHandler>
         + Binding<interrupt::typelevel::RADIO, HighPrioInterruptHandler>
@@ -67,6 +68,7 @@ pub async fn init_sdc<
     PR: rng::Instance,
     RM: Mode + Send,
 >(
+    spawner: embassy_executor::Spawner,
     mpsl_peripherals: mpsl::Peripherals<'static>,
     sdc_peripherals: sdc::Peripherals<'static>,
     rng: &'static mut Rng<'static, PR, RM>,
@@ -89,9 +91,7 @@ pub async fn init_sdc<
         lfclk_cfg,
     )?);
 
-    embassy_executor::Spawner::for_current_executor()
-        .await
-        .must_spawn(mpsl_task(&*mpsl));
+    spawner.must_spawn(mpsl_task(&*mpsl));
 
     let sdc_mem = singleton!(sdc::Mem::<3312>::new(), sdc::Mem::<3312>);
 

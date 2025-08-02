@@ -26,7 +26,6 @@ rktk-drivers-common = { workspace = true }
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
 embassy-executor = { workspace = true, features = [
-  "task-arena-size-65536",
   "arch-cortex-m",
   "executor-thread",
   "executor-interrupt",

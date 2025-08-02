@@ -19,7 +19,7 @@
       "doc_enabled": true
     },
     "rktk-drivers-nrf": {
-      "check_features": ["_nrfxx", "nightly", "power"],
+      "check_features": ["_nrfxx", "power"],
       "check_group_features": [
         ["softdevice", "softdevice-ble"],
         ["defmt", "log"]

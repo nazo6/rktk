@@ -45,7 +45,9 @@ mod sd {
     use rktk_drivers_nrf::softdevice::flash::SharedFlash;
     use rktk_drivers_nrf::softdevice::{ble::init_ble_server, flash::get_flash, init_softdevice};
 
-    pub async fn init_sd() -> (SoftdeviceBleReporterBuilder, &'static SharedFlash) {
+    pub async fn init_sd(
+        spawner: embassy_executor::Spawner,
+    ) -> (SoftdeviceBleReporterBuilder, &'static SharedFlash) {
         let sd = init_softdevice("negL");
 
         let server = init_ble_server(
@@ -59,11 +61,11 @@ mod sd {
         );
         let (flash, _cache) = get_flash(sd);
 
-        rktk_drivers_nrf::softdevice::start_softdevice(sd).await;
+        rktk_drivers_nrf::softdevice::start_softdevice(spawner, sd);
         embassy_time::Timer::after_millis(200).await;
 
         (
-            SoftdeviceBleReporterBuilder::new(sd, server, "negL", flash),
+            SoftdeviceBleReporterBuilder::new(spawner, sd, server, "negL", flash),
             flash,
         )
     }

@@ -12,10 +12,10 @@ use embassy_nrf::{
     usb::vbus_detect::SoftwareVbusDetect,
 };
 use rktk::{
+    config::Hand,
     config::{CONST_CONFIG, new_rktk_opts},
     drivers::{Drivers, dummy},
     hooks::empty_hooks::create_empty_hooks,
-    config::Hand,
     singleton,
 };
 
@@ -30,7 +30,7 @@ bind_interrupts!(pub struct Irqs {
 });
 
 #[embassy_executor::main]
-async fn main(_spawner: Spawner) {
+async fn main(spawner: Spawner) {
     let p = embassy_nrf::init(Default::default());
 
     // Output pins are arranged from left to right
@@ -95,6 +95,7 @@ async fn main(_spawner: Spawner) {
     };
 
     rktk::task::start(
+        spawner,
         drivers,
         create_empty_hooks(),
         new_rktk_opts(&keymap::KEYMAP, {

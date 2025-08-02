@@ -11,7 +11,7 @@ use rktk::{config::keymap::Keymap, hooks::create_empty_hooks};
 static KM: Keymap = Keymap::const_default();
 
 #[embassy_executor::main]
-async fn main(_spawner: Spawner) {
+async fn main(spawner: Spawner) {
     let p = init_peri();
-    start_master(p, create_empty_hooks(), &KM).await;
+    start_master(spawner, p, create_empty_hooks(), &KM).await;
 }

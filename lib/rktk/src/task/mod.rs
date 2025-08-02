@@ -59,6 +59,11 @@ pub async fn start<
     DC: DisplayConfig + 'static,
     RL: blinksy::layout::Layout2d + 'static,
 >(
+    #[allow(
+        unused_variables,
+        reason = "`spawner` is unused when `alloc` is disabled"
+    )]
+    spawner: embassy_executor::Spawner,
     mut drivers: Drivers<
         System,
         KeyScan,
@@ -92,12 +97,14 @@ pub async fn start<
         .await;
 
     sjoin::join!(
+        spawner,
         async {
             initializers::init_mouse(&mut drivers.mouse, opts.config).await;
             let ((wireless, wireless_task), (usb, usb_task)) =
                 initializers::init_reporters(drivers.ble_builder, drivers.usb_builder).await;
 
             sjoin::join!(
+                spawner,
                 async {
                     let hand = opts.hand.unwrap_or(Hand::Left);
                     crate::utils::display_state!(Hand, Some(hand));
@@ -125,6 +132,7 @@ pub async fn start<
                         } => {
                             info!("Master start");
                             sjoin::join!(
+                                spawner,
                                 async {
                                     let config_store =
                                         master::utils::init_storage(drivers.storage).await;
@@ -202,6 +210,7 @@ pub async fn start<
                         } => {
                             debug!("Slave start");
                             sjoin::join!(
+                                spawner,
                                 async move {
                                     slave::start(
                                         opts.config,

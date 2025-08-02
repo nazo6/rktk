@@ -27,7 +27,7 @@ impl KeyscanDriver for DummyKeyscanDriver {
 }
 
 #[embassy_executor::main]
-async fn main(_spawner: Spawner) {
+async fn main(spawner: Spawner) {
     let _p = embassy_rp::init(Default::default());
 
     let drivers = Drivers {
@@ -45,6 +45,7 @@ async fn main(_spawner: Spawner) {
     };
 
     rktk::task::start(
+        spawner,
         drivers,
         create_empty_hooks(),
         new_rktk_opts(&keymap::KEYMAP, None),

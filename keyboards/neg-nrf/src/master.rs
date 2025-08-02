@@ -11,6 +11,7 @@ use crate::*;
 
 static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 pub async fn start_master(
+    spawner: embassy_executor::Spawner,
     p: embassy_nrf::Peripherals,
     hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
     keymap: &'static Keymap,
@@ -35,6 +36,7 @@ pub async fn start_master(
         );
         let rng_2 = singleton!(ChaCha12Rng::from_rng(&mut rng).unwrap(), ChaCha12Rng);
         init_sdc!(
+            spawner,
             sdc, Irqs, rng,
             mpsl: (p.RTC0, p.TIMER0, p.TEMP, p.PPI_CH19, p.PPI_CH30, p.PPI_CH31),
             sdc: (p.PPI_CH17, p.PPI_CH18, p.PPI_CH20, p.PPI_CH21, p.PPI_CH22, p.PPI_CH23, p.PPI_CH24, p.PPI_CH25, p.PPI_CH26, p.PPI_CH27, p.PPI_CH28, p.PPI_CH29),
@@ -54,7 +56,7 @@ pub async fn start_master(
 
     cfg_if::cfg_if! {
         if #[cfg(feature = "sd")] {
-            let ble_builder = Some(crate::common::init_sd().await.0);
+            let ble_builder = Some(crate::common::init_sd(spawner).await.0);
         } else if #[cfg(feature = "trouble")] {
             let ble_builder = Some(trouble_ble_reporter);
         } else {
@@ -87,5 +89,5 @@ pub async fn start_master(
         encoder: Some(driver_encoder!(p)),
     };
 
-    rktk::task::start(drivers, hooks, misc::get_opts(keymap)).await;
+    rktk::task::start(spawner, drivers, hooks, misc::get_opts(keymap)).await;
 }

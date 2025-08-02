@@ -85,9 +85,6 @@ _nrfxx = [
 _check = ["_nrfxx", "softdevice-ble", "esb", "sdc", "defmt"]
 _release_check = ["_nrfxx", "esb", "defmt"]
 
-## Use this feature to use embassy-executor's nightly features.
-nightly = ["embassy-executor/nightly"]
-
 ## Enables system power off feature. This is supported only on some chips like nRF52840.
 power = []
 

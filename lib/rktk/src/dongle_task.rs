@@ -14,6 +14,11 @@ use crate::{
 
 /// Runs dongle with the given drivers.
 pub async fn start_dongle<D: display::DisplayConfig + 'static>(
+    #[allow(
+        unused_variables,
+        reason = "`spawner` is unused when `alloc` is disabled"
+    )]
+    spawner: embassy_executor::Spawner,
     usb: impl UsbReporterDriverBuilder,
     dongle: impl DongleDriverBuilder,
     mut hooks: impl DongleHooks,
@@ -24,6 +29,7 @@ pub async fn start_dongle<D: display::DisplayConfig + 'static>(
     let (mut dongle, dongle_task) = dongle.build().await.unwrap();
 
     sjoin::join!(
+        spawner,
         async move {
             loop {
                 let data = dongle.recv().await;

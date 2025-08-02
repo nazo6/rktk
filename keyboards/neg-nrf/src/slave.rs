@@ -12,11 +12,12 @@ use crate::*;
 const EMPTY_KM: Keymap = Keymap::const_default();
 
 pub async fn start_slave(
+    spawner: embassy_executor::Spawner,
     p: Peripherals,
     hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
 ) {
     #[cfg(feature = "sd")]
-    let _ = init_sd().await;
+    let _ = init_sd(spawner).await;
 
     let spi = create_spi!(p);
 
@@ -33,5 +34,5 @@ pub async fn start_slave(
         debounce: Some(driver_debounce!()),
         encoder: Some(driver_encoder!(p)),
     };
-    rktk::task::start(drivers, hooks, misc::get_opts(&EMPTY_KM)).await;
+    rktk::task::start(spawner, drivers, hooks, misc::get_opts(&EMPTY_KM)).await;
 }
