@@ -1,5 +1,5 @@
 [env]
-RKTK_CONFIG_PATH = { value = "./rktk.json", relative = true }
+RKTK_CONFIG_PATH = { value = "rktk.json", relative = true }
 
 [profile.dev]
 debug = true
@@ -11,4 +11,4 @@ rustflags = ["-Zlocation-detail=none"]
 
 [unstable]
 build-std = ["core", "alloc"]
-build-std-features = ["panic_immediate_abort"]
+build-std-features = ["panic_immediate_abort", "optimize_for_size"]
