@@ -43,7 +43,7 @@ embassy-executor = { version = "0.7.0" }
 embassy-time = { version = "0.4.0" }
 embassy-usb = { version = "0.4.0" }
 embassy-futures = { version = "0.1.1" }
-sequential-storage = "4.0.0"
+sequential-storage = "5.0.0"
 
 embassy-rp = { version = "0.5.0" }
 embassy-nrf = { version = "0.4.1" }
