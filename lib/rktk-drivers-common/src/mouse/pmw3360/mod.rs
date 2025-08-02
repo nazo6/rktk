@@ -18,10 +18,13 @@ mod timing {
     pub const NCS_SCLK: u32 = 120;
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct BurstData {
     pub motion: bool,
     pub on_surface: bool,
+    pub op_mode: u8,
+    pub frame_data_first: bool,
     pub dx: i16,
     pub dy: i16,
     pub surface_quality: u8,
@@ -34,6 +37,7 @@ pub struct BurstData {
 pub struct Pmw3360<S: SpiDevice> {
     spi: S,
     in_burst_mode: bool,
+    cpi: u16,
 }
 
 impl<S: SpiDevice> Pmw3360<S> {
@@ -41,6 +45,7 @@ impl<S: SpiDevice> Pmw3360<S> {
         Self {
             spi,
             in_burst_mode: false,
+            cpi: 1000, // Default CPI
         }
     }
 }
@@ -138,6 +143,8 @@ impl<S: SpiDevice> Pmw3360<S> {
         let data = BurstData {
             motion: (data[0] & 0x80) != 0,
             on_surface: (data[0] & 0x08) == 0,
+            op_mode: (data[0] >> 1) & 0x03,
+            frame_data_first: data[0] & 0x01 != 0,
             dx: ((data[3] as i16) << 8) | (data[2] as i16),
             dy: ((data[5] as i16) << 8) | (data[4] as i16),
             surface_quality: data[6],
@@ -147,10 +154,19 @@ impl<S: SpiDevice> Pmw3360<S> {
             shutter: ((data[11] as u16) << 8) | (data[10] as u16),
         };
 
+        // FIXME: This is a workaround for a phenomenon in which the PMW3360 sensor stacks with
+        // OP_MODE remaining at Rest1 and then stops moving.
+        // It is necessary to investigate whether this is hardware-specific or whether other programs are incorrect.
+        if data.motion && data.op_mode == 0x01 && data.on_surface && data.dx == 0 && data.dy == 0 {
+            rktk_log::warn!("Invalid motion detected. Performing reset:\n{:?}", data);
+            self.power_up().await?;
+        }
+
         Ok(data)
     }
 
     pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), Pmw3360Error<S::Error>> {
+        self.cpi = cpi;
         let val: u16;
         if cpi < 100 {
             val = 0
@@ -191,6 +207,7 @@ impl<S: SpiDevice> Pmw3360<S> {
     async fn power_up(&mut self) -> Result<(), Pmw3360Error<S::Error>> {
         let is_valid_signature = self.power_up_inner().await?;
         if is_valid_signature {
+            self.set_cpi(self.cpi).await?;
             Ok(())
         } else {
             Err(Pmw3360Error::InvalidSignature)
