@@ -10,6 +10,8 @@ on:
       - "**.rs"
       - "**.lock"
   pull_request:
+    types:
+      - ready_for_review
     paths:
       - ".github/workflows/lib.yml"
       - ".github/workflows/setup-rust/action.yaml"
