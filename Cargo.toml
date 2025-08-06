@@ -37,16 +37,16 @@ embedded-io-async = "0.6.1"
 embedded-storage-async = "0.4.1"
 
 # embassy
-embassy-embedded-hal = { version = "0.3.1" }
+embassy-embedded-hal = { version = "0.4.0" }
 embassy-sync = { version = "0.7.0" }
 embassy-executor = { version = "0.8.0" }
 embassy-time = { version = "0.4.0" }
-embassy-usb = { version = "0.4.0" }
+embassy-usb = { version = "0.5.0" }
 embassy-futures = { version = "0.1.1" }
 sequential-storage = "5.0.0"
 
-embassy-rp = { version = "0.5.0" }
-embassy-nrf = { version = "0.4.1" }
+embassy-rp = { version = "0.7.0" }
+embassy-nrf = { version = "0.6.0" }
 nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice" }
 
 # embedded architecture support
@@ -64,8 +64,8 @@ ssd1306 = { version = "0.10.0", features = ["async"] }
 trouble-host = { version = "0.2.4" }
 rand_core = { version = "0.6.4" }
 
-nrf-sdc = { version = "0.1.1", default-features = false }
-nrf-mpsl = { version = "0.1.1", default-features = false }
+nrf-sdc = { version = "0.2.0", default-features = false }
+nrf-mpsl = { version = "0.2.0", default-features = false }
 
 pio = "0.3.0"
 
