@@ -66,8 +66,7 @@
 			"check_at_least_one_of": [["sd", "trouble", "cs-impl"]],
 			"check_mutually_exclusive_features": [["sd", "trouble", "cs-impl"]],
 			"check_skip": ["_check", "default", "right", "pmw3360"],
-			"check_build": true,
-			"doc_enabled": true
+			"check_build": true
 		},
 		"keyball61-common": {
 			"check_build": true
