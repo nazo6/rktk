@@ -17,8 +17,8 @@
 	"devDependencies": {
 		"@tailwindcss/cli": "^4.1.11",
 		"concurrently": "^9.2.0",
-		"daisyui": "^5.0.46",
+		"daisyui": "^5.0.50",
 		"tailwindcss": "^4.1.11",
-		"wrangler": "^4.24.1"
+		"wrangler": "^4.28.1"
 	}
 }
