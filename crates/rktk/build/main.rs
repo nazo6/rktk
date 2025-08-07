@@ -17,7 +17,7 @@ fn main() {
         println!("cargo:warning=Using demo json for docs.rs");
         r#####"
             {
-              "$schema": "./lib/rktk/schema.json",
+              "$schema": "./crates/rktk/schema.json",
               "constant": {
                 "keyboard": {
                   "cols": 14,

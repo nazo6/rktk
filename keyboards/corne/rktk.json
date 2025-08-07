@@ -1,5 +1,5 @@
 {
-	"$schema": "../../lib/rktk/schema.json",
+	"$schema": "../../crates/rktk/schema.json",
 	"constant": {
 		"keyboard": {
 			"cols": 12,

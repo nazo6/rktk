@@ -31,7 +31,7 @@
 //! Here is the example of the `rktk.json` file.
 //! ```json
 //! {
-//!   "$schema": "https://raw.githubusercontent.com/nazo6/rktk/refs/heads/master/lib/rktk/schema.json",
+//!   "$schema": "https://raw.githubusercontent.com/nazo6/rktk/refs/heads/master/crates/rktk/schema.json",
 //!   "constant": {
 //!     "keyboard": {
 //!       "cols": 12,

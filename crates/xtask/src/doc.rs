@@ -40,6 +40,7 @@ fn run_doc(
     let part_dir = parts_root.join(p.name.as_str());
     let mut args = vec![
         "doc".to_string(),
+        "--lib".to_string(),
         "--no-deps".to_string(),
         "--message-format=json".to_string(),
         "-Zrustdoc-map".to_string(),
