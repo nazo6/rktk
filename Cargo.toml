@@ -2,8 +2,8 @@ cargo-features = ["profile-rustflags"]
 
 [workspace]
 resolver = "3"
-members = ["lib/*", "tools/*", "keyboards/*/crates/*"]
-exclude = ["lib/.cargo"]
+members = ["crates/*", "keyboards/*/crates/*"]
+exclude = ["crates/.cargo"]
 
 [workspace.package]
 authors = ["nazo6"]
