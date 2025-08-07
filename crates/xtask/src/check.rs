@@ -17,6 +17,7 @@ fn build_args(crate_name: &str) -> Vec<String> {
 
     if config.check_build {
         args.push("build".to_string());
+        args.push("--release".to_string());
     } else {
         args.push("clippy".to_string());
     }

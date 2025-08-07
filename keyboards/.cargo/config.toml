@@ -1,4 +1,6 @@
-[profile.dev]
+# Configuration to minimize binary size
+
+[profile.release]
 debug = true
 opt-level = "z"
 lto = "fat"

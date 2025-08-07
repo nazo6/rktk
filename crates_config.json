@@ -69,6 +69,9 @@
 			"check_build": true,
 			"doc_enabled": true
 		},
+		"keyball61-common": {
+			"check_build": true
+		},
 		"keyball61-rp": {
 			"check_build": true
 		},
