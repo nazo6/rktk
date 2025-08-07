@@ -1,7 +1,6 @@
 {
 	"name": "rktk-client",
 	"version": "1.0.0",
-	"description": "",
 	"main": "index.js",
 	"scripts": {
 		"dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
@@ -11,9 +10,8 @@
 		"dev:desktop": "conc -r -c auto npm:dev:tailwind npm:dev:desktop:dioxus",
 		"build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release --platform web --features web"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "nazo6",
+	"license": "MIT",
 	"devDependencies": {
 		"@tailwindcss/cli": "^4.1.11",
 		"concurrently": "^9.2.0",
