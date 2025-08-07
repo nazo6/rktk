@@ -15,6 +15,24 @@ importers:
         specifier: ^4.24.1
         version: 4.24.1
 
+  crates/rktk-client:
+    devDependencies:
+      '@tailwindcss/cli':
+        specifier: ^4.1.11
+        version: 4.1.11
+      concurrently:
+        specifier: ^9.2.0
+        version: 9.2.0
+      daisyui:
+        specifier: ^5.0.46
+        version: 5.0.46
+      tailwindcss:
+        specifier: ^4.1.11
+        version: 4.1.11
+      wrangler:
+        specifier: ^4.24.1
+        version: 4.24.1
+
   site:
     dependencies:
       clsx:
@@ -75,24 +93,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
-
-  tools/rktk-client:
-    devDependencies:
-      '@tailwindcss/cli':
-        specifier: ^4.1.11
-        version: 4.1.11
-      concurrently:
-        specifier: ^9.2.0
-        version: 9.2.0
-      daisyui:
-        specifier: ^5.0.46
-        version: 5.0.46
-      tailwindcss:
-        specifier: ^4.1.11
-        version: 4.1.11
-      wrangler:
-        specifier: ^4.24.1
-        version: 4.24.1
 
 packages:
 

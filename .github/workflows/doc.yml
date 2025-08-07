@@ -6,7 +6,7 @@ on:
     paths:
       - ".github/workflows/doc.yml"
       - ".github/workflows/setup-rust/action.yaml"
-      - "lib/rktk/wrangler.jsonc"
+      - "crates/rktk/wrangler.jsonc"
       - "**.toml"
       - "**.rs"
       - "**.lock"
