@@ -4,9 +4,9 @@ on:
   push:
     branches: ["master"]
     paths:
-      - "tools/rktk-client/**"
-      - "lib/rktk-keymanager/**.rs"
-      - "lib/rktk-rrp/**.rs"
+      - "crates/rktk-client/**"
+      - "crates/rktk-keymanager/**.rs"
+      - "crates/rktk-rrp/**.rs"
       - ".github/workflows/rktk-client.yml"
       - ".github/workflows/setup-rust/action.yaml"
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
         uses: ./.github/workflows/setup-pnpm
 
       - name: Build
-        run: cd tools/rktk-client && pnpm build
+        run: cd crates/rktk-client && pnpm build
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3

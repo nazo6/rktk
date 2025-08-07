@@ -1,4 +1,0 @@
-# This is part of the cargo config. This config will be merged with examples/.cargo/config.toml.
-
-[env]
-RKTK_CONFIG_PATH = { value = "rktk.json", relative = true, force = true }

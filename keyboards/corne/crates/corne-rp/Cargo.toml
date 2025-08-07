@@ -1,0 +1,48 @@
+# You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
+cargo-features = ["per-package-target"]
+
+[[bin]]
+name = "corne-rp"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
+[package]
+name = "corne-rp"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish = false
+forced-target = "thumbv6m-none-eabi"
+
+[dependencies]
+rktk = { workspace = true }
+rktk-drivers-rp = { workspace = true }
+rktk-drivers-common = { workspace = true }
+
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+embassy-rp = { workspace = true, features = [
+  "time-driver",
+  "critical-section-impl",
+  "rp2040",
+] }
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+] }
+
+portable-atomic = { workspace = true, features = ["unsafe-assume-single-core"] }
+
+[features]
+default = ["right"]
+
+right = []
+left = []
+
+_check = []
+# Remove this line in your project. It's just used in this workspace for check.

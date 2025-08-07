@@ -1,5 +1,4 @@
-[profile.release]
-lto = true
+[profile]
 
 [profile.dioxus-wasm]
 inherits = "dev"
@@ -11,11 +10,18 @@ inherits = "dev"
 [profile.dioxus-android]
 inherits = "dev"
 
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
+
 [alias]
 xtask = "run -p xtask --"
-
-[env]
-RKTK_CONFIG_PATH = { value = "rktk.dev.json", relative = true }
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]

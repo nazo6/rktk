@@ -1,0 +1,14 @@
+{
+	"$schema": "./crates/rktk/schema.json",
+	"constant": {
+		"keyboard": {
+			"cols": 14,
+			"rows": 5
+		}
+	},
+	"dynamic": {
+		"keyboard": {
+			"name": "test-keyboard"
+		}
+	}
+}

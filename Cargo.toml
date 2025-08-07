@@ -1,18 +1,9 @@
 cargo-features = ["profile-rustflags"]
 
 [workspace]
-members = [
-  "lib/*",
-  "examples/corne-rp",
-  "examples/corne-nrf",
-  "examples/dummy-kb",
-  "tools/*",
-  "keyboards/neg-nrf",
-  "keyboards/keyball61/keyball61-common",
-  "keyboards/keyball61/keyball61-nrf",
-  "keyboards/keyball61/keyball61-rp",
-]
 resolver = "3"
+members = ["crates/*", "keyboards/*/crates/*"]
+exclude = ["crates/.cargo"]
 
 [workspace.package]
 authors = ["nazo6"]
@@ -22,13 +13,13 @@ edition = "2024"
 repository = "https://github.com/nazo6/rktk"
 
 [workspace.dependencies]
-rktk-drivers-common = { path = "lib/rktk-drivers-common", version = "0.2.0" }
-rktk-drivers-nrf = { path = "lib/rktk-drivers-nrf", version = "0.2.0" }
-rktk-drivers-rp = { path = "lib/rktk-drivers-rp", version = "0.2.0" }
-rktk = { path = "lib/rktk", version = "0.2.0" }
-rktk-keymanager = { path = "lib/rktk-keymanager", version = "0.2.0" }
-rktk-log = { path = "lib/rktk-log", version = "0.2.0" }
-rktk-rrp = { path = "lib/rktk-rrp", version = "0.2.0" }
+rktk-drivers-common = { path = "crates/rktk-drivers-common", version = "0.2.0" }
+rktk-drivers-nrf = { path = "crates/rktk-drivers-nrf", version = "0.2.0" }
+rktk-drivers-rp = { path = "crates/rktk-drivers-rp", version = "0.2.0" }
+rktk = { path = "crates/rktk", version = "0.2.0" }
+rktk-keymanager = { path = "crates/rktk-keymanager", version = "0.2.0" }
+rktk-log = { path = "crates/rktk-log", version = "0.2.0" }
+rktk-rrp = { path = "crates/rktk-rrp", version = "0.2.0" }
 
 # embedded core libraries
 embedded-hal = "1.0.0"
@@ -139,18 +130,6 @@ hex = "0.4.3"
 # meta
 document-features = "0.2.11"
 pretty_assertions = "1.4.1"
-
-[profile]
-
-[profile.wasm-dev]
-inherits = "dev"
-opt-level = 1
-
-[profile.server-dev]
-inherits = "dev"
-
-[profile.android-dev]
-inherits = "dev"
 
 [patch.crates-io]
 bbq2 = { git = "https://github.com/jamesmunns/bbq2", tag = "bbq2/0.1.0" }
