@@ -42,8 +42,8 @@ export default async function Page(props: {
 			full={page.data.full}
 			editOnGithub={{
 				owner: "nazo6",
-				repo: "rktk-site",
-				path: `content/docs/${page.file.path}`,
+				repo: "rktk",
+				path: `site/content/docs/${page.path}`,
 				sha: "master",
 			}}
 			lastUpdate={page.data.lastModified}

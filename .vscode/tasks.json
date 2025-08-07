@@ -25,6 +25,11 @@
 			"label": "doc",
 			"type": "shell",
 			"command": "cargo xtask doc"
+		},
+		{
+			"label": "site dev",
+			"type": "shell",
+			"command": "cd site && pnpm dev"
 		}
 	]
 }
