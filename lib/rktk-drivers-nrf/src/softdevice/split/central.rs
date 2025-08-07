@@ -3,8 +3,8 @@ use core::slice;
 
 use embassy_futures::join::join;
 use embassy_sync::pipe::Pipe;
-use nrf_softdevice::ble::{central, l2cap, Address, TxPower};
 use nrf_softdevice::Softdevice;
+use nrf_softdevice::ble::{Address, TxPower, central, l2cap};
 use rktk::drivers::interface::split::SplitDriver;
 use rktk::utils::RawMutex;
 use rktk_log::{error, info};
@@ -105,11 +105,8 @@ pub struct SoftdeviceBleCentralSplitDriver {
 }
 
 impl SoftdeviceBleCentralSplitDriver {
-    pub async fn new(sd: &'static Softdevice) -> Self {
-        embassy_executor::Spawner::for_current_executor()
-            .await
-            .spawn(ble_split_central_task(sd))
-            .unwrap();
+    pub async fn new(spawner: embassy_executor::Spawner, sd: &'static Softdevice) -> Self {
+        spawner.spawn(ble_split_central_task(sd)).unwrap();
 
         Self {
             _phantom: PhantomData,

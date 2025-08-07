@@ -52,21 +52,20 @@ pub type Signal<T> = embassy_sync::signal::Signal<RawMutex, T>;
 /// sjoin or "spawn or join"
 pub(crate) mod sjoin {
     macro_rules! join {
-        ($f1:expr, $($future:expr),* ) => {
-            $crate::utils::sjoin::join!(@alloc {$f1}, $($future),* );
+        ($spawner:expr, $f1:expr, $($future:expr),* ) => {
+            $crate::utils::sjoin::join!(@alloc {$spawner}, {$f1}, $($future),* );
             $crate::utils::sjoin::join!(@no_alloc {$f1}, $($future),* );
         };
-        (@alloc $f1:expr, $($future:expr),* ) => {
+        (@alloc $spawner:expr, $f1:expr, $($future:expr),* ) => {
             #[cfg(feature = "alloc")]
             {
                 {
                     use ::alloc::boxed::Box;
-                    let ex = embassy_executor::Spawner::for_current_executor().await;
                     {
                         $(
                             let ts = Box::leak(Box::new(embassy_executor::raw::TaskStorage::new()));
                             let st = ts.spawn(move || $future);
-                            ex.spawn(st).unwrap();
+                            $spawner.spawn(st).unwrap();
                         )*
                     }
                 }

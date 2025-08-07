@@ -38,7 +38,7 @@ bind_interrupts!(pub struct Irqs {
     PIO1_IRQ_0 => embassy_rp::pio::InterruptHandler<PIO1>;
 });
 
-pub async fn start(keymap: &'static Keymap) {
+pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) {
     let mut cfg = embassy_rp::config::Config::default();
     cfg.clocks.sys_clk.div_int = 2;
     let mut p = embassy_rp::init(cfg);
@@ -127,10 +127,22 @@ pub async fn start(keymap: &'static Keymap) {
 
     match hand {
         rktk::config::Hand::Left => {
-            rktk::task::start(drivers, create_empty_hooks(), get_opts_left(keymap)).await;
+            rktk::task::start(
+                spawner,
+                drivers,
+                create_empty_hooks(),
+                get_opts_left(keymap),
+            )
+            .await;
         }
         rktk::config::Hand::Right => {
-            rktk::task::start(drivers, create_empty_hooks(), get_opts_right(keymap)).await;
+            rktk::task::start(
+                spawner,
+                drivers,
+                create_empty_hooks(),
+                get_opts_right(keymap),
+            )
+            .await;
         }
     }
 }

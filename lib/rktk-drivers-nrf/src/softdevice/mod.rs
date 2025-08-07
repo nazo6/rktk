@@ -2,7 +2,7 @@
 
 use core::mem;
 
-use nrf_softdevice::{raw, Softdevice};
+use nrf_softdevice::{Softdevice, raw};
 
 #[cfg(feature = "softdevice-ble")]
 pub mod ble;
@@ -68,8 +68,7 @@ pub fn init_softdevice(ble_gap_name: &'static str) -> &'static mut Softdevice {
 }
 
 /// Starts softdevice task
-pub async fn start_softdevice(sd: &'static Softdevice) {
-    let spawner = embassy_executor::Spawner::for_current_executor().await;
+pub fn start_softdevice(spawner: embassy_executor::Spawner, sd: &'static Softdevice) {
     spawner.spawn(softdevice_task(sd)).unwrap();
 }
 

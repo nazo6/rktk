@@ -9,6 +9,6 @@ use rktk::config::keymap::Keymap;
 static KM: Keymap = Keymap::const_default();
 
 #[embassy_executor::main]
-async fn main(_spawner: Spawner) {
-    start(&KM).await;
+async fn main(spawner: Spawner) {
+    start(spawner, &KM).await;
 }
