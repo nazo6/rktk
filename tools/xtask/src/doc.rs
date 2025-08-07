@@ -112,7 +112,6 @@ fn run_doc(
         .unwrap()
         .join("src")
         .join(p.name.replace("-", "_"));
-    dbg!(&src_dir);
 
     Ok((doc_dir.to_path_buf(), part_dir, src_dir))
 }

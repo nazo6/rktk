@@ -1,18 +1,9 @@
 cargo-features = ["profile-rustflags"]
 
 [workspace]
-members = [
-  "lib/*",
-  "examples/corne-rp",
-  "examples/corne-nrf",
-  "examples/dummy-kb",
-  "tools/*",
-  "keyboards/neg-nrf",
-  "keyboards/keyball61/keyball61-common",
-  "keyboards/keyball61/keyball61-nrf",
-  "keyboards/keyball61/keyball61-rp",
-]
 resolver = "3"
+members = ["lib/*", "tools/*", "keyboards/*/crates/*"]
+exclude = ["lib/.cargo"]
 
 [workspace.package]
 authors = ["nazo6"]
@@ -139,18 +130,6 @@ hex = "0.4.3"
 # meta
 document-features = "0.2.11"
 pretty_assertions = "1.4.1"
-
-[profile]
-
-[profile.wasm-dev]
-inherits = "dev"
-opt-level = 1
-
-[profile.server-dev]
-inherits = "dev"
-
-[profile.android-dev]
-inherits = "dev"
 
 [patch.crates-io]
 bbq2 = { git = "https://github.com/jamesmunns/bbq2", tag = "bbq2/0.1.0" }

@@ -1,78 +1,79 @@
 {
-  "check_skip_global": ["_check", "default"],
-  "check_env": { "DEFMT_LOG": "trace" },
-  "test_features_global": ["_check"],
-  "doc_features_global": ["_check"],
-  "crates": {
-    "rktk": {
-      "check_group_features": [["defmt", "log"]],
-      "doc_enabled": true
-    },
-    "rktk-rrp": {
-      "check_at_least_one_of": [["server", "client"]],
-      "test_enabled": true,
-      "doc_enabled": true
-    },
-    "rktk-keymanager": {
-      "check_group_features": [["serde", "postcard"]],
-      "test_enabled": true,
-      "doc_enabled": true
-    },
-    "rktk-drivers-nrf": {
-      "check_features": ["_nrfxx", "power"],
-      "check_group_features": [
-        ["softdevice", "softdevice-ble"],
-        ["defmt", "log"]
-      ],
-      "check_mutually_exclusive_features": [
-        ["softdevice-ble", "esb"],
-        ["esb", "sdc"],
-        ["softdevice-ble", "sdc"]
-      ],
-      "doc_enabled": true
-    },
-    "rktk-drivers-rp": {
-      "check_features": ["_check"],
-      "check_skip": [],
-      "doc_enabled": true
-    },
-    "rktk-drivers-common": {
-      "check_group_features": [
-        ["defmt", "defmt-timestamp", "defmt-usb"],
-        ["trouble", "reporter-trouble"]
-      ],
-      "test_enabled": true,
-      "test_features": [],
-      "doc_enabled": true
-    },
-    "rktk-client": {
-      "check_at_least_one_of": [["web", "native"]],
-      "check_mutually_exclusive_features": [["web", "native"]]
-    },
-    "xtask": {
-      "check_no_powerset": true
-    },
-    "example-corne": {
-      "check_no_powerset": true
-    },
-    "example-corne-nrf": {
-      "check_no_powerset": true
-    },
-    "example-dummy-kb-rp": {
-      "check_no_powerset": true
-    },
-    "neg-nrf": {
-      "check_features": ["left", "alloc", "paw3395", "log", "defmt"],
-      "check_at_least_one_of": [["sd", "trouble", "cs-impl"]],
-      "check_mutually_exclusive_features": [["sd", "trouble", "cs-impl"]],
-      "check_skip": ["_check", "default", "right", "pmw3360"],
-      "check_build": true
-    },
-    "keyball61-rp": {
-      "check_build": true
-    },
-    "keyball61-nrf": {
-      "check_build": true
-    }
-  }
+	"check_skip_global": ["_check", "default"],
+	"check_env": { "DEFMT_LOG": "trace" },
+	"test_features_global": ["_check"],
+	"doc_features_global": ["_check"],
+	"crates": {
+		"rktk": {
+			"check_group_features": [["defmt", "log"]],
+			"doc_enabled": true
+		},
+		"rktk-rrp": {
+			"check_at_least_one_of": [["server", "client"]],
+			"test_enabled": true,
+			"doc_enabled": true
+		},
+		"rktk-keymanager": {
+			"check_group_features": [["serde", "postcard"]],
+			"test_enabled": true,
+			"doc_enabled": true
+		},
+		"rktk-drivers-nrf": {
+			"check_features": ["_nrfxx", "power"],
+			"check_group_features": [
+				["softdevice", "softdevice-ble"],
+				["defmt", "log"]
+			],
+			"check_mutually_exclusive_features": [
+				["softdevice-ble", "esb"],
+				["esb", "sdc"],
+				["softdevice-ble", "sdc"]
+			],
+			"doc_enabled": true
+		},
+		"rktk-drivers-rp": {
+			"check_features": ["_check"],
+			"check_skip": [],
+			"doc_enabled": true
+		},
+		"rktk-drivers-common": {
+			"check_group_features": [
+				["defmt", "defmt-timestamp", "defmt-usb"],
+				["trouble", "reporter-trouble"]
+			],
+			"test_enabled": true,
+			"test_features": [],
+			"doc_enabled": true
+		},
+		"rktk-client": {
+			"check_at_least_one_of": [["web", "native"]],
+			"check_mutually_exclusive_features": [["web", "native"]]
+		},
+		"xtask": {
+			"check_no_powerset": true
+		},
+		"corne-rp": {
+			"check_no_powerset": true
+		},
+		"corne-nrf": {
+			"check_no_powerset": true
+		},
+		"dummy-rp": {
+			"check_no_powerset": true
+		},
+		"neg-nrf": {
+			"check_features": ["left", "alloc", "paw3395", "log", "defmt"],
+			"check_at_least_one_of": [["sd", "trouble", "cs-impl"]],
+			"check_mutually_exclusive_features": [["sd", "trouble", "cs-impl"]],
+			"check_skip": ["_check", "default", "right", "pmw3360"],
+			"check_build": true,
+			"doc_enabled": true
+		},
+		"keyball61-rp": {
+			"check_build": true
+		},
+		"keyball61-nrf": {
+			"check_build": true
+		}
+	}
 }

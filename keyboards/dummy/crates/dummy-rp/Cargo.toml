@@ -1,0 +1,38 @@
+cargo-features = ["per-package-target"]
+
+[[bin]]
+name = "dummy-rp"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
+[package]
+name = "dummy-rp"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+forced-target = "thumbv6m-none-eabi"
+publish = false
+
+[dependencies]
+rktk-drivers-rp = { workspace = true }
+rktk = { workspace = true }
+cortex-m = { workspace = true, features = ["inline-asm"] }
+cortex-m-rt = { workspace = true }
+embassy-rp = { workspace = true, features = [
+  "time-driver",
+  "critical-section-impl",
+  "rp2040",
+] }
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+] }
+portable-atomic = { workspace = true, features = ["unsafe-assume-single-core"] }
+
+[features]
+_check = []
