@@ -5,11 +5,11 @@
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
 
 :root {
-  --fd-layout-width: 1400px;
+	--fd-layout-width: 1400px;
 
-  --color-fd-primary: hsl(340, 40%, 48%);
+	--color-fd-primary: hsl(340, 40%, 48%);
 }
 
 .dark {
-  --color-fd-background: hsl(0, 0%, 0%);
+	--color-fd-background: hsl(0, 0%, 0%);
 }

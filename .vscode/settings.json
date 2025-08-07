@@ -1,19 +1,19 @@
 {
-  "rust-analyzer.check.overrideCommand": [
-    "cargo",
-    "check-delta",
-    "-l",
-    "file",
-    "-s",
-    "clippy",
-    "--message-format=json",
-    "--features",
-    "_check",
-    "--all-targets"
-  ],
-  "rust-analyzer.cargo.features": ["_check"],
-  "rust-analyzer.check.extraEnv": {
-    "DEFMT_LOG": "trace"
-  },
-  "evenBetterToml.schema.enabled": false
+	"rust-analyzer.check.overrideCommand": [
+		"cargo",
+		"check-delta",
+		"-l",
+		"file",
+		"-s",
+		"clippy",
+		"--message-format=json",
+		"--features",
+		"_check",
+		"--all-targets"
+	],
+	"rust-analyzer.cargo.features": ["_check"],
+	"rust-analyzer.check.extraEnv": {
+		"DEFMT_LOG": "trace"
+	},
+	"evenBetterToml.schema.enabled": false
 }

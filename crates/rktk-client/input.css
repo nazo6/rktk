@@ -1,11 +1,10 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes:
-    cupcake --default,
-    dark --prefersdark;
+	themes:
+		cupcake --default,
+		dark --prefersdark;
 }
 
 .join-item {
-  outline: none !important;
+	outline: none !important;
 }
-

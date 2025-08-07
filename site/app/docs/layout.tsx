@@ -5,16 +5,16 @@ import { source } from "@/lib/source";
 import { GithubInfo } from "fumadocs-ui/components/github-info";
 
 const docsOptions: DocsLayoutProps = {
-  ...baseOptions,
-  tree: source.pageTree,
-  links: [
-    {
-      type: "custom",
-      children: <GithubInfo owner="nazo6" repo="rktk" className="lg:-mx-2" />,
-    },
-  ],
+	...baseOptions,
+	tree: source.pageTree,
+	links: [
+		{
+			type: "custom",
+			children: <GithubInfo owner="nazo6" repo="rktk" className="lg:-mx-2" />,
+		},
+	],
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return <DocsLayout {...docsOptions}>{children}</DocsLayout>;
+	return <DocsLayout {...docsOptions}>{children}</DocsLayout>;
 }

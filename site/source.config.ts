@@ -4,19 +4,17 @@ import { remarkDirectiveDriverTable } from "./lib/remarkDirectiveDriverTable";
 // import mdxMermaid from "mdx-mermaid";
 
 export const docs = defineDocs({
-  dir: "content/docs",
+	dir: "content/docs",
 });
 
 export default defineConfig({
-  mdxOptions: {
-    remarkPlugins: (
-      v,
-    ) => [
-      // [mdxMermaid, { output: "svg" }],
-      remarkDirective,
-      remarkDirectiveDriverTable,
-      ...v,
-    ],
-  },
-  lastModifiedTime: "git",
+	mdxOptions: {
+		remarkPlugins: (v) => [
+			// [mdxMermaid, { output: "svg" }],
+			remarkDirective,
+			remarkDirectiveDriverTable,
+			...v,
+		],
+	},
+	lastModifiedTime: "git",
 });

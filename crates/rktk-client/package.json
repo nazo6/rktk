@@ -1,24 +1,24 @@
 {
-  "name": "rktk-client",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
-    "dev:web:dioxus": "dx serve -i true --platform web --features web",
-    "dev": "conc -r -c auto npm:dev:tailwind npm:dev:web:dioxus",
-    "dev:desktop:dioxus": "dx serve -i true --platform desktop --features native",
-    "dev:desktop": "conc -r -c auto npm:dev:tailwind npm:dev:desktop:dioxus",
-    "build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release --platform web --features web"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@tailwindcss/cli": "^4.1.11",
-    "concurrently": "^9.2.0",
-    "daisyui": "^5.0.46",
-    "tailwindcss": "^4.1.11",
-    "wrangler": "^4.24.1"
-  }
+	"name": "rktk-client",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev:tailwind": "tailwindcss -i ./input.css -o ./assets/tailwind.css --watch",
+		"dev:web:dioxus": "dx serve -i true --platform web --features web",
+		"dev": "conc -r -c auto npm:dev:tailwind npm:dev:web:dioxus",
+		"dev:desktop:dioxus": "dx serve -i true --platform desktop --features native",
+		"dev:desktop": "conc -r -c auto npm:dev:tailwind npm:dev:desktop:dioxus",
+		"build": "pnpm tailwindcss -i ./input.css -o ./assets/tailwind.css && dx build --release --platform web --features web"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@tailwindcss/cli": "^4.1.11",
+		"concurrently": "^9.2.0",
+		"daisyui": "^5.0.46",
+		"tailwindcss": "^4.1.11",
+		"wrangler": "^4.24.1"
+	}
 }
