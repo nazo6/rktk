@@ -4,10 +4,45 @@ title: Nordic nRF
 
 nRF is widely used for wireless microcontroller such as nice!nano.
 
-## Softdevice
+## Types of chips
 
-Softdevice is a binary blob that provides Bluetooth stack provided by Nordic.
+There are various types of chips in the nRF series, but the most commonly used is the nRF52840. This is installed in most microcomputers for keyboards.
+Therefore, rktk assumes the use of nRF52840 to a certain extent. However, since the underlying embassy-nrf supports various chips such as the nRF53 and 54 series, it should be possible to operate it for such chips as well.
 
-The softdevice has several interrupt levels and peripherals that are proprietary and accessing them from outside the softdevice will cause a crash.
+## Wireless features
 
-Please follow the [nrf-softdevice documentation](https://github.com/embassy-rs/nrf-softdevice) and be careful not to access resources that are proprietary to the softdevice.
+### Softdevice
+
+Softdevice is a full-featured BLE stack provided by Nordic. Softdevice binaries are typically included in bootloaders rather than software such as rktk.
+
+Enabling the `softdevice-ble` feature in rktk-drivers-nrf adds the nrf-softdevice crate to the dependencies, which calls these binaries.
+
+Softdevice has v6 and v7 versions, and either can be used with rktk, but depending on which is included in the bootloader, you may need to change some build options such as memory.x.
+
+Additionally, enabling Softdevice causes certain peripherals to be occupied by Softdevice. Attempting to use these peripherals may cause a crash, so please be cautious.
+For more details, refer to the [nrf-softdevice documentation](https://github.com/embassy-rs/nrf-softdevice)
+
+This means that Softdevice and certain drivers, such as ESB (Enhanced ShockBurst), cannot coexist.
+
+### Softdevice Controller (SDC)
+
+Softdevice Controller (SDC) is also a BLE stack provided by Nordic, but please note that it is completely different from Softdevice.
+
+This is a newer approach than Softdevice and provides only the “Controller” portion rather than a full-featured BLE stack.
+This means that it provides only the lower-layer Controller layer when considering the BLE stack as a two-layer structure consisting of Controller and Host.  
+In rktk, you can use [trouble](https://github.com/embassy-rs/trouble), a Rust-based BLE stack, as a library to provide the Host layer.
+
+### ESB (Enhanced ShockBurst)
+
+ESB (Enhanced ShockBurst) is a wireless communication standard unique to nRF chips that can achieve lower latency than BLE.
+rktk utilizes this to provide a lower latency dongle implementation (`esb` feature).
+In theory, this should be compatible with Softdevice Controller, but due to insufficient testing and implementation, it is currently not possible to use the dongle and BLE simultaneously.
+
+## critical-section impl
+
+When building for nRF, exact one of the `critical-section` implementations must be provided.
+Follow the instructions below to select the appropriate critical-section implementation.
+
+- When Softdevice is enabled (when the `softdevice` feature of rktk-drivers-nrf is enabled and nrf-softdevice is linked), Softdevice automatically provides the implementation.
+- When Softdevice Controller is enabled (when the `trouble` feature is enabled), `nrf-mpsl` automatically provides the implementation.
+- In cases not covered by the above two scenarios, you can manually enable the `cortex-m/critical-section-single-core` feature in the `cortex-m` crate to provide the implementation.
