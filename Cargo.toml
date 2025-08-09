@@ -57,6 +57,8 @@ rand_core = { version = "0.6.4" }
 
 nrf-sdc = { version = "0.2.0", default-features = false }
 nrf-mpsl = { version = "0.2.0", default-features = false }
+esb-ng = { git = "https://github.com/nazo6/esb-async", branch = "async" }
+
 
 pio = "0.3.0"
 
@@ -130,6 +132,3 @@ hex = "0.4.3"
 # meta
 document-features = "0.2.11"
 pretty_assertions = "1.4.1"
-
-[patch.crates-io]
-bbq2 = { git = "https://github.com/jamesmunns/bbq2", tag = "bbq2/0.1.0" }

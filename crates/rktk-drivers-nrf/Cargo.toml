@@ -67,7 +67,7 @@ ssmarshal = { workspace = true }
 usbd-hid = { workspace = true }
 atomic-pool = { workspace = true }
 
-esb-ng = { version = "0.1.0", optional = true }
+esb-ng = { workspace = true, optional = true }
 
 
 document-features = { workspace = true }

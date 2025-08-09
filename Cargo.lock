@@ -447,9 +447,11 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "bbq2"
-version = "0.1.0"
-source = "git+https://github.com/jamesmunns/bbq2?tag=bbq2%2F0.1.0#9f2673f665ff2aa08567bc78ed939ca68d5876c8"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25d3e5fd78b60ce3a60e21e9a92b1d5e741328264de8e609193e2bf7616747bd"
 dependencies = [
+ "const-init",
  "critical-section",
  "maitake-sync",
 ]
@@ -974,6 +976,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "const-init"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bd422bfb4f24a97243f60b6a4443e63d810c925d8da4bb2d8fde26a7c1d57ec"
 
 [[package]]
 name = "const-oid"
@@ -2613,8 +2621,7 @@ dependencies = [
 [[package]]
 name = "esb-ng"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58efe494d834c791206e0997b13a9e568848cb642020eb041d04de02e060eeff"
+source = "git+https://github.com/nazo6/esb-async?branch=async#836c7170d4836d686de3eb7224b15c70a98f0c80"
 dependencies = [
  "bbq2",
  "cortex-m",
