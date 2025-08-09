@@ -1,6 +1,6 @@
 [package]
 name = "rktk-rrp"
-description = "rrp - RKTK Remap Protocol"
+description = "rrp - RKTK Remote Protocol"
 authors.workspace = true
 license.workspace = true
 version.workspace = true

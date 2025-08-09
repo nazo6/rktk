@@ -1,0 +1,114 @@
+---
+title: RRP Protocol spec
+---
+
+# RRP Protocol
+
+RRP protocol is 'high level' protocol like HTTP.
+
+## Indicators
+
+| Value          | Name     | Meaning                                |
+| -------------- | -------- | -------------------------------------- |
+| 01010101(0x55) | START    | Request/Response starts                |
+| 00000000(0x00) | END      | This request/response flow is finished |
+| 11111111(0xFF) | CONTINUE | This request/response continues        |
+
+## Request
+
+### Normal
+
+| Step | Operation                 | Data size                |
+| ---- | ------------------------- | ------------------------ |
+| 1    | Send `START` indicator    | 1byte                    |
+| 2    | Send request id           | 1byte                    |
+| 3    | Send endpoint id          | 1byte                    |
+| 4    | Send `CONTINUE` indicator | 1byte                    |
+| 5    | Send data size            | 4byte                    |
+| 6    | Send data                 | Size specified in step 5 |
+| 7    | Send `END` indicator      | 1byte                    |
+
+### Stream
+
+| Step | Operation                                                                | Data size                |
+| ---- | ------------------------------------------------------------------------ | ------------------------ |
+| 1    | Send `START` indicator                                                   | 1byte                    |
+| 2    | Send request id                                                          | 1byte                    |
+| 3    | Send endpoint id                                                         | 1byte                    |
+| 4    | If stream continues: Send `CONTINUE`<br />If stream finished: Send `END` | 1byte                    |
+| 5    | Send data size                                                           | 4byte                    |
+| 6    | Send data                                                                | Size specified in step 5 |
+| 7    | Goto step 4                                                              |                          |
+
+## Response
+
+### Normal
+
+| Step | Operation                             | Data size                |
+| ---- | ------------------------------------- | ------------------------ |
+| 1    | Send `START` indicator                | 1byte                    |
+| 2    | Send request id tied to this response | 1byte                    |
+| 3    | Send status code                      | 1byte                    |
+| 4    | Send `CONTINUE` indicator             | 1byte                    |
+| 5    | Send data size                        | 4byte                    |
+| 6    | Send data                             | Size specified in step 5 |
+| 7    | Send `END` indicator                  | 1byte                    |
+
+### Stream
+
+| Step | Operation                                                                | Data size                |
+| ---- | ------------------------------------------------------------------------ | ------------------------ |
+| 1    | Send `START` indicator                                                   | 1byte                    |
+| 2    | Send request id tied to this response                                    | 1byte                    |
+| 3    | Send status code                                                         | 1byte                    |
+| 4    | If stream continues: Send `CONTINUE`<br />If stream finished: Send `END` | 1byte                    |
+| 5    | Send data size                                                           | 4byte                    |
+| 6    | Send data                                                                | Size specified in step 5 |
+| 7    | Goto step 4                                                              |                          |
+
+If status code is other than 0, event stream endpoints respond with normal response.
+
+## About streaming
+
+Although it is called `streaming`, this is not primarily intended for streaming, but rather to save memory when passing large vec.
+
+If a request/response is streaming, its size should be greater than 0 so it can be distinguished from an End indicator.
+
+# RRP-hid protocol
+
+RRP-hid protocol is low level protocol like udp to transfer RRP through hid.
+
+- Use Output Report for request
+  - Output report is `[u8; 32]`
+- Use Input Report for response
+  - Input report is `[u8; u32]`
+    (This report descriptor's structure is same as via's one.)
+- Usage page id: 0xFF70, Usage id: 0x71
+
+One report is considered as a packet. A packet contains the RRP data and the size of the data included in the packet. So the data structure looks like this.
+1: Data size (1byte, 0-31)
+2: Data (arbitrary size specified in Data Size)
+Report size is always 32 bytes, and remained bytes are undefined (usually filled with 0).
+
+This protocol doesn't have flow control. While one rrp request or response is ongoing, other requests or responses muse be blocked.
+
+## Descriptor
+
+Changed usage id of [rmk's via code](https://github.com/HaoboGu/rmk/blob/86174f318ec0d22a9e0a8f08268aa41927e8dbba/rmk/src/usb/descriptor.rs#L16)
+
+```
+#[gen_hid_descriptor(
+    (collection = APPLICATION, usage_page = 0xFF70, usage = 0x71) = {
+        (usage = 0x72, logical_min = 0x0) = {
+            #[item_settings data,variable,absolute] input_data=input;
+        };
+        (usage = 0x73, logical_min = 0x0) = {
+            #[item_settings data,variable,absolute] output_data=output;
+        };
+    }
+)]
+pub(crate) struct ViaReport {
+    pub(crate) input_data: [u8; 32],
+    pub(crate) output_data: [u8; 32],
+}
+```
