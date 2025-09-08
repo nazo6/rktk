@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use anyhow::Context as _;
-use dioxus::signals::Readable as _;
+use dioxus::signals::ReadableExt as _;
 use futures::TryStreamExt as _;
 use kle_serial::Keyboard;
 use rktk_keymanager::keycode::KeyAction;
-use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, KeyActionLoc};
+use rktk_rrp::endpoints::{KeyActionLoc, get_keyboard_info::KeyboardInfo};
 
 use crate::{app::state::CONN, backend::RrpHidDevice as _};
 

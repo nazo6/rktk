@@ -88,7 +88,7 @@ pub fn Log() -> Element {
 
 mod fetcher {
     use anyhow::Context as _;
-    use dioxus::signals::Readable as _;
+    use dioxus::signals::ReadableExt as _;
     use futures::TryStreamExt;
     use rktk_rrp::endpoints::get_log::{LogChunk, LogLevel};
 
