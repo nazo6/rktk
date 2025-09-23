@@ -1,4 +1,4 @@
-use core::fmt::Display;
+use core::{fmt::Display, str::FromStr as _};
 
 use futures::{Stream, StreamExt as _};
 use rktk_rrp::{
@@ -53,8 +53,11 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         &mut self,
         _req: (),
     ) -> Result<get_keyboard_info::Response, Self::Error> {
+        let Ok(name) = heapless::String::from_str(self.config.keyboard.name) else {
+            return Err("Keyboard name is too long");
+        };
         Ok(get_keyboard_info::Response {
-            name: heapless::String::from(self.config.keyboard.name),
+            name,
             cols: CONST_CONFIG.keyboard.cols,
             rows: CONST_CONFIG.keyboard.rows,
             keymap: ConfiguredState::get_keymap_info(),

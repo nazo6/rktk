@@ -118,7 +118,7 @@ defmt = [
   "rktk-drivers-common/defmt",
   "nrf-softdevice?/defmt",
   "embassy-nrf/defmt",
-  "heapless/defmt-impl",
+  "heapless/defmt",
   "postcard?/use-defmt",
   "nrf-sdc?/defmt",
   "nrf-mpsl?/defmt",
