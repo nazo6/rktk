@@ -84,7 +84,7 @@ ssmarshal = { version = "1.0.0", default-features = false }
 postcard = { git = "https://github.com/jamesmunns/postcard", features = [
   "heapless-v0_9",
 ] }
-blinksy = { version = "0.5.0" }
+blinksy = { version = "0.10.0" }
 
 paste = "1.0.15"
 macro_rules_attribute = "0.2.0"

@@ -530,9 +530,9 @@ dependencies = [
 
 [[package]]
 name = "blinksy"
-version = "0.5.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c8c3626ea9d9f2a065b10e7736f606f8a1cdea8cc351a2b19a5218af308b121"
+checksum = "445c79f39b994c5736f1da0820fdcaf7638f16c1a53f3b3c199e052348288933"
 dependencies = [
  "defmt 0.3.100",
  "embedded-hal 1.0.0",
