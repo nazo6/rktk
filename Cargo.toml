@@ -55,8 +55,8 @@ ssd1306 = { version = "0.10.0", features = ["async"] }
 trouble-host = { version = "0.3.0" }
 rand_core = { version = "0.6.4" }
 
-nrf-sdc = { version = "0.4.0", default-features = false }
-nrf-mpsl = { version = "0.3.0", default-features = false }
+nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc", default-features = false }
+nrf-mpsl = { git = "https://github.com/alexmoon/nrf-sdc", default-features = false }
 
 pio = "0.3.0"
 
@@ -81,7 +81,9 @@ serde = { version = "1.0.207", default-features = false }
 serde_json = "1.0.122"
 serde_with = { version = "3.9.0", default-features = false }
 ssmarshal = { version = "1.0.0", default-features = false }
-postcard = { version = "1.0.8", features = ["heapless-v0_9"] }
+postcard = { git = "https://github.com/jamesmunns/postcard", features = [
+  "heapless-v0_9",
+] }
 blinksy = { version = "0.5.0" }
 
 paste = "1.0.15"
@@ -122,7 +124,7 @@ async-channel = "2.3.1"
 clap = { version = "4.5.20", features = ["derive"] }
 duct = "1.0.0"
 colored = "3.0.0"
-cargo_metadata = "0.21.0"
+cargo_metadata = "0.22.0"
 dircpy = { version = "0.3.19", default-features = false }
 sha2 = "0.10.8"
 hex = "0.4.3"
@@ -133,6 +135,3 @@ pretty_assertions = "1.4.1"
 
 [patch.crates-io]
 bbq2 = { git = "https://github.com/jamesmunns/bbq2", tag = "bbq2/0.1.0" }
-nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc/" }
-nrf-mpsl = { git = "https://github.com/alexmoon/nrf-sdc/" }
-postcard = { git = "https://github.com/jamesmunns/postcard" }
