@@ -1,3 +1,5 @@
+use heapless::index_map::FnvIndexMap;
+
 use crate::{
     interface::state::{config::TapHoldConfig, input_event::KeyChangeEvent},
     keycode::KeyCode,
@@ -17,7 +19,7 @@ struct TapHoldKeyState {
 
 /// State management for TapHold and Normal2 action
 pub struct TapHoldState {
-    pressed: heapless::FnvIndexMap<(u8, u8), TapHoldKeyState, 16>,
+    pressed: FnvIndexMap<(u8, u8), TapHoldKeyState, 16>,
     threshold: Duration,
     hold_on_other_key: bool,
 }
@@ -25,7 +27,7 @@ pub struct TapHoldState {
 impl TapHoldState {
     pub fn new(config: TapHoldConfig) -> Self {
         Self {
-            pressed: heapless::FnvIndexMap::new(),
+            pressed: FnvIndexMap::new(),
             threshold: Duration::from_millis(config.threshold),
             hold_on_other_key: config.hold_on_other_key,
         }
@@ -39,13 +41,15 @@ impl TapHoldState {
         mut cb: impl FnMut(EventType, KeyCode),
     ) {
         if let Some(event) = event
-            && event.pressed && self.hold_on_other_key {
-                for (key, state) in self.pressed.iter_mut() {
-                    if *key != (event.row, event.col) {
-                        state.pending = None;
-                    }
+            && event.pressed
+            && self.hold_on_other_key
+        {
+            for (key, state) in self.pressed.iter_mut() {
+                if *key != (event.row, event.col) {
+                    state.pending = None;
                 }
             }
+        }
 
         for (_, state) in self.pressed.iter_mut() {
             if let Some(press_start) = state.pending {
