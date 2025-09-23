@@ -100,14 +100,14 @@ async fn gatt_events_task<P: PacketPool>(conn: &GattConnection<'_, '_, P>) -> Re
             GattConnectionEvent::Gatt { event } => {
                 let result = match &event {
                     GattEvent::Read(_event) => {
-                        if conn.raw().encrypted() {
+                        if conn.raw().security_level().map(|l| l.encrypted()) == Ok(true) {
                             None
                         } else {
                             Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
                         }
                     }
                     GattEvent::Write(_event) => {
-                        if conn.raw().encrypted() {
+                        if conn.raw().security_level().map(|l| l.encrypted()) == Ok(true) {
                             None
                         } else {
                             Some(AttErrorCode::INSUFFICIENT_ENCRYPTION)
