@@ -6,6 +6,7 @@ mod check;
 mod config;
 mod doc;
 mod publish;
+mod stats;
 mod test;
 mod utils;
 
@@ -45,6 +46,16 @@ pub enum Commands {
     },
     /// Generate documentation for rktk crates.
     Doc,
+    Stats {
+        /// crate name to show stats. This must be binary crate.
+        crate_name: String,
+        /// Specify binary name if the crate has multiple binaries.
+        /// If not specified, the first binary will be used.
+        #[arg(long)]
+        bin: Option<String>,
+        #[arg(long)]
+        features: Option<Vec<String>>,
+    },
 }
 
 fn main() -> ExitCode {
@@ -58,6 +69,11 @@ fn main() -> ExitCode {
             continue_on_error,
         } => publish::start(crate_name, execute, continue_on_error),
         Commands::Doc => doc::start(),
+        Commands::Stats {
+            crate_name,
+            bin,
+            features,
+        } => stats::start(crate_name, bin, features),
     };
 
     eprintln!();
