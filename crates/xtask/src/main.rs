@@ -5,7 +5,7 @@ use utils::xprintln;
 mod check;
 mod config;
 mod doc;
-mod release;
+mod publish;
 mod test;
 mod utils;
 
@@ -20,25 +20,30 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    /// Run `cargo clippy` for rktk crates.
+    /// Run `cargo clippy` with feature matrix for rktk crates.
     Check {
         /// crate name to check
         /// If 'all' is specified, all crates will be checked.
         crate_name: String,
     },
+    /// Run `cargo test` for rktk crates.
     Test {
         /// crate name to run test
         /// If 'all' is specified, all crates will be tested.
         crate_name: String,
     },
-    Release {
+    /// Publish crates
+    Publish {
         crate_name: Option<String>,
-
-        #[arg(long)]
+        /// By default, `cargo publish` will be executed with `--dry-run`.
+        /// If true, `cargo publish` will be executed without `--dry-run`.
+        #[arg(long, default_value_t = false)]
         execute: bool,
-        #[arg(long)]
+        // If true, continue publishing other crates even if one crate fails to publish.
+        #[arg(long, default_value_t = false)]
         continue_on_error: bool,
     },
+    /// Generate documentation for rktk crates.
     Doc,
 }
 
@@ -47,11 +52,11 @@ fn main() -> ExitCode {
     let res = match args.command {
         Commands::Check { crate_name } => check::start(crate_name),
         Commands::Test { crate_name } => test::start(crate_name),
-        Commands::Release {
+        Commands::Publish {
             crate_name,
             execute,
             continue_on_error,
-        } => release::start(crate_name, execute, continue_on_error),
+        } => publish::start(crate_name, execute, continue_on_error),
         Commands::Doc => doc::start(),
     };
 

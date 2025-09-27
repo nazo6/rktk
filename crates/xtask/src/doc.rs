@@ -12,7 +12,7 @@ use crate::{utils::METADATA, xprintln};
 
 use super::config::CRATES_CONFIG;
 
-const BEFORE_CONTENT: &str = include_str!("./doc_before.html");
+const BEFORE_CONTENT: &str = include_str!("../res/doc_before.html");
 static HTML_BEFORE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     let mut hasher = Sha256::new();
     hasher.update(BEFORE_CONTENT);
@@ -22,7 +22,7 @@ static HTML_BEFORE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     std::fs::write(&path, BEFORE_CONTENT).unwrap();
     path
 });
-const AFTER_CONTENT: &str = include_str!("./doc_after.html");
+const AFTER_CONTENT: &str = include_str!("../res/doc_after.html");
 static HTML_AFTER_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     let mut hasher = Sha256::new();
     hasher.update(AFTER_CONTENT);

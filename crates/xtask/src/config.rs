@@ -9,6 +9,8 @@ pub struct InternalCmdConfig {
     pub test_features_global: Option<Vec<String>>,
 
     pub doc_features_global: Option<Vec<String>>,
+
+    pub publish_order: Vec<String>,
 }
 
 #[derive(Default, serde::Deserialize, Clone)]
@@ -34,6 +36,11 @@ pub struct CrateConfig {
 
     // Doc configuration
     pub doc_enabled: bool,
+
+    // Publish configuration
+    /// If false, `_check` feature is used when publishing crate.
+    /// If true, `_release` feature is used instead.
+    pub use_release_feature: bool,
 }
 
 pub static CRATES_CONFIG: LazyLock<InternalCmdConfig> = LazyLock::new(|| {

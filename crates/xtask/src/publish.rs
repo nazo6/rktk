@@ -1,43 +1,34 @@
 use duct::cmd;
 
-use crate::utils::xprintln;
-
-// Second value in tuple indicates if the crate should be published with the `_release` feature.
-// If true, the `_release` feature is used, otherwise `_release_check` is used.
-//
-// This is used to publish the crate that has optional git dependencies.
-const PUBLISH_ORDER: &[(&str, bool)] = &[
-    ("rktk-keymanager", false),
-    ("rktk-log", false),
-    ("rktk-rrp", false),
-    ("rktk", false),
-    ("rktk-drivers-common", false),
-    ("rktk-drivers-nrf", true),
-    ("rktk-drivers-rp", false),
-];
+use crate::{config::CRATES_CONFIG, utils::xprintln};
 
 pub fn start(
     crate_name: Option<String>,
     execute: bool,
     continue_on_error: bool,
 ) -> anyhow::Result<()> {
-    let publish_crates: Vec<(&str, bool)> = if let Some(crate_name) = crate_name {
-        PUBLISH_ORDER
+    let publish_crates: Vec<&String> = if let Some(crate_name) = crate_name {
+        CRATES_CONFIG
+            .publish_order
             .iter()
-            .copied()
-            .filter(|s| s.0 == crate_name)
+            .filter(|c| **c == crate_name)
             .collect()
     } else {
-        PUBLISH_ORDER.to_vec()
+        CRATES_CONFIG.publish_order.iter().collect()
     };
 
     xprintln!("Publishing...");
 
     let mut results = Vec::new();
-    for (package, use_release_feature) in publish_crates {
+    for package in publish_crates {
         let now = std::time::Instant::now();
+        let use_release_feature = CRATES_CONFIG
+            .crates
+            .get(package)
+            .map(|c| c.use_release_feature)
+            .unwrap_or(false);
 
-        let mut args = vec!["publish", "-p", &package, "--features"];
+        let mut args = vec!["publish", "-p", package, "--features"];
         if use_release_feature {
             args.push("_release_check");
         } else {

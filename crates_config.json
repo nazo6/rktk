@@ -3,6 +3,15 @@
 	"check_env": { "DEFMT_LOG": "trace" },
 	"test_features_global": ["_check"],
 	"doc_features_global": ["_check"],
+	"publish_order": [
+		"rktk-keymanager",
+		"rktk-log",
+		"rktk-rrp",
+		"rktk",
+		"rktk-drivers-common",
+		"rktk-drivers-nrf",
+		"rktk-drivers-rp"
+	],
 	"crates": {
 		"rktk": {
 			"check_group_features": [["defmt", "log"]],
@@ -29,7 +38,8 @@
 				["esb", "sdc"],
 				["softdevice-ble", "sdc"]
 			],
-			"doc_enabled": true
+			"doc_enabled": true,
+			"use_release_feature": true
 		},
 		"rktk-drivers-rp": {
 			"check_features": ["_check"],
