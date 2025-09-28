@@ -10,4 +10,8 @@ rustflags = ["-Zlocation-detail=none"]
 
 [unstable]
 build-std = ["core", "alloc"]
-build-std-features = ["panic_immediate_abort", "optimize_for_size"]
+build-std-features = [
+  # Temporary disabled (ref: #62)
+  # "panic_immediate_abort", 
+  "optimize_for_size",
+]
