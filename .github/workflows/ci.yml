@@ -1,4 +1,4 @@
-name: Run rust check and test
+name: ci
 
 on:
   push:

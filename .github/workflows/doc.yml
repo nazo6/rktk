@@ -1,4 +1,4 @@
-name: Build and deploy rktk rust api docs
+name: doc
 
 on:
   push:
@@ -19,6 +19,7 @@ env:
 
 jobs:
   build-and-deploy-docs:
+    name: Build and deploy rustdoc
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

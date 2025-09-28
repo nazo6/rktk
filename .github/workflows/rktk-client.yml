@@ -1,4 +1,4 @@
-name: Build and deploy rktk-client
+name: rktk-client
 
 on:
   push:
@@ -15,7 +15,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check-and-deploy-rktk-client:
+  build-and-deploy-rktk-client:
+    name: Build and deploy rktk-client
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
