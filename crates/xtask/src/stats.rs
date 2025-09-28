@@ -56,7 +56,8 @@ impl GhStatsWriter {
         let len = comment_file.metadata()?.len();
         xprintln!("Comment file length: {}", len);
         if len > 65536 * 4 {
-            xprintln!("Warning: Comment file is too large (>256KB).");
+            xprintln!("Warning: Comment file is too large (>256KB). Truncating.");
+            comment_file.set_len(65536 * 4)?;
         }
 
         Ok(())
