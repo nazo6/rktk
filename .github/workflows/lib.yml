@@ -45,7 +45,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-hack,cargo-llvm-lines
+          tool: cargo-hack,cargo-llvm-lines,uf2deploy
 
       - uses: r7kamura/rust-problem-matchers@v1
 
