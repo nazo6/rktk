@@ -23,7 +23,8 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  rust-check-and-test:
+  rust-check:
+    name: Check rust code
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     permissions:
@@ -53,9 +54,6 @@ jobs:
       - name: Run rust check
         run: cargo xtask check all
 
-      - name: Run rust test
-        run: cargo xtask test all
-
       - name: Post binary stats as PR comment
         if: github.event_name == 'pull_request'
         run: |
@@ -68,3 +66,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+
+  rust-test:
+    name: Execute test for rust code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          components: "clippy,rust-src"
+          target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+
+      - uses: r7kamura/rust-problem-matchers@v1
+
+      - name: Run rust test
+        run: cargo xtask test all
