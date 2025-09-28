@@ -40,7 +40,7 @@ jobs:
           target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
       - name: Install deps
-        run: apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+        run: sudo apt-get update && sudo apt-get install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
 
       - uses: taiki-e/install-action@v2
         with:
