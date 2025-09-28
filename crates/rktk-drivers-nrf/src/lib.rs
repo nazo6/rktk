@@ -12,7 +12,7 @@
 //! ## Feature flags
 #![doc = document_features::document_features!()]
 #![no_std]
-#![cfg_attr(doc, feature(doc_auto_cfg))]
+#![cfg_attr(doc, feature(doc_cfg))]
 
 pub mod display;
 #[cfg(feature = "esb")]

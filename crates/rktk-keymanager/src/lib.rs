@@ -9,7 +9,7 @@
 //!
 //! ## Feature flags
 #![doc = document_features::document_features!()]
-#![cfg_attr(doc, feature(doc_auto_cfg))]
+#![cfg_attr(doc, feature(doc_cfg))]
 #![allow(non_snake_case)]
 #![cfg_attr(not(test), no_std)]
 
