@@ -46,7 +46,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-hack,cargo-llvm-lines,uf2deploy
+          tool: cargo-hack,cargo-llvm-lines,uf2deploy,cargo-bloat
 
       - uses: r7kamura/rust-problem-matchers@v1
 
@@ -60,6 +60,8 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask stats keyball61-rp --features right,sd,pmw3360 --bin keyball61 --gh-output
           gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md --delete-last --yes
         env:
           GH_TOKEN: ${{ github.token }}

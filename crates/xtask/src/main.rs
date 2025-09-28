@@ -52,10 +52,10 @@ pub enum Commands {
         /// Specify binary name if the crate has multiple binaries.
         /// If not specified, the first binary will be used.
         #[arg(long)]
-        bin: Option<String>,
+        bin: String,
         #[arg(long)]
-        features: Option<Vec<String>>,
-        /// If true, output will be written to $GITHUB_OUTPUT file.
+        features: Vec<String>,
+        /// If true, output will be written to `/tmp/stats-comment.md` for GitHub Actions.
         #[arg(long)]
         gh_output: bool,
     },
