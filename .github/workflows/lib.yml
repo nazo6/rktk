@@ -62,7 +62,7 @@ jobs:
           cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats keyball61-rp --bin keyball61 --gh-output
-          gh pr comment "$PR_NUMBER" --delete-last --yes
+          gh pr comment "$PR_NUMBER" --delete-last --yes || true
           gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
         env:
           GH_TOKEN: ${{ github.token }}
