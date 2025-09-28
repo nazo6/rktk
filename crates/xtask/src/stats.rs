@@ -49,9 +49,15 @@ impl GhStatsWriter {
             .append(true)
             .open(Self::STATS_COMMENT_LOC)?;
         if comment_file.metadata()?.len() == 0 {
-            writeln!(comment_file, "# Binary stats\n")?;
+            writeln!(comment_file, "# Binary stats")?;
         }
         writeln!(comment_file, "{}", self.text)?;
+
+        let len = comment_file.metadata()?.len();
+        xprintln!("Comment file length: {}", len);
+        if len > 65536 * 4 {
+            xprintln!("Warning: Comment file is too large (>256KB).");
+        }
 
         Ok(())
     }
@@ -123,6 +129,9 @@ pub fn start(
     };
     xprintln!("Binary path: {}", elf_path);
 
+    // NOTE: Some analysis are commented out to reduce the comment body size. (Maxmium characters
+    // is 65536)
+
     /* Analyze bin and uf2 files */
 
     // NOTE: This command is just for stats, so any family name is fine.
@@ -148,12 +157,12 @@ pub fn start(
     /* Analyze using `cargo bloat` */
 
     xprintln!("Analyzing using `cargo bloat`");
-    let cargo_bloat_res = build_cmd(&["cargo", "bloat", "-n", "30"], &common_args, dir).read()?;
-    eprintln!("{}", cargo_bloat_res);
-    ghw.write("Cargo bloat", &cargo_bloat_res, true);
+    // let cargo_bloat_res = build_cmd(&["cargo", "bloat", "-n", "30"], &common_args, dir).read()?;
+    // eprintln!("{}", cargo_bloat_res);
+    // ghw.write("Cargo bloat", &cargo_bloat_res, true);
 
     let cargo_bloat_crate_res = build_cmd(
-        &["cargo", "bloat", "--crates", "-n", "30"],
+        &["cargo", "bloat", "--crates", "-n", "20"],
         &common_args,
         dir,
     )
@@ -172,9 +181,9 @@ pub fn start(
             "-HaF",
             &elf_path,
             "-w",
-            "200",
+            "150",
             "-m",
-            "200",
+            "500",
             "--no-color",
         ],
     )
@@ -193,7 +202,7 @@ pub fn start(
             "-HaR",
             &elf_path,
             "-w",
-            "200",
+            "150",
             "-m",
             "200",
             "--no-color",

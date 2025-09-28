@@ -63,6 +63,7 @@ jobs:
           cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats keyball61-rp --bin keyball61 --gh-output
           gh pr comment "$PR_NUMBER" --delete-last --yes || true
+          # note: maximum body file size is 65536(characters)*4 bytes
           gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
         env:
           GH_TOKEN: ${{ github.token }}
