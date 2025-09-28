@@ -19,6 +19,7 @@ serde_json = { workspace = true }
 dircpy = { workspace = true, default-features = false }
 sha2 = { workspace = true }
 hex = { workspace = true }
+human_bytes = { workspace = true }
 
 [features]
 _check = []

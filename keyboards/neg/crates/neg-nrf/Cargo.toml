@@ -17,13 +17,13 @@ doctest = false
 bench = false
 
 [[bin]]
-name = "master"
+name = "neg_nrf_master"
 test = false
 doctest = false
 bench = false
 
 [[bin]]
-name = "slave"
+name = "neg_nrf_slave"
 test = false
 doctest = false
 bench = false

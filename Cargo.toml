@@ -128,6 +128,7 @@ cargo_metadata = "0.22.0"
 dircpy = { version = "0.3.19", default-features = false }
 sha2 = "0.10.8"
 hex = "0.4.3"
+human_bytes = { version = "0.4.3" }
 
 # meta
 document-features = "0.2.11"

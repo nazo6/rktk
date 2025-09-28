@@ -3,7 +3,7 @@ name: Run rust check and test
 on:
   push:
     branches: ["master"]
-    paths:
+    paths: &paths
       - ".github/workflows/lib.yml"
       - ".github/workflows/setup-rust/action.yaml"
       - "**.toml"
@@ -11,13 +11,11 @@ on:
       - "**.lock"
   pull_request:
     types:
+      - opened
+      - reopened
+      - synchronize
       - ready_for_review
-    paths:
-      - ".github/workflows/lib.yml"
-      - ".github/workflows/setup-rust/action.yaml"
-      - "**.toml"
-      - "**.rs"
-      - "**.lock"
+    paths: *paths
   workflow_dispatch:
 
 env:
@@ -27,6 +25,9 @@ env:
 jobs:
   rust-check-and-test:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,7 +46,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-hack
+          tool: cargo-hack,cargo-llvm-lines,uf2deploy,cargo-bloat
 
       - uses: r7kamura/rust-problem-matchers@v1
 
@@ -54,3 +55,16 @@ jobs:
 
       - name: Run rust test
         run: cargo xtask test all
+
+      - name: Post binary stats as PR comment
+        if: github.event_name == 'pull_request'
+        run: |
+          cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask stats keyball61-rp --bin keyball61 --gh-output
+          gh pr comment "$PR_NUMBER" --delete-last --yes || true
+          # note: maximum body file size is 65536(characters)*4 bytes
+          gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}

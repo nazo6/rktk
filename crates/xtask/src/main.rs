@@ -6,6 +6,7 @@ mod check;
 mod config;
 mod doc;
 mod publish;
+mod stats;
 mod test;
 mod utils;
 
@@ -37,14 +38,27 @@ pub enum Commands {
         crate_name: Option<String>,
         /// By default, `cargo publish` will be executed with `--dry-run`.
         /// If true, `cargo publish` will be executed without `--dry-run`.
-        #[arg(long, default_value_t = false)]
+        #[arg(long)]
         execute: bool,
         // If true, continue publishing other crates even if one crate fails to publish.
-        #[arg(long, default_value_t = false)]
+        #[arg(long)]
         continue_on_error: bool,
     },
     /// Generate documentation for rktk crates.
     Doc,
+    Stats {
+        /// crate name to show stats. This must be binary crate.
+        crate_name: String,
+        /// Specify binary name if the crate has multiple binaries.
+        /// If not specified, the first binary will be used.
+        #[arg(long)]
+        bin: String,
+        #[arg(long)]
+        features: Vec<String>,
+        /// If true, output will be written to `/tmp/stats-comment.md` for GitHub Actions.
+        #[arg(long)]
+        gh_output: bool,
+    },
 }
 
 fn main() -> ExitCode {
@@ -58,6 +72,12 @@ fn main() -> ExitCode {
             continue_on_error,
         } => publish::start(crate_name, execute, continue_on_error),
         Commands::Doc => doc::start(),
+        Commands::Stats {
+            crate_name,
+            bin,
+            features,
+            gh_output,
+        } => stats::start(crate_name, bin, features, gh_output),
     };
 
     eprintln!();
