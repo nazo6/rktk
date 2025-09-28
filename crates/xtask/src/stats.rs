@@ -18,10 +18,18 @@ struct GhStatsWriter {
 impl GhStatsWriter {
     const STATS_COMMENT_LOC: &str = "/tmp/stats-comment.md";
 
-    fn new(name: String) -> Self {
-        Self {
-            text: format!("## Stats for `{}`\n\n", name),
+    fn new(name: &str, bin: &Option<String>, features: &Option<Vec<String>>) -> Self {
+        let mut text = format!("## Stats for `{}`", name);
+        if let Some(bin) = bin {
+            text.push_str(&format!(" (binary `{}`)", bin));
         }
+        if let Some(features) = features
+            && !features.is_empty()
+        {
+            text.push_str(&format!(" with features `{}`", features.join(",")));
+        }
+        text.push_str("\n\n");
+        Self { text }
     }
 
     fn write(&mut self, title: &str, value: &str) {
@@ -79,7 +87,7 @@ pub fn start(
 
     xprintln!("Analyzing crate `{}` ({})", package.name, dir);
 
-    let mut ghw = GhStatsWriter::new(name.clone());
+    let mut ghw = GhStatsWriter::new(&name, &bin, &features);
 
     let mut common_args = vec!["--release".to_string()];
     if let Some(bin_name) = bin {
@@ -132,8 +140,10 @@ pub fn start(
         bin_file_size,
         uf2_file_size
     );
-    ghw.write("Binary file size (bytes)", &bin_file_size.to_string());
-    ghw.write("UF2 file size (bytes)", &uf2_file_size.to_string());
+    ghw.write(
+        "File size (bytes)",
+        format!("BIN: {}\nUF2: {}", bin_file_size, uf2_file_size).as_str(),
+    );
 
     /* Analyze using cargo llvm-lines */
 

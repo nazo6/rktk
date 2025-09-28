@@ -60,7 +60,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
-          gh pr comment --delete-last --yes "$PR_NUMBER" --body-file /tmp/stats-comment.md
+          gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md --delete-last --yes
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
