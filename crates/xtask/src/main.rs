@@ -38,10 +38,10 @@ pub enum Commands {
         crate_name: Option<String>,
         /// By default, `cargo publish` will be executed with `--dry-run`.
         /// If true, `cargo publish` will be executed without `--dry-run`.
-        #[arg(long, default_value_t = false)]
+        #[arg(long)]
         execute: bool,
         // If true, continue publishing other crates even if one crate fails to publish.
-        #[arg(long, default_value_t = false)]
+        #[arg(long)]
         continue_on_error: bool,
     },
     /// Generate documentation for rktk crates.
