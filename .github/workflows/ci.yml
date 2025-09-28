@@ -23,8 +23,8 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  rust-check:
-    name: Check rust code
+  rust-check-lib:
+    name: Check rust code (lib)
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     permissions:
@@ -47,12 +47,37 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
+          tool: cargo-hack
+
+      - uses: r7kamura/rust-problem-matchers@v1
+
+      - name: Run rust check
+        run: cargo xtask check lib
+
+  rust-check-bin:
+    name: Check rust code (bin)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          components: "clippy,rust-src"
+          target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+
+      - uses: taiki-e/install-action@v2
+        with:
           tool: cargo-hack,cargo-llvm-lines,uf2deploy,cargo-bloat
 
       - uses: r7kamura/rust-problem-matchers@v1
 
       - name: Run rust check
-        run: cargo xtask check all
+        run: cargo xtask check bin
 
       - name: Post binary stats as PR comment
         if: github.event_name == 'pull_request'
@@ -70,6 +95,7 @@ jobs:
   rust-test:
     name: Execute test for rust code
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
         uses: actions/checkout@v4

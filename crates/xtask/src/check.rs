@@ -141,7 +141,7 @@ pub fn start(crate_filter: CrateFilter) -> anyhow::Result<()> {
     }
     xprintln!("Checking {} crates...", packages.len());
     for package in &packages {
-        xprintln!("\t- {}", package.name);
+        eprintln!("\t- {}", package.name);
     }
 
     let mut results = Vec::new();
