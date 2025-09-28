@@ -5,7 +5,7 @@ on:
     branches: ["master"]
     paths:
       - "site/**"
-      - ".github/workflows/site-deploy.yml"
+      - ".github/workflows/site.yml"
   workflow_dispatch:
 
 jobs:
