@@ -55,6 +55,9 @@ pub enum Commands {
         bin: Option<String>,
         #[arg(long)]
         features: Option<Vec<String>>,
+        /// If true, output will be written to $GITHUB_OUTPUT file.
+        #[arg(long)]
+        gh_output: bool,
     },
 }
 
@@ -73,7 +76,8 @@ fn main() -> ExitCode {
             crate_name,
             bin,
             features,
-        } => stats::start(crate_name, bin, features),
+            gh_output,
+        } => stats::start(crate_name, bin, features, gh_output),
     };
 
     eprintln!();

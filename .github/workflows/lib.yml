@@ -45,7 +45,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-hack
+          tool: cargo-hack,cargo-llvm-lines
 
       - uses: r7kamura/rust-problem-matchers@v1
 
@@ -54,3 +54,12 @@ jobs:
 
       - name: Run rust test
         run: cargo xtask test all
+
+      - name: Post binary stats as PR comment
+        if: github.event_name == 'pull_request'
+        run: |
+          cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
+          gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
