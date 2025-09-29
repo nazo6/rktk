@@ -52,7 +52,7 @@ display-interface = "0.5.0"
 embedded-graphics = "0.8.1"
 ssd1306 = { version = "0.10.0", features = ["async"] }
 
-trouble-host = { version = "0.3.0" }
+trouble-host = { version = "0.4.0" }
 rand_core = { version = "0.6.4" }
 
 nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc", default-features = false }
