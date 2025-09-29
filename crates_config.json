@@ -20,6 +20,7 @@
 			"doc_enabled": true
 		},
 		"kmsm-rktk": {
+			"check_no_powerset": true,
 			"doc_enabled": true
 		},
 		"rktk": {
