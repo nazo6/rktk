@@ -85,6 +85,7 @@ pub fn start(
     bin: String,
     features: Vec<String>,
     gh_output: bool,
+    extra: bool,
 ) -> anyhow::Result<()> {
     let Some(metadata) = METADATA.as_ref() else {
         anyhow::bail!("No metadata found. Are you running this command from a workspace?");
@@ -155,79 +156,81 @@ pub fn start(
     xprintln!("Binary sizes:\n {}", bytes_str);
     ghw.write("Binary size (bytes)", bytes_str.as_str(), false);
 
-    /* Analyze using `cargo bloat` */
+    if extra {
+        /* Analyze using `cargo bloat` */
 
-    xprintln!("Analyzing using `cargo bloat`");
-    // let cargo_bloat_res = build_cmd(&["cargo", "bloat", "-n", "30"], &common_args, dir).read()?;
-    // eprintln!("{}", cargo_bloat_res);
-    // ghw.write("Cargo bloat", &cargo_bloat_res, true);
+        xprintln!("Analyzing using `cargo bloat`");
+        // let cargo_bloat_res = build_cmd(&["cargo", "bloat", "-n", "30"], &common_args, dir).read()?;
+        // eprintln!("{}", cargo_bloat_res);
+        // ghw.write("Cargo bloat", &cargo_bloat_res, true);
 
-    let cargo_bloat_crate_res = build_cmd(
-        &["cargo", "bloat", "--crates", "-n", "20"],
-        &common_args,
-        dir,
-    )
-    .read()?;
-    eprintln!("{}", cargo_bloat_crate_res);
-    ghw.write("Cargo bloat (crates)", &cargo_bloat_crate_res, true);
+        let cargo_bloat_crate_res = build_cmd(
+            &["cargo", "bloat", "--crates", "-n", "20"],
+            &common_args,
+            dir,
+        )
+        .read()?;
+        eprintln!("{}", cargo_bloat_crate_res);
+        ghw.write("Cargo bloat (crates)", &cargo_bloat_crate_res, true);
 
-    /* Analyze using `elf-size-analyze` */
+        /* Analyze using `elf-size-analyze` */
 
-    xprintln!("Analyzing using `elf-size-analyze`");
-    let elf_size_analyze_rom_res = cmd(
-        "pipx",
-        [
-            "run",
-            "elf-size-analyze",
-            "-HaF",
-            &elf_path,
-            "-w",
-            "150",
-            "-m",
-            "500",
-            "--no-color",
-        ],
-    )
-    .read()?;
-    eprintln!("{}", elf_size_analyze_rom_res);
-    ghw.write(
-        "ELF size analyze (ROM, binary usage)",
-        &elf_size_analyze_rom_res,
-        true,
-    );
-    let elf_size_analyze_ram_res = cmd(
-        "pipx",
-        [
-            "run",
-            "elf-size-analyze",
-            "-HaR",
-            &elf_path,
-            "-w",
-            "150",
-            "-m",
-            "200",
-            "--no-color",
-        ],
-    )
-    .read()?;
-    eprintln!("{}", elf_size_analyze_ram_res);
-    ghw.write(
-        "ELF size analyze (RAM, memory usage)",
-        &elf_size_analyze_ram_res,
-        true,
-    );
+        xprintln!("Analyzing using `elf-size-analyze`");
+        let elf_size_analyze_rom_res = cmd(
+            "pipx",
+            [
+                "run",
+                "elf-size-analyze",
+                "-HaF",
+                &elf_path,
+                "-w",
+                "150",
+                "-m",
+                "500",
+                "--no-color",
+            ],
+        )
+        .read()?;
+        eprintln!("{}", elf_size_analyze_rom_res);
+        ghw.write(
+            "ELF size analyze (ROM, binary usage)",
+            &elf_size_analyze_rom_res,
+            true,
+        );
+        let elf_size_analyze_ram_res = cmd(
+            "pipx",
+            [
+                "run",
+                "elf-size-analyze",
+                "-HaR",
+                &elf_path,
+                "-w",
+                "150",
+                "-m",
+                "200",
+                "--no-color",
+            ],
+        )
+        .read()?;
+        eprintln!("{}", elf_size_analyze_ram_res);
+        ghw.write(
+            "ELF size analyze (RAM, memory usage)",
+            &elf_size_analyze_ram_res,
+            true,
+        );
 
-    /* Analyze using `cargo llvm-lines` */
+        /* Analyze using `cargo llvm-lines` */
 
-    xprintln!("Analyzing using `cargo llvm-lines`");
-    let llvm_lines_res = build_cmd(&["cargo", "llvm-lines"], &common_args, dir)
-        .read()?
-        .lines()
-        .take(20)
-        .collect::<Vec<_>>()
-        .join("\n");
-    eprintln!("{}", llvm_lines_res);
-    ghw.write("LLVM lines", &llvm_lines_res, true);
+        xprintln!("Analyzing using `cargo llvm-lines`");
+        let llvm_lines_res = build_cmd(&["cargo", "llvm-lines"], &common_args, dir)
+            .read()?
+            .lines()
+            .take(20)
+            .collect::<Vec<_>>()
+            .join("\n");
+        eprintln!("{}", llvm_lines_res);
+        ghw.write("LLVM lines", &llvm_lines_res, true);
+    }
 
     if gh_output {
         ghw.flush()?;

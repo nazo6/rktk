@@ -76,9 +76,12 @@ pub enum Commands {
         bin: String,
         #[arg(long)]
         features: Vec<String>,
-        /// If true, output will be written to `/tmp/stats-comment.md` for GitHub Actions.
         #[arg(long)]
+        /// If true, output will be written to `/tmp/stats-comment.md` for GitHub Actions.
         gh_output: bool,
+        #[arg(long)]
+        /// If false, only show stats about binary size. If true, it performs extra analysis and shows more detailed stats.
+        extra: bool,
     },
 }
 
@@ -98,7 +101,8 @@ fn main() -> ExitCode {
             bin,
             features,
             gh_output,
-        } => stats::start(crate_name, bin, features, gh_output),
+            extra,
+        } => stats::start(crate_name, bin, features, gh_output, extra),
     };
 
     eprintln!();

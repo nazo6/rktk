@@ -78,9 +78,11 @@ jobs:
       - name: Run rust check
         run: cargo xtask check bin
 
-      - name: Binary stats
+      - name: Binary stats (PR)
+        if: github.event_name == 'pull_request'
         run: |
-          cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
+          # note: maximum comment size is 65536 characters
+          cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output --extra
           cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats keyball61-rp --bin keyball61 --gh-output
 
@@ -88,11 +90,18 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           gh pr comment "$PR_NUMBER" --delete-last --yes || true
-          # note: maximum body file size is 65536(characters)*4 bytes
           gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Binary stats (Commit)
+        if: github.event_name == 'push'
+        run: |
+          # note: maximum comment size is 16384 characters, so skip --extra
+          cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask stats keyball61-rp --bin keyball61 --gh-output
 
       - name: Post binary stats as commit comment
         if: github.event_name == 'push'
