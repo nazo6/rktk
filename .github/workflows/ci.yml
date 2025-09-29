@@ -27,9 +27,6 @@ jobs:
     name: Check rust code (lib)
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
-    permissions:
-      pull-requests: write
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,6 +58,7 @@ jobs:
     if: github.event.pull_request.draft == false
     permissions:
       pull-requests: write
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
