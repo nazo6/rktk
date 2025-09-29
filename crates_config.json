@@ -5,6 +5,7 @@
 	"doc_features_global": ["_check"],
 	"publish_order": [
 		"kmsm",
+		"kmsm-rktk",
 		"rktk-log",
 		"rktk-rrp",
 		"rktk",
@@ -16,6 +17,9 @@
 		"kmsm": {
 			"check_group_features": [["serde", "postcard"]],
 			"test_enabled": true,
+			"doc_enabled": true
+		},
+		"kmsm-rktk": {
 			"doc_enabled": true
 		},
 		"rktk": {

@@ -11,6 +11,7 @@ readme = "../../README.md"
 
 [dependencies]
 kmsm = { workspace = true, features = ["state", "postcard"] }
+kmsm-rktk = { workspace = true }
 rktk-rrp = { workspace = true, features = ["server"], optional = true }
 
 rktk-log = { workspace = true }
@@ -38,7 +39,6 @@ postcard = { workspace = true, features = [
   "heapless-cas",
 ] }
 document-features = { workspace = true }
-strum = { workspace = true }
 itertools = { workspace = true }
 paste = { workspace = true }
 blinksy = { workspace = true }

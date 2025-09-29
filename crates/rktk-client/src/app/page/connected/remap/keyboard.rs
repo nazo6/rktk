@@ -119,8 +119,8 @@ pub fn Key(
 }
 
 mod utils {
-    use rktk::config::keymap::prelude::RktkKeys;
     use kmsm::keycode::{KeyAction, KeyCode, layer::LayerOp};
+    use kmsm_rktk::RktkKeys;
 
     pub fn key_str(key: &KeyAction) -> String {
         match key {

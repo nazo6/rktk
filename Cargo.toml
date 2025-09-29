@@ -14,6 +14,7 @@ repository = "https://github.com/nazo6/rktk"
 
 [workspace.dependencies]
 kmsm = { path = "crates/kmsm", version = "0.2.0" }
+kmsm-rktk = { path = "crates/kmsm-rktk", version = "0.2.0" }
 rktk-drivers-common = { path = "crates/rktk-drivers-common", version = "0.2.0" }
 rktk-drivers-nrf = { path = "crates/rktk-drivers-nrf", version = "0.2.0" }
 rktk-drivers-rp = { path = "crates/rktk-drivers-rp", version = "0.2.0" }

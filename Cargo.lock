@@ -4089,6 +4089,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kmsm-rktk"
+version = "0.2.0"
+dependencies = [
+ "kmsm",
+ "paste",
+ "strum",
+]
+
+[[package]]
 name = "kuchikiki"
 version = "0.8.8-speedreader"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5970,6 +5979,7 @@ dependencies = [
  "heapless 0.9.1",
  "itertools 0.14.0",
  "kmsm",
+ "kmsm-rktk",
  "log",
  "macro_rules_attribute",
  "paste",
@@ -5983,7 +5993,6 @@ dependencies = [
  "smart-default",
  "ssmarshal",
  "static_cell",
- "strum",
  "usbd-hid",
 ]
 
@@ -6000,8 +6009,8 @@ dependencies = [
  "js-sys",
  "kle-serial",
  "kmsm",
+ "kmsm-rktk",
  "log",
- "rktk",
  "rktk-rrp",
  "serde",
  "serde-wasm-bindgen",
