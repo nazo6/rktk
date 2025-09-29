@@ -5,7 +5,7 @@ on:
     branches: ["master"]
     paths:
       - "crates/rktk-client/**"
-      - "crates/rktk-keymanager/**.rs"
+      - "crates/kmsm/**.rs"
       - "crates/rktk-rrp/**.rs"
       - ".github/workflows/rktk-client.yml"
       - ".github/workflows/setup-rust/action.yaml"
