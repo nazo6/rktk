@@ -2,7 +2,7 @@
 <p align="center">Rust Keyboard Toolkit</p>
 
 [![Crates.io Version](https://img.shields.io/crates/v/rktk)](https://crates.io/crates/rktk)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/nazo6/rktk/lib.yml)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/nazo6/rktk/ci.yml)
 [![Doc build status](https://img.shields.io/github/actions/workflow/status/nazo6/rktk/doc.yml?label=doc)](https://rktk-docs.nazo6.dev)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nazo6/rktk)
 
@@ -16,23 +16,29 @@ This firmware consists of two parts: the core functionality implemented in the
 `rktk` crate and the driver that actually interacts with the hardware. This
 makes it easy to extend.
 
-## Docs
+## Links
+
+#### Documents
 
 - [Main site](https://rktk.nazo6.dev/): Very incomplete documentation site
 - [API Docs](https://rktk-docs.nazo6.dev/): RKTK Rust API docs
 - [Deepwiki](https://deepwiki.com/nazo6/rktk): It contains some incorrect
   content, but considering it is AI-generated, it is excellent.
 
-### Examples
+#### Tools
 
-You can find examples in the `examples` directory.
+- [RKTK client](https://rktk-client.nazo6.dev/): rktk remote protocol (rrp) online configurator (remapper)
 
-Also, you can find some advanced examples in the following repositories:
+## Example keyboards
 
-- https://github.com/nazo6/rktk-neg
-- https://github.com/nazo6/rktk-keyball-rs
+The `/keyboards` directory in this repository contains firmware code using rktk for each keyboard.
+
+Code for a specific platform and keyboard constitutes a single crate. Crates can be used as both libraries and binaries. 
+The library serves as a collection of useful code for that keyboard. The binary is the actual keyboard firmware built using it.
 
 ## Features
+
+Below is an overview of the features included in rktk.
 
 - ✅ : Working
 - 🟡 : Basic implementation only or known bugs.
@@ -132,10 +138,9 @@ to develop rktk, you need to install the following dependencies:
 
 #### As library
 
-Unless you enable a specific feature, rktk's MSRV is the latest stable version
-of Rust.
+rktk's MSRV is the latest stable version of Rust.
 
-In addition, a nightly compiler is required to minimize the binary size.
+Although, a nightly compiler is required to minimize the binary size.
 
 #### For development
 
