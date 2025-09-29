@@ -4,7 +4,7 @@
 	"test_features_global": ["_check"],
 	"doc_features_global": ["_check"],
 	"publish_order": [
-		"rktk-keymanager",
+		"kmsm",
 		"rktk-log",
 		"rktk-rrp",
 		"rktk",
@@ -13,17 +13,17 @@
 		"rktk-drivers-rp"
 	],
 	"crates": {
+		"kmsm": {
+			"check_group_features": [["serde", "postcard"]],
+			"test_enabled": true,
+			"doc_enabled": true
+		},
 		"rktk": {
 			"check_group_features": [["defmt", "log"]],
 			"doc_enabled": true
 		},
 		"rktk-rrp": {
 			"check_at_least_one_of": [["server", "client"]],
-			"test_enabled": true,
-			"doc_enabled": true
-		},
-		"rktk-keymanager": {
-			"check_group_features": [["serde", "postcard"]],
 			"test_enabled": true,
 			"doc_enabled": true
 		},

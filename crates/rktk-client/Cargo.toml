@@ -10,7 +10,7 @@ repository.workspace = true
 rktk = { workspace = true }
 ssmarshal = { workspace = true, features = ["std"] }
 rktk-rrp = { workspace = true, features = ["client"] }
-rktk-keymanager = { workspace = true }
+kmsm = { workspace = true }
 
 dioxus = { workspace = true }
 

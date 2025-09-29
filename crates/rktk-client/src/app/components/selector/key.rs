@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use dioxus::prelude::*;
-use rktk_keymanager::keycode::layer::LayerOp;
+use kmsm::keycode::layer::LayerOp;
 
 #[component]
 pub fn KeySelector<I: Display + PartialEq + Clone + 'static>(

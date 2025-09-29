@@ -1,4 +1,4 @@
-use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
+use kmsm::interface::state::input_event::KeyChangeEvent;
 use rktk_log::debug;
 
 use super::utils::get_split_right_shift;

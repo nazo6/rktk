@@ -3,7 +3,7 @@
 //! A key is represented by a three-layer structure: `KeyAction` → `KeyCode` → `Key`.
 //! For example, a key action that sends A on Tap and Shift on Hold could be defined as follows
 //! ```
-//! # use rktk_keymanager::keycode::prelude::*;
+//! # use kmsm::keycode::prelude::*;
 //! const ACTION: KeyAction = KeyAction::TapHold(KeyCode::Key(Key::A),
 //! KeyCode::Modifier(Modifier::LShft));
 //! ```
@@ -14,7 +14,7 @@
 //!
 //! For convenience, keycodes are defined as constants with normal keyaction like this:
 //! ```
-//! # use rktk_keymanager::keycode::prelude::*;
+//! # use kmsm::keycode::prelude::*;
 //! const A: KeyAction = KeyAction::Normal(KeyCode::Key(Key::A));
 //! ```
 //! You can use these constants to define keymap.
@@ -49,7 +49,7 @@ pub enum KeyAction {
     /// Tap-Hold key (tap, hold)
     ///
     /// If key is pressed and released in [`KeyResolverConfig::tap_hold`](crate::interface::state::config::KeyResolverConfig::tap_hold), tap key is sent.
-    /// If key is pressed and held longer, hold key is sent. Also, `rktk-keymanager` emulates qmk's `HOLD_ON_OTHER_KEY_PRESS` feature.
+    /// If key is pressed and held longer, hold key is sent. Also, `kmsm` emulates qmk's `HOLD_ON_OTHER_KEY_PRESS` feature.
     /// If another key is pressed while holding this key, even before `tap_threshold`, hold key is sent.
     TapHold(KeyCode, KeyCode),
     /// One-shot key

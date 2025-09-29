@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use dioxus::prelude::*;
 
 use fetcher::KeymapData;
-use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, rktk_keymanager::keycode::KeyAction};
+use rktk_rrp::endpoints::{get_keyboard_info::KeyboardInfo, kmsm::keycode::KeyAction};
 
 use crate::app::{
     cache::{invalidate_cache, use_cache, with_cache},

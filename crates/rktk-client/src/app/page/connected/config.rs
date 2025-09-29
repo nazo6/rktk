@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use rktk_keymanager::interface::state::config::StateConfig;
+use kmsm::interface::state::config::StateConfig;
 
 use crate::app::{
     cache::{invalidate_cache, use_cache, with_cache},
@@ -138,7 +138,7 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
 mod fetcher {
     use anyhow::Context as _;
     use dioxus::signals::ReadableExt as _;
-    use rktk_keymanager::interface::state::config::StateConfig;
+    use kmsm::interface::state::config::StateConfig;
 
     use crate::{app::state::CONN, backend::RrpHidDevice as _};
 

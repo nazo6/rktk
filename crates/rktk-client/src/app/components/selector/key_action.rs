@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use rktk_keymanager::keycode::{KeyAction, KeyCode, key::Key};
+use kmsm::keycode::{KeyAction, KeyCode, key::Key};
 
 use crate::app::components::selector::key_code::KeyCodeSelector;
 

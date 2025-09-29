@@ -1,4 +1,4 @@
-# rktk-keymanager
+# kmsm
 
 Keymap/state management library for keyboard firmware.
 
