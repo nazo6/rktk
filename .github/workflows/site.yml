@@ -1,15 +1,16 @@
-name: Build and deploy site
+name: site
 
 on:
   push:
     branches: ["master"]
     paths:
       - "site/**"
-      - ".github/workflows/site-deploy.yml"
+      - ".github/workflows/site.yml"
   workflow_dispatch:
 
 jobs:
   build-and-deploy-site:
+    name: Build and deploy site
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

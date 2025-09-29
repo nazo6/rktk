@@ -1,4 +1,4 @@
-name: Run rust check and test
+name: ci
 
 on:
   push:
@@ -23,7 +23,8 @@ env:
   CLICOLOR_FORCE: 1
 
 jobs:
-  rust-check-and-test:
+  rust-check-lib:
+    name: Check rust code (lib)
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     permissions:
@@ -46,25 +47,75 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
+          tool: cargo-hack
+
+      - uses: r7kamura/rust-problem-matchers@v1
+
+      - name: Run rust check
+        run: cargo xtask check lib
+
+  rust-check-bin:
+    name: Check rust code (bin)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          components: "clippy,rust-src"
+          target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+
+      - uses: taiki-e/install-action@v2
+        with:
           tool: cargo-hack,cargo-llvm-lines,uf2deploy,cargo-bloat
 
       - uses: r7kamura/rust-problem-matchers@v1
 
       - name: Run rust check
-        run: cargo xtask check all
+        run: cargo xtask check bin
 
-      - name: Run rust test
-        run: cargo xtask test all
-
-      - name: Post binary stats as PR comment
-        if: github.event_name == 'pull_request'
+      - name: Binary stats
         run: |
           cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats keyball61-rp --bin keyball61 --gh-output
+
+      - name: Post binary stats as PR comment
+        if: github.event_name == 'pull_request'
+        run: |
           gh pr comment "$PR_NUMBER" --delete-last --yes || true
           # note: maximum body file size is 65536(characters)*4 bytes
           gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Post binary stats as commit comment
+        if: github.event_name == 'push'
+        uses: peter-evans/commit-comment@v3
+        with:
+          body-path: /tmp/stats-comment.md
+
+  rust-test:
+    name: Execute test for rust code
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup rust
+        uses: ./.github/workflows/setup-rust
+        with:
+          components: "clippy,rust-src"
+          target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
+
+      - uses: r7kamura/rust-problem-matchers@v1
+
+      - name: Run rust test
+        run: cargo xtask test all

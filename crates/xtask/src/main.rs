@@ -19,14 +19,35 @@ pub struct Cli {
     pub command: Commands,
 }
 
+#[derive(Debug, Clone)]
+pub enum CrateFilter {
+    /// Choose all crates.
+    All,
+    /// Choose only binary crates (`check_build` is false, usually in `/crates`).
+    Lib,
+    /// Choose only binary crates (`check_build` is true, usually in `/keyboards`).
+    Bin,
+    /// Choose only specified crate.
+    CrateName(String),
+}
+
+impl std::str::FromStr for CrateFilter {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "all" => Ok(CrateFilter::All),
+            "lib" => Ok(CrateFilter::Lib),
+            "bin" => Ok(CrateFilter::Bin),
+            other => Ok(CrateFilter::CrateName(other.to_string())),
+        }
+    }
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// Run `cargo clippy` with feature matrix for rktk crates.
-    Check {
-        /// crate name to check
-        /// If 'all' is specified, all crates will be checked.
-        crate_name: String,
-    },
+    Check { crate_filter: CrateFilter },
     /// Run `cargo test` for rktk crates.
     Test {
         /// crate name to run test
@@ -64,7 +85,7 @@ pub enum Commands {
 fn main() -> ExitCode {
     let args = Cli::parse();
     let res = match args.command {
-        Commands::Check { crate_name } => check::start(crate_name),
+        Commands::Check { crate_filter } => check::start(crate_filter),
         Commands::Test { crate_name } => test::start(crate_name),
         Commands::Publish {
             crate_name,

@@ -2,9 +2,52 @@ use anyhow::Context;
 use cargo_metadata::{Package, camino::Utf8Path};
 use duct::cmd;
 
-use crate::utils::{METADATA, xprintln};
+use crate::{
+    CrateFilter,
+    utils::{METADATA, xprintln},
+};
 
 use super::config::CRATES_CONFIG;
+
+fn get_crates(crate_filter: &CrateFilter) -> Vec<Package> {
+    let Some(metadata) = METADATA.as_ref() else {
+        return vec![];
+    };
+
+    let packages = metadata.workspace_packages();
+
+    let mut crates = Vec::new();
+    for package in packages {
+        let crate_config = CRATES_CONFIG
+            .crates
+            .get(package.name.as_str())
+            .cloned()
+            .unwrap_or_default();
+
+        match crate_filter {
+            CrateFilter::All => {
+                crates.push(package.clone());
+            }
+            CrateFilter::Lib => {
+                if !crate_config.check_build {
+                    crates.push(package.clone());
+                }
+            }
+            CrateFilter::Bin => {
+                if crate_config.check_build {
+                    crates.push(package.clone());
+                }
+            }
+            CrateFilter::CrateName(name) => {
+                if package.name.as_str() == name {
+                    crates.push(package.clone());
+                }
+            }
+        }
+    }
+
+    crates
+}
 
 fn build_args(crate_name: &str) -> Vec<String> {
     let config = CRATES_CONFIG
@@ -88,85 +131,75 @@ fn run_check(package: &Package) -> (&Utf8Path, Result<std::process::Output, std:
     (crate_path, res)
 }
 
-pub fn start(name: String) -> anyhow::Result<()> {
-    let Some(metadata) = METADATA.as_ref() else {
-        anyhow::bail!("No metadata found. Are you running this command from a workspace?");
-    };
+pub fn start(crate_filter: CrateFilter) -> anyhow::Result<()> {
+    let packages = get_crates(&crate_filter);
+    if packages.is_empty() {
+        return Err(anyhow::anyhow!(
+            "No crates found for the filter {:?}",
+            crate_filter
+        ));
+    }
+    xprintln!("Checking {} crates...", packages.len());
+    for package in &packages {
+        eprintln!("\t- {}", package.name);
+    }
 
-    if &name == "all" {
-        let packages = metadata.workspace_packages();
-        xprintln!("Checking all {} crates...", packages.len());
+    let mut results = Vec::new();
+    for package in &packages {
+        eprintln!();
+        xprintln!(
+            "Checking crate `{}` ({})",
+            package.name,
+            package.manifest_path
+        );
 
-        let mut results = Vec::new();
-        for package in packages {
-            eprintln!();
-            xprintln!(
-                "Checking crate `{}` ({})",
-                package.name,
-                package.manifest_path
-            );
+        let now = std::time::Instant::now();
 
-            let now = std::time::Instant::now();
+        let (crate_path, res) = run_check(package);
 
-            let (crate_path, res) = run_check(package);
+        let is_err = res.is_err();
 
-            let is_err = res.is_err();
+        let elapsed = now.elapsed();
 
-            let elapsed = now.elapsed();
+        results.push((crate_path, package, res, elapsed));
 
-            results.push((crate_path, package, res, elapsed));
+        if is_err {
+            break;
+        }
+    }
 
-            if is_err {
-                break;
+    let mut failed = Vec::new();
+    for (crate_path, package, result, duration) in results {
+        match result {
+            Ok(_) => {
+                xprintln!(
+                    "{}  `{}` ({}) in {}s",
+                    " PASS ".on_green(),
+                    package.name,
+                    crate_path,
+                    duration.as_secs()
+                );
+            }
+            Err(err) => {
+                xprintln!(
+                    "{} `{}` ({}) in {}s: {}",
+                    " ERROR ".on_red(),
+                    package.name,
+                    crate_path,
+                    duration.as_secs(),
+                    err.to_string().red()
+                );
+                failed.push((crate_path, package.name.clone()));
             }
         }
+    }
 
-        let mut failed = Vec::new();
-        for (crate_path, package, result, duration) in results {
-            match result {
-                Ok(_) => {
-                    xprintln!(
-                        "{}  `{}` ({}) in {}s",
-                        " PASS ".on_green(),
-                        package.name,
-                        crate_path,
-                        duration.as_secs()
-                    );
-                }
-                Err(err) => {
-                    xprintln!(
-                        "{} `{}` ({}) in {}s: {}",
-                        " ERROR ".on_red(),
-                        package.name,
-                        crate_path,
-                        duration.as_secs(),
-                        err.to_string().red()
-                    );
-                    failed.push((crate_path, package.name.clone()));
-                }
-            }
+    if !failed.is_empty() {
+        let mut msg = "Some crates failed to pass clippy: ".to_string();
+        for (crate_path, name) in failed {
+            msg.push_str(&format!("\n  - {name} ({crate_path})"));
         }
-
-        if !failed.is_empty() {
-            let mut msg = "Some crates failed to pass clippy: ".to_string();
-            for (crate_path, name) in failed {
-                msg.push_str(&format!("\n  - {name} ({crate_path})"));
-            }
-            anyhow::bail!(msg);
-        }
-    } else {
-        let package = metadata
-            .workspace_packages()
-            .into_iter()
-            .find(|p| p.name.as_str() == name)
-            .context("no such crate")?;
-        let dir = package.manifest_path.parent().context("no parent dir")?;
-
-        xprintln!("Checking crate `{}` ({})", package.name, dir);
-
-        run_check(package)
-            .1
-            .with_context(|| format!("Failed to run clippy for crate: {dir}"))?;
+        anyhow::bail!(msg);
     }
 
     Ok(())
