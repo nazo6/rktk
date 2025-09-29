@@ -79,18 +79,27 @@ jobs:
       - name: Run rust check
         run: cargo xtask check bin
 
-      - name: Post binary stats as PR comment
-        if: github.event_name == 'pull_request'
+      - name: Binary stats
         run: |
           cargo xtask stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
           cargo xtask stats keyball61-rp --bin keyball61 --gh-output
+
+      - name: Post binary stats as PR comment
+        if: github.event_name == 'pull_request'
+        run: |
           gh pr comment "$PR_NUMBER" --delete-last --yes || true
           # note: maximum body file size is 65536(characters)*4 bytes
           gh pr comment "$PR_NUMBER" --body-file /tmp/stats-comment.md
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Post binary stats as commit comment
+        if: github.event_name == 'push'
+        uses: peter-evans/commit-comment@v3
+        with:
+          body-path: /tmp/stats-comment.md
 
   rust-test:
     name: Execute test for rust code
