@@ -4,7 +4,7 @@ on:
   push:
     branches: ["master"]
     paths: &paths
-      - ".github/workflows/lib.yml"
+      - ".github/workflows/ci.yml"
       - ".github/workflows/setup-rust/action.yaml"
       - "**.toml"
       - "**.rs"
@@ -29,6 +29,7 @@ jobs:
     if: github.event.pull_request.draft == false
     permissions:
       pull-requests: write
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
