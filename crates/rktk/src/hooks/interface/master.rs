@@ -1,4 +1,4 @@
-pub use rktk_keymanager::{
+pub use kmsm::{
     interface::state::{
         input_event::{EncoderDirection, KeyChangeEvent},
         output_event::OutputEvent,
@@ -67,7 +67,7 @@ pub trait MasterHooks {
     /// inconsistent state.
     ///
     /// # Parameters
-    /// - `state_report`: Report returned from rktk-keymanager's update function.
+    /// - `state_report`: Report returned from kmsm's update function.
     ///
     /// # Returns
     /// If false, this report will be ignored.

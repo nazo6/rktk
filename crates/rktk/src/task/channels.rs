@@ -41,7 +41,7 @@ pub mod report {
     use core::sync::atomic::Ordering;
 
     use portable_atomic::AtomicI8;
-    use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
+    use kmsm::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
     use crate::{config::CONST_CONFIG, utils::Signal};
 

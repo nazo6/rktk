@@ -1,4 +1,4 @@
-// Private struct available in this module is copied from rktk_keymanager::interface::state::config::* to avoid foreign impl problem.
+// Private struct available in this module is copied from kmsm::interface::state::config::* to avoid foreign impl problem.
 // `use keymanager::...::config::*` is inserted in top of generated code and types in this module
 // will not be used.
 

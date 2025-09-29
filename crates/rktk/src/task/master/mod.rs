@@ -1,4 +1,4 @@
-use rktk_keymanager::state::hid_report::HidReportState;
+use kmsm::state::hid_report::HidReportState;
 
 use crate::{config::CONST_CONFIG, utils::Mutex};
 

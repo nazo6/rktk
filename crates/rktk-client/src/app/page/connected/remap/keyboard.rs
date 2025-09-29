@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use dioxus::prelude::*;
 use dioxus_elements::geometry::PixelsSize;
-use rktk_rrp::endpoints::rktk_keymanager::keycode::KeyAction;
+use rktk_rrp::endpoints::kmsm::keycode::KeyAction;
 
 use super::KeymapData;
 
@@ -119,8 +119,8 @@ pub fn Key(
 }
 
 mod utils {
-    use rktk::config::keymap::prelude::RktkKeys;
-    use rktk_keymanager::keycode::{KeyAction, KeyCode, layer::LayerOp};
+    use kmsm::keycode::{KeyAction, KeyCode, layer::LayerOp};
+    use kmsm_rktk::RktkKeys;
 
     pub fn key_str(key: &KeyAction) -> String {
         match key {

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use dioxus::prelude::*;
-use rktk_keymanager::keycode::KeyAction;
+use kmsm::keycode::KeyAction;
 
 #[component]
 pub fn Bar(

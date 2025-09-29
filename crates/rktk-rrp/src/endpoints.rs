@@ -1,6 +1,6 @@
 use macro_rules_attribute::{apply, attribute_alias};
-pub use rktk_keymanager;
-use rktk_keymanager::keycode::KeyAction;
+pub use kmsm;
+use kmsm::keycode::KeyAction;
 
 #[cfg(test)]
 mod test_endpoints {
@@ -44,7 +44,7 @@ pub struct KeyActionLoc {
 
 pub mod get_keyboard_info {
     use macro_rules_attribute::apply;
-    use rktk_keymanager::interface::state::KeymapInfo;
+    use kmsm::interface::state::KeymapInfo;
 
     #[apply(super::common_derive)]
     pub struct KeyboardInfo {
@@ -86,10 +86,10 @@ pub mod get_now {
 
 pub mod get_keymap_config {
     pub type Request = ();
-    pub type Response = rktk_keymanager::interface::state::config::StateConfig;
+    pub type Response = kmsm::interface::state::config::StateConfig;
 }
 pub mod set_keymap_config {
-    pub type Request = rktk_keymanager::interface::state::config::StateConfig;
+    pub type Request = kmsm::interface::state::config::StateConfig;
     pub type Response = ();
 }
 

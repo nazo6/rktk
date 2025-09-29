@@ -7,7 +7,7 @@ use embedded_graphics::{
     pixelcolor::BinaryColor,
     prelude::{Dimensions, DrawTarget},
 };
-use rktk_keymanager::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
+use kmsm::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
 
 use crate::drivers::interface::{
     debounce::DebounceDriver,

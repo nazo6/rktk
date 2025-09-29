@@ -64,7 +64,7 @@ Below is an overview of the features included in rktk.
 
 #### Key mapping features
 
-Key mapping features is implemented in `rktk-keymanager` and this crate does not
+Key mapping features is implemented in `kmsm` and this crate does not
 depend on rktk or embassy.
 
 | Feature name           | Status | Note                                      |

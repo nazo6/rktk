@@ -7,15 +7,15 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
-rktk = { workspace = true }
-ssmarshal = { workspace = true, features = ["std"] }
+kmsm = { workspace = true }
+kmsm-rktk = { workspace = true }
 rktk-rrp = { workspace = true, features = ["client"] }
-rktk-keymanager = { workspace = true }
 
 dioxus = { workspace = true }
 
 serde = { workspace = true }
 serde_json = { workspace = true }
+ssmarshal = { workspace = true, features = ["std"] }
 anyhow = { workspace = true }
 futures = { workspace = true, features = ["async-await"] }
 strum = { workspace = true }

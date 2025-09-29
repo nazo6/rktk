@@ -10,8 +10,8 @@ use crate::macros::{common_derive, impl_display, with_consts};
 /// 1. "Transparent" keys
 ///    These keys have no meaning in this crate. If these keys are pressed, its information are
 ///    passed through transparent report to caller.
-/// 2. Keys that determine the behavior of rktk-keymanager
-///    These keys are used to control the behavior of rktk-keymanager.
+/// 2. Keys that determine the behavior of kmsm
+///    These keys are used to control the behavior of kmsm.
 ///    For example, while `MoScrl` key is pressed, mouse event is converted to scroll event.
 #[apply(with_consts)]
 #[apply(common_derive)]

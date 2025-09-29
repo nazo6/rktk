@@ -1,4 +1,4 @@
-pub use rktk_keymanager::interface::state::input_event::KeyChangeEvent;
+pub use kmsm::interface::state::input_event::KeyChangeEvent;
 
 /// Key scanner driver interface.
 ///

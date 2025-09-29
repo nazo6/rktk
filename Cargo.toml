@@ -13,11 +13,12 @@ edition = "2024"
 repository = "https://github.com/nazo6/rktk"
 
 [workspace.dependencies]
+kmsm = { path = "crates/kmsm", version = "0.2.0" }
+kmsm-rktk = { path = "crates/kmsm-rktk", version = "0.2.0" }
 rktk-drivers-common = { path = "crates/rktk-drivers-common", version = "0.2.0" }
 rktk-drivers-nrf = { path = "crates/rktk-drivers-nrf", version = "0.2.0" }
 rktk-drivers-rp = { path = "crates/rktk-drivers-rp", version = "0.2.0" }
 rktk = { path = "crates/rktk", version = "0.2.0" }
-rktk-keymanager = { path = "crates/rktk-keymanager", version = "0.2.0" }
 rktk-log = { path = "crates/rktk-log", version = "0.2.0" }
 rktk-rrp = { path = "crates/rktk-rrp", version = "0.2.0" }
 

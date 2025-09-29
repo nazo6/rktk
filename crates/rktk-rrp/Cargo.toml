@@ -12,7 +12,7 @@ all-features = true
 
 [dependencies]
 futures = { workspace = true }
-rktk-keymanager = { workspace = true, features = ["postcard"] }
+kmsm = { workspace = true, features = ["postcard"] }
 postcard = { workspace = true, features = ["experimental-derive"] }
 
 serde = { workspace = true, features = ["derive"] }

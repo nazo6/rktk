@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
-use rktk::config::keymap::prelude::RktkKeys;
-use rktk_keymanager::keycode::{
+use kmsm::keycode::{
     KeyCode, key::Key, layer::LayerOp, media::Media, modifier::Modifier, mouse::Mouse,
     special::Special,
 };
+use kmsm_rktk::RktkKeys;
 use strum::IntoEnumIterator as _;
 
 use crate::app::components::selector::key::{CustomKeySelector, LayerKeySelector};

@@ -2,9 +2,9 @@ use core::sync::atomic::Ordering;
 
 use embassy_futures::select::{Either, Either4, select, select4};
 use embassy_time::{Duration, Instant};
-use rktk_keymanager::interface::state::output_event::EventType;
-use rktk_keymanager::interface::state::{input_event::InputEvent, output_event::OutputEvent};
-use rktk_keymanager::state::hid_report::Report;
+use kmsm::interface::state::output_event::EventType;
+use kmsm::interface::state::{input_event::InputEvent, output_event::OutputEvent};
+use kmsm::state::hid_report::Report;
 use rktk_log::{debug, helper::Debug2Format};
 
 use crate::config::keymap::prelude::RktkKeys;

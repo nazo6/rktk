@@ -1,4 +1,4 @@
-use rktk_keymanager::interface::state::{config::StateConfig, input_event::KeyChangeEvent};
+use kmsm::interface::state::{config::StateConfig, input_event::KeyChangeEvent};
 use rktk_log::helper::Debug2Format;
 
 use crate::{

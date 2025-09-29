@@ -92,13 +92,13 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
         r#"
         /// Configuration schema
         pub mod schema {{
-            use rktk_keymanager::interface::state::config::*;
+            use kmsm::interface::state::config::*;
 
             {code_schemas}
         }}
         mod generate_config {{
             use super::schema::*;
-            use rktk_keymanager::interface::state::config::*;
+            use kmsm::interface::state::config::*;
 
             {code_const_config}
 

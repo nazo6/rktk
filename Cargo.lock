@@ -4070,6 +4070,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "kmsm"
+version = "0.2.0"
+dependencies = [
+ "critical-section",
+ "defmt 1.0.1",
+ "document-features",
+ "heapless 0.9.1",
+ "macro_rules_attribute",
+ "paste",
+ "postcard",
+ "pretty_assertions",
+ "serde",
+ "serde_with",
+ "ssmarshal",
+ "strum",
+ "usbd-hid",
+]
+
+[[package]]
+name = "kmsm-rktk"
+version = "0.2.0"
+dependencies = [
+ "kmsm",
+ "paste",
+ "strum",
+]
+
+[[package]]
 name = "kuchikiki"
 version = "0.8.8-speedreader"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5950,12 +5978,13 @@ dependencies = [
  "futures",
  "heapless 0.9.1",
  "itertools 0.14.0",
+ "kmsm",
+ "kmsm-rktk",
  "log",
  "macro_rules_attribute",
  "paste",
  "portable-atomic",
  "postcard",
- "rktk-keymanager",
  "rktk-log",
  "rktk-rrp",
  "schemars",
@@ -5964,7 +5993,6 @@ dependencies = [
  "smart-default",
  "ssmarshal",
  "static_cell",
- "strum",
  "usbd-hid",
 ]
 
@@ -5980,9 +6008,9 @@ dependencies = [
  "jiff",
  "js-sys",
  "kle-serial",
+ "kmsm",
+ "kmsm-rktk",
  "log",
- "rktk",
- "rktk-keymanager",
  "rktk-rrp",
  "serde",
  "serde-wasm-bindgen",
@@ -6087,25 +6115,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rktk-keymanager"
-version = "0.2.0"
-dependencies = [
- "critical-section",
- "defmt 1.0.1",
- "document-features",
- "heapless 0.9.1",
- "macro_rules_attribute",
- "paste",
- "postcard",
- "pretty_assertions",
- "serde",
- "serde_with",
- "ssmarshal",
- "strum",
- "usbd-hid",
-]
-
-[[package]]
 name = "rktk-log"
 version = "0.2.0"
 dependencies = [
@@ -6119,9 +6128,9 @@ dependencies = [
  "embedded-io-async",
  "futures",
  "heapless 0.9.1",
+ "kmsm",
  "macro_rules_attribute",
  "postcard",
- "rktk-keymanager",
  "serde",
  "serde_with",
  "thiserror 2.0.16",
