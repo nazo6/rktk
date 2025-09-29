@@ -8694,11 +8694,9 @@ dependencies = [
  "colored",
  "dircpy",
  "duct",
- "hex",
  "human_bytes",
  "serde",
  "serde_json",
- "sha2",
 ]
 
 [[package]]

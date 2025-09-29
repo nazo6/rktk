@@ -6,28 +6,30 @@ use cargo_metadata::{
     camino::{Utf8Path, Utf8PathBuf},
 };
 use duct::cmd;
-use sha2::{Digest, Sha256};
 
 use crate::{utils::METADATA, xprintln};
 
 use super::config::CRATES_CONFIG;
 
+fn djb2_32(s: &str) -> u32 {
+    let mut h: u32 = 5381;
+    for b in s.as_bytes() {
+        // h = h * 33 + b
+        h = h.wrapping_mul(33).wrapping_add(*b as u32);
+    }
+    h
+}
+
 const BEFORE_CONTENT: &str = include_str!("../res/doc_before.html");
 static HTML_BEFORE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
-    let mut hasher = Sha256::new();
-    hasher.update(BEFORE_CONTENT);
-    let hash = hex::encode(hasher.finalize());
-
+    let hash = djb2_32(BEFORE_CONTENT);
     let path = std::env::temp_dir().join(format!("doc_header_{hash}.html"));
     std::fs::write(&path, BEFORE_CONTENT).unwrap();
     path
 });
 const AFTER_CONTENT: &str = include_str!("../res/doc_after.html");
 static HTML_AFTER_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
-    let mut hasher = Sha256::new();
-    hasher.update(AFTER_CONTENT);
-    let hash = hex::encode(hasher.finalize());
-
+    let hash = djb2_32(AFTER_CONTENT);
     let path = std::env::temp_dir().join(format!("doc_header_{hash}.html"));
     std::fs::write(&path, AFTER_CONTENT).unwrap();
     path
