@@ -176,7 +176,7 @@ impl<S: SpiDevice> Paw3395<S> {
     }
 
     async fn power_up(&mut self) -> Result<(), Paw3395Error<S::Error>> {
-        Timer::after_micros(50).await;
+        Timer::after_millis(50).await;
 
         self.write(reg::POWER_UP_RESET, 0x5A).await?;
         Timer::after_millis(5).await;
