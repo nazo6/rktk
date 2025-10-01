@@ -21,6 +21,7 @@ rktk-drivers-nrf = { workspace = true }
 rktk-drivers-common = { workspace = true }
 rktk = { workspace = true }
 rktk-log = { workspace = true }
+rktk-ksp = { workspace = true }
 
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }

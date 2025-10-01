@@ -1,0 +1,2 @@
+[env]
+RKTK_CONFIG_PATH = { value = "../../configs/neg.json", relative = true }

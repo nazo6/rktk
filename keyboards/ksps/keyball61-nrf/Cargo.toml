@@ -16,7 +16,7 @@ doctest = false
 bench = false
 
 [dependencies]
-keyball61-common = { path = "../keyball61-common/" }
+rktk-ksp-keyball61-common = { path = "../keyball61-common/" }
 
 rktk = { workspace = true }
 rktk-drivers-nrf = { workspace = true }

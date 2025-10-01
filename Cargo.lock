@@ -1124,34 +1124,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "corne-nrf"
-version = "0.2.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "embassy-executor",
- "embassy-nrf",
- "nrf-softdevice",
- "rktk",
- "rktk-drivers-common",
- "rktk-drivers-nrf",
-]
-
-[[package]]
-name = "corne-rp"
-version = "0.2.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "embassy-executor",
- "embassy-rp",
- "portable-atomic",
- "rktk",
- "rktk-drivers-common",
- "rktk-drivers-rp",
-]
-
-[[package]]
 name = "cortex-m"
 version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2181,19 +2153,6 @@ dependencies = [
  "os_pipe",
  "shared_child",
  "shared_thread",
-]
-
-[[package]]
-name = "dummy-rp"
-version = "0.2.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "embassy-executor",
- "embassy-rp",
- "portable-atomic",
- "rktk",
- "rktk-drivers-rp",
 ]
 
 [[package]]
@@ -4001,52 +3960,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "keyball61-common"
-version = "0.2.0"
-dependencies = [
- "rktk",
- "rktk-drivers-common",
-]
-
-[[package]]
-name = "keyball61-nrf"
-version = "0.2.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "embassy-embedded-hal",
- "embassy-executor",
- "embassy-nrf",
- "embassy-sync 0.7.2",
- "embassy-time",
- "keyball61-common",
- "nrf-softdevice",
- "once_cell",
- "rktk",
- "rktk-drivers-common",
- "rktk-drivers-nrf",
-]
-
-[[package]]
-name = "keyball61-rp"
-version = "0.2.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "defmt 1.0.1",
- "embassy-embedded-hal",
- "embassy-executor",
- "embassy-rp",
- "embassy-sync 0.7.2",
- "embassy-time",
- "keyball61-common",
- "portable-atomic",
- "rktk",
- "rktk-drivers-common",
- "rktk-drivers-rp",
-]
-
-[[package]]
 name = "keyboard-types"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4619,32 +4532,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee6cda3051665f1fb8d9e08fc35c96d5a244fb1be711a03b71118828afc9a873"
 dependencies = [
  "jni-sys",
-]
-
-[[package]]
-name = "neg-nrf"
-version = "0.2.0"
-dependencies = [
- "cfg-if",
- "cortex-m",
- "cortex-m-rt",
- "defmt 1.0.1",
- "embassy-embedded-hal",
- "embassy-executor",
- "embassy-nrf",
- "embassy-sync 0.7.2",
- "embassy-time",
- "embedded-alloc",
- "log",
- "nrf-sdc",
- "nrf-softdevice",
- "once_cell",
- "rand_chacha 0.3.1",
- "rktk",
- "rktk-drivers-common",
- "rktk-drivers-nrf",
- "rktk-log",
- "static_cell",
 ]
 
 [[package]]
@@ -6117,6 +6004,111 @@ dependencies = [
 [[package]]
 name = "rktk-ksp"
 version = "0.2.0"
+dependencies = [
+ "embassy-executor",
+ "rktk",
+]
+
+[[package]]
+name = "rktk-ksp-corne-nrf"
+version = "0.2.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-executor",
+ "embassy-nrf",
+ "nrf-softdevice",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-nrf",
+]
+
+[[package]]
+name = "rktk-ksp-corne-rp"
+version = "0.2.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-executor",
+ "embassy-rp",
+ "portable-atomic",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-rp",
+]
+
+[[package]]
+name = "rktk-ksp-keyball61-common"
+version = "0.2.0"
+dependencies = [
+ "rktk",
+ "rktk-drivers-common",
+]
+
+[[package]]
+name = "rktk-ksp-keyball61-nrf"
+version = "0.2.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-nrf",
+ "embassy-sync 0.7.2",
+ "embassy-time",
+ "nrf-softdevice",
+ "once_cell",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-nrf",
+ "rktk-ksp-keyball61-common",
+]
+
+[[package]]
+name = "rktk-ksp-keyball61-rp"
+version = "0.2.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.0.1",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-rp",
+ "embassy-sync 0.7.2",
+ "embassy-time",
+ "portable-atomic",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-rp",
+ "rktk-ksp-keyball61-common",
+]
+
+[[package]]
+name = "rktk-ksp-neg-nrf"
+version = "0.2.0"
+dependencies = [
+ "cfg-if",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.0.1",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-nrf",
+ "embassy-sync 0.7.2",
+ "embassy-time",
+ "embedded-alloc",
+ "log",
+ "nrf-sdc",
+ "nrf-softdevice",
+ "once_cell",
+ "rand_chacha 0.3.1",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-nrf",
+ "rktk-ksp",
+ "rktk-log",
+ "static_cell",
+]
 
 [[package]]
 name = "rktk-log"

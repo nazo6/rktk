@@ -7,3 +7,5 @@ edition.workspace = true
 repository.workspace = true
 
 [dependencies]
+embassy-executor.workspace = true
+rktk.workspace = true
