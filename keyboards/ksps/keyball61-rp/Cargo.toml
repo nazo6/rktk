@@ -1,0 +1,57 @@
+[package]
+name = "rktk-ksp-keyball61-rp"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[lib]
+path = "src/lib.rs"
+test = false
+doctest = false
+bench = false
+
+[dependencies]
+keyball61-common = { path = "../keyball61-common/" }
+
+rktk = { workspace = true, features = ["rrp"] }
+rktk-drivers-rp = { workspace = true }
+rktk-drivers-common = { workspace = true }
+
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-thread",
+  "executor-interrupt",
+] }
+embassy-sync = { workspace = true }
+embassy-time = { workspace = true }
+embassy-embedded-hal = { workspace = true }
+
+embassy-rp = { workspace = true, features = [
+  "time-driver",
+  "critical-section-impl",
+  "rp2040",
+] }
+
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+
+portable-atomic = { version = "1.6.0", features = [
+  "unsafe-assume-single-core",
+] }
+
+defmt = { workspace = true, optional = true }
+
+[features]
+_check = []
+
+default = ["defmt"]
+
+defmt = [
+  "dep:defmt",
+  "rktk/defmt",
+  "rktk-drivers-common/defmt-usb",
+  "rktk-drivers-common/defmt-timestamp",
+  "rktk-drivers-rp/defmt",
+]
