@@ -2,7 +2,7 @@ use embassy_nrf::Peripherals;
 use rktk::{
     config::keymap::Keymap,
     drivers::{Drivers, dummy},
-    hooks::{Hooks, interface::*},
+    hooks::AllHooks,
 };
 
 #[cfg(feature = "sd")]
@@ -11,11 +11,7 @@ use crate::*;
 
 const EMPTY_KM: Keymap = Keymap::const_default();
 
-pub async fn start_slave(
-    spawner: embassy_executor::Spawner,
-    p: Peripherals,
-    hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
-) {
+pub async fn start_slave(spawner: embassy_executor::Spawner, p: Peripherals, hooks: impl AllHooks) {
     #[cfg(feature = "sd")]
     let _ = init_sd(spawner).await;
 

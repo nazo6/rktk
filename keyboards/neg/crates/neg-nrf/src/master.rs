@@ -3,7 +3,7 @@ use once_cell::sync::OnceCell;
 use rktk::{
     config::keymap::Keymap,
     drivers::{Drivers, dummy},
-    hooks::{Hooks, interface::*},
+    hooks::AllHooks,
 };
 use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig};
 
@@ -13,7 +13,7 @@ static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
 pub async fn start_master(
     spawner: embassy_executor::Spawner,
     p: embassy_nrf::Peripherals,
-    hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
+    hooks: impl AllHooks,
     keymap: &'static Keymap,
 ) {
     // create shared SPI bus

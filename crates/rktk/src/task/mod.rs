@@ -8,7 +8,7 @@ use crate::{
         storage::StorageDriver, usb::UsbReporterDriverBuilder,
         wireless::WirelessReporterDriverBuilder,
     },
-    hooks::Hooks,
+    hooks::{AllHooks, Hooks},
 };
 use crate::{
     drivers::{Drivers, interface::system::SystemDriver},
@@ -50,12 +50,7 @@ pub async fn start<
     Usb: UsbReporterDriverBuilder,
     Display: DisplayDriver,
     Mouse: MouseDriver,
-    //
-    CH: CommonHooks,
-    MH: MasterHooks,
-    SH: SlaveHooks,
-    BH: RgbHooks,
-    //
+    H: AllHooks,
     DC: DisplayConfig + 'static,
     RL: blinksy::layout::Layout2d + 'static,
 >(
@@ -77,7 +72,7 @@ pub async fn start<
         Display,
         Mouse,
     >,
-    mut hooks: Hooks<CH, MH, SH, BH>,
+    hooks: H,
     mut opts: crate::config::RktkOpts<DC, RL>,
 ) {
     #[cfg(feature = "rrp-log")]
@@ -95,6 +90,8 @@ pub async fn start<
         .system
         .double_reset_usb_boot(Duration::from_millis(opts.config.rktk.split_usb_timeout))
         .await;
+
+    let mut hooks = hooks.destructure();
 
     sjoin::join!(
         spawner,
