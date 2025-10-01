@@ -6115,6 +6115,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "rktk-ksp"
+version = "0.2.0"
+
+[[package]]
 name = "rktk-log"
 version = "0.2.0"
 dependencies = [

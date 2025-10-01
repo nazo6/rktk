@@ -1,0 +1,9 @@
+[package]
+name = "rktk-ksp"
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+
+[dependencies]
