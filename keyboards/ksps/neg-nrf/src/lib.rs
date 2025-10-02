@@ -3,6 +3,7 @@
 use core::panic::PanicInfo;
 
 use embassy_nrf::bind_interrupts;
+use rktk::{config::keymap::Keymap, hooks::AllHooks};
 use rktk_drivers_common::panic_utils;
 use rktk_ksp::RktkKsp;
 
@@ -46,7 +47,7 @@ bind_interrupts!(pub struct Irqs {
 #[cfg(feature = "trouble")]
 bind_interrupts!(pub struct Irqs {
     USBD => embassy_nrf::usb::InterruptHandler<embassy_nrf::peripherals::USBD>;
-    SPI2 => embassy_nrf::spim::InterruptHandler<embssy_nrf::peripherals::SPI2>;
+    SPI2 => embassy_nrf::spim::InterruptHandler<embassy_nrf::peripherals::SPI2>;
     TWISPI0 => embassy_nrf::twim::InterruptHandler<embassy_nrf::peripherals::TWISPI0>;
     UARTE0 => embassy_nrf::buffered_uarte::InterruptHandler<embassy_nrf::peripherals::UARTE0>;
     RNG => embassy_nrf::rng::InterruptHandler<embassy_nrf::peripherals::RNG>;
@@ -57,10 +58,6 @@ bind_interrupts!(pub struct Irqs {
     RTC0 => nrf_sdc::mpsl::HighPrioInterruptHandler;
 });
 
-pub use common::init_peri;
-pub use master::start_master;
-pub use slave::start_slave;
-
 pub struct NegMaster;
 impl RktkKsp for NegMaster {
     type Irqs = Irqs;
@@ -69,19 +66,18 @@ impl RktkKsp for NegMaster {
 
     type PeriConfig = ();
 
-    type RunConfig = ();
+    type RunConfig = &'static Keymap;
 
-    fn init_peripherals(config: Self::PeriConfig) -> Peri {
+    fn init_peripherals(_config: Self::PeriConfig) -> Self::Peri {
         common::init_peri()
     }
 
     async fn start(
         spawner: embassy_executor::Spawner,
         p: Self::Peri,
-        hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
-        keymap: &'static Keymap,
+        hooks: impl AllHooks,
         config: Self::RunConfig,
     ) {
-        todo!()
+        master::start_master(spawner, p, hooks, config).await
     }
 }

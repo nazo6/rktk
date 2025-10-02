@@ -1,7 +1,7 @@
 #![no_std]
 
 use rktk::hooks::{
-    Hooks,
+    AllHooks, Hooks,
     interface::{CommonHooks, MasterHooks, RgbHooks, SlaveHooks},
 };
 
@@ -16,7 +16,7 @@ pub trait RktkKsp {
     async fn start(
         spawner: embassy_executor::Spawner,
         p: Self::Peri,
-        hooks: Hooks<impl CommonHooks, impl MasterHooks, impl SlaveHooks, impl RgbHooks>,
+        hooks: impl AllHooks,
         config: Self::RunConfig,
     );
 }
