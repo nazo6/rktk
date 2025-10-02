@@ -1,2 +1,0 @@
-[env]
-RKTK_CONFIG_PATH = { value = "../corne/rktk.json", relative = true }
