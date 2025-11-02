@@ -62,7 +62,7 @@ impl Updater<'_> {
         if ev == EventType::Pressed && *kc == KeyCode::Special(Special::LockTg) {
             shared_state.locked = !shared_state.locked;
         }
-        if shared_state.locked && ev == EventType::Pressed {
+        if shared_state.locked && ev != EventType::Released {
             return;
         }
 
