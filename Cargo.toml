@@ -129,6 +129,13 @@ cargo_metadata = "0.22.0"
 dircpy = { version = "0.3.19", default-features = false }
 human_bytes = { version = "0.4.3" }
 
+# rktk-defmt-print
+dialoguer = "0.12.0"
+dirs = "6.0.0"
+rusb = "0.9.4"
+# This is pinned because of serialport/serialport-rs#300
+serialport = "=4.7.3"
+
 # meta
 document-features = "0.2.11"
 pretty_assertions = "1.4.1"

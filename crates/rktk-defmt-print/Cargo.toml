@@ -1,0 +1,15 @@
+[package]
+name = "rktk-defmt-print"
+description = "Small convenient defmt-print wrapper for rktk keyboards"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+dialoguer = { workspace = true }
+dirs = { workspace = true }
+rusb = { workspace = true }
+serialport = { workspace = true }

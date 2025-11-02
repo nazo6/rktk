@@ -67,6 +67,9 @@
 		"xtask": {
 			"check_no_powerset": true
 		},
+		"rktk-defmt-print": {
+			"check_no_powerset": true
+		},
 		"corne-rp": {
 			"check_no_powerset": true
 		},
