@@ -8,7 +8,7 @@ use crate::{
         storage::StorageDriver, usb::UsbReporterDriverBuilder,
         wireless::WirelessReporterDriverBuilder,
     },
-    hooks::{AllHooks, Hooks},
+    hooks::AllHooks,
 };
 use crate::{
     drivers::{Drivers, interface::system::SystemDriver},
