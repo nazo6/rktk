@@ -1,8 +1,8 @@
+use embassy_nrf::interrupt;
 use embassy_nrf::interrupt::typelevel::{Binding, Interrupt};
 use embassy_nrf::mode::Mode;
 use embassy_nrf::peripherals::RNG;
 use embassy_nrf::rng::{InterruptHandler, Rng};
-use embassy_nrf::{interrupt, rng};
 use nrf_sdc::mpsl::{
     ClockInterruptHandler, HighPrioInterruptHandler, LowPrioInterruptHandler,
     MultiprotocolServiceLayer,
@@ -65,13 +65,12 @@ pub fn init_sdc<
         + Binding<interrupt::typelevel::RNG, InterruptHandler<RNG>>
         + 'static
         + Clone,
-    PR: rng::Instance,
     RM: Mode + Send,
 >(
     spawner: embassy_executor::Spawner,
     mpsl_peripherals: mpsl::Peripherals<'static>,
     sdc_peripherals: sdc::Peripherals<'static>,
-    rng: &'static mut Rng<'static, PR, RM>,
+    rng: &'static mut Rng<'static, RM>,
     l2cap_mtu: u16,
     l2cap_txq: u8,
     l2cap_rxq: u8,

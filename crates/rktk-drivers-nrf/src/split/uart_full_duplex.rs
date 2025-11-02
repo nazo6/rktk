@@ -1,6 +1,4 @@
 use embassy_nrf::buffered_uarte::BufferedUarte;
-use embassy_nrf::timer::Instance as TimerInstance;
-use embassy_nrf::uarte::Instance as UarteInstance;
 use embedded_io_async::Write as _;
 use rktk::drivers::interface::split::SplitDriver;
 
@@ -12,19 +10,17 @@ pub enum UartFullDuplexSplitDriverError {
 
 impl rktk::drivers::interface::Error for UartFullDuplexSplitDriverError {}
 
-pub struct UartFullDuplexSplitDriver<I: UarteInstance + 'static, T: TimerInstance + 'static> {
-    uarte: BufferedUarte<'static, I, T>,
+pub struct UartFullDuplexSplitDriver {
+    uarte: BufferedUarte<'static>,
 }
 
-impl<I: UarteInstance + 'static, T: TimerInstance + 'static> UartFullDuplexSplitDriver<I, T> {
-    pub fn new(uarte: BufferedUarte<'static, I, T>) -> Self {
+impl UartFullDuplexSplitDriver {
+    pub fn new(uarte: BufferedUarte<'static>) -> Self {
         Self { uarte }
     }
 }
 
-impl<I: UarteInstance + 'static, T: TimerInstance + 'static> SplitDriver
-    for UartFullDuplexSplitDriver<I, T>
-{
+impl SplitDriver for UartFullDuplexSplitDriver {
     type Error = UartFullDuplexSplitDriverError;
 
     async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {
