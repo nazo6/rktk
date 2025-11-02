@@ -2,8 +2,10 @@ use rktk::{
     config::{Hand, RktkOpts, keymap::Keymap},
     task::display::default_display::DefaultDisplayConfig,
 };
-use rktk_drivers_common::mouse::paw3395;
 
+#[cfg(feature = "paw3395")]
+use rktk_drivers_common::mouse::paw3395;
+#[cfg(feature = "paw3395")]
 pub const PAW3395_CONFIG: paw3395::config::Config = paw3395::config::Config {
     mode: paw3395::config::HP_MODE,
     lift_cutoff: paw3395::config::LiftCutoff::_2mm,

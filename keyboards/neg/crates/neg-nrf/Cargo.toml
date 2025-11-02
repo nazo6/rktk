@@ -97,14 +97,17 @@ log = [
   "rktk-drivers-nrf/log",
 ]
 
-sd = ["rktk-drivers-nrf/softdevice-ble", "dep:nrf-softdevice"]
+sd = ["rktk-drivers-nrf/softdevice-ble", "dep:nrf-softdevice", "software-vbus"]
 trouble = [
   "dep:rand_chacha",
   "dep:nrf-sdc",
   "rktk-drivers-nrf/sdc",
   "rktk-drivers-common/reporter-trouble",
+  "software-vbus",
 ]
 cs-impl = ["cortex-m/critical-section-single-core"]
+
+software-vbus = []
 
 paw3395 = []
 pmw3360 = []
