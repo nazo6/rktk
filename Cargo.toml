@@ -39,7 +39,7 @@ sequential-storage = "5.0.0"
 
 embassy-rp = { version = "0.8.0" }
 embassy-nrf = { version = "0.7.0" }
-nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice" }
+nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice", rev = "5949a5b1445cc907745c6449a35577e4544cd255" }
 
 # embedded architecture support
 cortex-m = "0.7.6"
@@ -53,7 +53,7 @@ display-interface = "0.5.0"
 embedded-graphics = "0.8.1"
 ssd1306 = { version = "0.10.0", features = ["async"] }
 
-trouble-host = { version = "0.4.0" }
+trouble-host = { version = "0.5.0" }
 rand_core = { version = "0.6.4" }
 
 nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc", rev = "fac511c8557a215de37f9e1af214870778b74375", default-features = false }
@@ -85,7 +85,7 @@ ssmarshal = { version = "1.0.0", default-features = false }
 postcard = { git = "https://github.com/jamesmunns/postcard", rev = "07b436d972fc92c21e7e310cc12b334ef0be6a44", features = [
   "heapless-v0_9",
 ] }
-blinksy = { version = "0.10.0" }
+blinksy = { version = "0.11.0" }
 
 paste = "1.0.15"
 macro_rules_attribute = "0.2.0"
@@ -125,7 +125,7 @@ async-channel = "2.3.1"
 clap = { version = "4.5.20", features = ["derive"] }
 duct = "1.0.0"
 colored = "3.0.0"
-cargo_metadata = "0.22.0"
+cargo_metadata = "0.23.0"
 dircpy = { version = "0.3.19", default-features = false }
 human_bytes = { version = "0.4.3" }
 

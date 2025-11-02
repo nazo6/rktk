@@ -592,15 +592,14 @@ dependencies = [
 
 [[package]]
 name = "blinksy"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "445c79f39b994c5736f1da0820fdcaf7638f16c1a53f3b3c199e052348288933"
+checksum = "8630fbf6a3567a2bb5a9733e8f2fc656390ec5e8bd2309dc45e157663ccbae33"
 dependencies = [
- "defmt 0.3.100",
  "embedded-hal 1.0.0",
  "fugit",
  "glam",
- "heapless 0.8.0",
+ "heapless 0.9.1",
  "noise-functions",
  "num-traits",
  "smart-leds-trait",
@@ -745,30 +744,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo-util-schemas"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dc1a6f7b5651af85774ae5a34b4e8be397d9cf4bc063b7e6dbd99a841837830"
-dependencies = [
- "semver 1.0.27",
- "serde",
- "serde-untagged",
- "serde-value",
- "thiserror 2.0.17",
- "toml",
- "unicode-xid",
- "url",
-]
-
-[[package]]
 name = "cargo_metadata"
-version = "0.22.0"
+version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c3f56c207c76c07652489840ff98687dcf213de178ac0974660d6fefeaf5ec6"
+checksum = "981a6f317983eec002839b90fae7411a85621410ae591a9cab2ecf5cb5744873"
 dependencies = [
  "camino",
  "cargo-platform",
- "cargo-util-schemas",
  "semver 1.0.27",
  "serde",
  "serde_json",
@@ -2834,17 +2816,6 @@ name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
-
-[[package]]
-name = "erased-serde"
-version = "0.4.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "259d404d09818dec19332e31d94558aeb442fea04c817006456c24b5460bbd4b"
-dependencies = [
- "serde",
- "serde_core",
- "typeid",
-]
 
 [[package]]
 name = "errno"
@@ -5068,7 +5039,7 @@ dependencies = [
 [[package]]
 name = "nrf-softdevice"
 version = "0.1.0"
-source = "git+https://github.com/embassy-rs/nrf-softdevice#5949a5b1445cc907745c6449a35577e4544cd255"
+source = "git+https://github.com/embassy-rs/nrf-softdevice?rev=5949a5b1445cc907745c6449a35577e4544cd255#5949a5b1445cc907745c6449a35577e4544cd255"
 dependencies = [
  "cortex-m",
  "critical-section",
@@ -5088,7 +5059,7 @@ dependencies = [
 [[package]]
 name = "nrf-softdevice-macro"
 version = "0.1.0"
-source = "git+https://github.com/embassy-rs/nrf-softdevice#5949a5b1445cc907745c6449a35577e4544cd255"
+source = "git+https://github.com/embassy-rs/nrf-softdevice?rev=5949a5b1445cc907745c6449a35577e4544cd255#5949a5b1445cc907745c6449a35577e4544cd255"
 dependencies = [
  "Inflector",
  "darling 0.13.4",
@@ -5101,7 +5072,7 @@ dependencies = [
 [[package]]
 name = "nrf-softdevice-s140"
 version = "0.1.2"
-source = "git+https://github.com/embassy-rs/nrf-softdevice#5949a5b1445cc907745c6449a35577e4544cd255"
+source = "git+https://github.com/embassy-rs/nrf-softdevice?rev=5949a5b1445cc907745c6449a35577e4544cd255#5949a5b1445cc907745c6449a35577e4544cd255"
 
 [[package]]
 name = "nu-ansi-term"
@@ -5346,15 +5317,6 @@ name = "option-ext"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
-
-[[package]]
-name = "ordered-float"
-version = "2.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68f19d67e5a2795c94e73e0bb1cc1a7edeb2e28efd39e2e1c9b7a40c1108b11c"
-dependencies = [
- "num-traits",
-]
 
 [[package]]
 name = "ordered-stream"
@@ -6807,28 +6769,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde-untagged"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9faf48a4a2d2693be24c6289dbe26552776eb7737074e6722891fadbe6c5058"
-dependencies = [
- "erased-serde",
- "serde",
- "serde_core",
- "typeid",
-]
-
-[[package]]
-name = "serde-value"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3a1a3341211875ef120e117ea7fd5228530ae7e7036a779fdc9117be6b3282c"
-dependencies = [
- "ordered-float",
- "serde",
-]
-
-[[package]]
 name = "serde-wasm-bindgen"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7785,7 +7725,6 @@ dependencies = [
  "serde",
  "serde_spanned",
  "toml_datetime 0.6.11",
- "toml_write",
  "winnow 0.7.13",
 ]
 
@@ -7809,12 +7748,6 @@ checksum = "c0cbe268d35bdb4bb5a56a2de88d0ad0eb70af5384a99d648cd4b3d04039800e"
 dependencies = [
  "winnow 0.7.13",
 ]
-
-[[package]]
-name = "toml_write"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
 
 [[package]]
 name = "tower"
@@ -7956,9 +7889,9 @@ dependencies = [
 
 [[package]]
 name = "trouble-host"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78a852f6e193f71732ce3c33661fea2575ba3dac6f48bbe1713059373f96e864"
+checksum = "b5b5d5992d07744e464b294ccf2dd6d96285bd61c267c4e0307d1f7057a8cd7f"
 dependencies = [
  "aes",
  "bt-hci",
@@ -8017,12 +7950,6 @@ dependencies = [
  "thiserror 2.0.17",
  "utf-8",
 ]
-
-[[package]]
-name = "typeid"
-version = "1.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc7d623258602320d5c55d1bc22793b57daff0ec7efc270ea7d55ce1d5f5471c"
 
 [[package]]
 name = "typenum"
