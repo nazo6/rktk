@@ -13,7 +13,7 @@ pub fn Keyboard(
     keymap: KeymapData,
     layer: Signal<usize>,
     select_signal: Signal<Option<(usize, usize)>>,
-    keymap_changes: ReadOnlySignal<HashMap<(u8, u8, u8), KeyAction>>,
+    keymap_changes: ReadSignal<HashMap<(u8, u8, u8), KeyAction>>,
 ) -> Element {
     let keyboard_width = keymap
         .iter()
