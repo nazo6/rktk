@@ -1,5 +1,5 @@
 # You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
-cargo-features = ["per-package-target"]
+cargo-features = ["per-package-target", "panic-immediate-abort"]
 
 [[bin]]
 name = "corne-nrf"

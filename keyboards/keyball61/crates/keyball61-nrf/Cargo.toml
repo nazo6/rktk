@@ -1,4 +1,4 @@
-cargo-features = ["per-package-target"]
+cargo-features = ["per-package-target", "panic-immediate-abort"]
 
 [package]
 name = "keyball61-nrf"

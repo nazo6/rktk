@@ -5,13 +5,10 @@ debug = true
 opt-level = "z"
 lto = "fat"
 codegen-units = 1
-panic = "abort"
+panic = "immediate-abort"
 rustflags = ["-Zlocation-detail=none"]
 
 [unstable]
 build-std = ["core", "alloc"]
-build-std-features = [
-  # Temporary disabled (ref: #62)
-  # "panic_immediate_abort", 
-  "optimize_for_size",
-]
+build-std-features = ["optimize_for_size"]
+panic-immediate-abort = true
