@@ -6,6 +6,7 @@ mod keycode;
 mod keymap;
 mod layer;
 mod mouse;
+mod special;
 
 #[allow(unused_imports)]
 mod prelude {
@@ -28,6 +29,7 @@ mod prelude {
             hid_report::{HidReportState, Report},
         },
     };
+
     pub use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
     pub const fn time(ms: u32) -> Duration {

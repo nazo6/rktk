@@ -102,11 +102,7 @@ pub mod output_event {
     #[derive(Copy)]
     #[apply(common_derive)]
     pub enum OutputEvent {
-        Key((Key, EventType)),
-        Modifier((Modifier, EventType)),
-        MouseButton((Mouse, EventType)),
-        MediaKey((Media, EventType)),
-        Custom(u8, (u8, EventType)),
+        KeyCode((KeyCode, EventType)),
         MouseMove((i8, i8)),
         MouseScroll((i8, i8)),
     }

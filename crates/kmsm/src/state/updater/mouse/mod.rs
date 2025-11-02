@@ -3,7 +3,7 @@ use crate::{
         config::MouseConfig,
         output_event::{EventType, OutputEvent},
     },
-    keycode::{key::Key, special::Special, KeyCode},
+    keycode::{KeyCode, key::Key, special::Special},
     time::Duration,
 };
 
@@ -67,7 +67,7 @@ impl<'a> MouseUpdater<'a> {
     ) {
         match (kc, event) {
             (KeyCode::Mouse(m), et) => {
-                cb(OutputEvent::MouseButton((*m, et)));
+                cb(OutputEvent::KeyCode((KeyCode::Mouse(*m), et)));
                 if et != EventType::Released {
                     self.extend_aml = true;
                 }
@@ -134,7 +134,10 @@ impl<'a> MouseUpdater<'a> {
             };
 
             if let Some(key) = key {
-                cb(OutputEvent::Key((key, EventType::Pressed)));
+                cb(OutputEvent::KeyCode((
+                    KeyCode::Key(key),
+                    EventType::Pressed,
+                )));
                 self.state.arrow_mouse_move = (0, 0);
             }
 

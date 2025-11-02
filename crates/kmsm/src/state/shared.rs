@@ -26,18 +26,19 @@ pub(super) struct SharedState<
     >,
     pub layer_active: LayerActive<LAYER>,
     pub now: Instant,
+    pub locked: bool,
 }
 
 impl<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+>
     SharedState<
         LAYER,
         ROW,
@@ -65,6 +66,7 @@ impl<
             keymap,
             layer_active: [false; LAYER],
             now: Instant::from_start(Duration::from_millis(0)),
+            locked: false,
         }
     }
 

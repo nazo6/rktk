@@ -124,7 +124,7 @@ pub async fn report_task<
 
             (
                 s.update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
-                    if let OutputEvent::Custom(1, (id, et)) = ev {
+                    if let OutputEvent::KeyCode((kmsm::keycode::KeyCode::Custom1(id), et)) = ev {
                         if et == EventType::Pressed
                             && let Some(k) = RktkKeys::from_repr(id)
                         {

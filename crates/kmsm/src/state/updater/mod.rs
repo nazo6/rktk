@@ -3,7 +3,7 @@ use crate::{
         config::MouseConfig,
         output_event::{EventType, OutputEvent},
     },
-    keycode::KeyCode,
+    keycode::{KeyCode, special::Special},
 };
 
 use super::shared::SharedState;
@@ -59,22 +59,17 @@ impl Updater<'_> {
         >,
         mut cb: impl FnMut(OutputEvent),
     ) {
+        if ev == EventType::Pressed && *kc == KeyCode::Special(Special::LockTg) {
+            shared_state.locked = !shared_state.locked;
+        }
+        if shared_state.locked && ev == EventType::Pressed {
+            return;
+        }
+
         layer::update_layer_by_keycode(&mut shared_state.layer_active, kc, ev);
         self.mouse.update_by_keycode(kc, ev, &mut cb);
 
-        let output_event = match *kc {
-            KeyCode::Key(key) => OutputEvent::Key((key, ev)),
-            KeyCode::Mouse(mouse) => OutputEvent::MouseButton((mouse, ev)),
-            KeyCode::Modifier(modifier) => OutputEvent::Modifier((modifier, ev)),
-            KeyCode::Media(media) => OutputEvent::MediaKey((media, ev)),
-            KeyCode::Custom1(id) => OutputEvent::Custom(1, (id, ev)),
-            KeyCode::Custom2(id) => OutputEvent::Custom(2, (id, ev)),
-            KeyCode::Custom3(id) => OutputEvent::Custom(3, (id, ev)),
-            // These keycodes does not appear in the output event
-            KeyCode::None => return,
-            KeyCode::Layer(_) => return,
-            KeyCode::Special(_) => return,
-        };
+        let output_event = OutputEvent::KeyCode((*kc, ev));
         cb(output_event);
     }
 

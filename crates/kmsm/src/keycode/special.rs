@@ -19,6 +19,7 @@ use crate::macros::{common_derive, impl_display, with_consts};
 pub enum Special {
     MoScrl,
     AmlReset,
+    LockTg,
 }
 
 impl_display!(Special);

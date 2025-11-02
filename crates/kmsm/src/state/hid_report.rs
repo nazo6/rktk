@@ -1,10 +1,13 @@
 use heapless::Vec;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use crate::interface::state::{
-    KeymapInfo,
-    input_event::InputEvent,
-    output_event::{EventType, OutputEvent},
+use crate::{
+    interface::state::{
+        KeymapInfo,
+        input_event::InputEvent,
+        output_event::{EventType, OutputEvent},
+    },
+    keycode::KeyCode,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -113,44 +116,50 @@ impl<
 
         self.state.update(event, since_last_update, |ev| {
             match ev {
-                OutputEvent::Key((key, ev)) => {
-                    if ev != EventType::Pressing {
-                        keyboard_change = true;
-                    }
-                    if ev != EventType::Released && !keys.contains(&(key as u8)) {
-                        let _ = keys.push(key as u8);
-                    }
-                    // If both `Pressing` and `Released` events are sent same time, that means key
-                    // should be released in next report.
-                    if ev == EventType::Released && keys.contains(&(key as u8)) {
-                        self.next_send_keyboard_report = true;
-                    }
-                }
-                OutputEvent::MediaKey((m, ev)) => {
-                    if ev != EventType::Pressing {
-                        media_keyboard_change = true;
-                    }
-                    if ev != EventType::Released {
-                        media_keys = m as u16;
-                    }
-                    if ev == EventType::Released && media_keys == m as u16 {
-                        self.next_send_mkb_report = true;
-                    }
-                }
-                OutputEvent::Modifier((m, ev)) => {
-                    if ev != EventType::Pressing {
-                        keyboard_change = true;
-                    }
-                    if ev != EventType::Released {
-                        modifier |= m as u8;
-                    }
-                }
-                OutputEvent::MouseButton((m, ev)) => {
-                    if ev != EventType::Pressing {
-                        mouse_change = true;
-                    }
-                    if ev != EventType::Released {
-                        mouse_buttons |= m as u8;
+                OutputEvent::KeyCode((kc, ev)) => {
+                    match kc {
+                        KeyCode::Key(key) => {
+                            if ev != EventType::Pressing {
+                                keyboard_change = true;
+                            }
+                            if ev != EventType::Released && !keys.contains(&(key as u8)) {
+                                let _ = keys.push(key as u8);
+                            }
+                            // If both `Pressing` and `Released` events are sent same time, that means key
+                            // should be released in next report.
+                            if ev == EventType::Released && keys.contains(&(key as u8)) {
+                                self.next_send_keyboard_report = true;
+                            }
+                        }
+                        KeyCode::Media(m) => {
+                            if ev != EventType::Pressing {
+                                media_keyboard_change = true;
+                            }
+                            if ev != EventType::Released {
+                                media_keys = m as u16;
+                            }
+                            if ev == EventType::Released && media_keys == m as u16 {
+                                self.next_send_mkb_report = true;
+                            }
+                        }
+                        KeyCode::Modifier(m) => {
+                            if ev != EventType::Pressing {
+                                keyboard_change = true;
+                            }
+                            if ev != EventType::Released {
+                                modifier |= m as u8;
+                            }
+                        }
+                        KeyCode::Mouse(m) => {
+                            if ev != EventType::Pressing {
+                                mouse_change = true;
+                            }
+                            if ev != EventType::Released {
+                                mouse_buttons |= m as u8;
+                            }
+                        }
+                        // Other types of key codes will not appear as the HID report.
+                        _ => {}
                     }
                 }
                 OutputEvent::MouseMove(m) => {
@@ -163,7 +172,6 @@ impl<
                     scroll.0 += pan;
                     scroll.1 += wheel;
                 }
-                _ => {}
             }
             cb(ev);
         });
