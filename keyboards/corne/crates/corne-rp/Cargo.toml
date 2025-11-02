@@ -1,5 +1,4 @@
-# You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
-cargo-features = ["per-package-target", "panic-immediate-abort"]
+cargo-features = ["panic-immediate-abort"]
 
 [[bin]]
 name = "corne-rp"
@@ -16,7 +15,6 @@ version.workspace = true
 edition.workspace = true
 repository.workspace = true
 publish = false
-forced-target = "thumbv6m-none-eabi"
 
 [dependencies]
 rktk = { workspace = true }
@@ -35,8 +33,6 @@ embassy-executor = { workspace = true, features = [
   "executor-thread",
   "executor-interrupt",
 ] }
-
-portable-atomic = { workspace = true, features = ["unsafe-assume-single-core"] }
 
 [features]
 default = ["right"]

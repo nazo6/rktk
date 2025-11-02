@@ -1233,7 +1233,6 @@ dependencies = [
  "cortex-m-rt",
  "embassy-executor",
  "embassy-rp",
- "portable-atomic",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-rp",
@@ -2332,7 +2331,6 @@ dependencies = [
  "cortex-m-rt",
  "embassy-executor",
  "embassy-rp",
- "portable-atomic",
  "rktk",
  "rktk-drivers-rp",
 ]
@@ -6444,6 +6442,7 @@ dependencies = [
  "fixed-macro",
  "log",
  "pio",
+ "portable-atomic",
  "rktk",
  "rktk-drivers-common",
  "rktk-log",

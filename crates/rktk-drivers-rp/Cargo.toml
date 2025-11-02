@@ -30,6 +30,7 @@ embassy-rp = { workspace = true, features = [
   "time-driver",
   "critical-section-impl",
 ] }
+portable-atomic = { workspace = true }
 
 ssd1306 = { workspace = true }
 display-interface = { workspace = true }
@@ -41,7 +42,11 @@ fixed-macro = { workspace = true }
 static_cell = { workspace = true }
 
 [features]
-_check = ["embassy-rp/rp2040"]
+_check = ["embassy-rp/rp2040", "single-core"]
+
+default = ["single-core"]
+
+single-core = ["portable-atomic/unsafe-assume-single-core"]
 
 defmt = [
   "dep:defmt",
