@@ -1,9 +1,9 @@
-use embassy_futures::select::{Either, select};
+use embassy_futures::select::Either3;
 use embassy_time::{Duration, Timer};
 use rktk_log::{debug, helper::Debug2Format};
 
 use crate::{
-    config::schema::DynamicConfig,
+    config::schema::{DynamicConfig, RktkRoleDetectionMethod, RktkRoleDetectionTimeoutBehavior},
     drivers::interface::{
         mouse::MouseDriver,
         split::SplitDriver,
@@ -117,23 +117,7 @@ pub async fn init_split<'a>(
         debug!("No split driver");
     }
 
-    let usb_available = if let Some(usb) = usb {
-        match select(
-            usb.wait_ready(),
-            Timer::after(Duration::from_millis(
-                config.rktk.role_detection.usb_timeout,
-            )),
-        )
-        .await
-        {
-            Either::First(_) => true,
-            Either::Second(_) => false,
-        }
-    } else {
-        false
-    };
-
-    let is_master = split.is_none() || usb_available || wireless.is_some();
+    let is_master = detect_role(config, &split, usb, wireless).await;
 
     let s2m_tx = S2M_CHANNEL.sender();
     let s2m_rx = S2M_CHANNEL.receiver();
@@ -157,5 +141,68 @@ pub async fn init_split<'a>(
             receiver: m2s_rx,
             task: split.map(|s| split_handler::start(s, m2s_tx, s2m_rx, is_master)),
         }
+    }
+}
+
+#[inline(always)]
+pub async fn detect_role(
+    config: &DynamicConfig,
+    split: &Option<impl SplitDriver>,
+    usb: &Option<impl UsbReporterDriver>,
+    wireless: &Option<impl WirelessReporterDriver>,
+) -> bool {
+    let c = &config.rktk.role_detection;
+
+    if split.is_none() {
+        return true;
+    }
+
+    if wireless.is_some() {
+        return true;
+    }
+
+    if usb.is_none() {
+        return false;
+    }
+
+    match c.method {
+        RktkRoleDetectionMethod::Auto => {}
+        RktkRoleDetectionMethod::ForceMaster => return true,
+        RktkRoleDetectionMethod::ForceSlave => return false,
+    }
+
+    match embassy_futures::select::select3(
+        async {
+            if let Some(usb) = usb {
+                usb.wait_ready().await;
+                true
+            } else {
+                core::future::pending::<bool>().await
+            }
+        },
+        async {
+            if let Some(usb) = usb {
+                usb.vbus_detect().await;
+                true
+            } else {
+                core::future::pending::<bool>().await
+            }
+        },
+        async {
+            if matches!(c.timeout_behavior, RktkRoleDetectionTimeoutBehavior::None) {
+                core::future::pending::<bool>().await
+            } else {
+                Timer::after(Duration::from_millis(c.usb_timeout)).await;
+                match c.timeout_behavior {
+                    RktkRoleDetectionTimeoutBehavior::ForceMaster => true,
+                    RktkRoleDetectionTimeoutBehavior::ForceSlave => false,
+                    RktkRoleDetectionTimeoutBehavior::None => unreachable!(),
+                }
+            }
+        },
+    )
+    .await
+    {
+        Either3::First(b) | Either3::Second(b) | Either3::Third(b) => b,
     }
 }

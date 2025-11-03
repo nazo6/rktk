@@ -14,6 +14,9 @@ mod task;
 #[cfg(feature = "usb-remote-wakeup")]
 type RemoteWakeupSignal = rktk::utils::Signal<()>;
 type ReadySignal = rktk::utils::Signal<()>;
+
+static POWERED_SIGNAL: rktk::utils::Signal<()> = rktk::utils::Signal::new();
+
 static SUSPENDED: AtomicBool = AtomicBool::new(false);
 
 pub use builder::CommonUsbReporterBuilder;

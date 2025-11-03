@@ -11,9 +11,10 @@ impl UsbDeviceHandler {
     }
 }
 
-// 参考: https://www.itf.co.jp/tech/road-to-usb-master/usb-status
+// Ref: https://www.itf.co.jp/tech/road-to-usb-master/usb-status
 impl Handler for UsbDeviceHandler {
     fn enabled(&mut self, _enabled: bool) {
+        super::POWERED_SIGNAL.signal(());
         SUSPENDED.store(false, Ordering::Release);
     }
 
