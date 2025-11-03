@@ -1,4 +1,4 @@
-cargo-features = ["panic-immediate-abort"]
+cargo-features = ["per-package-target", "panic-immediate-abort"]
 
 [[bin]]
 name = "dummy-rp"
@@ -14,6 +14,7 @@ license.workspace = true
 version.workspace = true
 edition.workspace = true
 repository.workspace = true
+forced-target = "thumbv6m-none-eabi"
 publish = false
 
 [dependencies]
@@ -31,6 +32,7 @@ embassy-executor = { workspace = true, features = [
   "executor-thread",
   "executor-interrupt",
 ] }
+portable-atomic = { workspace = true, features = ["unsafe-assume-single-core"] }
 
 [features]
 _check = []

@@ -1,6 +1,9 @@
+cargo-features = ["per-package-target"]
+
 [package]
 name = "rktk-drivers-nrf"
 description = "rktk drivers for nrf chip"
+forced-target = "thumbv7em-none-eabihf"
 version.workspace = true
 license.workspace = true
 edition.workspace = true
@@ -15,6 +18,7 @@ bench = false
 
 [package.metadata.docs.rs]
 features = ["_release_check"]
+default-target = "thumbv7em-none-eabihf"
 
 [dependencies]
 rktk = { workspace = true }

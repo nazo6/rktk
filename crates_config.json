@@ -47,7 +47,8 @@
 			"use_release_feature": true
 		},
 		"rktk-drivers-rp": {
-			"check_features": ["embassy-rp/rp2040", "single-core"],
+			"check_features": ["_check"],
+			"check_skip": [],
 			"doc_enabled": true
 		},
 		"rktk-drivers-common": {
