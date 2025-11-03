@@ -7,7 +7,7 @@ use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, 
 
 use crate::*;
 
-#[cfg(feature = "software-vbus")]
+#[cfg(feature = "sd")]
 mod vbus {
     use embassy_nrf::usb::vbus_detect::{SoftwareVbusDetect, VbusDetect};
     use once_cell::sync::OnceCell;
@@ -19,7 +19,7 @@ mod vbus {
     }
 }
 
-#[cfg(not(feature = "software-vbus"))]
+#[cfg(not(feature = "sd"))]
 mod vbus {
     use embassy_nrf::usb::vbus_detect::{HardwareVbusDetect, VbusDetect};
 
