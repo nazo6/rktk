@@ -47,10 +47,6 @@ embassy-nrf = { workspace = true, features = [
 ] }
 embassy-sync = { workspace = true }
 
-once_cell = { version = "1.19.0", default-features = false, features = [
-  "atomic-polyfill",
-] }
-static_cell = { workspace = true }
 cfg-if = "1.0.0"
 
 log = { workspace = true, optional = true }

@@ -2,13 +2,15 @@
 
 use core::mem;
 
-use nrf_softdevice::{Softdevice, raw};
+use nrf_softdevice::{SocEvent, Softdevice, raw};
+use rktk::utils::Signal;
 
 #[cfg(feature = "softdevice-ble")]
 pub mod ble;
 pub mod flash;
 #[cfg(feature = "softdevice-ble")]
 pub mod split;
+pub mod vbus;
 
 /// Initialize the softdevice and return the instance.
 ///
@@ -74,5 +76,10 @@ pub fn start_softdevice(spawner: embassy_executor::Spawner, sd: &'static Softdev
 
 #[embassy_executor::task]
 async fn softdevice_task(sd: &'static Softdevice) -> ! {
-    sd.run().await
+    sd.run_with_callback(|ev| {
+        SD_SOCEVENT_SIGNAL.signal(ev);
+    })
+    .await
 }
+
+pub static SD_SOCEVENT_SIGNAL: Signal<SocEvent> = Signal::new();

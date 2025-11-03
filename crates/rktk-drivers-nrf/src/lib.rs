@@ -26,3 +26,4 @@ pub mod sdc;
 pub mod softdevice;
 pub mod split;
 pub mod system;
+mod vbus;

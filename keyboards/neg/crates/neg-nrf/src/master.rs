@@ -7,29 +7,6 @@ use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, 
 
 use crate::*;
 
-#[cfg(feature = "sd")]
-mod vbus {
-    use embassy_nrf::usb::vbus_detect::{SoftwareVbusDetect, VbusDetect};
-    use once_cell::sync::OnceCell;
-
-    pub(super) static SOFTWARE_VBUS: OnceCell<SoftwareVbusDetect> = OnceCell::new();
-
-    pub(super) fn new() -> impl VbusDetect {
-        SOFTWARE_VBUS.get_or_init(|| SoftwareVbusDetect::new(true, true))
-    }
-}
-
-#[cfg(not(feature = "sd"))]
-mod vbus {
-    use embassy_nrf::usb::vbus_detect::{HardwareVbusDetect, VbusDetect};
-
-    use crate::Irqs;
-
-    pub(super) fn new() -> impl VbusDetect {
-        HardwareVbusDetect::new(Irqs)
-    }
-}
-
 pub async fn start_master(
     spawner: embassy_executor::Spawner,
     p: embassy_nrf::Peripherals,
@@ -85,7 +62,8 @@ pub async fn start_master(
     }
 
     let usb = {
-        let embassy_driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus::new());
+        let embassy_driver =
+            embassy_nrf::usb::Driver::new(p.USBD, Irqs, rktk_drivers_nrf::get_vbus!(spawner, Irqs));
         let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
         driver_config.product = Some("negL");
         let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);

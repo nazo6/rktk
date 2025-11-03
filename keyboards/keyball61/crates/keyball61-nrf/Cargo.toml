@@ -53,8 +53,6 @@ nrf-softdevice = { workspace = true, features = [
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
 
-once_cell = { workspace = true, features = ["critical-section"] }
-
 [features]
 _check = []
 
