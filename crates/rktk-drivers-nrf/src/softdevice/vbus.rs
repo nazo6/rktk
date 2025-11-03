@@ -1,14 +1,16 @@
 use embassy_executor::Spawner;
 use embassy_nrf::usb::vbus_detect::{SoftwareVbusDetect, VbusDetect};
 use nrf_softdevice::SocEvent;
-use rktk::utils::Signal;
+
+use crate::softdevice::SdEventChan;
 
 pub struct SoftdeviceVbusDetect(SoftwareVbusDetect);
 
 #[embassy_executor::task]
-async fn sd_vbus_task(d: &'static SoftdeviceVbusDetect, signal: &'static Signal<SocEvent>) {
+async fn sd_vbus_task(d: &'static SoftdeviceVbusDetect, chan: &'static SdEventChan) {
     loop {
-        match signal.wait().await {
+        let ev = chan.receive().await;
+        match ev {
             SocEvent::PowerUsbRemoved => d.0.detected(false),
             SocEvent::PowerUsbPowerReady => d.0.ready(),
             SocEvent::PowerUsbDetected => d.0.detected(true),
@@ -21,14 +23,14 @@ impl SoftdeviceVbusDetect {
     /// Initialize the SoftdeviceVbusDetect and return a static reference to it.
     ///
     /// This function must be called only once.
-    pub fn init(spawner: Spawner, signal: &'static Signal<SocEvent>) -> &'static Self {
+    pub fn init(spawner: Spawner, chan: &'static SdEventChan) -> &'static Self {
         static VBUS_DETECT: static_cell::StaticCell<SoftdeviceVbusDetect> =
             static_cell::StaticCell::new();
 
-        let d = Self(SoftwareVbusDetect::new(false, false));
+        let d = Self(SoftwareVbusDetect::new(true, false));
         let d = VBUS_DETECT.init(d);
 
-        spawner.must_spawn(sd_vbus_task(d, signal));
+        spawner.must_spawn(sd_vbus_task(d, chan));
 
         d
     }

@@ -15,9 +15,9 @@
 #[macro_export]
 macro_rules! get_vbus {
     ($spawner:expr, $irqs:expr) => {{
-        use $crate::softdevice::{SD_SOCEVENT_SIGNAL, vbus::SoftdeviceVbusDetect};
+        use $crate::softdevice::{SD_SOCEVENT_CHAN, vbus::SoftdeviceVbusDetect};
 
-        SoftdeviceVbusDetect::init($spawner, &SD_SOCEVENT_SIGNAL)
+        SoftdeviceVbusDetect::init($spawner, &SD_SOCEVENT_CHAN)
     }};
 }
 
