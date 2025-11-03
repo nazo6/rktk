@@ -10,7 +10,7 @@
 		"rktk": {
 			"scan_interval_keyboard": 10,
 			"scan_interval_mouse": 5,
-			"split_usb_timeout": 1000,
+			"split_usb_timeout": 10000,
 			"double_tap_threshold": 500,
 			"swap_mouse_x_y": true
 		},
