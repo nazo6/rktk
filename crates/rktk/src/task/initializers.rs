@@ -120,7 +120,9 @@ pub async fn init_split<'a>(
     let usb_available = if let Some(usb) = usb {
         match select(
             usb.wait_ready(),
-            Timer::after(Duration::from_millis(config.rktk.split_usb_timeout)),
+            Timer::after(Duration::from_millis(
+                config.rktk.role_detection.usb_timeout,
+            )),
         )
         .await
         {

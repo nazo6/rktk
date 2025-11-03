@@ -4,6 +4,7 @@
 #[serde(default)]
 pub struct RktkConfig {
     pub rgb: RktkRgbConfig,
+    pub role_detection: RktkRoleDetectionConfig,
 
     /// Threshold for double tap (ms).
     #[default(500)]
@@ -20,10 +21,6 @@ pub struct RktkConfig {
     /// Default duration of auto mouse mode (ms)
     #[default(500)]
     pub default_auto_mouse_duration: u32,
-
-    /// Timeout for detecting split USB connection (ms).
-    #[default(1000)]
-    pub split_usb_timeout: u64,
 
     /// Time (ms) to wait for the next keyboard scan
     #[default(5)]
@@ -64,4 +61,37 @@ pub struct RktkRgbConfig {
     /// Range: 0.0 to 1.0
     #[default(0.5)]
     pub default_brightness: f32,
+}
+
+/// RKTK role detection config
+#[macro_rules_attribute::apply(crate::schema::common_derive)]
+#[derive(smart_default::SmartDefault)]
+#[serde(default)]
+pub struct RktkRoleDetectionConfig {
+    /// Timeout for detecting split USB connection (ms).
+    #[default(1000)]
+    pub usb_timeout: u64,
+
+    pub timeout_behavior: RktkRoleDetectionTimeoutBehavior,
+
+    /// Method for role detection
+    pub method: RktkRoleDetectionMethod,
+}
+
+#[macro_rules_attribute::apply(crate::schema::common_derive)]
+#[derive(smart_default::SmartDefault)]
+pub enum RktkRoleDetectionMethod {
+    #[default]
+    Auto,
+    ForceMaster,
+    ForceSlave,
+}
+
+#[macro_rules_attribute::apply(crate::schema::common_derive)]
+#[derive(smart_default::SmartDefault)]
+pub enum RktkRoleDetectionTimeoutBehavior {
+    #[default]
+    None,
+    ForceMaster,
+    ForceSlave,
 }
