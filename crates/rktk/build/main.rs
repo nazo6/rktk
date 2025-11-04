@@ -73,6 +73,9 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
         schema::dynamic::DynamicConfig,
         schema::dynamic::rktk::RktkConfig,
         schema::dynamic::rktk::RktkRgbConfig,
+        schema::dynamic::rktk::RktkRoleDetectionConfig,
+        schema::dynamic::rktk::RktkRoleDetectionMethod,
+        schema::dynamic::rktk::RktkRoleDetectionTimeoutBehavior,
         schema::dynamic::keyboard::KeyboardConfig,
         schema::dynamic::key_manager::KeyManagerConfig
     );

@@ -84,11 +84,11 @@ pub async fn start<
         });
     }
 
-    info!("Booting rktk",);
+    info!("Booting rktk");
 
     drivers
         .system
-        .double_reset_usb_boot(Duration::from_millis(opts.config.rktk.split_usb_timeout))
+        .double_reset_usb_boot(Duration::from_millis(opts.config.rktk.double_tap_threshold))
         .await;
 
     let mut hooks = hooks.destructure();

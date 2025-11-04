@@ -362,6 +362,9 @@
         "rgb": {
           "$ref": "#/$defs/RktkRgbConfig"
         },
+        "role_detection": {
+          "$ref": "#/$defs/RktkRoleDetectionConfig"
+        },
         "scan_interval_keyboard": {
           "description": "Time (ms) to wait for the next keyboard scan",
           "type": "integer",
@@ -374,13 +377,6 @@
           "type": "integer",
           "format": "uint64",
           "default": 5,
-          "minimum": 0
-        },
-        "split_usb_timeout": {
-          "description": "Timeout for detecting split USB connection (ms).",
-          "type": "integer",
-          "format": "uint64",
-          "default": 1000,
           "minimum": 0
         },
         "state_update_interval": {
@@ -417,6 +413,43 @@
         }
       },
       "additionalProperties": false
+    },
+    "RktkRoleDetectionConfig": {
+      "description": "RKTK role detection config",
+      "type": "object",
+      "properties": {
+        "method": {
+          "description": "Method for role detection",
+          "$ref": "#/$defs/RktkRoleDetectionMethod"
+        },
+        "timeout_behavior": {
+          "$ref": "#/$defs/RktkRoleDetectionTimeoutBehavior"
+        },
+        "usb_timeout": {
+          "description": "Timeout for detecting split USB connection (ms).",
+          "type": "integer",
+          "format": "uint64",
+          "default": 1000,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "RktkRoleDetectionMethod": {
+      "type": "string",
+      "enum": [
+        "Auto",
+        "ForceMaster",
+        "ForceSlave"
+      ]
+    },
+    "RktkRoleDetectionTimeoutBehavior": {
+      "type": "string",
+      "enum": [
+        "None",
+        "ForceMaster",
+        "ForceSlave"
+      ]
     },
     "TapDanceConfig": {
       "type": "object",

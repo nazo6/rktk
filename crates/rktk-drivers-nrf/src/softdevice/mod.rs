@@ -2,13 +2,15 @@
 
 use core::mem;
 
-use nrf_softdevice::{Softdevice, raw};
+use nrf_softdevice::{SocEvent, Softdevice, raw};
+use rktk::utils::Channel;
 
 #[cfg(feature = "softdevice-ble")]
 pub mod ble;
 pub mod flash;
 #[cfg(feature = "softdevice-ble")]
 pub mod split;
+pub mod vbus;
 
 /// Initialize the softdevice and return the instance.
 ///
@@ -74,5 +76,18 @@ pub fn start_softdevice(spawner: embassy_executor::Spawner, sd: &'static Softdev
 
 #[embassy_executor::task]
 async fn softdevice_task(sd: &'static Softdevice) -> ! {
-    sd.run().await
+    unsafe {
+        nrf_softdevice::raw::sd_power_usbpwrrdy_enable(1);
+        nrf_softdevice::raw::sd_power_usbdetected_enable(1);
+        nrf_softdevice::raw::sd_power_usbremoved_enable(1);
+        nrf_softdevice::raw::sd_clock_hfclk_request();
+    }
+
+    sd.run_with_callback(|ev| {
+        let _ = SD_SOCEVENT_CHAN.try_send(ev);
+    })
+    .await
 }
+
+pub type SdEventChan = Channel<SocEvent, 8>;
+pub static SD_SOCEVENT_CHAN: SdEventChan = Channel::new();

@@ -45,14 +45,16 @@ embassy-rp = { workspace = true, features = [
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
 
-portable-atomic = { workspace = true }
+portable-atomic = { version = "1.6.0", features = [
+  "unsafe-assume-single-core",
+] }
 
 defmt = { workspace = true, optional = true }
 
 [features]
 _check = []
 
-default = ["defmt", "single-core"]
+default = ["defmt"]
 
 defmt = [
   "dep:defmt",
@@ -61,5 +63,3 @@ defmt = [
   "rktk-drivers-common/defmt-timestamp",
   "rktk-drivers-rp/defmt",
 ]
-
-single-core = ["portable-atomic/unsafe-assume-single-core"]

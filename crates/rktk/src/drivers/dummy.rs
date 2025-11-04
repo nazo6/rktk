@@ -194,7 +194,7 @@ impl WirelessReporterDriver for DummyReporter {
 impl UsbReporterDriver for DummyReporter {
     type Error = Infallible;
 
-    async fn vbus_detect(&self) -> Result<bool, <Self as UsbReporterDriver>::Error> {
+    async fn vbus_detect(&self) {
         unreachable!()
     }
 }

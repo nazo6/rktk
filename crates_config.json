@@ -47,7 +47,8 @@
 			"use_release_feature": true
 		},
 		"rktk-drivers-rp": {
-			"check_features": ["embassy-rp/rp2040", "single-core"],
+			"check_features": ["_check"],
+			"check_skip": [],
 			"doc_enabled": true
 		},
 		"rktk-drivers-common": {
@@ -82,7 +83,7 @@
 			"check_features": ["left", "alloc", "paw3395", "log", "defmt"],
 			"check_at_least_one_of": [["sd", "trouble", "cs-impl"]],
 			"check_mutually_exclusive_features": [["sd", "trouble", "cs-impl"]],
-			"check_skip": ["_check", "default", "right", "pmw3360", "software-vbus"],
+			"check_skip": ["_check", "default", "right", "pmw3360"],
 			"check_build": true
 		},
 		"keyball61-common": {

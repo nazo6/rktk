@@ -118,7 +118,7 @@ impl ReporterDriver for CommonUsbDriver {
 impl UsbReporterDriver for CommonUsbDriver {
     type Error = UsbError;
 
-    async fn vbus_detect(&self) -> Result<bool, <Self as UsbReporterDriver>::Error> {
-        Err(UsbError::NotSupported)
+    async fn vbus_detect(&self) {
+        super::POWERED_SIGNAL.wait().await;
     }
 }

@@ -40,13 +40,8 @@ mod ble {
 
 #[cfg(feature = "usb")]
 mod usb {
-    pub use embassy_nrf::usb::vbus_detect::SoftwareVbusDetect;
-    pub use once_cell::sync::OnceCell;
     pub use rktk_drivers_common::usb::*;
 }
-
-#[cfg(feature = "usb")]
-static SOFTWARE_VBUS: usb::OnceCell<usb::SoftwareVbusDetect> = usb::OnceCell::new();
 
 bind_interrupts!(pub struct Irqs {
     USBD => embassy_nrf::usb::InterruptHandler<embassy_nrf::peripherals::USBD>;
@@ -180,8 +175,11 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         usb_builder: {
             #[cfg(feature = "usb")]
             let usb = {
-                let vbus = SOFTWARE_VBUS.get_or_init(|| usb::SoftwareVbusDetect::new(true, true));
-                let embassy_driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
+                let embassy_driver = embassy_nrf::usb::Driver::new(
+                    p.USBD,
+                    Irqs,
+                    rktk_drivers_nrf::get_vbus!(spawner, Irqs),
+                );
                 let mut driver_config = usb::UsbDriverConfig::new(0xc0de, 0xcafe);
                 driver_config.product = Some("Keyball61");
                 let opts = usb::CommonUsbDriverConfig::new(embassy_driver, driver_config);

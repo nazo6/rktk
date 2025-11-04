@@ -1,3 +1,6 @@
+[env]
+RKTK_CONFIG_PATH = { value = "./rktk.dev.json", relative = true }
+
 [profile]
 
 [profile.dioxus-wasm]

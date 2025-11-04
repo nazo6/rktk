@@ -9,14 +9,12 @@ use embassy_executor::Spawner;
 use embassy_nrf::{
     bind_interrupts,
     gpio::{Input, Level, Output, OutputDrive, Pull},
-    usb::vbus_detect::SoftwareVbusDetect,
 };
 use rktk::{
     config::Hand,
     config::{CONST_CONFIG, new_rktk_opts},
     drivers::{Drivers, dummy},
     hooks::empty_hooks::create_empty_hooks,
-    singleton,
 };
 
 use rktk_drivers_common::{
@@ -77,8 +75,11 @@ async fn main(spawner: Spawner) {
         system: NrfSystemDriver::new(None),
         mouse: dummy::mouse(),
         usb_builder: Some({
-            let vbus = &*singleton!(SoftwareVbusDetect::new(true, true), SoftwareVbusDetect);
-            let embassy_driver = embassy_nrf::usb::Driver::new(p.USBD, Irqs, vbus);
+            let embassy_driver = embassy_nrf::usb::Driver::new(
+                p.USBD,
+                Irqs,
+                rktk_drivers_nrf::get_vbus!(spawner, Irqs),
+            );
             let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
             driver_config.product = Some("corne");
             let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);

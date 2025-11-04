@@ -1,3 +1,5 @@
+cargo-features = ["per-package-target"]
+
 [package]
 name = "neg-nrf"
 authors.workspace = true
@@ -5,6 +7,8 @@ license.workspace = true
 version.workspace = true
 edition.workspace = true
 repository.workspace = true
+
+forced-target = "thumbv7em-none-eabihf"
 
 [lib]
 path = "src/lib.rs"
@@ -47,10 +51,6 @@ embassy-nrf = { workspace = true, features = [
 ] }
 embassy-sync = { workspace = true }
 
-once_cell = { version = "1.19.0", default-features = false, features = [
-  "atomic-polyfill",
-] }
-static_cell = { workspace = true }
 cfg-if = "1.0.0"
 
 log = { workspace = true, optional = true }
@@ -97,17 +97,14 @@ log = [
   "rktk-drivers-nrf/log",
 ]
 
-sd = ["rktk-drivers-nrf/softdevice-ble", "dep:nrf-softdevice", "software-vbus"]
+sd = ["rktk-drivers-nrf/softdevice-ble", "dep:nrf-softdevice"]
 trouble = [
   "dep:rand_chacha",
   "dep:nrf-sdc",
   "rktk-drivers-nrf/sdc",
   "rktk-drivers-common/reporter-trouble",
-  "software-vbus",
 ]
 cs-impl = ["cortex-m/critical-section-single-core"]
-
-software-vbus = []
 
 paw3395 = []
 pmw3360 = []
