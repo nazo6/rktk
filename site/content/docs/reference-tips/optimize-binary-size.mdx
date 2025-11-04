@@ -12,12 +12,15 @@ debug = true
 opt-level = "z"
 lto = "fat"
 panic = "abort"
+# or
+# panic = "immediate-abort"
 rustflags = ["-Zlocation-detail=none"]
 codegen-units = 1
 
 [unstable]
 build-std = ["core", "alloc"]
 build-std-features = ["optimize_for_size"]
+# panic-immediate-abort = true
 ```
 
 - `debug = true`
@@ -39,6 +42,12 @@ build-std-features = ["optimize_for_size"]
   However, you will no longer receive messages in case of panic.
 
   Note that second line is only available in nightly rust.
+
+- `panic-immediate-abort`
+
+  With this option enabled, the program will immediately abort on panic without unwinding or running destructors. This can further reduce binary size compared to the standard `abort` strategy.
+
+  Note that this option is only available in nightly rust. Also you need to specify `panic-immediate-abort = true` in `[unstable]` section to use this feature.
 
 - `build-std` and `build-std-features`
 

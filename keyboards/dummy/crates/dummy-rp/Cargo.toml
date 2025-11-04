@@ -1,4 +1,4 @@
-cargo-features = ["per-package-target", "panic-immediate-abort"]
+cargo-features = ["per-package-target"]
 
 [[bin]]
 name = "dummy-rp"
