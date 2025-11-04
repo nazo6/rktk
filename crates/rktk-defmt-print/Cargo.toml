@@ -13,3 +13,6 @@ dialoguer = { workspace = true }
 dirs = { workspace = true }
 rusb = { workspace = true }
 serialport = { workspace = true }
+
+[features]
+_check = []
