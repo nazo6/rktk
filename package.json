@@ -2,7 +2,7 @@
 	"name": "rktk",
 	"packageManager": "pnpm@10.6.3",
 	"devDependencies": {
-		"@biomejs/biome": "^2.2.4",
-		"wrangler": "^4.40.2"
+		"@biomejs/biome": "^2.3.3",
+		"wrangler": "^4.45.3"
 	}
 }

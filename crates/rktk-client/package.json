@@ -13,10 +13,10 @@
 	"author": "nazo6",
 	"license": "MIT",
 	"devDependencies": {
-		"@tailwindcss/cli": "^4.1.13",
+		"@tailwindcss/cli": "^4.1.16",
 		"concurrently": "^9.2.1",
-		"daisyui": "^5.1.25",
-		"tailwindcss": "^4.1.13",
-		"wrangler": "^4.40.2"
+		"daisyui": "^5.4.3",
+		"tailwindcss": "^4.1.16",
+		"wrangler": "^4.45.3"
 	}
 }
