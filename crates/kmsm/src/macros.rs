@@ -8,34 +8,32 @@ macro_rules! normal {
 }
 
 macro_rules! with_consts {
-    // for enum with value
     {
         $(#[$($attr:tt)*])*
         $vis:vis enum $name:ident {
-            $($variant:ident = $val:literal,)*
+            $(
+                $(#[$($field_attr:tt)*])*
+                $variant:ident $(= $val:literal)?,
+            )*
         }
     } => {
         $(#[$($attr)*])*
-        $vis enum $name { $($variant = $val,)* }
+        $vis enum $name {
+            $(
+                $(#[$($field_attr)*])*
+                $variant $(= $val)?,
+            )*
+        }
 
-        paste::paste!{
-            $(pub const [<$variant:snake:upper>] : crate::keycode::KeyAction = crate::keycode::KeyAction::Normal(crate::keycode::KeyCode::$name($name::$variant));)*
+        paste::paste! {
+            $(
+                pub const [<$variant:snake:upper>]: crate::keycode::KeyAction =
+                    crate::keycode::KeyAction::Normal(
+                        crate::keycode::KeyCode::$name($name::$variant)
+                    );
+            )*
         }
     };
-    // for enum without value
-    {
-        $(#[$($attr:tt)*])*
-        $vis:vis enum $name:ident {
-            $($variant:ident,)*
-        }
-    } => {
-        $(#[$($attr)*])*
-        $vis enum $name { $($variant,)* }
-
-        paste::paste!{
-            $(pub const [<$variant:snake:upper>] : crate::keycode::KeyAction = crate::keycode::KeyAction::Normal(crate::keycode::KeyCode::$name($name::$variant));)*
-        }
-    }
 }
 
 macro_rules! impl_display {
