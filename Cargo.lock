@@ -6323,6 +6323,7 @@ dependencies = [
  "anyhow",
  "async-channel",
  "async-hid",
+ "cfg-if",
  "dioxus",
  "futures",
  "jiff",

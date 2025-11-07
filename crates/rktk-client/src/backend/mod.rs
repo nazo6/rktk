@@ -1,14 +1,17 @@
-#[cfg(feature = "web")]
-pub mod web;
-
-#[cfg(feature = "native")]
-pub mod native;
-
-#[cfg(feature = "web")]
-pub type Backend = web::WebHidBackend;
-
-#[cfg(feature = "native")]
-pub type Backend = native::NativeBackend;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "_check")] {
+        pub mod web;
+        #[allow(dead_code)]
+        pub mod native;
+        pub type Backend = web::WebHidBackend;
+    } else if #[cfg(feature = "native")] {
+        pub mod native;
+        pub type Backend = native::NativeBackend;
+    } else if #[cfg(feature = "web")] {
+        pub mod web;
+        pub type Backend = web::WebHidBackend;
+    }
+}
 
 pub trait RrpHidBackend: Sized {
     type Error: std::fmt::Display + std::fmt::Debug;

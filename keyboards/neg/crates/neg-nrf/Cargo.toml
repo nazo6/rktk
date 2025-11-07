@@ -51,7 +51,7 @@ embassy-nrf = { workspace = true, features = [
 ] }
 embassy-sync = { workspace = true }
 
-cfg-if = "1.0.0"
+cfg-if = { workspace = true }
 
 log = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
