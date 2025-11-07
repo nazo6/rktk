@@ -30,7 +30,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: wasm-pack,dioxus-cli@0.7.0-rc.0
+          tool: wasm-pack,dioxus-cli@0.7
 
       - name: Setup pnpm
         uses: ./.github/workflows/setup-pnpm
