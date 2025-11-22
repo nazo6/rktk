@@ -1,49 +1,42 @@
 [package]
 name = "kmsm"
-description = "Keymap/state manager for self-made keyboard firmware"
-authors.workspace = true
-license.workspace = true
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
+description = "Keymap/state manager for self-made keyboard firmware"
 repository.workspace = true
+license.workspace = true
 
 [package.metadata.docs.rs]
 features = ["state", "postcard"]
 
 [dependencies]
-heapless = { workspace = true }
-usbd-hid = { workspace = true, optional = true }
-
-paste = { workspace = true }
-macro_rules_attribute = { workspace = true }
-
-strum = { workspace = true, features = ["derive"] }
-serde = { workspace = true, optional = true, features = ["derive"] }
-serde_with = { workspace = true, features = ["macros"], optional = true }
-postcard = { workspace = true, optional = true, features = [
-  "experimental-derive",
-] }
-
-ssmarshal = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
-
 document-features = { workspace = true }
+heapless = { workspace = true }
+macro_rules_attribute = { workspace = true }
+paste = { workspace = true }
+postcard = { workspace = true, features = [
+  "experimental-derive",
+], optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
+serde_with = { workspace = true, features = ["macros"], optional = true }
+ssmarshal = { workspace = true, optional = true }
+strum = { workspace = true, features = ["derive"] }
+usbd-hid = { workspace = true, optional = true }
 
 [dev-dependencies]
 critical-section = { workspace = true, features = ["std"] }
-usbd-hid = { workspace = true }
 pretty_assertions = { workspace = true }
+usbd-hid = { workspace = true }
 
 [features]
-_check = ["state", "ssmarshal/std", "defmt"]
-
-## Enables state management.
-state = ["dep:usbd-hid"]
-
-## Enables serialization using serde.
-serde = ["dep:serde", "dep:serde_with"]
-## Derives postcard's MaxSize trait
-postcard = ["dep:postcard", "serde"]
-
+_check = ["defmt", "ssmarshal/std", "state"]
 ## Derives defmt's Format trait
 defmt = ["dep:defmt"]
+## Derives postcard's MaxSize trait
+postcard = ["dep:postcard", "serde"]
+## Enables serialization using serde.
+serde = ["dep:serde", "dep:serde_with"]
+## Enables state management.
+state = ["dep:usbd-hid"]

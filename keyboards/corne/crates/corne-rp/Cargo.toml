@@ -1,48 +1,45 @@
 # You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
 cargo-features = ["per-package-target"]
 
+[package]
+name = "corne-rp"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+# tombi: lint.rules.key-not-allowed.disabled = true
+forced-target = "thumbv6m-none-eabi"
+
 [[bin]]
+bench = false
+doctest = false
 name = "corne-rp"
 path = "src/main.rs"
 test = false
-doctest = false
-bench = false
-
-[package]
-name = "corne-rp"
-authors.workspace = true
-license.workspace = true
-version.workspace = true
-edition.workspace = true
-repository.workspace = true
-publish = false
-forced-target = "thumbv6m-none-eabi"
 
 [dependencies]
-rktk = { workspace = true }
-rktk-drivers-rp = { workspace = true }
-rktk-drivers-common = { workspace = true }
-
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
-embassy-rp = { workspace = true, features = [
-  "time-driver",
-  "critical-section-impl",
-  "rp2040",
-] }
 embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
-  "executor-thread",
   "executor-interrupt",
+  "executor-thread",
 ] }
-
+embassy-rp = { workspace = true, features = [
+  "critical-section-impl",
+  "rp2040",
+  "time-driver",
+] }
 portable-atomic = { workspace = true, features = ["unsafe-assume-single-core"] }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
+rktk-drivers-rp = { workspace = true }
 
 [features]
 default = ["right"]
-
-right = []
-left = []
-
 _check = []
+left = []
+right = []
 # Remove this line in your project. It's just used in this workspace for check.

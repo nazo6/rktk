@@ -1,37 +1,35 @@
 [package]
 name = "rktk-client"
-authors.workspace = true
-license.workspace = true
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
 repository.workspace = true
+license.workspace = true
 
 [dependencies]
+anyhow = { workspace = true }
+async-channel = { workspace = true }
+async-hid = { workspace = true, optional = true }
+cfg-if = { workspace = true }
+dioxus = { workspace = true }
+futures = { workspace = true, features = ["async-await"] }
+jiff = { workspace = true }
+js-sys = { workspace = true, optional = true }
+kle-serial = { workspace = true }
 kmsm = { workspace = true }
 kmsm-rktk = { workspace = true }
+log = { workspace = true }
 rktk-rrp = { workspace = true, features = ["client"] }
-
-dioxus = { workspace = true }
-
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde-wasm-bindgen = { workspace = true, optional = true }
+smol = { workspace = true, optional = true }
 ssmarshal = { workspace = true, features = ["std"] }
-anyhow = { workspace = true }
-futures = { workspace = true, features = ["async-await"] }
 strum = { workspace = true }
-jiff = { workspace = true }
-cfg-if = { workspace = true }
-
-log = { workspace = true }
 tracing-log = { workspace = true, features = ["log-tracer"] }
-
-kle-serial = { workspace = true }
-
-# web deps
-web-sys = { workspace = true, optional = true, features = [
-  "Navigator",
-  "Window",
-  "ResizeObserver",
+wasm-bindgen = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+web-sys = { workspace = true, features = [
   "Hid",
   "HidCollectionInfo",
   "HidConnectionEvent",
@@ -43,29 +41,22 @@ web-sys = { workspace = true, optional = true, features = [
   "HidInputReportEventInit",
   "HidReportInfo",
   "HidReportItem",
-  "HiddenPluginEventInit",
   "HidUnitSystem",
-] }
-js-sys = { workspace = true, optional = true }
-wasm-bindgen = { workspace = true, optional = true }
-wasm-bindgen-futures = { workspace = true, optional = true }
-serde-wasm-bindgen = { workspace = true, optional = true }
-async-channel = { workspace = true }
-
-# native deps
-smol = { workspace = true, optional = true }
-async-hid = { workspace = true, optional = true }
+  "HiddenPluginEventInit",
+  "Navigator",
+  "ResizeObserver",
+  "Window",
+], optional = true }
 
 [features]
-_check = ["web", "native"]
-
+_check = ["native", "web"]
+native = ["dep:async-hid", "dep:smol", "dioxus/desktop"]
 web = [
-  "dioxus/web",
-  "dep:web-sys",
   "dep:js-sys",
-  "dep:wasm-bindgen-futures",
   "dep:serde-wasm-bindgen",
   "dep:wasm-bindgen",
+  "dep:wasm-bindgen-futures",
+  "dep:web-sys",
+  "dioxus/web",
   "jiff/js",
 ]
-native = ["dioxus/desktop", "dep:smol", "dep:async-hid"]

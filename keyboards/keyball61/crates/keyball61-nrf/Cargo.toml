@@ -3,60 +3,57 @@ cargo-features = ["per-package-target"]
 [package]
 name = "keyball61-nrf"
 version.workspace = true
-license.workspace = true
-edition.workspace = true
 authors.workspace = true
+edition.workspace = true
 repository.workspace = true
+license.workspace = true
+# tombi: lint.rules.key-not-allowed.disabled = true
 forced-target = "thumbv7em-none-eabihf"
 
 [lib]
+bench = false
+doctest = false
 path = "src/lib.rs"
 test = false
-doctest = false
-bench = false
 
 [[bin]]
+bench = false
+doctest = false
 name = "keyball61"
 test = false
-doctest = false
-bench = false
 
 [dependencies]
-keyball61-common = { path = "../keyball61-common/" }
-
-rktk = { workspace = true }
-rktk-drivers-nrf = { workspace = true }
-rktk-drivers-common = { workspace = true }
-
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+embassy-embedded-hal = { workspace = true }
 embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
-  "executor-thread",
   "executor-interrupt",
+  "executor-thread",
+] }
+embassy-nrf = { workspace = true, features = [
+  "gpiote",
+  "nfc-pins-as-gpio",
+  "nrf52840",
+  "time-driver-rtc1",
+  "unstable-pac",
 ] }
 embassy-sync = { workspace = true }
 embassy-time = { workspace = true }
-embassy-embedded-hal = { workspace = true }
-
-embassy-nrf = { workspace = true, features = [
-  "gpiote",
-  "time-driver-rtc1",
-  "nrf52840",
-  "nfc-pins-as-gpio",
-  "unstable-pac",
-] }
+keyball61-common = { path = "../keyball61-common/" }
 nrf-softdevice = { workspace = true, features = [
-  "ble-peripheral",
   "ble-central",
+  "ble-peripheral",
   "critical-section-impl",
-  "s140",
   "nrf52840",
+  "s140",
 ] }
-cortex-m = { workspace = true }
-cortex-m-rt = { workspace = true }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
+rktk-drivers-nrf = { workspace = true }
 
 [features]
-_check = []
-
-usb = ["rktk-drivers-nrf/softdevice"]
-ble = ["rktk-drivers-nrf/softdevice-ble"]
 default = ["ble", "usb"]
+_check = []
+ble = ["rktk-drivers-nrf/softdevice-ble"]
+usb = ["rktk-drivers-nrf/softdevice"]

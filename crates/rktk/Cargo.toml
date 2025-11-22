@@ -1,77 +1,68 @@
 [package]
 name = "rktk"
-description = "rktk - Rust Keyboard firmware Toolkit"
 version.workspace = true
-license.workspace = true
-edition.workspace = true
 authors.workspace = true
-repository.workspace = true
-build = "build/main.rs"
+edition.workspace = true
+description = "rktk - Rust Keyboard firmware Toolkit"
 readme = "../../README.md"
+repository.workspace = true
+license.workspace = true
+build = "build/main.rs"
 
 [dependencies]
-kmsm = { workspace = true, features = ["state", "postcard"] }
-kmsm-rktk = { workspace = true }
-rktk-rrp = { workspace = true, features = ["server"], optional = true }
-
-rktk-log = { workspace = true }
-log = { workspace = true, optional = true }
-defmt = { workspace = true, optional = true }
-
-embassy-time = { workspace = true }
-embassy-sync = { workspace = true }
-embassy-futures = { workspace = true }
-embassy-executor = { workspace = true }
-
+blinksy = { workspace = true }
 critical-section = { workspace = true, optional = true }
-portable-atomic = { workspace = true }
-usbd-hid = { workspace = true }
-
-embedded-graphics = { workspace = true }
+defmt = { workspace = true, optional = true }
 display-interface = { workspace = true }
-
-heapless = { workspace = true }
-static_cell = { workspace = true }
+document-features = { workspace = true }
+embassy-executor = { workspace = true }
+embassy-futures = { workspace = true }
+embassy-sync = { workspace = true }
+embassy-time = { workspace = true }
+embedded-graphics = { workspace = true }
 futures = { workspace = true, features = ["async-await"] }
-serde = { workspace = true, features = ["derive"] }
+heapless = { workspace = true }
+itertools = { workspace = true }
+kmsm = { workspace = true, features = ["postcard", "state"] }
+kmsm-rktk = { workspace = true }
+log = { workspace = true, optional = true }
+paste = { workspace = true }
+portable-atomic = { workspace = true }
 postcard = { workspace = true, features = [
   "experimental-derive",
   "heapless-cas",
 ] }
-document-features = { workspace = true }
-itertools = { workspace = true }
-paste = { workspace = true }
-blinksy = { workspace = true }
+rktk-log = { workspace = true }
+rktk-rrp = { workspace = true, features = ["server"], optional = true }
+serde = { workspace = true, features = ["derive"] }
+static_cell = { workspace = true }
+usbd-hid = { workspace = true }
 
 [build-dependencies]
-ssmarshal = { workspace = true, default-features = true }
+const-gen = { workspace = true }
+macro_rules_attribute = { workspace = true }
+schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-macro_rules_attribute = { workspace = true }
-
 smart-default = { workspace = true }
-const-gen = { workspace = true }
-schemars = { workspace = true }
+ssmarshal = { workspace = true, default-features = true }
 
 [features]
-_check = ["alloc", "log", "defmt", "rrp-log"]
-
+_check = ["alloc", "defmt", "log", "rrp-log"]
 ## Uses alloc to spawn arbitary tasks.
 ## For more detail, see next section.
 alloc = []
-
-## Enables rrp
-rrp = ["dep:rktk-rrp"]
-## Set rrp-over-usb logger of `log` crate
-rrp-log = ["dep:critical-section", "rrp", "log"]
-
 ## Logging using [`defmt`]. Intended for debugging.
 defmt = [
   "dep:defmt",
-  "rktk-log/defmt",
-  "kmsm/defmt",
-  "heapless/defmt",
   "display-interface/defmt-03",
+  "heapless/defmt",
+  "kmsm/defmt",
+  "rktk-log/defmt",
 ]
 ## Logging using [`log`]. Required to send logs via rrp.
 log = ["dep:log", "rktk-log/log"]
+## Enables rrp
+rrp = ["dep:rktk-rrp"]
+## Set rrp-over-usb logger of `log` crate
+rrp-log = ["dep:critical-section", "log", "rrp"]

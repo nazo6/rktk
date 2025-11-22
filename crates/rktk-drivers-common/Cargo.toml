@@ -1,78 +1,68 @@
 [package]
 name = "rktk-drivers-common"
-description = "Common drivers for rktk"
 version.workspace = true
-license.workspace = true
-edition.workspace = true
 authors.workspace = true
+edition.workspace = true
+description = "Common drivers for rktk"
 repository.workspace = true
+license.workspace = true
 
 [dependencies]
-rktk = { workspace = true }
-
-rktk-log = { workspace = true }
-log = { workspace = true, optional = true }
-defmt = { workspace = true, optional = true }
-
 critical-section = { workspace = true, optional = true }
+defmt = { workspace = true, optional = true }
+display-interface = { workspace = true }
+document-features = { workspace = true }
 embassy-executor = { workspace = true }
-embedded-hal-async = { workspace = true }
-embedded-hal = { workspace = true }
+embassy-futures = { workspace = true }
+embassy-sync = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true, features = [
   "max-handler-count-8",
   "max-interface-count-8",
 ] }
-embassy-sync = { workspace = true }
-embassy-futures = { workspace = true }
-embedded-storage-async = { workspace = true }
-sequential-storage = { workspace = true }
-
-usbd-hid = { workspace = true }
-
-ssd1306 = { workspace = true }
-display-interface = { workspace = true }
 embedded-graphics = { workspace = true }
-
+embedded-hal = { workspace = true }
+embedded-hal-async = { workspace = true }
+embedded-storage-async = { workspace = true }
 heapless = { workspace = true }
-
-document-features = { workspace = true }
-static_cell = { workspace = true, optional = true }
-ssmarshal = { workspace = true, optional = true }
-
-# Due to compatibility with nrf-sdc, the revision is currently locked.
-trouble-host = { workspace = true, optional = true, features = ["security"] }
+log = { workspace = true, optional = true }
 rand_core = { workspace = true, optional = true }
+rktk = { workspace = true }
+rktk-log = { workspace = true }
+sequential-storage = { workspace = true }
+ssd1306 = { workspace = true }
+ssmarshal = { workspace = true, optional = true }
+static_cell = { workspace = true, optional = true }
+# Due to compatibility with nrf-sdc, the revision is currently locked.
+trouble-host = { workspace = true, features = ["security"], optional = true }
+usbd-hid = { workspace = true }
 
 [features]
 _check = [
-  "defmt-usb",
-  "log",
   "defmt",
   "defmt-timestamp",
-  "usb-remote-wakeup",
+  "defmt-usb",
+  "log",
   "reporter-trouble",
+  "usb-remote-wakeup",
 ]
-
-## Enables defmt-over-usb logger. You cannot use this feature with other defmt logger.
-defmt-usb = ["defmt", "dep:critical-section"]
-## Enables defmt timestamp support using embassy-time
-defmt-timestamp = ["defmt"]
 ## Enables defmt logging
 defmt = [
   "dep:defmt",
-  "embassy-usb/defmt",
   "embassy-executor/defmt",
-  "rktk/defmt",
+  "embassy-usb/defmt",
   "rktk-log/defmt",
+  "rktk/defmt",
   "trouble-host?/defmt",
 ]
+## Enables defmt timestamp support using embassy-time
+defmt-timestamp = ["defmt"]
+## Enables defmt-over-usb logger. You cannot use this feature with other defmt logger.
+defmt-usb = ["defmt", "dep:critical-section"]
 ## Enables logging using the `log` crate.
 log = ["dep:log"]
-
-trouble = ["dep:trouble-host", "dep:rand_core"]
-reporter-trouble = ["trouble", "dep:ssmarshal", "dep:static_cell"]
-
+reporter-trouble = ["dep:ssmarshal", "dep:static_cell", "trouble"]
+trouble = ["dep:rand_core", "dep:trouble-host"]
 ## Enables remote wakeup feature of USB.
 ## NOTE: Usually, this is automatically enabled by each platform's driver crate and you should not enable this feature manually.
 usb-remote-wakeup = []

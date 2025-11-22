@@ -1,30 +1,25 @@
 [package]
 name = "rktk-rrp"
-description = "rrp - RKTK Remote Protocol"
-authors.workspace = true
-license.workspace = true
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
+description = "rrp - RKTK Remote Protocol"
 repository.workspace = true
+license.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
 
 [dependencies]
+embedded-io-async = { workspace = true, optional = true }
 futures = { workspace = true }
+heapless = { workspace = true, optional = true }
 kmsm = { workspace = true, features = ["postcard"] }
+macro_rules_attribute = { workspace = true }
 postcard = { workspace = true, features = ["experimental-derive"] }
-
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
-macro_rules_attribute = { workspace = true }
 thiserror = { workspace = true }
-
-# server deps
-heapless = { workspace = true, optional = true }
-embedded-io-async = { workspace = true, optional = true }
-
-# client deps
 wasm-bindgen = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -32,10 +27,7 @@ tokio = { workspace = true, features = ["io-std", "io-util", "macros", "rt"] }
 
 [features]
 default = []
-
-server = ["dep:heapless", "dep:embedded-io-async"]
+_check = ["client", "server"]
 client = ["std"]
-
-std = ["postcard/use-std", "futures/std"]
-
-_check = ["server", "client"]
+server = ["dep:embedded-io-async", "dep:heapless"]
+std = ["futures/std", "postcard/use-std"]

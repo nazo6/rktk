@@ -2,126 +2,108 @@ cargo-features = ["per-package-target"]
 
 [package]
 name = "rktk-drivers-nrf"
-description = "rktk drivers for nrf chip"
-forced-target = "thumbv7em-none-eabihf"
 version.workspace = true
-license.workspace = true
-edition.workspace = true
 authors.workspace = true
+edition.workspace = true
+description = "rktk drivers for nrf chip"
 repository.workspace = true
-
-[lib]
-path = "src/lib.rs"
-test = false
-doctest = false
-bench = false
+license.workspace = true
+# tombi: lint.rules.key-not-allowed.disabled = true
+forced-target = "thumbv7em-none-eabihf"
 
 [package.metadata.docs.rs]
 features = ["_release_check"]
 default-target = "thumbv7em-none-eabihf"
 
+[lib]
+bench = false
+doctest = false
+path = "src/lib.rs"
+test = false
+
 [dependencies]
-rktk = { workspace = true }
-rktk-drivers-common = { workspace = true, features = ["usb-remote-wakeup"] }
-
-rktk-log = { workspace = true }
-log = { workspace = true, optional = true }
+atomic-pool = { workspace = true }
+bitvec = { workspace = true, default-features = false }
+cortex-m = { workspace = true }
 defmt = { workspace = true, optional = true }
-
+document-features = { workspace = true }
 embassy-embedded-hal = { workspace = true }
-embassy-time = { workspace = true }
-embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
-embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
-nrf-softdevice = { optional = true, workspace = true, features = [
-  "ble-peripheral",
+embassy-sync = { workspace = true }
+embassy-time = { workspace = true }
+embassy-usb = { workspace = true }
+embedded-io-async = { workspace = true }
+embedded-storage-async = { workspace = true }
+esb-ng = { version = "0.1.0", optional = true }
+heapless = { workspace = true }
+log = { workspace = true, optional = true }
+nrf-mpsl = { workspace = true, default-features = false, features = [
+  "critical-section-impl",
+], optional = true }
+# after this revision, unreleased breaking change of embassy-nrf is included
+nrf-sdc = { workspace = true, default-features = false, features = [
+  "central",
+  "peripheral",
+], optional = true }
+nrf-softdevice = { workspace = true, features = [
   "ble-central",
   "ble-l2cap",
-] }
-
-# after this revision, unreleased breaking change of embassy-nrf is included
-nrf-sdc = { workspace = true, default-features = false, optional = true, features = [
-  "peripheral",
-  "central",
-] }
-nrf-mpsl = { workspace = true, default-features = false, optional = true, features = [
-  "critical-section-impl",
-] }
-
-
-embedded-io-async = { workspace = true }
-cortex-m = { workspace = true }
-
-embedded-storage-async = { workspace = true }
-sequential-storage = { workspace = true }
-
-serde = { workspace = true, optional = true }
+  "ble-peripheral",
+], optional = true }
 postcard = { workspace = true, optional = true }
-
-static_cell = { workspace = true }
-heapless = { workspace = true }
-bitvec = { workspace = true, default-features = false }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true, features = ["usb-remote-wakeup"] }
+rktk-log = { workspace = true }
+sequential-storage = { workspace = true }
+serde = { workspace = true, optional = true }
 ssmarshal = { workspace = true }
+static_cell = { workspace = true }
 usbd-hid = { workspace = true }
-atomic-pool = { workspace = true }
-
-esb-ng = { version = "0.1.0", optional = true }
-
-
-document-features = { workspace = true }
 
 [features]
 default = ["power"]
-
+_check = ["_nrfxx", "defmt", "esb", "sdc", "softdevice-ble"]
 _nrfxx = [
   "embassy-nrf/nrf52840",
+  "nrf-sdc?/nrf52840",
   "nrf-softdevice?/nrf52840",
   "nrf-softdevice?/s140",
-  "nrf-sdc?/nrf52840",
 ]
-
-_check = ["_nrfxx", "softdevice-ble", "esb", "sdc", "defmt"]
-_release_check = ["_nrfxx", "esb", "defmt"]
-
-## Enables system power off feature. This is supported only on some chips like nRF52840.
-power = []
-
-## Enables wireless dongle driver using esb(Enhanced Shockburst) protocol.
-## This feature is not compatible with softdevice.
-esb = ["dep:esb-ng", "dep:postcard", "embassy-nrf/unstable-pac"]
-
-#! #### Softdevice
-## Enables softdevice. If this feature is enabled, the softdevice will be included in the build.
-softdevice = ["dep:nrf-softdevice"]
-
-## Enables BLE split and reporter driver using softdevice
-softdevice-ble = [
-  "dep:postcard",
-  "dep:serde",
-  "softdevice",
-  "nrf-softdevice/ble-gatt-server",
-  "nrf-softdevice/ble-sec",
-  "nrf-softdevice/ble-central",
-  "nrf-softdevice/ble-peripheral",
-]
-
-sdc = ["dep:nrf-sdc", "dep:nrf-mpsl"]
-
+_release_check = ["_nrfxx", "defmt", "esb"]
 #! #### Logging
 ## Enables defmt logging
 defmt = [
   "dep:defmt",
-  "rktk/defmt",
-  "rktk-log/defmt",
-  "rktk-drivers-common/defmt",
-  "nrf-softdevice?/defmt",
   "embassy-nrf/defmt",
   "heapless/defmt",
-  "postcard?/use-defmt",
-  "nrf-sdc?/defmt",
   "nrf-mpsl?/defmt",
+  "nrf-sdc?/defmt",
+  "nrf-softdevice?/defmt",
+  "postcard?/use-defmt",
+  "rktk-drivers-common/defmt",
+  "rktk-log/defmt",
+  "rktk/defmt",
 ]
+## Enables wireless dongle driver using esb(Enhanced Shockburst) protocol.
+## This feature is not compatible with softdevice.
+esb = ["dep:esb-ng", "dep:postcard", "embassy-nrf/unstable-pac"]
 ## Enables log logging
 log = ["dep:log"]
+## Enables system power off feature. This is supported only on some chips like nRF52840.
+power = []
+sdc = ["dep:nrf-mpsl", "dep:nrf-sdc"]
+#! #### Softdevice
+## Enables softdevice. If this feature is enabled, the softdevice will be included in the build.
+softdevice = ["dep:nrf-softdevice"]
+## Enables BLE split and reporter driver using softdevice
+softdevice-ble = [
+  "dep:postcard",
+  "dep:serde",
+  "nrf-softdevice/ble-central",
+  "nrf-softdevice/ble-gatt-server",
+  "nrf-softdevice/ble-peripheral",
+  "nrf-softdevice/ble-sec",
+  "softdevice",
+]

@@ -1,23 +1,23 @@
 [package]
 name = "xtask"
-description = "Internal xtask command for rktk"
-publish = false
-authors.workspace = true
-license.workspace = true
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
+description = "Internal xtask command for rktk"
 repository.workspace = true
+license.workspace = true
+publish = false
 
 [dependencies]
-clap = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
-duct = { workspace = true }
-colored = { workspace = true }
 cargo_metadata = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+colored = { workspace = true }
+dircpy = { workspace = true, default-features = false }
+duct = { workspace = true }
+human_bytes = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-dircpy = { workspace = true, default-features = false }
-human_bytes = { workspace = true }
 
 [features]
 _check = []

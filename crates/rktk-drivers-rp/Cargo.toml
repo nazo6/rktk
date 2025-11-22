@@ -1,52 +1,45 @@
 [package]
 name = "rktk-drivers-rp"
-description = "rktk drivers for RP chip"
 version.workspace = true
-license.workspace = true
-edition.workspace = true
 authors.workspace = true
+edition.workspace = true
+description = "rktk drivers for RP chip"
 repository.workspace = true
+license.workspace = true
 
 [package.metadata.docs.rs]
 features = ["embassy-rp/rp2040"]
 
 [dependencies]
-rktk = { workspace = true }
-rktk-drivers-common = { workspace = true }
-
-rktk-log = { workspace = true }
-log = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
-
-embedded-storage-async = { workspace = true }
-
+display-interface = { workspace = true }
 embassy-embedded-hal = { workspace = true }
-embassy-time = { workspace = true }
-embassy-usb = { workspace = true }
 embassy-executor = { workspace = true }
-embassy-sync = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-rp = { workspace = true, features = [
-  "time-driver",
   "critical-section-impl",
+  "time-driver",
 ] }
-
-ssd1306 = { workspace = true }
-display-interface = { workspace = true }
-
-pio = { workspace = true }
-
+embassy-sync = { workspace = true }
+embassy-time = { workspace = true }
+embassy-usb = { workspace = true }
+embedded-storage-async = { workspace = true }
 fixed = { workspace = true }
 fixed-macro = { workspace = true }
+log = { workspace = true, optional = true }
+pio = { workspace = true }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
+rktk-log = { workspace = true }
+ssd1306 = { workspace = true }
 static_cell = { workspace = true }
 
 [features]
 _check = ["embassy-rp/rp2040"]
-
 defmt = [
   "dep:defmt",
-  "rktk/defmt",
-  "rktk-log/defmt",
   "rktk-drivers-common/defmt",
+  "rktk-log/defmt",
+  "rktk/defmt",
 ]
 log = ["dep:log"]

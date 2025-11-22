@@ -1,53 +1,50 @@
 # You can remove this line and `forced-target` property and use `.cargo/config.toml` if your crate isn't in workspace.
 cargo-features = ["per-package-target"]
 
+[package]
+name = "corne-nrf"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+# tombi: lint.rules.key-not-allowed.disabled = true
+forced-target = "thumbv7em-none-eabihf"
+
 [[bin]]
+bench = false
+doctest = false
 name = "corne-nrf"
 path = "src/main.rs"
 test = false
-doctest = false
-bench = false
-
-[package]
-name = "corne-nrf"
-authors.workspace = true
-license.workspace = true
-version.workspace = true
-edition.workspace = true
-repository.workspace = true
-publish = false
-forced-target = "thumbv7em-none-eabihf"
 
 [dependencies]
-rktk = { workspace = true }
-rktk-drivers-nrf = { workspace = true, features = ["softdevice-ble"] }
-rktk-drivers-common = { workspace = true }
-
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
 embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
-  "executor-thread",
   "executor-interrupt",
+  "executor-thread",
 ] }
-
 embassy-nrf = { workspace = true, features = [
   "gpiote",
-  "time-driver-rtc1",
-  "nrf52840",
   "nfc-pins-as-gpio",
+  "nrf52840",
+  "time-driver-rtc1",
 ] }
 nrf-softdevice = { workspace = true, features = [
   "critical-section-impl",
-  "s140",
   "nrf52840",
+  "s140",
 ] }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
+rktk-drivers-nrf = { workspace = true, features = ["softdevice-ble"] }
 
 [features]
 default = ["right"]
-
-right = []
-left = []
-
 # Remove this line in your project. It's just used in this workspace for check.
 _check = []
+left = []
+right = []
