@@ -80,7 +80,7 @@ rktk-log = { path = "crates/rktk-log", version = "0.2.0" }
 rktk-rrp = { path = "crates/rktk-rrp", version = "0.2.0" }
 rusb = "0.9.4"
 schemars = "1.0.0"
-sequential-storage = "5.0.0"
+sequential-storage = "6.0.1"
 serde = { version = "1.0.207", default-features = false }
 serde_json = "1.0.122"
 serde-wasm-bindgen = { version = "0.6.5" }
