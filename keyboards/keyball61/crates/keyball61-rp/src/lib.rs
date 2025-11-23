@@ -66,8 +66,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         p.DMA_CH1,
         pmw3360::recommended_spi_config(),
     ));
-    let ball_spi = SpiDevice::new(&spi, Output::new(p.PIN_21, embassy_rp::gpio::Level::High));
-    let ball = Pmw3360::new(ball_spi);
+    let ball = Pmw3360::new(&spi, Output::new(p.PIN_21, embassy_rp::gpio::Level::High));
 
     let hand = detect_hand_from_matrix(
         Output::new(p.PIN_6.reborrow(), Level::Low),

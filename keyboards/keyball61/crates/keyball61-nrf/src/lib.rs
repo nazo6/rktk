@@ -84,7 +84,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         p.P0_10,
         rktk_drivers_nrf::mouse::pmw3360::recommended_spi_config(),
     ));
-    let ball_spi_device = SpiDevice::new(
+    let ball = Pmw3360::new(
         &spi,
         Output::new(
             p.P0_06,
@@ -92,7 +92,6 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
             embassy_nrf::gpio::OutputDrive::Standard,
         ),
     );
-    let ball = Pmw3360::new(ball_spi_device);
 
     let hand = detect_hand_from_matrix(
         Output::new(p.P1_00.reborrow(), Level::Low, OutputDrive::Standard),
