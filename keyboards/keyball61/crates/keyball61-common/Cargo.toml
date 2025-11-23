@@ -1,7 +1,6 @@
 [package]
 name = "keyball61-common"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 repository.workspace = true
 license.workspace = true

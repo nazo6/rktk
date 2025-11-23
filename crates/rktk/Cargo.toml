@@ -1,7 +1,6 @@
 [package]
 name = "rktk"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "rktk - Rust Keyboard firmware Toolkit"
 readme = "../../README.md"

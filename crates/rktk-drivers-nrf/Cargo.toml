@@ -3,7 +3,6 @@ cargo-features = ["per-package-target"]
 [package]
 name = "rktk-drivers-nrf"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "rktk drivers for nrf chip"
 repository.workspace = true

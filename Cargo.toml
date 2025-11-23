@@ -7,7 +7,6 @@ exclude = ["crates/.cargo"]
 
 [workspace.package]
 version = "0.2.0"
-authors = ["nazo6"]
 edition = "2024"
 repository = "https://github.com/nazo6/rktk"
 license = "MIT"

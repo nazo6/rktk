@@ -4,7 +4,6 @@ cargo-features = ["per-package-target"]
 [package]
 name = "corne-nrf"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 repository.workspace = true
 license.workspace = true

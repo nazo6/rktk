@@ -1,7 +1,6 @@
 [package]
 name = "rktk-log"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "rktk log management"
 repository.workspace = true

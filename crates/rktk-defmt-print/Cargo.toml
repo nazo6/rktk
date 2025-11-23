@@ -1,7 +1,6 @@
 [package]
 name = "rktk-defmt-print"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "Small convenient defmt-print wrapper for rktk keyboards"
 repository.workspace = true

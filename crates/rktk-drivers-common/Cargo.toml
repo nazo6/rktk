@@ -1,7 +1,6 @@
 [package]
 name = "rktk-drivers-common"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "Common drivers for rktk"
 repository.workspace = true

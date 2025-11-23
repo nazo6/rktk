@@ -1,7 +1,6 @@
 [package]
 name = "kmsm"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "Keymap/state manager for self-made keyboard firmware"
 repository.workspace = true

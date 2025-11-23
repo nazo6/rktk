@@ -1,7 +1,6 @@
 [package]
 name = "xtask"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 description = "Internal xtask command for rktk"
 repository.workspace = true

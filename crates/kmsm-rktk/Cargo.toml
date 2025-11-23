@@ -1,7 +1,6 @@
 [package]
 name = "kmsm-rktk"
 version.workspace = true
-authors.workspace = true
 edition.workspace = true
 repository.workspace = true
 license.workspace = true
