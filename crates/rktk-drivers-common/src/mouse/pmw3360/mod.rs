@@ -59,9 +59,9 @@ impl Pmw3360Srom {
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Pmw3360Config {
-    srom: Pmw3360Srom,
-    cpi: u16,
-    auto_reset: bool,
+    pub srom: Pmw3360Srom,
+    pub cpi: u16,
+    pub auto_reset: bool,
 }
 
 impl Default for Pmw3360Config {
