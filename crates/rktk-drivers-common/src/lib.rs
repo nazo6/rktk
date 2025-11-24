@@ -10,6 +10,7 @@ pub mod encoder;
 pub mod keyscan;
 pub mod mouse;
 pub mod panic_utils;
+pub mod spi;
 pub mod storage;
 #[cfg(feature = "trouble")]
 pub mod trouble;

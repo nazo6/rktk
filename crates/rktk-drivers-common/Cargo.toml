@@ -11,6 +11,7 @@ critical-section = { workspace = true, optional = true }
 defmt = { workspace = true, optional = true }
 display-interface = { workspace = true }
 document-features = { workspace = true }
+embassy-embedded-hal = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-futures = { workspace = true }
 embassy-sync = { workspace = true }
