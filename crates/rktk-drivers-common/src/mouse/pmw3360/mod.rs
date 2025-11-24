@@ -4,18 +4,18 @@
 
 mod error;
 mod registers;
+mod spi;
 mod srom_liftoff;
 mod srom_tracking;
 
-use embassy_embedded_hal::shared_bus::{SpiDeviceError, asynch::spi::SpiDevice};
-use embassy_sync::{blocking_mutex::raw::RawMutex, mutex::Mutex};
 use embassy_time::Timer;
-use embedded_hal::digital::OutputPin;
-use embedded_hal_async::spi::{Operation, SpiBus, SpiDevice as _};
+use embedded_hal_async::spi::Operation;
 
 use error::Pmw3360Error;
 use registers as reg;
 use rktk::drivers::interface::mouse::MouseDriver;
+
+use crate::mouse::pmw3360::spi::{ExtendedSpi, IterOperation};
 
 mod timing {
     /// NCS To SCLK Active
@@ -38,30 +38,62 @@ pub struct BurstData {
     pub shutter: u16,
 }
 
-pub struct Pmw3360<'a, M: RawMutex, BUS: SpiBus<u8>, CS: OutputPin> {
-    bus: &'a Mutex<M, BUS>,
-    cs: CS,
-    in_burst_mode: bool,
-    cpi: u16,
+#[derive(Debug, Default)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Pmw3360Srom {
+    #[default]
+    None,
+    Liftoff,
+    Tracking,
 }
 
-impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
-    pub fn new(bus: &'a Mutex<M, BUS>, cs: CS) -> Self {
+impl Pmw3360Srom {
+    fn id(&self) {
+        match self {
+            Pmw3360Srom::None => 0x00,
+            // TODO: Is this right?
+            Pmw3360Srom::Liftoff => 0x02,
+            Pmw3360Srom::Tracking => 0x04,
+        };
+    }
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct Pmw3360Config {
+    srom: Pmw3360Srom,
+    cpi: u16,
+    auto_reset: bool,
+}
+
+impl Default for Pmw3360Config {
+    fn default() -> Self {
         Self {
-            bus,
-            cs,
-            in_burst_mode: false,
-            cpi: 1000, // Default CPI
+            srom: Pmw3360Srom::default(),
+            cpi: 1000,
+            auto_reset: false,
         }
     }
+}
 
-    fn spi(&mut self) -> SpiDevice<'a, M, BUS, &mut CS> {
-        SpiDevice::new(self.bus, &mut self.cs)
+pub struct Pmw3360<S: ExtendedSpi> {
+    spi_device: S,
+    in_burst_mode: bool,
+    config: Pmw3360Config,
+}
+
+impl<S: ExtendedSpi> Pmw3360<S> {
+    pub fn new(spi_device: S, config: Pmw3360Config) -> Self {
+        Self {
+            spi_device,
+            in_burst_mode: false,
+            config,
+        }
     }
 }
 
-impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> MouseDriver for Pmw3360<'a, M, BUS, CS> {
-    type Error = Pmw3360Error<SpiDeviceError<BUS::Error, CS::Error>>;
+impl<S: ExtendedSpi> MouseDriver for Pmw3360<S> {
+    type Error = Pmw3360Error<S::Error>;
 
     async fn init(&mut self) -> Result<(), Self::Error> {
         self.power_up().await
@@ -83,10 +115,10 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> MouseDriver for Pmw3360<'a, M,
     }
 }
 
-impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
+impl<S: ExtendedSpi> Pmw3360<S> {
     async fn write(&mut self, address: u8, data: u8) -> Result<(), <Self as MouseDriver>::Error> {
         self.in_burst_mode = false;
-        self.spi()
+        self.spi_device
             .transaction(&mut [
                 Operation::DelayNs(timing::NCS_SCLK),
                 // send adress of the register, with MSBit = 1 to indicate it's a write and send data
@@ -106,7 +138,7 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
     async fn read(&mut self, address: u8) -> Result<u8, <Self as MouseDriver>::Error> {
         self.in_burst_mode = false;
         let mut buf = [0x00];
-        self.spi()
+        self.spi_device
             .transaction(&mut [
                 Operation::DelayNs(timing::NCS_SCLK),
                 // send adress of the register, with MSBit = 0 to indicate it's a read
@@ -135,7 +167,7 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
 
         let mut data = [0u8; 12];
 
-        self.spi()
+        self.spi_device
             .transaction(&mut [
                 Operation::DelayNs(timing::NCS_SCLK),
                 Operation::Write(&[reg::MOTION_BURST]),
@@ -164,19 +196,25 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
             shutter: ((data[11] as u16) << 8) | (data[10] as u16),
         };
 
-        // // FIXME: This is a workaround for a phenomenon in which the PMW3360 sensor stacks with
-        // // OP_MODE remaining at Rest1 and then stops moving.
-        // // It is necessary to investigate whether this is hardware-specific or whether other programs are incorrect.
-        // if data.motion && data.op_mode == 0x01 && data.on_surface && data.dx == 0 && data.dy == 0 {
-        //     rktk_log::warn!("Invalid motion detected. Performing reset:\n{:?}", data);
-        //     self.power_up().await?;
-        // }
+        // FIXME: This is a workaround for a phenomenon in which the PMW3360 sensor stacks with
+        // OP_MODE remaining at Rest1 and then stops moving.
+        // It is necessary to investigate whether this is hardware-specific or whether other programs are incorrect.
+        if data.motion
+            && data.op_mode == 0x01
+            && data.on_surface
+            && data.dx == 0
+            && data.dy == 0
+            && self.config.auto_reset
+        {
+            rktk_log::warn!("Invalid motion detected. Performing reset:\n{:?}", data);
+            self.power_up().await?;
+        }
 
         Ok(data)
     }
 
     pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), <Self as MouseDriver>::Error> {
-        self.cpi = cpi;
+        self.config.cpi = cpi;
         let val: u16;
         if cpi < 100 {
             val = 0
@@ -217,7 +255,7 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
     async fn power_up(&mut self) -> Result<(), <Self as MouseDriver>::Error> {
         let is_valid_signature = self.power_up_inner().await?;
         if is_valid_signature {
-            self.set_cpi(self.cpi).await?;
+            self.set_cpi(self.config.cpi).await?;
             Ok(())
         } else {
             Err(Pmw3360Error::InvalidSignature)
@@ -226,7 +264,7 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
 
     async fn power_up_inner(&mut self) -> Result<bool, <Self as MouseDriver>::Error> {
         // reset spi port
-        self.spi()
+        self.spi_device
             .transaction(&mut [])
             .await
             .map_err(Pmw3360Error::Spi)?;
@@ -259,6 +297,19 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
     }
 
     async fn srom_download(&mut self) -> Result<(), <Self as MouseDriver>::Error> {
+        let fw = match self.config.srom {
+            Pmw3360Srom::None => {
+                rktk_log::info!("SROM download skipped: no SROM selected");
+                return Ok(());
+            }
+            Pmw3360Srom::Liftoff => &srom_liftoff::FW,
+            Pmw3360Srom::Tracking => &srom_tracking::FW,
+        };
+        if !self.spi_device.transaction_iter_supported() {
+            rktk_log::warn!("SROM download skipped: transaction_iter not supported");
+            return Ok(());
+        }
+
         // Write 0 to Rest_En bit of Config2 register to disable Rest mode.
         self.write(reg::CONFIG_2, 0x00).await?;
 
@@ -271,32 +322,21 @@ impl<'a, M: RawMutex, BUS: SpiBus, CS: OutputPin> Pmw3360<'a, M, BUS, CS> {
         // Write 0x18 to SROM_Enable register again to start SROM Download
         self.write(reg::SROM_ENABLE, 0x18).await?;
 
-        self.cs
-            .set_low()
-            .map_err(|e| Pmw3360Error::Spi(SpiDeviceError::Cs(e)))?;
+        let operations = [IterOperation::Write(reg::SROM_LOAD_BURST | 0x80)]
+            .into_iter()
+            .chain(fw.iter().flat_map(|byte| {
+                [
+                    IterOperation::Write(*byte),
+                    IterOperation::DelayNs(15 * 1000),
+                ]
+            }));
 
-        let mut spi_err = None;
-        {
-            let mut bus = self.bus.lock().await;
-            let _ = bus.write(&[reg::SROM_LOAD_BURST | 0x80]).await;
-            for byte in srom_tracking::FW {
-                let res = bus.write(&[byte]).await;
-                Timer::after_micros(15).await;
-                if let Err(e) = res {
-                    spi_err = Some(e);
-                    break;
-                }
-            }
-        }
-        self.cs
-            .set_high()
-            .map_err(|e| Pmw3360Error::Spi(SpiDeviceError::Cs(e)))?;
+        self.spi_device
+            .transaction_iter(operations)
+            .await
+            .map_err(Pmw3360Error::Spi)?;
 
         Timer::after_micros(185).await;
-
-        if let Some(e) = spi_err {
-            return Err(Pmw3360Error::Spi(SpiDeviceError::Spi(e)));
-        }
 
         let srom_id = self.read(reg::SROM_ID).await?;
         if srom_id == 0x00 {
