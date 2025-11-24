@@ -40,9 +40,9 @@ pub struct BurstData {
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Pmw3360Srom {
+    #[default]
     None,
     Liftoff,
-    #[default]
     Tracking,
 }
 
@@ -69,7 +69,7 @@ impl Default for Pmw3360Config {
         Self {
             srom: Pmw3360Srom::default(),
             cpi: 1000,
-            auto_reset: false,
+            auto_reset: true,
         }
     }
 }
