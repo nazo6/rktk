@@ -47,13 +47,12 @@ pub enum Pmw3360Srom {
 }
 
 impl Pmw3360Srom {
-    fn id(&self) {
+    fn id(&self) -> u8 {
         match self {
             Pmw3360Srom::None => 0x00,
-            // TODO: Is this right?
-            Pmw3360Srom::Liftoff => 0x02,
+            Pmw3360Srom::Liftoff => 0x81,
             Pmw3360Srom::Tracking => 0x04,
-        };
+        }
     }
 }
 
@@ -245,8 +244,7 @@ impl<S: ExtendedSpi> Pmw3360<S> {
         let pid = self.read(reg::PRODUCT_ID).await.unwrap_or(0);
         let ipid = self.read(reg::INVERSE_PRODUCT_ID).await.unwrap_or(0);
 
-        // signature for SROM 0x04
-        Ok(srom == 0x04 && pid == 0x42 && ipid == 0xBD)
+        Ok(srom == self.config.srom.id() && pid == 0x42 && ipid == 0xBD)
     }
 
     #[allow(dead_code)]
@@ -347,10 +345,11 @@ impl<S: ExtendedSpi> Pmw3360<S> {
         Timer::after_micros(185).await;
 
         let srom_id = self.read(reg::SROM_ID).await?;
-        if srom_id == 0x00 {
+        if srom_id != self.config.srom.id() {
             rktk_log::error!("SROM Download failed. ID: 0x{:02x}", srom_id);
             return Err(Pmw3360Error::InvalidSignature);
         }
+        rktk_log::debug!("SROM Download succeeded. ID: 0x{:02x}", srom_id);
 
         Ok(())
     }
