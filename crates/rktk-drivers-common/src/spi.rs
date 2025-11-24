@@ -26,6 +26,7 @@ pub enum IterOperation<Word: 'static> {
 ///
 /// The ExtendedSpi trait is also implemented for regular [`SpiDeviceTrait`] for convenience.
 /// Since these SpiDevice instances cannot actually perform extended operations, the `transaction_iter_supported` method always returns false.
+#[allow(async_fn_in_trait)]
 pub trait ExtendedSpi<Word: Copy + 'static = u8> {
     type Error: core::fmt::Debug;
 
