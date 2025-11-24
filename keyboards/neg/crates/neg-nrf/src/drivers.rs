@@ -91,7 +91,9 @@ macro_rules! driver_mouse {
         }
         #[cfg(feature = "pmw3360")]
         {
-            Pmw3360::new(&$spi, ball_cs)
+            use rktk_drivers_common::spi::EmbassySpiDevice;
+            let spi = EmbassySpiDevice::new(&$spi, ball_cs);
+            Pmw3360::new(spi, Default::default())
         }
     }};
 }

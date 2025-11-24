@@ -4,7 +4,6 @@
 
 mod error;
 mod registers;
-mod spi;
 mod srom_liftoff;
 mod srom_tracking;
 
@@ -15,7 +14,7 @@ use error::Pmw3360Error;
 use registers as reg;
 use rktk::drivers::interface::mouse::MouseDriver;
 
-use crate::mouse::pmw3360::spi::{ExtendedSpi, IterOperation};
+use crate::spi::{ExtendedSpi, IterOperation};
 
 mod timing {
     /// NCS To SCLK Active
@@ -41,9 +40,9 @@ pub struct BurstData {
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Pmw3360Srom {
-    #[default]
     None,
     Liftoff,
+    #[default]
     Tracking,
 }
 
@@ -76,6 +75,15 @@ impl Default for Pmw3360Config {
     }
 }
 
+/// PMW3360 optical sensor driver.
+///
+/// # Notice about SPI
+/// This driver requires [`ExtendedSpi`] trait for SPI communication instead of
+/// [`embedded_hal_async::spi::SpiDevice`].
+/// This is because the PMW3360 driver needs to perform streaming transfers with CS held low,
+///
+/// Although, you still can use any SPI device that implements
+/// [`embedded_hal_async::spi::SpiDevice`]. In that case, SROM download will be skipped.
 pub struct Pmw3360<S: ExtendedSpi> {
     spi_device: S,
     in_burst_mode: bool,

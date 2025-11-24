@@ -13,6 +13,19 @@ pub enum IterOperation<Word: 'static> {
     DelayNs(u32),
 }
 
+/// Extended SPI trait with additional functionality
+///
+/// This trait exists to resolve the issue that standard [`SpiDeviceTrait`] traits cannot perform
+/// streaming transfers (https://github.com/rust-embedded/embedded-hal/issues/583).
+/// This operation is required for some drivers (e.g., [Pmw3360](crate::mouse::pmw3360::Pmw3360) SROM download).
+///
+/// [`IterOperation`] has more limited capabilities than a standard Operation, but since the
+/// `transaction_iter` method accepts an iterator rather than an array, it enables streaming transfers while keeping the CS active.
+///
+/// The primary implementation of this trait is for [`EmbassySpiDevice`]. It performs extended operations by utilizing the SPI implementation provided by [`embassy_embedded_hal`].
+///
+/// The ExtendedSpi trait is also implemented for regular [`SpiDeviceTrait`] for convenience.
+/// Since these SpiDevice instances cannot actually perform extended operations, the `transaction_iter_supported` method always returns false.
 pub trait ExtendedSpi<Word: Copy + 'static = u8> {
     type Error: core::fmt::Debug;
 

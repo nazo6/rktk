@@ -2,7 +2,6 @@
 
 use core::panic::PanicInfo;
 
-use embassy_embedded_hal::shared_bus::asynch::spi::SpiDevice;
 use embassy_rp::{
     bind_interrupts,
     gpio::{Input, Level, Output},
@@ -22,6 +21,7 @@ use rktk_drivers_common::{
     keyscan::{detect_hand_from_matrix, duplex_matrix::DuplexMatrixScanner},
     mouse::pmw3360::Pmw3360,
     panic_utils,
+    spi::EmbassySpiDevice,
     usb::*,
 };
 use rktk_drivers_rp::{
@@ -57,7 +57,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
 
     panic_utils::display_message_if_panicked(&mut display).await;
 
-    let spi = Mutex::<NoopRawMutex, _>::new(embassy_rp::spi::Spi::new(
+    let bus = Mutex::<NoopRawMutex, _>::new(embassy_rp::spi::Spi::new(
         p.SPI0,
         p.PIN_22,
         p.PIN_23,
@@ -66,7 +66,8 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         p.DMA_CH1,
         pmw3360::recommended_spi_config(),
     ));
-    let ball = Pmw3360::new(&spi, Output::new(p.PIN_21, embassy_rp::gpio::Level::High));
+    let spi = EmbassySpiDevice::new(&bus, Output::new(p.PIN_21, embassy_rp::gpio::Level::High));
+    let ball = Pmw3360::new(spi, Default::default());
 
     let hand = detect_hand_from_matrix(
         Output::new(p.PIN_6.reborrow(), Level::Low),
