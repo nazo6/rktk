@@ -1,4 +1,5 @@
 import { defineConfig, defineDocs } from "fumadocs-mdx/config";
+import lastModified from "fumadocs-mdx/plugins/last-modified";
 import remarkDirective from "remark-directive";
 import { remarkDirectiveDriverTable } from "./lib/remarkDirectiveDriverTable";
 // import mdxMermaid from "mdx-mermaid";
@@ -16,5 +17,5 @@ export default defineConfig({
 			...v,
 		],
 	},
-	lastModifiedTime: "git",
+	plugins: [lastModified()],
 });
