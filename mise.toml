@@ -1,0 +1,14 @@
+[tasks.check-all]
+run = "cargo xtask check all"
+
+[tasks.test-all]
+run = "cargo xtask test all"
+
+[tasks.rktk-client-start]
+run = "cd crates/rktk-client && pnpm dev"
+
+[tasks.doc-gen]
+run = "cargo xtask doc"
+
+[tasks.site-dev]
+run = "cd site && pnpm dev"
