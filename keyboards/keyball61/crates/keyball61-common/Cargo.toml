@@ -5,6 +5,11 @@ edition.workspace = true
 repository.workspace = true
 license.workspace = true
 
+[lib]
+bench = false
+doctest = false
+test = false
+
 [dependencies]
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
