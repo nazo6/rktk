@@ -8,7 +8,7 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    EsbApp, EsbBuffer, EsbHeader, EsbIrq, IrqTimer, bbq2::queue::BBQueue, irq::StatePTX,
+    EsbApp, EsbBuffer, EsbHeader, EsbIrq, IrqTimer, irq::StatePTX, payload::BBQueueType,
     peripherals::PtrTimer as _,
 };
 use postcard::experimental::max_size::MaxSize as _;
@@ -45,9 +45,10 @@ impl interrupt::typelevel::Handler<<DongleTimer as timer::Instance>::Interrupt>
 {
     unsafe fn on_interrupt() {
         if let Ok(mut irq_timer) = IRQ_TIMER.try_lock()
-            && let Some(irq_timer) = &mut *irq_timer {
-                irq_timer.timer_interrupt();
-            }
+            && let Some(irq_timer) = &mut *irq_timer
+        {
+            irq_timer.timer_interrupt();
+        }
     }
 }
 
@@ -66,9 +67,10 @@ impl interrupt::typelevel::Handler<<DongleRadio as radio::Instance>::Interrupt>
     unsafe fn on_interrupt() {
         if let Ok(mut esb_irq) = ESB_IRQ.try_lock()
             && let Some(esb_irq) = &mut *esb_irq
-                && let Err(e) = esb_irq.radio_interrupt() {
-                    rktk_log::warn!("Irq error: {:?}", Debug2Format(&e));
-                }
+            && let Err(e) = esb_irq.radio_interrupt()
+        {
+            rktk_log::warn!("Irq error: {:?}", Debug2Format(&e));
+        }
     }
 }
 
@@ -104,8 +106,8 @@ impl ReporterDriverBuilder for EsbReporterDriverBuilder {
 
     async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         static BUFFER: EsbBuffer<1024, 1024> = EsbBuffer {
-            app_to_radio_buf: BBQueue::new(),
-            radio_to_app_buf: BBQueue::new(),
+            app_to_radio_buf: BBQueueType::new(),
+            radio_to_app_buf: BBQueueType::new(),
             timer_flag: AtomicBool::new(false),
         };
         let config = self

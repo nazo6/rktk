@@ -95,8 +95,8 @@ pub fn init_sdc<
     let sdc_mem = singleton!(sdc::Mem::<3312>::new(), sdc::Mem::<3312>);
 
     let sdc = sdc::Builder::new()?
-        .support_adv()?
-        .support_peripheral()?
+        .support_adv()
+        .support_peripheral()
         .peripheral_count(1)?
         .buffer_cfg(l2cap_mtu, l2cap_mtu, l2cap_txq, l2cap_rxq)?
         .build(sdc_peripherals, rng, mpsl, sdc_mem)?;

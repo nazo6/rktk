@@ -35,7 +35,7 @@ embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
 embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
-esb-ng = { version = "0.1.0", optional = true }
+esb-ng = { git = "https://github.com/nazo6/esb", optional = true }
 heapless = { workspace = true }
 log = { workspace = true, optional = true }
 nrf-mpsl = { workspace = true, default-features = false, features = [
@@ -66,9 +66,10 @@ default = ["power"]
 _check = ["_nrfxx", "defmt", "esb", "sdc", "softdevice-ble"]
 _nrfxx = [
   "embassy-nrf/nrf52840",
+  "esb-ng?/nrf52840",
   "nrf-sdc?/nrf52840",
   "nrf-softdevice?/nrf52840",
-  "nrf-softdevice?/s140",
+  "nrf-softdevice?/s140"
 ]
 _release_check = ["_nrfxx", "defmt", "esb"]
 #! #### Logging

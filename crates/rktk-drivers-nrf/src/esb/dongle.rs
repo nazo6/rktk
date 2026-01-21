@@ -8,7 +8,7 @@ use embassy_nrf::{
 };
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, mutex::Mutex};
 use esb_ng::{
-    EsbApp, EsbBuffer, EsbIrq, IrqTimer, bbq2::queue::BBQueue, irq::StatePRX,
+    EsbApp, EsbBuffer, EsbIrq, IrqTimer, irq::StatePRX, payload::BBQueueType,
     peripherals::PtrTimer as _,
 };
 use rktk::drivers::interface::dongle::{DongleData, DongleDriver, DongleDriverBuilder};
@@ -98,8 +98,8 @@ impl DongleDriverBuilder for EsbDongleDriverBuilder {
 
     async fn build(self) -> Result<(Self::Output, impl Future<Output = ()>), Self::Error> {
         static BUFFER: EsbBuffer<1024, 1024> = EsbBuffer {
-            app_to_radio_buf: BBQueue::new(),
-            radio_to_app_buf: BBQueue::new(),
+            app_to_radio_buf: BBQueueType::new(),
+            radio_to_app_buf: BBQueueType::new(),
             timer_flag: AtomicBool::new(false),
         };
         let config = self
