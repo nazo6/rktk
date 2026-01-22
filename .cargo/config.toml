@@ -1,8 +1,8 @@
 [env]
 RKTK_CONFIG_PATH = { value = "./rktk.dev.json", relative = true }
+DEFMT_LOG = "trace"
 
 [profile]
-
 [profile.dioxus-wasm]
 inherits = "dev"
 opt-level = 2
@@ -25,6 +25,7 @@ inherits = "dev"
 
 [alias]
 xtask = "run -p xtask --"
+ra-check = "run -p ra-check --"
 
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]

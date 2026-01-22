@@ -1,0 +1,15 @@
+[package]
+name = "ra-check"
+version.workspace = true
+edition.workspace = true
+description = "Internal xtask command for rktk"
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+anyhow = { workspace = true }
+cargo_metadata = { workspace = true }
+
+[features]
+_check = []

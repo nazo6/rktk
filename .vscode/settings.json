@@ -1,32 +1,21 @@
 {
 	"rust-analyzer.check.overrideCommand": [
 		"cargo",
-		"check-delta",
-		"-l",
-		"file",
-		"-s",
+		"ra-check",
 		"clippy",
 		"--message-format=json",
 		"--features",
 		"_check",
 		"--all-targets"
 	],
-	"rust-analyzer.check.invocationStrategy": "once",
 	"rust-analyzer.cargo.buildScripts.overrideCommand": [
 		"cargo",
-		"check-delta",
-		"-l",
-		"file",
-		"-s",
+		"ra-check",
 		"check",
 		"--message-format=json",
 		"--features",
 		"_check"
 	],
-	"rust-analyzer.cargo.buildScripts.invocationStrategy": "once",
 	"rust-analyzer.cargo.features": ["_check"],
-	"rust-analyzer.check.extraEnv": {
-		"DEFMT_LOG": "trace"
-	},
 	"evenBetterToml.schema.enabled": false
 }

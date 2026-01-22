@@ -1,2 +1,5 @@
 [env]
 RKTK_CONFIG_PATH = { value = "../corne/rktk.json", relative = true, force = true }
+
+[build]
+target-dir = "../../target/dummy"
