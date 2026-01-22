@@ -1,5 +1,5 @@
+use embassy_embedded_hal::flash::partition::Partition;
 use embassy_futures::select::select;
-use nrf_softdevice::Softdevice;
 use nrf_softdevice::ble::{
     advertisement_builder::{
         AdvertisementDataType, Flag, LegacyAdvertisementBuilder, LegacyAdvertisementPayload,
@@ -7,10 +7,11 @@ use nrf_softdevice::ble::{
     },
     gatt_server, peripheral,
 };
+use nrf_softdevice::{Flash, Softdevice};
+use rktk::utils::RawMutex;
 use rktk_log::{info, warn};
 
 use crate::softdevice::ble::INPUT_REPORT_CHAN;
-use crate::softdevice::flash::SharedFlash;
 
 use super::server::Server;
 
@@ -19,7 +20,7 @@ pub async fn softdevice_task(
     sd: &'static Softdevice,
     server: Server,
     name: &'static str,
-    flash: &'static SharedFlash,
+    flash: Partition<'static, RawMutex, Flash>,
 ) {
     let adv_data: LegacyAdvertisementPayload = LegacyAdvertisementBuilder::new()
         .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])

@@ -150,7 +150,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         server
     };
     #[cfg(feature = "ble")]
-    let (flash, cache) = rktk_drivers_nrf::softdevice::flash::get_flash(sd);
+    let flash = rktk_drivers_nrf::softdevice::flash::get_flash(sd);
     #[cfg(feature = "ble")]
     let (storage, ble_builder) = (
         Some(rktk_drivers_nrf::softdevice::flash::create_storage_driver(
