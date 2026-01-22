@@ -1,7 +1,10 @@
 use embassy_futures::join::join;
 use rktk::utils::Signal;
 use rktk_log::{info, warn};
-use sequential_storage::cache::NoCache;
+use sequential_storage::{
+    cache::NoCache,
+    map::{MapConfig, MapStorage},
+};
 
 use crate::softdevice::flash::SharedFlash;
 
@@ -22,6 +25,12 @@ const DEVICES_MAX_SIZE: usize = 192 + 100 * MAX_PEER_COUNT;
 #[allow(clippy::useless_asref)]
 #[embassy_executor::task]
 pub async fn bonder_save_task(flash: &'static SharedFlash) {
+    let mut bond_storage = MapStorage::<u8, _, _>::new(
+        flash,
+        const { MapConfig::new(BOND_FLASH_START..BOND_FLASH_START) },
+        NoCache::new(),
+    );
+
     join(
         async {
             loop {
@@ -45,9 +54,10 @@ pub async fn bonder_save_task(flash: &'static SharedFlash) {
                 let data = BOND_SAVE.wait().await;
 
                 if let Some(prev_data) = &prev_data
-                    && *prev_data == data {
-                        info!("Bond data save is skipped");
-                    }
+                    && *prev_data == data
+                {
+                    info!("Bond data save is skipped");
+                }
 
                 let mut buf = [0; DEVICES_MAX_SIZE];
                 let Ok(data_slice) = postcard::to_slice(&data, &mut buf) else {

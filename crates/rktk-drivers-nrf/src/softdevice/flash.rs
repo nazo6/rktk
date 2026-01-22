@@ -1,7 +1,7 @@
 use nrf_softdevice::{Flash, Softdevice};
 use rktk::utils::Mutex;
 use rktk_drivers_common::storage::flash_sequential_map::{
-    sequential_storage::cache::NoCache, FlashSequentialMapStorage,
+    FlashSequentialMapStorage, sequential_storage::cache::NoCache,
 };
 use static_cell::StaticCell;
 
@@ -9,14 +9,11 @@ pub type SharedFlash = Mutex<Flash>;
 
 static FLASH: StaticCell<SharedFlash> = StaticCell::new();
 
-/// Get steal from softdevice instance.
+/// Take flash from softdevice instance.
 ///
 /// This function must be called only once. Otherwise, it will panic.
-pub fn get_flash(sd: &Softdevice) -> (&'static SharedFlash, Mutex<NoCache>) {
-    (
-        FLASH.init(Mutex::new(nrf_softdevice::Flash::take(sd))),
-        Mutex::new(NoCache::new()),
-    )
+pub fn get_flash(sd: &Softdevice) -> &'static SharedFlash {
+    FLASH.init(Mutex::new(nrf_softdevice::Flash::take(sd)))
 }
 
 // 4kb * 160 = 640kb
