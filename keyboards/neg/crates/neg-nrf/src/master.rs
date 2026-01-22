@@ -18,6 +18,7 @@ pub async fn start_master(
     let spi = create_spi!(p);
 
     #[cfg(feature = "trouble")]
+    #[cfg_attr(feature = "_check", allow(unused_variables))]
     let trouble_ble_reporter = {
         use embassy_nrf::mode::Async;
         use rand_chacha::{ChaCha12Rng, rand_core::SeedableRng as _};
