@@ -8,7 +8,7 @@ pub use server::Server;
 pub use services::device_information::DeviceInformation;
 use usbd_hid::descriptor::{KeyboardReport, MediaKeyboardReport, MouseReport};
 
-use crate::softdevice::flash::PartitionFlash;
+use crate::softdevice::flash::SoftdeviceFlashPartition;
 
 mod bonder;
 mod constant;
@@ -41,7 +41,7 @@ pub struct SoftdeviceBleReporterBuilder {
     sd: &'static Softdevice,
     server: Server,
     name: &'static str,
-    flash: PartitionFlash,
+    flash: SoftdeviceFlashPartition,
     spawner: embassy_executor::Spawner,
 }
 
@@ -51,7 +51,7 @@ impl SoftdeviceBleReporterBuilder {
         sd: &'static Softdevice,
         server: Server,
         name: &'static str,
-        flash: PartitionFlash,
+        flash: SoftdeviceFlashPartition,
     ) -> Self {
         Self {
             sd,

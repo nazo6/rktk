@@ -20,7 +20,7 @@ mod types;
 pub use storage::{BOND_FLASH, BondFlashCommand};
 use types::*;
 
-use crate::softdevice::flash::{PartitionFlash, StorageType};
+use crate::softdevice::flash::{SoftdeviceFlashPartition, SoftdeviceFlashStorage};
 
 const MAX_PEER_COUNT: usize = 8;
 
@@ -138,16 +138,11 @@ static SEC: static_cell::StaticCell<Bonder> = static_cell::StaticCell::new();
 
 pub async fn init_bonder(
     spawner: embassy_executor::Spawner,
-    flash: PartitionFlash,
+    flash: SoftdeviceFlashPartition,
 ) -> &'static Bonder {
-    const BOND_FLASH_START: u32 = 0;
-    const BOND_FLASH_END: u32 = BOND_FLASH_START + 4096 * 2;
-
-    let mut storage: StorageType = MapStorage::new(
-        flash,
-        MapConfig::new(BOND_FLASH_START..BOND_FLASH_END),
-        NoCache,
-    );
+    let size = flash.size();
+    let mut storage: SoftdeviceFlashStorage =
+        MapStorage::new(flash, MapConfig::new(0..size), NoCache);
 
     let bond_map = storage::read_bond_map(&mut storage)
         .await

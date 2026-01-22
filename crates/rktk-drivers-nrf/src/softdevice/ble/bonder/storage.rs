@@ -2,7 +2,7 @@ use embassy_futures::select::{Either, select};
 use rktk::utils::Signal;
 use rktk_log::{info, warn};
 
-use crate::softdevice::flash::StorageType;
+use crate::softdevice::flash::SoftdeviceFlashStorage;
 
 use super::{Devices, MAX_PEER_COUNT};
 
@@ -13,14 +13,11 @@ pub enum BondFlashCommand {
 }
 pub static BOND_FLASH: Signal<BondFlashCommand> = Signal::new();
 
-const BOND_FLASH_START: u32 = 4096 * 170;
-const BOND_FLASH_END: u32 = BOND_FLASH_START + 4096 * 2;
-
 const DEVICES_MAX_SIZE: usize = 192 + 100 * MAX_PEER_COUNT;
 
 #[allow(clippy::useless_asref)]
 #[embassy_executor::task]
-pub async fn bonder_save_task(mut storage: StorageType) {
+pub async fn bonder_save_task(mut storage: SoftdeviceFlashStorage) {
     let mut prev_data = None;
 
     loop {
@@ -61,7 +58,7 @@ pub async fn bonder_save_task(mut storage: StorageType) {
     }
 }
 
-pub async fn read_bond_map(storage: &mut StorageType) -> Option<Devices> {
+pub async fn read_bond_map(storage: &mut SoftdeviceFlashStorage) -> Option<Devices> {
     let mut buf = [0; DEVICES_MAX_SIZE + 1];
     let Ok(Some(data)) = storage.fetch_item(&mut buf, &0u8).await else {
         warn!("Failed to read bond map");
