@@ -56,7 +56,7 @@ fn main() {
 macro_rules! definitions {
     ($name:ident, $($path:path),* ) => {
         let $name = vec![$(
-            const_definition!(#[derive(Debug, serde::Serialize)] pub $path),
+            const_definition!(#[derive(Debug, Clone, serde::Serialize)] pub $path),
         )*];
     };
 }
