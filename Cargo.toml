@@ -71,6 +71,7 @@ postcard = { git = "https://github.com/jamesmunns/postcard", rev = "07b436d972fc
 ] }
 pretty_assertions = "1.4.1"
 rand_core = { version = "0.6.4" }
+regex = "1.12.2"
 rktk = { path = "crates/rktk", version = "0.2.0" }
 rktk-drivers-common = { path = "crates/rktk-drivers-common", version = "0.2.0" }
 rktk-drivers-nrf = { path = "crates/rktk-drivers-nrf", version = "0.2.0" }

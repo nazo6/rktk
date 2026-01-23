@@ -7,6 +7,7 @@ mod config;
 mod doc;
 mod publish;
 mod stats;
+mod stats_gen;
 mod test;
 mod utils;
 
@@ -47,7 +48,9 @@ impl std::str::FromStr for CrateFilter {
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     /// Run `cargo clippy` with feature matrix for rktk crates.
-    Check { crate_filter: CrateFilter },
+    Check {
+        crate_filter: CrateFilter,
+    },
     /// Run `cargo test` for rktk crates.
     Test {
         /// crate name to run test
@@ -83,6 +86,7 @@ pub enum Commands {
         /// If false, only show stats about binary size. If true, it performs extra analysis and shows more detailed stats.
         extra: bool,
     },
+    StatsGen,
 }
 
 fn main() -> ExitCode {
@@ -103,6 +107,7 @@ fn main() -> ExitCode {
             gh_output,
             extra,
         } => stats::start(crate_name, bin, features, gh_output, extra),
+        Commands::StatsGen => stats_gen::start(),
     };
 
     eprintln!();

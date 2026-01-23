@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Binary Size Stats</title>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"
+			integrity="sha512-Y51n9mtKTVBh3Jbx5pZSJNDDMyY+yGe77DGtBPzRlgsf/YLCh13kSZ3JmfHGzYFCmOndraf0sQgfM654b7dJ3w=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		></script>
+	</head>
+	<body>
+		<div style="width: 90%; margin: auto;">
+			<canvas id="binSizeChart"></canvas>
+		</div>
+		<script>
+		const data = CHART_DATA;
+		const ctx = document.getElementById("binSizeChart");
+
+		new Chart(ctx, {
+			type: "line",
+			data: data,
+			options: {
+				responsive: true,
+				plugins: {
+					title: {
+						display: true,
+						text: "Binary Size History (Bytes)",
+					},
+					tooltip: {
+						mode: "index",
+						intersect: false,
+					},
+				},
+			scales: {
+				y: {
+					beginAtZero: true,
+					title: {
+						display: true,
+						text: "Size (Bytes)",
+					},
+				},
+			},
+			onClick: (event, elements, chart) => {
+				// チャート領域のクリック位置からx軸のインデックスを取得
+				const canvasPosition = Chart.helpers.getRelativePosition(event, chart);
+				const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+				
+				if (dataX !== undefined && dataX >= 0 && dataX < chart.data.labels.length) {
+					const commitId = chart.data.labels[Math.round(dataX)];
+					if (commitId) {
+						window.open(`https://github.com/nazo6/rktk/commit/${commitId}`, '_blank');
+					}
+				}
+			},
+		},
+		});
+		</script>
+	</body>
+</html>

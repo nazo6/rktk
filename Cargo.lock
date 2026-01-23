@@ -8860,6 +8860,7 @@ dependencies = [
  "dircpy",
  "duct",
  "human_bytes",
+ "regex",
  "serde",
  "serde_json",
 ]
