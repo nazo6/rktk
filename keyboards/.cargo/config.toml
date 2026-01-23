@@ -12,3 +12,6 @@ rustflags = ["-Zlocation-detail=none"]
 build-std = ["core", "alloc"]
 build-std-features = ["optimize_for_size"]
 panic-immediate-abort = true
+
+[env]
+DEFMT_LOG = "info"
