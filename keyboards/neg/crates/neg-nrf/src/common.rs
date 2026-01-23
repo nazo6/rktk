@@ -41,13 +41,15 @@ use embassy_nrf::Peripherals;
 pub(crate) use sd::init_sd;
 #[cfg(feature = "sd")]
 mod sd {
-    use rktk_drivers_nrf::softdevice::ble::SoftdeviceBleReporterBuilder;
-    use rktk_drivers_nrf::softdevice::flash::SharedFlash;
-    use rktk_drivers_nrf::softdevice::{ble::init_ble_server, flash::get_flash, init_softdevice};
+    use rktk_drivers_nrf::softdevice::{
+        ble::{SoftdeviceBleReporterBuilder, init_ble_server},
+        flash::{SoftdeviceFlashPartition, get_typical_flash_partitions},
+        init_softdevice,
+    };
 
     pub async fn init_sd(
         spawner: embassy_executor::Spawner,
-    ) -> (SoftdeviceBleReporterBuilder, &'static SharedFlash) {
+    ) -> (SoftdeviceBleReporterBuilder, SoftdeviceFlashPartition) {
         let sd = init_softdevice("negL");
 
         let server = init_ble_server(
@@ -59,14 +61,14 @@ mod sd {
                 ..Default::default()
             },
         );
-        let (flash, _cache) = get_flash(sd);
+        let (part_main, part_bond) = get_typical_flash_partitions(sd);
 
         rktk_drivers_nrf::softdevice::start_softdevice(spawner, sd);
         embassy_time::Timer::after_millis(200).await;
 
         (
-            SoftdeviceBleReporterBuilder::new(spawner, sd, server, "negL", flash),
-            flash,
+            SoftdeviceBleReporterBuilder::new(spawner, sd, server, "negL", part_bond),
+            part_main,
         )
     }
 }

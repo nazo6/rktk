@@ -32,12 +32,6 @@ use rktk_drivers_nrf::{
 
 use nrf_softdevice as _;
 
-#[cfg(feature = "ble")]
-mod ble {
-    pub use rktk_drivers_nrf::softdevice::ble::SoftdeviceBleReporterBuilder;
-    pub use rktk_drivers_nrf::softdevice::ble::init_ble_server;
-}
-
 #[cfg(feature = "usb")]
 mod usb {
     pub use rktk_drivers_common::usb::*;
@@ -136,7 +130,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
     let sd = rktk_drivers_nrf::softdevice::init_softdevice("keyball61");
     #[cfg(feature = "ble")]
     let server = {
-        let server = ble::init_ble_server(
+        let server = rktk_drivers_nrf::softdevice::ble::init_ble_server(
             sd,
             rktk_drivers_nrf::softdevice::ble::DeviceInformation {
                 manufacturer_name: Some("nazo6"),
@@ -150,21 +144,24 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         server
     };
     #[cfg(feature = "ble")]
-    let (flash, cache) = rktk_drivers_nrf::softdevice::flash::get_flash(sd);
-    #[cfg(feature = "ble")]
-    let (storage, ble_builder) = (
-        Some(rktk_drivers_nrf::softdevice::flash::create_storage_driver(
-            flash, &cache,
-        )),
-        Some(ble::SoftdeviceBleReporterBuilder::new(
-            spawner,
-            sd,
-            server,
-            "keyball61",
-            flash,
-        )),
-    );
+    let (storage, ble_builder) = {
+        use rktk_drivers_common::storage::flash_sequential_map::FlashSequentialMapStorage;
+        pub use rktk_drivers_nrf::softdevice::ble::SoftdeviceBleReporterBuilder;
 
+        let (part_main, part_bond) =
+            rktk_drivers_nrf::softdevice::flash::get_typical_flash_partitions(sd);
+        let part_main_size = part_main.size();
+        (
+            Some(FlashSequentialMapStorage::new(part_main, 0, part_main_size)),
+            Some(SoftdeviceBleReporterBuilder::new(
+                spawner,
+                sd,
+                server,
+                "keyball61",
+                part_bond,
+            )),
+        )
+    };
     #[cfg(not(feature = "ble"))]
     let (ble_builder, storage) = (dummy::ble_builder(), dummy::storage());
 

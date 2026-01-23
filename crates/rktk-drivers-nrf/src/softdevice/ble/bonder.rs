@@ -8,15 +8,19 @@ use nrf_softdevice::ble::{
     security::{IoCapabilities, SecurityHandler},
 };
 use rktk_log::{info, warn};
+use sequential_storage::{
+    cache::NoCache,
+    map::{MapConfig, MapStorage},
+};
 use storage::{BOND_SAVE, bonder_save_task};
-
-use crate::softdevice::flash::SharedFlash;
 
 mod storage;
 mod types;
 
 pub use storage::{BOND_FLASH, BondFlashCommand};
 use types::*;
+
+use crate::softdevice::flash::{SoftdeviceFlashPartition, SoftdeviceFlashStorage};
 
 const MAX_PEER_COUNT: usize = 8;
 
@@ -134,11 +138,17 @@ static SEC: static_cell::StaticCell<Bonder> = static_cell::StaticCell::new();
 
 pub async fn init_bonder(
     spawner: embassy_executor::Spawner,
-    flash: &'static SharedFlash,
+    flash: SoftdeviceFlashPartition,
 ) -> &'static Bonder {
-    spawner.must_spawn(bonder_save_task(flash));
+    let size = flash.size();
+    let mut storage: SoftdeviceFlashStorage =
+        MapStorage::new(flash, MapConfig::new(0..size), NoCache);
 
-    let bond_map = storage::read_bond_map(flash).await.unwrap_or_default();
+    let bond_map = storage::read_bond_map(&mut storage)
+        .await
+        .unwrap_or_default();
+
+    spawner.must_spawn(bonder_save_task(storage));
 
     info!("Loaded {} bond info", bond_map.iter().count());
 
