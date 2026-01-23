@@ -25,7 +25,7 @@ use rktk_drivers_common::{
     usb::*,
 };
 use rktk_drivers_rp::{
-    keyscan::flex_pin::RpFlexPin, mouse::pmw3360, rgb::ws2812_pio::Ws2812Pio,
+    flash::init_storage, keyscan::flex_pin::RpFlexPin, mouse::pmw3360, rgb::ws2812_pio::Ws2812Pio,
     split::pio_half_duplex::PioHalfDuplexSplitDriver,
 };
 
@@ -109,7 +109,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
     let pio = Pio::new(p.PIO1, Irqs);
     let rgb = Ws2812Pio::<'_, 30, _>::new(pio, p.PIN_0, p.DMA_CH2);
 
-    rktk_drivers_rp::init_storage!(storage, p.FLASH, p.DMA_CH3, { 4 * 1024 * 1024 });
+    let storage = init_storage::<{ 4 * 1024 * 1024 }>(p.FLASH, p.DMA_CH3.into());
 
     let drivers = Drivers {
         keyscan,
