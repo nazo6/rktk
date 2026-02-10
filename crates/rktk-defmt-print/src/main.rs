@@ -30,11 +30,26 @@ fn main() -> anyhow::Result<()> {
             .iter()
             .find(|d| d.0.pid == pid && d.0.vid == vid);
 
-        if let Some(sp) = matched_serial_port
-            && let Ok(handle) = device.open()
-            && let Ok(product) = handle.read_product_string_ascii(&device_desc)
-        {
-            usb_serials_with_name.push((pid, vid, sp.1.clone(), product))
+        if let Some(sp) = matched_serial_port {
+            match device.open() {
+                Err(e) => {
+                    eprintln!(
+                        "Warning: Failed to open USB device PID: {:04x}, VID: {:04x}: {}",
+                        pid, vid, e
+                    );
+                    usb_serials_with_name.push((
+                        pid,
+                        vid,
+                        sp.1.clone(),
+                        "<unknown product>".into(),
+                    ));
+                }
+                Ok(handle) => {
+                    if let Ok(product) = handle.read_product_string_ascii(&device_desc) {
+                        usb_serials_with_name.push((pid, vid, sp.1.clone(), product))
+                    }
+                }
+            }
         }
     }
 
@@ -65,7 +80,7 @@ fn main() -> anyhow::Result<()> {
 
     let elf_config_path =
         dirs::config_dir().map(|p| p.join("rktk-defmt-print").join("elf-path-preset.csv"));
-    let elf_path = if let Some(path) = elf_config_path
+    let elf_path = if let Some(path) = &elf_config_path
         && path.exists()
         && let Ok(content) = std::fs::read_to_string(path)
     {
@@ -79,6 +94,10 @@ fn main() -> anyhow::Result<()> {
         }
         elf_path
     } else {
+        println!(
+            "No ELF path preset found. Config file path: {:?}",
+            elf_config_path
+        );
         None
     };
 
