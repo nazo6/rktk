@@ -94,8 +94,11 @@ pub enum SizeStatsCommands {
         /// If false, only show stats about binary size. If true, it performs extra analysis and shows more detailed stats.
         extra: bool,
     },
+    PerFeature {
+        #[arg(long)]
+        gh_output: bool,
+    },
     GenHistory,
-    PerFeature,
 }
 
 fn main() -> ExitCode {
