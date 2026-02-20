@@ -80,7 +80,8 @@
 			"check_no_powerset": true
 		},
 		"dummy-nrf": {
-			"check_no_powerset": true
+			"check_no_powerset": true,
+			"check_build": true
 		},
 		"neg-nrf": {
 			"check_features": ["left", "alloc", "paw3395", "log", "defmt"],
