@@ -126,7 +126,7 @@ async fn main(spawner: Spawner) {
     };
     cfg_if::cfg_if! {
         if #[cfg(feature = "ble-sd")] {
-            let ble_builder = Some(crate::common::init_sd(spawner).await.0);
+            // FIXME: Implement sd reporter
         } else if #[cfg(feature = "ble-trouble")] {
             let ble_builder = Some(trouble_ble_reporter);
         } else {

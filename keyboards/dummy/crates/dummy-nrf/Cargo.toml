@@ -50,7 +50,6 @@ rand_chacha = { version = "0.3", default-features = false, optional = true }
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
 rktk-drivers-nrf = { workspace = true }
-rktk-log = { workspace = true }
 
 [features]
 default = []
@@ -90,9 +89,9 @@ log-log = [
   "dep:log",
   "rktk-drivers-common/log",
   "rktk-drivers-nrf/log",
-  "rktk-log/log",
   "rktk/log",
 ]
+log-none = []
 mouse = []
 rgb = []
 rrp = ["rktk/rrp"]
