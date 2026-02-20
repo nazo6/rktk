@@ -1,67 +1,18 @@
-use std::{io::Write, path::PathBuf};
+use std::path::PathBuf;
 
 use anyhow::Context;
 use duct::cmd;
 use human_bytes::human_bytes;
 
-use crate::utils::{METADATA, xprintln};
+use crate::{
+    size_stats::GhStatsWriter,
+    utils::{METADATA, xprintln},
+};
 
 #[derive(serde::Deserialize)]
 pub struct CompilerArtifactLog {
     reason: String,
     executable: String,
-}
-
-struct GhStatsWriter {
-    text: String,
-}
-
-impl GhStatsWriter {
-    const STATS_COMMENT_LOC: &str = "/tmp/stats-comment.md";
-
-    fn new(name: &str, bin: &str, features: &[String], dir: &str) -> Self {
-        let mut text = format!("## Stats for `{}`\n", name);
-        text.push_str(&format!("- Path: `{}`\n", dir));
-        text.push_str(&format!("- Binary: `{}`\n", bin));
-        if !features.is_empty() {
-            text.push_str(&format!("- Features: `{}`\n", features.join(",")));
-        }
-        text.push_str("\n\n");
-        Self { text }
-    }
-
-    fn write(&mut self, title: &str, value: &str, collapse: bool) {
-        if collapse {
-            self.text
-                .push_str(&format!("<details>\n<summary>{title}</summary>\n\n"));
-        }
-        self.text.push_str(&format!("### {title}\n"));
-        self.text.push_str(&format!("```\n{value}\n```\n"));
-        if collapse {
-            self.text.push_str("</details>\n");
-        }
-    }
-
-    fn flush(&self) -> anyhow::Result<()> {
-        let mut comment_file = std::fs::OpenOptions::new()
-            .read(true)
-            .create(true)
-            .append(true)
-            .open(Self::STATS_COMMENT_LOC)?;
-        if comment_file.metadata()?.len() == 0 {
-            writeln!(comment_file, "# Binary stats")?;
-        }
-        writeln!(comment_file, "{}", self.text)?;
-
-        let len = comment_file.metadata()?.len();
-        xprintln!("Comment file length: {}", len);
-        if len > 65536 * 4 {
-            xprintln!("Warning: Comment file is too large (>256KB). Truncating.");
-            comment_file.set_len(65536 * 4)?;
-        }
-
-        Ok(())
-    }
 }
 
 pub fn build_cmd(
@@ -110,42 +61,15 @@ pub fn start(
 
     /* Run cargo build */
 
-    xprintln!("Building binary...");
-    let cargo_build_res = build_cmd(
-        &["cargo", "build", "--message-format=json"],
-        &common_args,
-        dir,
-    )
-    .read()?;
-    let mut elf_path = None;
-    for line in cargo_build_res.lines() {
-        if let Ok(log) = serde_json::from_str::<CompilerArtifactLog>(line)
-            && log.reason == "compiler-artifact"
-        {
-            elf_path = Some(log.executable);
-            break;
-        }
-    }
-    let Some(elf_path) = elf_path else {
-        anyhow::bail!("Failed to find the binary path in the cargo output");
-    };
-    xprintln!("Binary path: {}", elf_path);
-
     // NOTE: Some analysis are commented out to reduce the comment body size. (Maxmium characters
     // is 65536)
 
-    /* Analyze bin and uf2 files */
-
-    // NOTE: This command is just for stats, so any family name is fine.
-    cmd("uf2deploy", ["deploy", "-f", "nrf52840", &elf_path])
-        .stderr_capture()
-        .read()?;
-    let bin_file_size = std::fs::metadata(elf_path.clone() + ".bin")
-        .context("failed to get binary file metadata")?
-        .len();
-    let uf2_file_size = std::fs::metadata(elf_path.clone() + ".uf2")
-        .context("failed to get uf2 file metadata")?
-        .len();
+    xprintln!("Building binary...");
+    let (elf_path, bin_file_size, uf2_file_size) = build_and_get_binary_size(build_cmd(
+        &["cargo", "build", "--message-format=json"],
+        &common_args,
+        dir,
+    ))?;
     let bytes_str = format!(
         "BIN: {} bytes ({})\nUF2: {} bytes ({})",
         bin_file_size,
@@ -237,4 +161,37 @@ pub fn start(
     }
 
     Ok(())
+}
+
+pub(super) fn build_and_get_binary_size(
+    cmd_ex: duct::Expression,
+) -> anyhow::Result<(String, u64, u64)> {
+    let cargo_build_res = cmd_ex.read()?;
+    let mut elf_path = None;
+    for line in cargo_build_res.lines() {
+        if let Ok(log) = serde_json::from_str::<CompilerArtifactLog>(line)
+            && log.reason == "compiler-artifact"
+        {
+            elf_path = Some(log.executable);
+            break;
+        }
+    }
+    let Some(elf_path) = elf_path else {
+        anyhow::bail!("Failed to find the binary path in the cargo output");
+    };
+
+    /* Analyze bin and uf2 files */
+
+    // NOTE: This command is just for stats, so any family name is fine.
+    cmd("uf2deploy", ["deploy", "-f", "nrf52840", &elf_path])
+        .stderr_capture()
+        .read()?;
+    let bin_file_size = std::fs::metadata(elf_path.clone() + ".bin")
+        .context("failed to get binary file metadata")?
+        .len();
+    let uf2_file_size = std::fs::metadata(elf_path.clone() + ".uf2")
+        .context("failed to get uf2 file metadata")?
+        .len();
+
+    Ok((elf_path, bin_file_size, uf2_file_size))
 }

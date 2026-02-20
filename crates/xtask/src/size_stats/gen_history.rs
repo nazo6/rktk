@@ -115,8 +115,8 @@ fn generate_html(parsed_comments: &[ParsedComment]) -> anyhow::Result<()> {
         "datasets": datasets
     });
 
-    let html =
-        include_str!("../res/bin_size_stats.html").replace("CHART_DATA", &chart_data.to_string());
+    let html = include_str!("../../res/bin_size_stats.html")
+        .replace("CHART_DATA", &chart_data.to_string());
 
     std::fs::write("target/stats.html", html).context("Failed to write stats.html")?;
     println!("Generated target/stats.html");

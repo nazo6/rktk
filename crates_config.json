@@ -79,6 +79,11 @@
 		"dummy-rp": {
 			"check_no_powerset": true
 		},
+		"dummy-nrf": {
+			"check_no_powerset": true,
+			"check_build": true,
+			"check_features": ["_check"]
+		},
 		"neg-nrf": {
 			"check_features": ["left", "alloc", "paw3395", "log", "defmt"],
 			"check_at_least_one_of": [["sd", "trouble", "cs-impl"]],

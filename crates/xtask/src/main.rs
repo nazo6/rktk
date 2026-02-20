@@ -6,8 +6,7 @@ mod check;
 mod config;
 mod doc;
 mod publish;
-mod stats;
-mod stats_gen;
+mod size_stats;
 mod test;
 mod utils;
 
@@ -70,11 +69,20 @@ pub enum Commands {
     },
     /// Generate documentation for rktk crates.
     Doc,
-    Stats {
+    SizeStats(SizeStatsArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct SizeStatsArgs {
+    #[command(subcommand)]
+    command: SizeStatsCommands,
+}
+#[derive(Debug, Subcommand)]
+pub enum SizeStatsCommands {
+    Crate {
         /// crate name to show stats. This must be binary crate.
         crate_name: String,
-        /// Specify binary name if the crate has multiple binaries.
-        /// If not specified, the first binary will be used.
+        /// Specify binary name
         #[arg(long)]
         bin: String,
         #[arg(long)]
@@ -86,7 +94,11 @@ pub enum Commands {
         /// If false, only show stats about binary size. If true, it performs extra analysis and shows more detailed stats.
         extra: bool,
     },
-    StatsGen,
+    PerFeature {
+        #[arg(long)]
+        gh_output: bool,
+    },
+    GenHistory,
 }
 
 fn main() -> ExitCode {
@@ -100,14 +112,7 @@ fn main() -> ExitCode {
             continue_on_error,
         } => publish::start(crate_name, execute, continue_on_error),
         Commands::Doc => doc::start(),
-        Commands::Stats {
-            crate_name,
-            bin,
-            features,
-            gh_output,
-            extra,
-        } => stats::start(crate_name, bin, features, gh_output, extra),
-        Commands::StatsGen => stats_gen::start(),
+        Commands::SizeStats(args) => size_stats::start(args),
     };
 
     eprintln!();
