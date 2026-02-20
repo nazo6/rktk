@@ -1,0 +1,100 @@
+cargo-features = ["per-package-target"]
+
+[package]
+name = "dummy-nrf"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+# tombi: lint.rules.key-not-allowed.disabled = true
+forced-target = "thumbv7em-none-eabihf"
+
+[[bin]]
+bench = false
+doctest = false
+name = "dummy-nrf"
+path = "src/main.rs"
+test = false
+
+[dependencies]
+cfg-if = { workspace = true }
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+defmt = { workspace = true, optional = true }
+embassy-embedded-hal = { workspace = true }
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-interrupt",
+  "executor-thread",
+] }
+embassy-nrf = { workspace = true, features = [
+  "gpiote",
+  "nfc-pins-as-gpio",
+  "nrf52840",
+  "time-driver-rtc1",
+] }
+embassy-sync = { workspace = true }
+embassy-time = { workspace = true }
+# alloc
+embedded-alloc = { version = "0.6.0", optional = true }
+log = { workspace = true, optional = true }
+nrf-sdc = { workspace = true, features = ["nrf52840"], optional = true }
+# sd
+nrf-softdevice = { workspace = true, features = [
+  "critical-section-impl",
+  "nrf52840",
+  "s140",
+], optional = true }
+# trouble
+rand_chacha = { version = "0.3", default-features = false, optional = true }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
+rktk-drivers-nrf = { workspace = true }
+rktk-log = { workspace = true }
+
+[features]
+default = []
+_check = [
+  "alloc",
+  "ble-trouble",
+  "debounce",
+  "display",
+  "encoder",
+  "log-defmt",
+  "log-log",
+  "mouse",
+  "rgb",
+  "rrp",
+  "split",
+  "usb"
+]
+alloc = ["dep:embedded-alloc", "rktk/alloc"]
+ble-none = ["cortex-m/critical-section-single-core"]
+ble-sd = ["dep:nrf-softdevice", "rktk-drivers-nrf/softdevice-ble"]
+ble-trouble = [
+  "dep:nrf-sdc",
+  "dep:rand_chacha",
+  "rktk-drivers-common/reporter-trouble",
+  "rktk-drivers-nrf/sdc",
+]
+debounce = []
+display = []
+encoder = []
+log-defmt = [
+  "dep:defmt",
+  "rktk-drivers-common/defmt-timestamp",
+  "rktk-drivers-common/defmt-usb",
+  "rktk-drivers-nrf/defmt",
+]
+log-log = [
+  "dep:log",
+  "rktk-drivers-common/log",
+  "rktk-drivers-nrf/log",
+  "rktk-log/log",
+  "rktk/log",
+]
+mouse = []
+rgb = []
+rrp = ["rktk/rrp"]
+split = []
+usb = []

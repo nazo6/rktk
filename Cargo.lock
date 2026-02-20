@@ -2306,6 +2306,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "dummy-nrf"
+version = "0.2.0"
+dependencies = [
+ "cfg-if",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.0.1",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-nrf",
+ "embassy-sync 0.7.2",
+ "embassy-time",
+ "embedded-alloc",
+ "log",
+ "nrf-sdc",
+ "nrf-softdevice",
+ "rand_chacha 0.3.1",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-nrf",
+ "rktk-log",
+]
+
+[[package]]
 name = "dummy-rp"
 version = "0.2.0"
 dependencies = [
