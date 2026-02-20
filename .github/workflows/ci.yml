@@ -82,9 +82,9 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           # note: maximum comment size is 65536 characters
-          cargo xtask size-stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output --extra
-          cargo xtask size-stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
-          cargo xtask size-stats keyball61-rp --bin keyball61 --gh-output
+          cargo xtask size-stats crate neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output --extra
+          cargo xtask size-stats crate neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask size-stats crate keyball61-rp --bin keyball61 --gh-output
           cargo xtask size-stats per-feature --gh-output
 
       - name: Post binary stats as PR comment
@@ -100,9 +100,9 @@ jobs:
         if: github.event_name == 'push'
         run: |
           # note: maximum comment size is 16384 characters, so skip --extra
-          cargo xtask size-stats neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
-          cargo xtask size-stats neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
-          cargo xtask size-stats keyball61-rp --bin keyball61 --gh-output
+          cargo xtask size-stats crate neg-nrf --features right,trouble,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask size-stats crate neg-nrf --features right,sd,pmw3360 --bin neg_nrf_master --gh-output
+          cargo xtask size-stats crate keyball61-rp --bin keyball61 --gh-output
           cargo xtask size-stats per-feature --gh-output
 
       - name: Post binary stats as commit comment
