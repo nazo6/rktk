@@ -21,7 +21,7 @@ impl<PIN: Wait + InputPin, const ENCODER_COUNT: usize> EncoderDriver
     for GeneralEncoder<PIN, ENCODER_COUNT>
 {
     async fn read_wait(&mut self) -> (u8, EncoderDirection) {
-        let mut futures = self
+        let futures = self
             .encoders
             .iter_mut()
             .enumerate()
@@ -48,6 +48,6 @@ impl<PIN: Wait + InputPin, const ENCODER_COUNT: usize> EncoderDriver
             })
             .collect::<heapless::Vec<_, ENCODER_COUNT>>();
 
-        select_slice(core::pin::pin!(&mut futures)).await.0
+        select_slice(core::pin::pin!(futures)).await.0
     }
 }
