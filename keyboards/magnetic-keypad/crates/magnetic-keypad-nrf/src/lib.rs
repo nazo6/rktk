@@ -65,8 +65,6 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         }
     });
 
-    // press/release dist in 0-65535 range.
-    // Adjust these values as needed.
     let keyscan = MagneticMatrix::<
         _,
         { rktk::config::CONST_CONFIG.keyboard.rows as usize },
@@ -92,7 +90,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
                 Irqs,
                 rktk_drivers_nrf::get_vbus!(spawner, Irqs),
             );
-            let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
+            let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcaee);
             driver_config.product = Some("kp");
             let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);
 
