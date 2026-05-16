@@ -8,6 +8,8 @@ pub struct ConstantConfig {
     pub buffer: BufferSizeConfig,
     #[serde(default)]
     pub key_manager: KeymanagerConstantConfig,
+    #[serde(default)]
+    pub magnetic: MagneticConstantConfig,
 }
 
 #[macro_rules_attribute::apply(crate::schema::common_derive)]
@@ -80,4 +82,10 @@ pub struct KeymanagerConstantConfig {
 
     #[default(3)]
     pub combo_key_max_sources: usize,
+}
+#[macro_rules_attribute::apply(crate::schema::common_derive)]
+#[derive(SmartDefault)]
+#[serde(default)]
+pub struct MagneticConstantConfig {
+    pub enabled: bool,
 }

@@ -35,6 +35,7 @@ gen_rktk_keys! {
     RgbBrightnessUp = 7,
     RgbBrightnessDown = 8,
     RgbPatternRainbow = 9,
+    MagCal = 10,
 }
 
 use core::fmt::{self, Display, Formatter};

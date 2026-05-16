@@ -77,7 +77,9 @@ pub fn generate(value: &str) -> Result<String, Box<dyn std::error::Error>> {
         schema::dynamic::rktk::RktkRoleDetectionMethod,
         schema::dynamic::rktk::RktkRoleDetectionTimeoutBehavior,
         schema::dynamic::keyboard::KeyboardConfig,
-        schema::dynamic::key_manager::KeyManagerConfig
+        schema::dynamic::key_manager::KeyManagerConfig,
+        schema::constant::MagneticConstantConfig,
+        schema::dynamic::magnetic::MagneticConfig
     );
     let code_schemas = code_schemas.join("\n");
 

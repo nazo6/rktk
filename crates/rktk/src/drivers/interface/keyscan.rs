@@ -10,4 +10,10 @@ pub use kmsm::interface::state::input_event::KeyChangeEvent;
 pub trait KeyscanDriver {
     /// Scans a key and returns the delta from the previous key scan
     async fn scan(&mut self, callback: impl FnMut(KeyChangeEvent));
+
+    /// Starts calibration mode.
+    fn start_calibration(&mut self) {}
+
+    /// Ends calibration mode.
+    fn end_calibration(&mut self) {}
 }

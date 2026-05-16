@@ -22,7 +22,7 @@ use crate::{
         wireless::WirelessReporterDriver,
     },
     hooks::interface::MasterHooks,
-    task::channels::report::{ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL},
+    task::channels::report::{ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, KeyboardCommand, KEYBOARD_CONTROL_CHANNEL},
     utils::display_state,
 };
 
@@ -111,12 +111,14 @@ pub async fn report_task<
             ble_bond_clear: bool,
             flash_clear: bool,
             power_off: bool,
+            mag_cal: bool,
         }
         let mut rktk_key_state = RktkKeyState {
             bootloader: false,
             ble_bond_clear: false,
             flash_clear: false,
             power_off: false,
+            mag_cal: false,
         };
 
         let (mut state_report, layer_active) = {
@@ -124,37 +126,50 @@ pub async fn report_task<
 
             (
                 s.update_with_cb(event, prev_update_time.elapsed().into(), |ev| {
-                    if let OutputEvent::KeyCode((kmsm::keycode::KeyCode::Custom1(id), et)) = ev {
-                        if et == EventType::Pressed
-                            && let Some(k) = RktkKeys::from_repr(id)
-                        {
-                            match k {
-                                RktkKeys::FlashClear => rktk_key_state.flash_clear = true,
-                                RktkKeys::OutputBle => current_output = Output::Ble,
-                                RktkKeys::OutputUsb => current_output = Output::Usb,
-                                RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
-                                RktkKeys::Bootloader => rktk_key_state.bootloader = true,
-                                RktkKeys::PowerOff => rktk_key_state.power_off = true,
-                                RktkKeys::RgbOff => {
-                                    let _ = RGB_CHANNEL
-                                        .sender()
-                                        .try_send(RgbCommand::Start(RgbMode::Off));
+                    if let OutputEvent::KeyCode((kc, et)) = ev {
+                        match kc {
+                            kmsm::keycode::KeyCode::Custom1(id) => {
+                                if et == EventType::Pressed
+                                    && let Some(k) = RktkKeys::from_repr(id)
+                                {
+                                    match k {
+                                        RktkKeys::FlashClear => rktk_key_state.flash_clear = true,
+                                        RktkKeys::OutputBle => current_output = Output::Ble,
+                                        RktkKeys::OutputUsb => current_output = Output::Usb,
+                                        RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
+                                        RktkKeys::Bootloader => rktk_key_state.bootloader = true,
+                                        RktkKeys::PowerOff => rktk_key_state.power_off = true,
+                                        RktkKeys::MagCal => rktk_key_state.mag_cal = true,
+                                        RktkKeys::RgbOff => {
+                                            let _ = RGB_CHANNEL
+                                                .sender()
+                                                .try_send(RgbCommand::Start(RgbMode::Off));
+                                        }
+                                        RktkKeys::RgbBrightnessUp => {
+                                            let _ = RGB_CHANNEL
+                                                .sender()
+                                                .try_send(RgbCommand::BrightnessDelta(0.05));
+                                        }
+                                        RktkKeys::RgbBrightnessDown => {
+                                            let _ = RGB_CHANNEL
+                                                .sender()
+                                                .try_send(RgbCommand::BrightnessDelta(-0.05));
+                                        }
+                                        RktkKeys::RgbPatternRainbow => {
+                                            let _ = RGB_CHANNEL.sender().try_send(RgbCommand::Start(
+                                                RgbMode::Pattern(RgbPattern::Rainbow(0.3 / 1e3, 1.0)),
+                                            ));
+                                        }
+                                    }
                                 }
-                                RktkKeys::RgbBrightnessUp => {
-                                    let _ = RGB_CHANNEL
-                                        .sender()
-                                        .try_send(RgbCommand::BrightnessDelta(0.05));
+                            }
+                            kmsm::keycode::KeyCode::Special(kmsm::keycode::Special::MagCal) => {
+                                if et == EventType::Pressed {
+                                    rktk_key_state.mag_cal = true;
                                 }
-                                RktkKeys::RgbBrightnessDown => {
-                                    let _ = RGB_CHANNEL
-                                        .sender()
-                                        .try_send(RgbCommand::BrightnessDelta(-0.05));
-                                }
-                                RktkKeys::RgbPatternRainbow => {
-                                    let _ = RGB_CHANNEL.sender().try_send(RgbCommand::Start(
-                                        RgbMode::Pattern(RgbPattern::Rainbow(0.3 / 1e3, 1.0)),
-                                    ));
-                                }
+                            }
+                            _ => {
+                                master_hooks.on_keymanager_event(ev);
                             }
                         }
                     } else {
@@ -203,6 +218,20 @@ pub async fn report_task<
 
         if rktk_key_state.power_off {
             system.power_off().await;
+        }
+
+        static mut MAG_CAL_ENABLED: bool = false;
+        if rktk_key_state.mag_cal {
+            unsafe {
+                MAG_CAL_ENABLED = !MAG_CAL_ENABLED;
+                if MAG_CAL_ENABLED {
+                    let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::StartCalibration);
+                    crate::print!("Calibration started");
+                } else {
+                    let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::EndCalibration);
+                    crate::print!("Calibration ended");
+                }
+            }
         }
 
         let reported = match current_output {
