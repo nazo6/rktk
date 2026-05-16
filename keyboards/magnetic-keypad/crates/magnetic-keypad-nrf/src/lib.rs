@@ -18,24 +18,24 @@ use rktk::{
 };
 
 use rktk_drivers_common::{
-    magnetic::matrix::{MagneticMatrix, MuxScanner},
-    magnetic::mux::sn74lv4051::Sn74lv4051,
+    magnetic::{
+        matrix::{MagneticMatrix, MuxScanner},
+        mux::sn74lv4051::Sn74lv4051,
+    },
     usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig},
 };
 use rktk_drivers_nrf::{
-    keyscan::magnetic::NrfAdc,
-    rgb::ws2812_pwm::Ws2812Pwm,
-    system::NrfSystemDriver,
+    keyscan::magnetic::NrfAdc, rgb::ws2812_pwm::Ws2812Pwm, system::NrfSystemDriver,
 };
 
 bind_interrupts!(struct Irqs {
     USBD => embassy_nrf::usb::InterruptHandler<embassy_nrf::peripherals::USBD>;
     SAADC => saadc::InterruptHandler;
+    CLOCK_POWER => embassy_nrf::usb::vbus_detect::InterruptHandler;
 });
 
 pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
     let p = embassy_nrf::init(Default::default());
-
     // Multiplexer selection pins
     // SEL A: P0.29, SEL B: P0.02, SEL C: P1.15
     let mux_s0 = Output::new(p.P0_29, Level::Low, OutputDrive::Standard);
@@ -74,7 +74,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
     >::new(scanner, 1000, 500);
 
     // RGB: P0.11, 8 LEDs
-    let rgb = Ws2812Pwm::<8, _, _>::new(p.PWM0, p.P0_11);
+    let rgb = Ws2812Pwm::<256, _, _>::new(p.PWM0, p.P0_11);
 
     // Encoder: P0.09(A), P0.10(B)
     let encoder = rktk_drivers_common::encoder::GeneralEncoder::new([(
@@ -93,7 +93,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
                 rktk_drivers_nrf::get_vbus!(spawner, Irqs),
             );
             let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
-            driver_config.product = Some("magnetic_keypad");
+            driver_config.product = Some("kp");
             let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);
 
             CommonUsbReporterBuilder::new(opts)
@@ -117,6 +117,8 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
 }
 
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+fn panic(info: &PanicInfo) -> ! {
+    cortex_m::interrupt::disable();
+    rktk_drivers_common::panic_utils::save_panic_info(info);
+    cortex_m::peripheral::SCB::sys_reset()
 }

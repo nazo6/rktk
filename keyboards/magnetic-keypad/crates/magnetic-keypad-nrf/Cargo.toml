@@ -5,7 +5,6 @@ edition.workspace = true
 repository.workspace = true
 license.workspace = true
 publish = false
-# tombi: lint.rules.key-not-allowed.disabled = true
 
 [lib]
 bench = false
@@ -21,8 +20,9 @@ path = "src/main.rs"
 test = false
 
 [dependencies]
-cortex-m = { workspace = true }
+cortex-m = { workspace = true, features = ["critical-section-single-core"] }
 cortex-m-rt = { workspace = true }
+defmt = { workspace = true }
 embassy-executor = { workspace = true, features = [
   "arch-cortex-m",
   "executor-interrupt",
@@ -35,14 +35,12 @@ embassy-nrf = { version = "0.9.0", features = [
   "time-driver-rtc1"
 ] }
 embassy-time = { workspace = true }
-nrf-softdevice = { workspace = true, features = [
-  "critical-section-impl",
-  "nrf52840",
-  "s140"
+rktk = { workspace = true, features = ["defmt"] }
+rktk-drivers-common = { workspace = true, features = [
+  "defmt-timestamp",
+  "defmt-usb"
 ] }
-rktk = { workspace = true }
-rktk-drivers-common = { workspace = true }
-rktk-drivers-nrf = { workspace = true, features = ["_nrfxx", "softdevice-ble"] }
+rktk-drivers-nrf = { workspace = true, features = ["_nrfxx", "defmt"] }
 rktk-log = { workspace = true }
 static_cell = { workspace = true }
 

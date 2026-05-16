@@ -33,7 +33,5 @@ fn main() {
     println!("cargo:rustc-link-arg-bins=-Tlink.x");
 
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_DEFMT");
-    if std::env::var("CARGO_FEATURE_DEFMT").is_ok() {
-        println!("cargo:rustc-link-arg-bins=-Tdefmt.x");
-    }
+    println!("cargo:rustc-link-arg-bins=-Tdefmt.x");
 }
