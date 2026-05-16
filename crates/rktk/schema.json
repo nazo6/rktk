@@ -94,6 +94,9 @@
         },
         "keyboard": {
           "$ref": "#/$defs/KeyboardConstantConfig"
+        },
+        "magnetic": {
+          "$ref": "#/$defs/MagneticConstantConfig"
         }
       },
       "additionalProperties": false,
@@ -110,6 +113,9 @@
         },
         "keyboard": {
           "$ref": "#/$defs/KeyboardConfig"
+        },
+        "magnetic": {
+          "$ref": "#/$defs/MagneticConfig"
         },
         "rktk": {
           "$ref": "#/$defs/RktkConfig"
@@ -282,6 +288,38 @@
           "format": "uint",
           "default": 4,
           "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "MagneticConfig": {
+      "type": "object",
+      "properties": {
+        "press_dist": {
+          "description": "Default press distance (normalized 0-65535)",
+          "type": "integer",
+          "format": "uint16",
+          "default": 1000,
+          "maximum": 65535,
+          "minimum": 0
+        },
+        "release_dist": {
+          "description": "Default release distance (normalized 0-65535)",
+          "type": "integer",
+          "format": "uint16",
+          "default": 1000,
+          "maximum": 65535,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "MagneticConstantConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
         }
       },
       "additionalProperties": false

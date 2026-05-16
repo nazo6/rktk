@@ -15,7 +15,7 @@ impl<'a, const N: usize> Adc for NrfAdc<'a, N> {
     type Error = saadc::Error;
 
     async fn read(&mut self) -> Result<u16, Self::Error> {
-        let mut buf = [0; 1];
+        let mut buf = [0; N];
         self.saadc.sample(&mut buf).await;
         // nRF SAADC returns i16, but for magnetic switches we usually want positive values.
         // Scale/convert appropriately if needed. Here we just take the raw value as u16.

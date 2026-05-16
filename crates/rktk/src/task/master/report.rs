@@ -163,7 +163,7 @@ pub async fn report_task<
                                     }
                                 }
                             }
-                            kmsm::keycode::KeyCode::Special(kmsm::keycode::Special::MagCal) => {
+                            kmsm::keycode::KeyCode::Special(kmsm::keycode::special::Special::MagCal) => {
                                 if et == EventType::Pressed {
                                     rktk_key_state.mag_cal = true;
                                 }

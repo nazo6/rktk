@@ -14,8 +14,10 @@ impl<S0: OutputPin, S1: OutputPin, S2: OutputPin> Sn74lv4051<S0, S1, S2> {
     }
 }
 
-impl<S0: OutputPin, S1: OutputPin, S2: OutputPin> Multiplexer for Sn74lv4051<S0, S1, S2> {
-    type Error = S0::Error;
+impl<E: core::fmt::Debug, S0: OutputPin<Error = E>, S1: OutputPin<Error = E>, S2: OutputPin<Error = E>>
+    Multiplexer for Sn74lv4051<S0, S1, S2>
+{
+    type Error = E;
 
     async fn select(&mut self, channel: u8) -> Result<(), Self::Error> {
         if channel & 0b001 != 0 {

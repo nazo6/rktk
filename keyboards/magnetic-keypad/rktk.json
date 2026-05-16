@@ -1,0 +1,14 @@
+{
+	"$schema": "../../crates/rktk/schema.json",
+	"constant": {
+		"keyboard": {
+			"cols": 3,
+			"rows": 3
+		}
+	},
+	"dynamic": {
+		"keyboard": {
+			"name": "magnetic_keypad"
+		}
+	}
+}

@@ -1,0 +1,51 @@
+[package]
+name = "magnetic-keypad-nrf"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+# tombi: lint.rules.key-not-allowed.disabled = true
+
+[lib]
+bench = false
+doctest = false
+path = "src/lib.rs"
+test = false
+
+[[bin]]
+bench = false
+doctest = false
+name = "magnetic_keypad-nrf"
+path = "src/main.rs"
+test = false
+
+[dependencies]
+cortex-m = { workspace = true }
+cortex-m-rt = { workspace = true }
+embassy-executor = { workspace = true, features = [
+  "arch-cortex-m",
+  "executor-interrupt",
+  "executor-thread"
+] }
+embassy-nrf = { version = "0.9.0", features = [
+  "gpiote",
+  "nfc-pins-as-gpio",
+  "nrf52840",
+  "time-driver-rtc1"
+] }
+embassy-time = { workspace = true }
+nrf-softdevice = { workspace = true, features = [
+  "critical-section-impl",
+  "nrf52840",
+  "s140"
+] }
+rktk = { workspace = true }
+rktk-drivers-common = { workspace = true }
+rktk-drivers-nrf = { workspace = true, features = ["_nrfxx", "softdevice-ble"] }
+rktk-log = { workspace = true }
+static_cell = { workspace = true }
+
+[features]
+default = []
+_check = []
