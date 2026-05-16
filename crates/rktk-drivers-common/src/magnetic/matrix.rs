@@ -1,10 +1,15 @@
+use crate::magnetic::rapid_trigger::RapidTriggerState;
 use rktk::drivers::interface::keyscan::{KeyChangeEvent, KeyscanDriver};
 use rktk::drivers::interface::magnetic::{Adc, Multiplexer};
-use crate::magnetic::rapid_trigger::RapidTriggerState;
+use rktk_log::MaybeFormat;
 
 pub trait MagneticScanner {
-    type Error: core::fmt::Debug;
-    async fn scan(&mut self, row: usize, col: usize) -> Result<u16, Self::Error>;
+    type Error: core::fmt::Debug + MaybeFormat;
+    fn scan(
+        &mut self,
+        row: usize,
+        col: usize,
+    ) -> impl core::future::Future<Output = Result<u16, Self::Error>>;
 }
 
 pub struct DirectScanner<A: Adc, const ROWS: usize, const COLS: usize> {
@@ -17,7 +22,9 @@ impl<A: Adc, const ROWS: usize, const COLS: usize> DirectScanner<A, ROWS, COLS> 
     }
 }
 
-impl<A: Adc, const ROWS: usize, const COLS: usize> MagneticScanner for DirectScanner<A, ROWS, COLS> {
+impl<A: Adc, const ROWS: usize, const COLS: usize> MagneticScanner
+    for DirectScanner<A, ROWS, COLS>
+{
     type Error = A::Error;
     async fn scan(&mut self, row: usize, col: usize) -> Result<u16, Self::Error> {
         self.adcs[row][col].read().await
@@ -37,12 +44,15 @@ impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> (u8, u8)> MuxScanner<A, M, F
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum MagneticError<AE, ME> {
     Adc(AE),
     Mux(ME),
 }
 
-impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> (u8, u8)> MagneticScanner for MuxScanner<A, M, F> {
+impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> (u8, u8)> MagneticScanner
+    for MuxScanner<A, M, F>
+{
     type Error = MagneticError<A::Error, M::Error>;
     async fn scan(&mut self, row: usize, col: usize) -> Result<u16, Self::Error> {
         let (mux_ch, _adc_ch) = (self.map)(row, col);
@@ -63,6 +73,12 @@ impl CalibrationEntry {
             min: u16::MAX,
             max: u16::MIN,
         }
+    }
+}
+
+impl Default for CalibrationEntry {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -104,7 +120,9 @@ impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> MagneticMatrix<S,
     }
 }
 
-impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> KeyscanDriver for MagneticMatrix<S, ROWS, COLS> {
+impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> KeyscanDriver
+    for MagneticMatrix<S, ROWS, COLS>
+{
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         for row in 0..ROWS {
             for col in 0..COLS {
@@ -127,10 +145,16 @@ impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> KeyscanDriver for
                                 } else if val >= entry.max {
                                     65535
                                 } else {
-                                    ((val - entry.min) as u32 * 65535 / (entry.max - entry.min) as u32) as u16
+                                    ((val - entry.min) as u32 * 65535
+                                        / (entry.max - entry.min) as u32)
+                                        as u16
                                 };
 
-                                if let Some(pressed) = self.states[row][col].update(normalized, self.press_dist, self.release_dist) {
+                                if let Some(pressed) = self.states[row][col].update(
+                                    normalized,
+                                    self.press_dist,
+                                    self.release_dist,
+                                ) {
                                     cb(KeyChangeEvent {
                                         row: row as u8,
                                         col: col as u8,

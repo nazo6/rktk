@@ -20,7 +20,6 @@ pub enum Special {
     MoScrl,
     AmlReset,
     LockTg,
-    MagCal,
 }
 
 impl_display!(Special);

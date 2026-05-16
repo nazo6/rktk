@@ -7,6 +7,7 @@ pub struct RapidTriggerState {
 }
 
 impl RapidTriggerState {
+    #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
         Self {
             last_val: 0,
