@@ -29,7 +29,7 @@ document-features = { workspace = true }
 embassy-embedded-hal = { workspace = true }
 embassy-executor = { workspace = true }
 embassy-futures = { workspace = true }
-embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1"] }
+embassy-nrf = { workspace = true, features = ["gpiote", "time-driver-rtc1", "saadc"] }
 embassy-sync = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
