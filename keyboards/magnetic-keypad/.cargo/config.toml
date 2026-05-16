@@ -4,3 +4,7 @@ RKTK_CONFIG_PATH = { value = "rktk.json", relative = true, force = true }
 [build]
 target = "thumbv7em-none-eabihf"
 target-dir = "../../target/magnetic_keypad"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+linker = "flip-link"
+runner = "uf2deploy deploy -f nrf52840 -p auto"
