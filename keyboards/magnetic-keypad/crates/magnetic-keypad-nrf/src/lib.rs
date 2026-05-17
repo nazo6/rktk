@@ -1,6 +1,7 @@
 #![no_std]
 
 pub mod keymap;
+pub mod xw09d;
 
 use core::panic::PanicInfo;
 
@@ -33,10 +34,14 @@ bind_interrupts!(struct Irqs {
     USBD => embassy_nrf::usb::InterruptHandler<embassy_nrf::peripherals::USBD>;
     SAADC => saadc::InterruptHandler;
     CLOCK_POWER => embassy_nrf::usb::vbus_detect::InterruptHandler;
+    TWISPI0 => embassy_nrf::twim::InterruptHandler<embassy_nrf::peripherals::TWISPI0>;
 });
 
 pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
     let p = embassy_nrf::init(Default::default());
+
+    // Spawn XW09D touch controller background task (polling ch0-3 for keys, ch4-8 for slider)
+    spawner.spawn(touch_task(p.TWISPI0, p.P0_06.into(), p.P0_08.into())).unwrap();
     // Multiplexer selection pins
     // SEL A: P0.29, SEL B: P0.02, SEL C: P1.15
     let mux_s0 = Output::new(p.P0_29, Level::Low, OutputDrive::Standard);
@@ -125,6 +130,73 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         new_rktk_opts(keymap, None),
     )
     .await;
+}
+
+#[embassy_executor::task]
+pub async fn touch_task(
+    twispi0: embassy_nrf::Peri<'static, embassy_nrf::peripherals::TWISPI0>,
+    sda: embassy_nrf::Peri<'static, embassy_nrf::gpio::AnyPin>,
+    scl: embassy_nrf::Peri<'static, embassy_nrf::gpio::AnyPin>,
+) {
+    let mut config = embassy_nrf::twim::Config::default();
+    config.frequency = embassy_nrf::twim::Frequency::K400;
+    let mut i2c_buf = [0u8; 64];
+    let twim = embassy_nrf::twim::Twim::new(twispi0, Irqs, sda, scl, config, &mut i2c_buf);
+
+    let mut touch_sensor = xw09d::Xw09d::new(twim);
+    let kb_sender = rktk::hooks::channels::report::keyboard_event_sender();
+    let enc_sender = rktk::hooks::channels::report::encoder_event_sender();
+
+    let mut prev_buttons = [false; 4];
+    let mut prev_slider_pos: Option<i32> = None;
+    const SLIDER_THRESHOLD: i32 = 25; // 0.25 of one pad spacing
+
+    loop {
+        if let Ok(state) = touch_sensor.read_touch().await {
+            // 1. Right-side Buttons (ch0 - ch3)
+            for i in 0..4 {
+                let current = state.pads[i];
+                if current != prev_buttons[i] {
+                    let ev = rktk::drivers::interface::keyscan::KeyChangeEvent {
+                        row: i as u8,
+                        col: 3, // Column 3 is the virtual column
+                        pressed: current,
+                    };
+                    let _ = kb_sender.try_send(ev);
+                    prev_buttons[i] = current;
+                }
+            }
+
+            // 2. Left-side Slider (ch4 - ch8)
+            let mut sum = 0i32;
+            let mut count = 0i32;
+            for i in 4..=8 {
+                if state.pads[i] {
+                    sum += (i as i32 - 4) * 100; // Map pads 4..8 to 0..400
+                    count += 1;
+                }
+            }
+
+            if count > 0 {
+                let pos = sum / count;
+                if let Some(prev_pos) = prev_slider_pos {
+                    let diff = pos - prev_pos;
+                    if diff >= SLIDER_THRESHOLD {
+                        let _ = enc_sender.try_send((1, rktk::drivers::interface::encoder::EncoderDirection::Clockwise));
+                        prev_slider_pos = Some(pos);
+                    } else if diff <= -SLIDER_THRESHOLD {
+                        let _ = enc_sender.try_send((1, rktk::drivers::interface::encoder::EncoderDirection::CounterClockwise));
+                        prev_slider_pos = Some(pos);
+                    }
+                } else {
+                    prev_slider_pos = Some(pos);
+                }
+            } else {
+                prev_slider_pos = None;
+            }
+        }
+        embassy_time::Timer::after_millis(15).await;
+    }
 }
 
 #[panic_handler]

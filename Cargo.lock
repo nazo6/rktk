@@ -4592,6 +4592,7 @@ dependencies = [
  "embassy-executor",
  "embassy-nrf",
  "embassy-time",
+ "embedded-hal-async",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-nrf",

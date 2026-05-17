@@ -35,6 +35,7 @@ embassy-nrf = { version = "0.9.0", features = [
   "time-driver-rtc1"
 ] }
 embassy-embedded-hal = { workspace = true }
+embedded-hal-async = { workspace = true }
 embassy-time = { workspace = true }
 rktk = { workspace = true, features = ["defmt", "rrp"] }
 rktk-drivers-common = { workspace = true, features = [
