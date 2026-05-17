@@ -45,7 +45,7 @@ pub fn Keyboard(
     let mut elem_size = use_signal(|| Option::<PixelsSize>::None);
 
     let scale = if let Some(size) = &*elem_size.read() {
-        (size.width - 150.0) / keyboard_width
+        ((size.width - 150.0) / keyboard_width).min(1.0)
     } else {
         1.0
     };
