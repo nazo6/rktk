@@ -35,7 +35,7 @@ embassy-nrf = { version = "0.9.0", features = [
   "time-driver-rtc1"
 ] }
 embassy-time = { workspace = true }
-rktk = { workspace = true, features = ["defmt"] }
+rktk = { workspace = true, features = ["defmt", "rrp"] }
 rktk-drivers-common = { workspace = true, features = [
   "defmt-timestamp",
   "defmt-usb"
