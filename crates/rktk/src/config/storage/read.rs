@@ -45,4 +45,10 @@ impl<S: StorageDriver> StorageConfigManager<S> {
         let res = postcard::from_bytes(&buf).map_err(ConfigReadError::DecodeError)?;
         Ok(res)
     }
+
+    pub async fn read_calibration<const N: usize>(&self, buf: &mut [u8]) -> Result<(), ConfigReadError<S::Error>> {
+        let key = u64::from_le_bytes([ConfigKey::Calibration as u8, 0, 0, 0, 0, 0, 0, 0]);
+        self.storage.read::<N>(key, buf).await?;
+        Ok(())
+    }
 }

@@ -56,6 +56,10 @@ pub struct BufferSizeConfig {
     /// Size of the encoder event buffer
     #[default(4)]
     pub encoder_event: usize,
+
+    /// Size of the magnetic switch calibration data buffer.
+    #[default(512)]
+    pub calibration: usize,
 }
 
 #[macro_rules_attribute::apply(crate::schema::common_derive)]

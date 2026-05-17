@@ -146,6 +146,42 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
 impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize>
     KeyscanDriver for MagneticMatrix<S, M, ROWS, COLS>
 {
+    const CALIBRATION_SIZE: usize = ROWS * COLS * 4;
+
+    fn save_calibration(&self, buf: &mut [u8]) -> Result<(), ()> {
+        if buf.len() < Self::CALIBRATION_SIZE {
+            return Err(());
+        }
+        let mut idx = 0;
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                let entry = self.calibration_data[row][col];
+                buf[idx..idx + 2].copy_from_slice(&entry.min.to_le_bytes());
+                buf[idx + 2..idx + 4].copy_from_slice(&entry.max.to_le_bytes());
+                idx += 4;
+            }
+        }
+        Ok(())
+    }
+
+    fn load_calibration(&mut self, buf: &[u8]) -> Result<(), ()> {
+        if buf.len() < Self::CALIBRATION_SIZE {
+            return Err(());
+        }
+        let mut idx = 0;
+        let mut data = [[CalibrationEntry::new(); COLS]; ROWS];
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                let min = u16::from_le_bytes([buf[idx], buf[idx + 1]]);
+                let max = u16::from_le_bytes([buf[idx + 2], buf[idx + 3]]);
+                data[row][col] = CalibrationEntry { min, max };
+                idx += 4;
+            }
+        }
+        self.set_calibration_data(data);
+        Ok(())
+    }
+
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         for row in 0..ROWS {
             for col in 0..COLS {

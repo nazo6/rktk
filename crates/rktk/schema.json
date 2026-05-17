@@ -18,6 +18,13 @@
     "BufferSizeConfig": {
       "type": "object",
       "properties": {
+        "calibration": {
+          "description": "Size of the magnetic switch calibration data buffer.",
+          "type": "integer",
+          "format": "uint",
+          "default": 512,
+          "minimum": 0
+        },
         "encoder_event": {
           "description": "Size of the encoder event buffer",
           "type": "integer",

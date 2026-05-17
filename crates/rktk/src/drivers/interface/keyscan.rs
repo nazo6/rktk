@@ -8,6 +8,19 @@ pub use kmsm::interface::state::input_event::KeyChangeEvent;
 ///
 /// This is because the key scanning circuit often includes a left/right determination circuit.
 pub trait KeyscanDriver {
+    /// The size of the calibration data in bytes. If 0, calibration is not supported.
+    const CALIBRATION_SIZE: usize = 0;
+
+    /// Save calibration data into the provided buffer. Returns `Ok(())` on success.
+    fn save_calibration(&self, _buf: &mut [u8]) -> Result<(), ()> {
+        Err(())
+    }
+
+    /// Load calibration data from the provided buffer. Returns `Ok(())` on success.
+    fn load_calibration(&mut self, _buf: &[u8]) -> Result<(), ()> {
+        Err(())
+    }
+
     /// Scans a key and returns the delta from the previous key scan
     async fn scan(&mut self, callback: impl FnMut(KeyChangeEvent));
 

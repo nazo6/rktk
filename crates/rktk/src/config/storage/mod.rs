@@ -11,6 +11,7 @@ pub enum ConfigKey {
     Version = 0,
     StateConfig = 1,
     StateKeymap = 2,
+    Calibration = 3,
 }
 
 impl<S: StorageDriver> StorageConfigManager<S> {

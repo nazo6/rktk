@@ -85,6 +85,14 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         embassy_nrf::gpio::Input::new(p.P0_10, embassy_nrf::gpio::Pull::Up),
     )]);
 
+    let flash = embassy_nrf::nvmc::Nvmc::new(p.NVMC);
+    let async_flash = embassy_embedded_hal::adapter::BlockingAsync::new(flash);
+    let storage = rktk_drivers_common::storage::flash_sequential_map::FlashSequentialMapStorage::new(
+        async_flash,
+        0xFC000,
+        16 * 1024,
+    );
+
     let drivers = Drivers {
         keyscan,
         system: NrfSystemDriver::new(None),
@@ -105,7 +113,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         split: dummy::split(),
         rgb: Some(rgb),
         ble_builder: dummy::ble_builder(),
-        storage: dummy::storage(),
+        storage: Some(storage),
         debounce: dummy::debounce(), // Magnetic matrix handles its own "debounce" via RT logic
         encoder: Some(encoder),
     };

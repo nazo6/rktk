@@ -54,4 +54,10 @@ impl<S: StorageDriver> StorageConfigManager<S> {
             .await?;
         Ok(())
     }
+
+    pub async fn write_calibration<const N: usize>(&self, data: &[u8]) -> Result<(), ConfigWriteError<S::Error>> {
+        let key = u64::from_le_bytes([ConfigKey::Calibration as u8, 0, 0, 0, 0, 0, 0, 0]);
+        self.storage.write::<N>(key, data).await?;
+        Ok(())
+    }
 }
