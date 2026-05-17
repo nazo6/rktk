@@ -17,12 +17,12 @@ impl RapidTriggerState {
         }
     }
 
-    /// Updates the state with a new ADC value and returns whether the key state changed.
+    /// Updates the state with a new travel distance and returns whether the key state changed.
     ///
     /// # Arguments
-    /// * `val`: Normalized ADC value (0-65535).
-    /// * `press_dist`: Threshold to trigger press when moving down.
-    /// * `release_dist`: Threshold to trigger release when moving up.
+    /// * `val`: Physical travel distance in 0.01mm units (e.g., 0-400 for 0-4.0mm).
+    /// * `press_dist`: Threshold to trigger press when moving down (in 0.01mm).
+    /// * `release_dist`: Threshold to trigger release when moving up (in 0.01mm).
     pub fn update(&mut self, val: u16, press_dist: u16, release_dist: u16) -> Option<bool> {
         let changed = if !self.pressed {
             if val > self.min_val.saturating_add(press_dist) {

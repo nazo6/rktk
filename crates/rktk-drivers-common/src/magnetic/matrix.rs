@@ -1,4 +1,5 @@
 use crate::magnetic::rapid_trigger::RapidTriggerState;
+use crate::magnetic::profile::{KeyProfileMap, SwitchProfile};
 use rktk::drivers::interface::keyscan::{KeyChangeEvent, KeyscanDriver};
 use rktk::drivers::interface::magnetic::{Adc, Multiplexer};
 use rktk_log::MaybeFormat;
@@ -82,8 +83,9 @@ impl Default for CalibrationEntry {
     }
 }
 
-pub struct MagneticMatrix<S: MagneticScanner, const ROWS: usize, const COLS: usize> {
+pub struct MagneticMatrix<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize> {
     scanner: S,
+    profiles: M,
     states: [[RapidTriggerState; COLS]; ROWS],
     calibration_mode: bool,
     calibration_data: [[CalibrationEntry; COLS]; ROWS],
@@ -91,10 +93,11 @@ pub struct MagneticMatrix<S: MagneticScanner, const ROWS: usize, const COLS: usi
     release_dist: u16,
 }
 
-impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> MagneticMatrix<S, ROWS, COLS> {
-    pub fn new(scanner: S, press_dist: u16, release_dist: u16) -> Self {
+impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize> MagneticMatrix<S, M, ROWS, COLS> {
+    pub fn new(scanner: S, profiles: M, press_dist: u16, release_dist: u16) -> Self {
         Self {
             scanner,
+            profiles,
             states: [[RapidTriggerState::new(); COLS]; ROWS],
             calibration_mode: false,
             calibration_data: [[CalibrationEntry::new(); COLS]; ROWS],
@@ -120,8 +123,8 @@ impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> MagneticMatrix<S,
     }
 }
 
-impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> KeyscanDriver
-    for MagneticMatrix<S, ROWS, COLS>
+impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize> KeyscanDriver
+    for MagneticMatrix<S, M, ROWS, COLS>
 {
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         for row in 0..ROWS {
@@ -150,8 +153,11 @@ impl<S: MagneticScanner, const ROWS: usize, const COLS: usize> KeyscanDriver
                                         as u16
                                 };
 
+                                let profile = self.profiles.get_profile(row, col);
+                                let distance = profile.normalized_to_distance(normalized);
+
                                 if let Some(pressed) = self.states[row][col].update(
-                                    normalized,
+                                    distance,
                                     self.press_dist,
                                     self.release_dist,
                                 ) {

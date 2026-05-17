@@ -21,6 +21,7 @@ use rktk_drivers_common::{
     magnetic::{
         matrix::{MagneticMatrix, MuxScanner},
         mux::sn74lv4051::Sn74lv4051,
+        profile::{SingleProfileMap, LinearProfile},
     },
     usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig},
 };
@@ -65,11 +66,15 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         }
     });
 
+    let profile = LinearProfile { max_travel: 400 };
+    let profile_map = SingleProfileMap { profile };
+
     let keyscan = MagneticMatrix::<
+        _,
         _,
         { rktk::config::CONST_CONFIG.keyboard.rows as usize },
         { rktk::config::CONST_CONFIG.keyboard.cols as usize },
-    >::new(scanner, 1000, 500);
+    >::new(scanner, profile_map, 10, 5);
 
     // RGB: P0.11, 8 LEDs
     let rgb = Ws2812Pwm::<256, _, _>::new(p.PWM0, p.P0_11);
