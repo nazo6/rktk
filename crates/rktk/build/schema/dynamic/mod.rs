@@ -1,6 +1,7 @@
 pub mod key_manager;
 pub mod keyboard;
 pub mod rktk;
+pub mod magnetic;
 
 /// Root struct of the "dynamic" config
 #[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]
@@ -11,4 +12,6 @@ pub struct DynamicConfig {
     pub rktk: rktk::RktkConfig,
     #[serde(default)]
     pub key_manager: key_manager::KeyManagerConfig,
+    #[serde(default)]
+    pub magnetic: magnetic::MagneticConfig,
 }

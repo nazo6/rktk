@@ -83,7 +83,7 @@ pub fn save_panic_info(info: &core::panic::PanicInfo) {
     }
 }
 
-fn read_panic_message() -> Option<PanicMessage> {
+pub fn read_panic_message() -> Option<PanicMessage> {
     unsafe {
         let info = core::ptr::read(&raw const PANIC_INFO);
         let info = info.assume_init();
@@ -96,7 +96,7 @@ fn read_panic_message() -> Option<PanicMessage> {
     }
 }
 
-fn parse_panic_message(panic_info: &PanicMessage) -> &str {
+pub fn parse_panic_message(panic_info: &PanicMessage) -> &str {
     // if panic_info.len == 0 {
     //     return "No panic message";
     // }

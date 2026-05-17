@@ -70,6 +70,8 @@ impl<
     const COLS: usize,
 > KeyscanDriver for ShiftRegisterMatrix<S, IP, T, OUTPUT_PIN_COUNT, INPUT_PIN_COUNT, ROWS, COLS>
 {
+    type CalibrationError = core::convert::Infallible;
+
     // TODO: support async matrix
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         for output_idx in 0..OUTPUT_PIN_COUNT {

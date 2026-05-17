@@ -22,7 +22,10 @@ use crate::{
         wireless::WirelessReporterDriver,
     },
     hooks::interface::MasterHooks,
-    task::channels::report::{ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL},
+    task::channels::report::{
+        ENCODER_EVENT_REPORT_CHANNEL, KEYBOARD_CONTROL_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL,
+        KeyboardCommand,
+    },
     utils::display_state,
 };
 
@@ -53,6 +56,7 @@ pub async fn report_task<
     };
     let mut display_off =
         DisplayOffController::new(Duration::from_millis(config.rktk.display_timeout));
+    let mut mag_cal_enabled = false;
 
     loop {
         let event = match select4(
@@ -111,12 +115,14 @@ pub async fn report_task<
             ble_bond_clear: bool,
             flash_clear: bool,
             power_off: bool,
+            mag_cal: bool,
         }
         let mut rktk_key_state = RktkKeyState {
             bootloader: false,
             ble_bond_clear: false,
             flash_clear: false,
             power_off: false,
+            mag_cal: false,
         };
 
         let (mut state_report, layer_active) = {
@@ -135,6 +141,7 @@ pub async fn report_task<
                                 RktkKeys::BleBondClear => rktk_key_state.ble_bond_clear = true,
                                 RktkKeys::Bootloader => rktk_key_state.bootloader = true,
                                 RktkKeys::PowerOff => rktk_key_state.power_off = true,
+                                RktkKeys::MagCal => rktk_key_state.mag_cal = true,
                                 RktkKeys::RgbOff => {
                                     let _ = RGB_CHANNEL
                                         .sender()
@@ -203,6 +210,17 @@ pub async fn report_task<
 
         if rktk_key_state.power_off {
             system.power_off().await;
+        }
+
+        if rktk_key_state.mag_cal {
+            mag_cal_enabled = !mag_cal_enabled;
+            if mag_cal_enabled {
+                let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::StartCalibration);
+                crate::print!("Calibration started");
+            } else {
+                let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::EndCalibration);
+                crate::print!("Calibration ended");
+            }
         }
 
         let reported = match current_output {

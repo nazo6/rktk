@@ -6,6 +6,7 @@ pub mod display;
 pub mod dongle;
 pub mod encoder;
 pub mod keyscan;
+pub mod magnetic;
 pub mod mouse;
 pub mod reporter;
 pub mod rgb;

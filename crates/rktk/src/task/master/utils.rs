@@ -19,10 +19,11 @@ pub fn get_split_right_shift(config: &DynamicConfig) -> u8 {
     if let Some(val) = config.keyboard.split_right_shift {
         val
     } else {
-        assert!(
-            CONST_CONFIG.keyboard.cols.is_multiple_of(2),
-            "Split right shift is not defined, but the keyboard has odd number of columns."
-        );
+        if !CONST_CONFIG.keyboard.cols.is_multiple_of(2) {
+            rktk_log::warn!(
+                "Split right shift is not defined, but the keyboard has odd number of columns."
+            );
+        }
         CONST_CONFIG.keyboard.cols / 2
     }
 }

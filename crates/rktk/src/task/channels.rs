@@ -76,4 +76,12 @@ pub mod report {
     pub fn encoder_event_sender() -> DynamicSender<'static, (u8, EncoderDirection)> {
         ENCODER_EVENT_REPORT_CHANNEL.dyn_sender()
     }
+
+    #[derive(Debug, Clone, Copy)]
+    pub enum KeyboardCommand {
+        StartCalibration,
+        EndCalibration,
+    }
+
+    pub(crate) static KEYBOARD_CONTROL_CHANNEL: Channel<KeyboardCommand, 2> = Channel::new();
 }

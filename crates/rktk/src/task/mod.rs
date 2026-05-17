@@ -133,6 +133,19 @@ pub async fn start<
                                 async {
                                     let config_store =
                                         master::utils::init_storage(drivers.storage).await;
+
+                                    if KeyScan::CALIBRATION_SIZE > 0
+                                        && let Some(ref store) = config_store {
+                                            let mut buf = [0u8; crate::config::CONST_CONFIG.buffer.calibration];
+                                            if let Ok(()) = store.read_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&mut buf).await {
+                                                if drivers.keyscan.load_calibration(&buf[..KeyScan::CALIBRATION_SIZE]).is_err() {
+                                                    rktk_log::error!("Failed to load calibration data into keyscan driver");
+                                                } else {
+                                                    rktk_log::info!("Calibration data loaded successfully");
+                                                }
+                                            }
+                                        }
+
                                     let state = master::utils::load_state(
                                         &opts.config.key_manager,
                                         &config_store,
@@ -169,6 +182,7 @@ pub async fn start<
                                                 hand,
                                                 drivers.keyscan,
                                                 &mut drivers.debounce,
+                                                &config_store,
                                             ),
                                             master::handle_mouse::start(opts.config, drivers.mouse),
                                             master::handle_encoder::start(&mut drivers.encoder),

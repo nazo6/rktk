@@ -127,3 +127,8 @@ pub mod get_log {
     pub type Request = ();
     pub type Response = LogChunk;
 }
+
+pub mod set_calibration_mode {
+    pub type Request = bool;
+    pub type Response = ();
+}

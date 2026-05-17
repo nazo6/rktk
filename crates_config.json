@@ -99,6 +99,10 @@
 		},
 		"keyball61-nrf": {
 			"check_build": true
+		},
+		"magnetic_keypad-nrf": {
+			"check_no_powerset": true,
+			"check_build": true
 		}
 	}
 }

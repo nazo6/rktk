@@ -21,6 +21,8 @@ use rktk_drivers_rp::system::RpSystemDriver;
 
 pub struct DummyKeyscanDriver;
 impl KeyscanDriver for DummyKeyscanDriver {
+    type CalibrationError = core::convert::Infallible;
+
     async fn scan(&mut self, _cb: impl FnMut(KeyChangeEvent)) {
         let _: () = core::future::pending().await;
     }
