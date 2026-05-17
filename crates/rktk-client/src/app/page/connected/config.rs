@@ -45,6 +45,7 @@ pub fn Config() -> Element {
 #[component]
 pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Element {
     let mut config = use_signal(|| initial_config.clone());
+    let mut calibrating = use_signal(|| false);
 
     macro_rules! number_form {
         ($name:literal, $($path:ident).+) => {{
@@ -86,8 +87,8 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
     }
 
     rsx! {
-        div { class: "flex flex-col max-w-lg items-center",
-            div { class: "grid grid-cols-5 items-center gap-2",
+        div { class: "flex flex-col max-w-lg items-center w-full px-4",
+            div { class: "grid grid-cols-5 items-center gap-2 w-full",
                 h2 { class: "col-span-5 text-lg font-bold", "Mouse" }
                 {number_form!("Auto mouse layer", mouse.auto_mouse_layer)}
                 {number_form!("Auto mouse duration", mouse.auto_mouse_duration)}
@@ -131,6 +132,42 @@ pub fn ConfigInner(initial_config: StateConfig, refetch: Callback<()>) -> Elemen
                 onclick: move |_| *config.write() = initial_config.clone(),
                 "Discard"
             }
+
+            div { class: "divider my-6 w-full" }
+
+            h2 { class: "text-lg font-bold mb-2 text-center", "Magnetic Switches" }
+            p { class: "text-sm text-gray-500 mb-4 text-center",
+                "To calibrate: start calibration, slowly press every key all the way down and release completely, then stop calibration."
+            }
+            button {
+                class: "btn w-full transition-all duration-200",
+                class: if *calibrating.read() { "btn-error animate-pulse" } else { "btn-neutral" },
+                onclick: move |_| {
+                    let next_state = !*calibrating.read();
+                    spawn(async move {
+                        let result = fetcher::set_calibration_mode(next_state).await;
+                        if let Err(e) = result {
+                            push_notification(Notification {
+                                message: format!("Failed to set calibration mode: {e:?}"),
+                                level: NotificationLevel::Error,
+                                ..Default::default()
+                            });
+                        } else {
+                            calibrating.set(next_state);
+                            push_notification(Notification {
+                                message: if next_state {
+                                    "Calibration mode active. Press all keys to their physical limits."
+                                } else {
+                                    "Calibration completed and saved."
+                                }.to_string(),
+                                level: NotificationLevel::Info,
+                                ..Default::default()
+                            });
+                        }
+                    });
+                },
+                if *calibrating.read() { "Stop Calibration" } else { "Start Calibration" }
+            }
         }
     }
 }
@@ -164,6 +201,19 @@ mod fetcher {
             .await
             .get_client()
             .set_keymap_config(config)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn set_calibration_mode(enabled: bool) -> anyhow::Result<()> {
+        let conn = &*CONN.read();
+        let conn = conn.as_ref().context("Not connected")?;
+        conn.device
+            .lock()
+            .await
+            .get_client()
+            .set_calibration_mode(enabled)
             .await?;
 
         Ok(())

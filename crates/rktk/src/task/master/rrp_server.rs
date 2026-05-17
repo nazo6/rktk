@@ -18,6 +18,8 @@ use crate::{
     },
 };
 
+use crate::task::channels::report::{KEYBOARD_CONTROL_CHANNEL, KeyboardCommand};
+
 use super::{ConfiguredState, SharedState};
 
 pub async fn start(
@@ -171,6 +173,19 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
 
     async fn get_now(&mut self, _req: get_now::Request) -> Result<get_now::Response, Self::Error> {
         Ok(embassy_time::Instant::now().as_millis())
+    }
+
+    async fn set_calibration_mode(
+        &mut self,
+        req: set_calibration_mode::Request,
+    ) -> Result<set_calibration_mode::Response, Self::Error> {
+        let cmd = if req {
+            KeyboardCommand::StartCalibration
+        } else {
+            KeyboardCommand::EndCalibration
+        };
+        let _ = KEYBOARD_CONTROL_CHANNEL.try_send(cmd);
+        Ok(())
     }
 }
 

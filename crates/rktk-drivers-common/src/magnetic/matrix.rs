@@ -180,9 +180,28 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
 
     fn start_calibration(&mut self) {
         self.set_calibration_mode(true);
+        rktk_log::info!("Calibration started. Press all keys to their physical limits.");
     }
 
     fn end_calibration(&mut self) {
         self.set_calibration_mode(false);
+        rktk_log::info!("Calibration finished. Results:");
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                let entry = self.calibration_data[row][col];
+                if entry.min < entry.max {
+                    rktk_log::info!(
+                        "  Key ({},{}): min_adc={}, max_adc={}, range={}",
+                        row,
+                        col,
+                        entry.min,
+                        entry.max,
+                        entry.max - entry.min
+                    );
+                } else {
+                    rktk_log::info!("  Key ({},{}): Not calibrated", row, col);
+                }
+            }
+        }
     }
 }

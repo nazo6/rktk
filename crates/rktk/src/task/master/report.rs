@@ -56,6 +56,7 @@ pub async fn report_task<
     };
     let mut display_off =
         DisplayOffController::new(Duration::from_millis(config.rktk.display_timeout));
+    let mut mag_cal_enabled = false;
 
     loop {
         let event = match select4(
@@ -211,17 +212,14 @@ pub async fn report_task<
             system.power_off().await;
         }
 
-        static mut MAG_CAL_ENABLED: bool = false;
         if rktk_key_state.mag_cal {
-            unsafe {
-                MAG_CAL_ENABLED = !MAG_CAL_ENABLED;
-                if MAG_CAL_ENABLED {
-                    let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::StartCalibration);
-                    crate::print!("Calibration started");
-                } else {
-                    let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::EndCalibration);
-                    crate::print!("Calibration ended");
-                }
+            mag_cal_enabled = !mag_cal_enabled;
+            if mag_cal_enabled {
+                let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::StartCalibration);
+                crate::print!("Calibration started");
+            } else {
+                let _ = KEYBOARD_CONTROL_CHANNEL.try_send(KeyboardCommand::EndCalibration);
+                crate::print!("Calibration ended");
             }
         }
 

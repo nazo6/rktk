@@ -31,6 +31,7 @@ generate_impls!(
     5: set_keymap_config(normal) -> normal;
     6: get_now(normal) -> normal;
     7: get_log(normal) -> stream;
+    8: set_calibration_mode(normal) -> normal;
 );
 
 #[cfg(test)]
@@ -43,8 +44,9 @@ generate_impls!(
     5: set_keymap_config(normal) -> normal;
     6: get_now(normal) -> normal;
     7: get_log(normal) -> stream;
-    8: test_normal_normal(normal) -> normal;
-    9: test_stream_normal(stream) -> normal;
-    10: test_normal_stream(normal) -> stream;
-    11: test_stream_stream(stream) -> stream;
+    8: set_calibration_mode(normal) -> normal;
+    9: test_normal_normal(normal) -> normal;
+    10: test_stream_normal(stream) -> normal;
+    11: test_normal_stream(normal) -> stream;
+    12: test_stream_stream(stream) -> stream;
 );
