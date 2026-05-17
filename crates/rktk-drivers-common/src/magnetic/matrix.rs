@@ -143,14 +143,31 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
     }
 }
 
+#[derive(Debug)]
+pub enum CalibrationError {
+    BufferTooSmall,
+}
+
+impl core::fmt::Display for CalibrationError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            CalibrationError::BufferTooSmall => write!(f, "Calibration buffer is too small"),
+        }
+    }
+}
+impl core::error::Error for CalibrationError {}
+
+
 impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize>
     KeyscanDriver for MagneticMatrix<S, M, ROWS, COLS>
 {
     const CALIBRATION_SIZE: usize = ROWS * COLS * 4;
 
-    fn save_calibration(&self, buf: &mut [u8]) -> Result<(), ()> {
+    type CalibrationError = CalibrationError;
+
+    fn save_calibration(&self, buf: &mut [u8]) -> Result<(), Self::CalibrationError> {
         if buf.len() < Self::CALIBRATION_SIZE {
-            return Err(());
+            return Err(CalibrationError::BufferTooSmall);
         }
         let mut idx = 0;
         for row in 0..ROWS {
@@ -164,9 +181,10 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
         Ok(())
     }
 
-    fn load_calibration(&mut self, buf: &[u8]) -> Result<(), ()> {
+    #[allow(clippy::needless_range_loop)]
+    fn load_calibration(&mut self, buf: &[u8]) -> Result<(), Self::CalibrationError> {
         if buf.len() < Self::CALIBRATION_SIZE {
-            return Err(());
+            return Err(CalibrationError::BufferTooSmall);
         }
         let mut idx = 0;
         let mut data = [[CalibrationEntry::new(); COLS]; ROWS];

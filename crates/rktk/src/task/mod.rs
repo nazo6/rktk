@@ -134,18 +134,17 @@ pub async fn start<
                                     let config_store =
                                         master::utils::init_storage(drivers.storage).await;
 
-                                    if KeyScan::CALIBRATION_SIZE > 0 {
-                                        if let Some(ref store) = config_store {
+                                    if KeyScan::CALIBRATION_SIZE > 0
+                                        && let Some(ref store) = config_store {
                                             let mut buf = [0u8; crate::config::CONST_CONFIG.buffer.calibration];
                                             if let Ok(()) = store.read_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&mut buf).await {
-                                                if let Err(_) = drivers.keyscan.load_calibration(&buf[..KeyScan::CALIBRATION_SIZE]) {
+                                                if drivers.keyscan.load_calibration(&buf[..KeyScan::CALIBRATION_SIZE]).is_err() {
                                                     rktk_log::error!("Failed to load calibration data into keyscan driver");
                                                 } else {
                                                     rktk_log::info!("Calibration data loaded successfully");
                                                 }
                                             }
                                         }
-                                    }
 
                                     let state = master::utils::load_state(
                                         &opts.config.key_manager,

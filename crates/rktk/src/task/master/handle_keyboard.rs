@@ -60,8 +60,8 @@ pub async fn start<KeyScan: KeyscanDriver, Debounce: DebounceDriver, S: StorageD
                         debug!("Ending calibration");
                         keyscan.end_calibration();
                         
-                        if KeyScan::CALIBRATION_SIZE > 0 {
-                            if let Some(store) = config_store.as_ref() {
+                        if KeyScan::CALIBRATION_SIZE > 0
+                            && let Some(store) = config_store.as_ref() {
                                 let mut buf = [0u8; crate::config::CONST_CONFIG.buffer.calibration];
                                 if keyscan.save_calibration(&mut buf[..KeyScan::CALIBRATION_SIZE]).is_ok() {
                                     match store.write_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&buf).await {
@@ -74,7 +74,6 @@ pub async fn start<KeyScan: KeyscanDriver, Debounce: DebounceDriver, S: StorageD
                                     }
                                 }
                             }
-                        }
                     }
                 }
             }

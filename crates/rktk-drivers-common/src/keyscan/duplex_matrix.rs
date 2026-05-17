@@ -138,6 +138,8 @@ impl<
     const COLS: usize,
 > KeyscanDriver for DuplexMatrixScanner<F, T, ROW_PIN_COUNT, COL_PIN_COUNT, ROWS, COLS>
 {
+    type CalibrationError = core::convert::Infallible;
+
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         Self::scan_dir(
             &mut self.rows,
