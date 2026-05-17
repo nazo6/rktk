@@ -47,22 +47,22 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
 
     // ADC for multiplexer output: P0.31 (AIN7)
     let config = saadc::Config::default();
-    let channel_config = saadc::ChannelConfig::single_ended(p.P0_31);
+    let mut channel_config = saadc::ChannelConfig::single_ended(p.P0_31);
+    channel_config.time = saadc::Time::_40US;
     let saadc = saadc::Saadc::new(p.SAADC, Irqs, config, [channel_config]);
     let adc = NrfAdc::new(saadc);
 
-    // Magnetic Matrix
     let scanner = MuxScanner::new(adc, mux, |row, col| {
         match (row, col) {
-            (2, 0) => (0, 0), // KEY1
-            (2, 1) => (1, 0), // KEY2
-            (2, 2) => (2, 0), // KEY3
-            (1, 0) => (3, 0), // KEY4
-            (1, 1) => (4, 0), // KEY5
-            (1, 2) => (5, 0), // KEY6
-            (0, 0) => (6, 0), // KEY7
-            (0, 1) => (7, 0), // KEY8
-            _ => (0, 0),      // ENC position (dummy)
+            (2, 0) => Some((0, 0)), // KEY1
+            (2, 1) => Some((1, 0)), // KEY2
+            (2, 2) => Some((2, 0)), // KEY3
+            (1, 0) => Some((3, 0)), // KEY4
+            (1, 1) => Some((4, 0)), // KEY5
+            (1, 2) => Some((5, 0)), // KEY6
+            (0, 0) => Some((6, 0)), // KEY7
+            (0, 1) => Some((7, 0)), // KEY8
+            _ => None,
         }
     });
 
@@ -74,7 +74,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         _,
         { rktk::config::CONST_CONFIG.keyboard.rows as usize },
         { rktk::config::CONST_CONFIG.keyboard.cols as usize },
-    >::new(scanner, profile_map, 10, 5);
+    >::new(scanner, profile_map, 30, 20, 15);
 
     // RGB: P0.11, 8 LEDs
     let rgb = Ws2812Pwm::<256, _, _>::new(p.PWM0, p.P0_11);

@@ -23,7 +23,30 @@ impl RapidTriggerState {
     /// * `val`: Physical travel distance in 0.01mm units (e.g., 0-400 for 0-4.0mm).
     /// * `press_dist`: Threshold to trigger press when moving down (in 0.01mm).
     /// * `release_dist`: Threshold to trigger release when moving up (in 0.01mm).
-    pub fn update(&mut self, val: u16, press_dist: u16, release_dist: u16) -> Option<bool> {
+    /// * `top_deadzone`: Initial travel distance required before activating rapid trigger (in 0.01mm).
+    pub fn update(
+        &mut self,
+        val: u16,
+        press_dist: u16,
+        release_dist: u16,
+        top_deadzone: u16,
+    ) -> Option<bool> {
+        // Top deadzone: if physical travel distance is less than the configured deadzone, force release/unpressed state.
+        // This is standard for magnetic switches to filter out top-of-travel key mechanical play and electronic noise.
+        if val < top_deadzone {
+            if self.pressed {
+                self.pressed = false;
+                self.min_val = val;
+                self.max_val = 0;
+                self.last_val = val;
+                return Some(false);
+            }
+            self.min_val = val;
+            self.max_val = 0;
+            self.last_val = val;
+            return None;
+        }
+
         let changed = if !self.pressed {
             if val > self.min_val.saturating_add(press_dist) {
                 self.pressed = true;

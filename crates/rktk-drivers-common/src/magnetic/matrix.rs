@@ -1,5 +1,5 @@
-use crate::magnetic::rapid_trigger::RapidTriggerState;
 use crate::magnetic::profile::{KeyProfileMap, SwitchProfile};
+use crate::magnetic::rapid_trigger::RapidTriggerState;
 use rktk::drivers::interface::keyscan::{KeyChangeEvent, KeyscanDriver};
 use rktk::drivers::interface::magnetic::{Adc, Multiplexer};
 use rktk_log::MaybeFormat;
@@ -32,13 +32,13 @@ impl<A: Adc, const ROWS: usize, const COLS: usize> MagneticScanner
     }
 }
 
-pub struct MuxScanner<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> (u8, u8)> {
+pub struct MuxScanner<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> Option<(u8, u8)>> {
     adc: A,
     mux: M,
     map: F,
 }
 
-impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> (u8, u8)> MuxScanner<A, M, F> {
+impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> Option<(u8, u8)>> MuxScanner<A, M, F> {
     pub fn new(adc: A, mux: M, map: F) -> Self {
         Self { adc, mux, map }
     }
@@ -51,14 +51,19 @@ pub enum MagneticError<AE, ME> {
     Mux(ME),
 }
 
-impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> (u8, u8)> MagneticScanner
+impl<A: Adc, M: Multiplexer, F: Fn(usize, usize) -> Option<(u8, u8)>> MagneticScanner
     for MuxScanner<A, M, F>
 {
     type Error = MagneticError<A::Error, M::Error>;
     async fn scan(&mut self, row: usize, col: usize) -> Result<u16, Self::Error> {
-        let (mux_ch, _adc_ch) = (self.map)(row, col);
-        self.mux.select(mux_ch).await.map_err(MagneticError::Mux)?;
-        self.adc.read().await.map_err(MagneticError::Adc)
+        if let Some((mux_ch, _adc_ch)) = (self.map)(row, col) {
+            self.mux.select(mux_ch).await.map_err(MagneticError::Mux)?;
+            // Settling delay: let the analog voltage stabilize after mux switching
+            embassy_time::Timer::after_micros(10).await;
+            self.adc.read().await.map_err(MagneticError::Adc)
+        } else {
+            Ok(0)
+        }
     }
 }
 
@@ -83,7 +88,12 @@ impl Default for CalibrationEntry {
     }
 }
 
-pub struct MagneticMatrix<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize> {
+pub struct MagneticMatrix<
+    S: MagneticScanner,
+    M: KeyProfileMap<ROWS, COLS>,
+    const ROWS: usize,
+    const COLS: usize,
+> {
     scanner: S,
     profiles: M,
     states: [[RapidTriggerState; COLS]; ROWS],
@@ -91,10 +101,19 @@ pub struct MagneticMatrix<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, cons
     calibration_data: [[CalibrationEntry; COLS]; ROWS],
     press_dist: u16,
     release_dist: u16,
+    top_deadzone: u16,
 }
 
-impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize> MagneticMatrix<S, M, ROWS, COLS> {
-    pub fn new(scanner: S, profiles: M, press_dist: u16, release_dist: u16) -> Self {
+impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize>
+    MagneticMatrix<S, M, ROWS, COLS>
+{
+    pub fn new(
+        scanner: S,
+        profiles: M,
+        press_dist: u16,
+        release_dist: u16,
+        top_deadzone: u16,
+    ) -> Self {
         Self {
             scanner,
             profiles,
@@ -103,6 +122,7 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
             calibration_data: [[CalibrationEntry::new(); COLS]; ROWS],
             press_dist,
             release_dist,
+            top_deadzone,
         }
     }
 
@@ -123,8 +143,8 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
     }
 }
 
-impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize> KeyscanDriver
-    for MagneticMatrix<S, M, ROWS, COLS>
+impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize>
+    KeyscanDriver for MagneticMatrix<S, M, ROWS, COLS>
 {
     async fn scan(&mut self, mut cb: impl FnMut(KeyChangeEvent)) {
         for row in 0..ROWS {
@@ -141,7 +161,7 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
                             }
                         } else {
                             let entry = &self.calibration_data[row][col];
-                            if entry.min < entry.max {
+                            if entry.min < entry.max && (entry.max - entry.min) >= 300 {
                                 // Normalize value to 0-65535
                                 let normalized = if val <= entry.min {
                                     0
@@ -160,7 +180,16 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
                                     distance,
                                     self.press_dist,
                                     self.release_dist,
+                                    self.top_deadzone,
                                 ) {
+                                    rktk_log::debug!(
+                                        "Magnetic Key Event: ({},{}) pressed={} distance={} normalized={}",
+                                        row,
+                                        col,
+                                        pressed,
+                                        distance,
+                                        normalized
+                                    );
                                     cb(KeyChangeEvent {
                                         row: row as u8,
                                         col: col as u8,
@@ -189,7 +218,7 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
         for row in 0..ROWS {
             for col in 0..COLS {
                 let entry = self.calibration_data[row][col];
-                if entry.min < entry.max {
+                if entry.min < entry.max && (entry.max - entry.min) >= 300 {
                     rktk_log::info!(
                         "  Key ({},{}): min_adc={}, max_adc={}, range={}",
                         row,
@@ -199,7 +228,7 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
                         entry.max - entry.min
                     );
                 } else {
-                    rktk_log::info!("  Key ({},{}): Not calibrated", row, col);
+                    rktk_log::info!("  Key ({},{}): Not calibrated (range too small)", row, col);
                 }
             }
         }
