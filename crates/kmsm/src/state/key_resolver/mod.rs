@@ -131,11 +131,11 @@ impl<
                         layer,
                         event.row as usize,
                         event.col as usize,
-                    ) {
-                        if *action != KeyAction::Inherit {
-                            key_action = *action;
-                            break;
-                        }
+                    )
+                        && *action != KeyAction::Inherit
+                    {
+                        key_action = *action;
+                        break;
                     }
                 }
             }

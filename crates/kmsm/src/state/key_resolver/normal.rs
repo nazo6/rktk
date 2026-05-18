@@ -42,11 +42,11 @@ fn resolve_action<
     let mut resolved_action = *keymap.get_keyaction(layer, row, col)?;
     if resolved_action == KeyAction::Inherit {
         for l in (0..layer).rev() {
-            if let Some(a) = keymap.get_keyaction(l, row, col) {
-                if *a != KeyAction::Inherit {
-                    resolved_action = *a;
-                    break;
-                }
+            if let Some(a) = keymap.get_keyaction(l, row, col)
+                && *a != KeyAction::Inherit
+            {
+                resolved_action = *a;
+                break;
             }
         }
     }

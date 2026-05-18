@@ -228,6 +228,23 @@ impl<
         &self.state
     }
 
+    pub fn inner_mut(
+        &mut self,
+    ) -> &mut super::State<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        NORMAL_MAX_PRESSED_KEYS,
+        ONESHOT_STATE_SIZE,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    > {
+        &mut self.state
+    }
+
     pub fn get_keymap_info() -> KeymapInfo {
         KeymapInfo {
             layer_count: LAYER as u8,
