@@ -13,9 +13,9 @@
 	"author": "nazo6",
 	"license": "MIT",
 	"devDependencies": {
-		"@tailwindcss/cli": "^4.1.18",
+		"@tailwindcss/cli": "^4.3.0",
 		"concurrently": "^9.2.1",
-		"daisyui": "^5.5.14",
-		"tailwindcss": "^4.1.18"
+		"daisyui": "^5.5.19",
+		"tailwindcss": "^4.3.0"
 	}
 }
