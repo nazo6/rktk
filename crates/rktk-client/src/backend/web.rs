@@ -10,6 +10,7 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::HidDevice;
+use web_sys::HidDeviceFilter;
 use web_sys::HidInputReportEvent;
 
 pub struct WebHidBackend {}
@@ -60,13 +61,10 @@ impl RrpHidBackend for WebHidBackend {
         let window = web_sys::window().context("Missing Window")?;
         let hid = window.navigator().hid();
 
-        let devices_promise = hid.request_device(&web_sys::HidDeviceRequestOptions::new(
-            &serde_wasm_bindgen::to_value(&[Filter {
-                usage_page: Some(usage_page),
-                usage: Some(usage),
-            }])
-            .unwrap(),
-        ));
+        let filter = HidDeviceFilter::new();
+        filter.set_usage_page(usage_page);
+        filter.set_usage(usage);
+        let devices_promise = hid.request_device(&web_sys::HidDeviceRequestOptions::new(&[filter]));
         let devices = wasm_bindgen_futures::JsFuture::from(devices_promise)
             .await
             .map_err(|e| anyhow::anyhow!("Cannot get devices: {:?}", e))?;
