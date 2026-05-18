@@ -228,7 +228,8 @@ impl<
         &self.state
     }
 
-    pub fn inner_mut(
+    #[cfg(test)]
+    pub(crate) fn inner_mut(
         &mut self,
     ) -> &mut super::State<
         LAYER,
