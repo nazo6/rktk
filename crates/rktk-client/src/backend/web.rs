@@ -88,14 +88,6 @@ impl RrpHidBackend for WebHidBackend {
     }
 }
 
-#[allow(non_snake_case)]
-#[derive(serde::Serialize)]
-struct Filter {
-    #[serde(rename = "usagePage")]
-    pub usage_page: Option<u16>,
-    pub usage: Option<u16>,
-}
-
 pub struct WebHidDevice {
     client: Client<HidReader, HidWriter>,
     device: HidDevice,
