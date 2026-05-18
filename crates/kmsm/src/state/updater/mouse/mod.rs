@@ -97,11 +97,11 @@ impl<'a> MouseUpdater<'a> {
 
     pub fn end(
         mut self,
-        highest_layer: usize,
+        arrow_mouse: bool,
         shared_state: &mut impl MouseEndContext,
         mut cb: impl FnMut(OutputEvent),
     ) {
-        if shared_state.is_arrow_mouse_layer(highest_layer) {
+        if arrow_mouse {
             self.state.arrow_mouse_move.0 += self.mouse_move.0;
             self.state.arrow_mouse_move.1 += self.mouse_move.1;
 

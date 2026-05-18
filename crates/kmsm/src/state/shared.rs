@@ -1,67 +1,16 @@
 use crate::time::{Duration, Instant};
 
-use crate::keymap::Keymap;
-
 pub(super) type LayerActive<const LAYER: usize> = [bool; LAYER];
 
-pub(super) struct SharedState<
-    const LAYER: usize,
-    const ROW: usize,
-    const COL: usize,
-    const ENCODER_COUNT: usize,
-    const TAP_DANCE_MAX_DEFINITIONS: usize,
-    const TAP_DANCE_MAX_REPEATS: usize,
-    const COMBO_KEY_MAX_DEFINITIONS: usize,
-    const COMBO_KEY_MAX_SOURCES: usize,
-> {
-    pub keymap: Keymap<
-        LAYER,
-        ROW,
-        COL,
-        ENCODER_COUNT,
-        TAP_DANCE_MAX_DEFINITIONS,
-        TAP_DANCE_MAX_REPEATS,
-        COMBO_KEY_MAX_DEFINITIONS,
-        COMBO_KEY_MAX_SOURCES,
-    >,
+pub(super) struct SharedState<K, const LAYER: usize> {
+    pub keymap: K,
     pub layer_active: LayerActive<LAYER>,
     pub now: Instant,
     pub locked: bool,
 }
 
-impl<
-    const LAYER: usize,
-    const ROW: usize,
-    const COL: usize,
-    const ENCODER_COUNT: usize,
-    const TAP_DANCE_MAX_DEFINITIONS: usize,
-    const TAP_DANCE_MAX_REPEATS: usize,
-    const COMBO_KEY_MAX_DEFINITIONS: usize,
-    const COMBO_KEY_MAX_SOURCES: usize,
->
-    SharedState<
-        LAYER,
-        ROW,
-        COL,
-        ENCODER_COUNT,
-        TAP_DANCE_MAX_DEFINITIONS,
-        TAP_DANCE_MAX_REPEATS,
-        COMBO_KEY_MAX_DEFINITIONS,
-        COMBO_KEY_MAX_SOURCES,
-    >
-{
-    pub fn new(
-        keymap: Keymap<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
-    ) -> Self {
+impl<K, const LAYER: usize> SharedState<K, LAYER> {
+    pub fn new(keymap: K) -> Self {
         Self {
             keymap,
             layer_active: [false; LAYER],
@@ -82,30 +31,11 @@ pub trait KeycodeUpdateContext {
 }
 
 pub trait MouseEndContext {
-    fn is_arrow_mouse_layer(&self, layer: usize) -> bool;
     fn now(&self) -> Instant;
     fn set_layer_active(&mut self, layer: usize, active: bool);
 }
 
-impl<
-    const LAYER: usize,
-    const ROW: usize,
-    const COL: usize,
-    const ENCODER_COUNT: usize,
-    const TAP_DANCE_MAX_DEFINITIONS: usize,
-    const TAP_DANCE_MAX_REPEATS: usize,
-    const COMBO_KEY_MAX_DEFINITIONS: usize,
-    const COMBO_KEY_MAX_SOURCES: usize,
-> KeycodeUpdateContext for SharedState<
-    LAYER,
-    ROW,
-    COL,
-    ENCODER_COUNT,
-    TAP_DANCE_MAX_DEFINITIONS,
-    TAP_DANCE_MAX_REPEATS,
-    COMBO_KEY_MAX_DEFINITIONS,
-    COMBO_KEY_MAX_SOURCES,
-> {
+impl<K, const LAYER: usize> KeycodeUpdateContext for SharedState<K, LAYER> {
     fn is_locked(&self) -> bool {
         self.locked
     }
@@ -119,29 +49,7 @@ impl<
     }
 }
 
-impl<
-    const LAYER: usize,
-    const ROW: usize,
-    const COL: usize,
-    const ENCODER_COUNT: usize,
-    const TAP_DANCE_MAX_DEFINITIONS: usize,
-    const TAP_DANCE_MAX_REPEATS: usize,
-    const COMBO_KEY_MAX_DEFINITIONS: usize,
-    const COMBO_KEY_MAX_SOURCES: usize,
-> MouseEndContext for SharedState<
-    LAYER,
-    ROW,
-    COL,
-    ENCODER_COUNT,
-    TAP_DANCE_MAX_DEFINITIONS,
-    TAP_DANCE_MAX_REPEATS,
-    COMBO_KEY_MAX_DEFINITIONS,
-    COMBO_KEY_MAX_SOURCES,
-> {
-    fn is_arrow_mouse_layer(&self, layer: usize) -> bool {
-        self.keymap.layers.get(layer).map(|l| l.arrow_mouse).unwrap_or(false)
-    }
-
+impl<K, const LAYER: usize> MouseEndContext for SharedState<K, LAYER> {
     fn now(&self) -> Instant {
         self.now
     }

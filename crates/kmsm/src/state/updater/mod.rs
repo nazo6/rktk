@@ -61,10 +61,10 @@ impl Updater<'_> {
 
     pub fn end(
         self,
-        highest_layer: usize,
+        arrow_mouse: bool,
         shared_state: &mut impl MouseEndContext,
         cb: impl FnMut(OutputEvent),
     ) {
-        self.mouse.end(highest_layer, shared_state, cb);
+        self.mouse.end(arrow_mouse, shared_state, cb);
     }
 }

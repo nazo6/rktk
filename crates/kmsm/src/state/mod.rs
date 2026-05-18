@@ -42,14 +42,17 @@ pub struct State<
         COMBO_KEY_MAX_SOURCES,
     >,
     shared: shared::SharedState<
+        Keymap<
+            LAYER,
+            ROW,
+            COL,
+            ENCODER_COUNT,
+            TAP_DANCE_MAX_DEFINITIONS,
+            TAP_DANCE_MAX_REPEATS,
+            COMBO_KEY_MAX_DEFINITIONS,
+            COMBO_KEY_MAX_SOURCES,
+        >,
         LAYER,
-        ROW,
-        COL,
-        ENCODER_COUNT,
-        TAP_DANCE_MAX_DEFINITIONS,
-        TAP_DANCE_MAX_REPEATS,
-        COMBO_KEY_MAX_DEFINITIONS,
-        COMBO_KEY_MAX_SOURCES,
     >,
     config: StateConfig,
     updater_state: updater::UpdaterState,
@@ -184,7 +187,9 @@ impl<
             updater.update_by_keycode(&kc, et, &mut self.shared, &mut cb);
         }
 
-        updater.end(self.shared.highest_layer(), &mut self.shared, cb);
+        let highest_layer = self.shared.highest_layer();
+        let arrow_mouse = self.shared.keymap.layers.get(highest_layer).map(|l| l.arrow_mouse).unwrap_or(false);
+        updater.end(arrow_mouse, &mut self.shared, cb);
     }
 }
 
