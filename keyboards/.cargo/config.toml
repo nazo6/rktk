@@ -5,13 +5,13 @@ debug = true
 opt-level = "z"
 lto = "fat"
 codegen-units = 1
-# panic = "immediate-abort"
-# rustflags = ["-Zlocation-detail=none"]
+panic = "immediate-abort"
+rustflags = ["-Zlocation-detail=none"]
 
 [unstable]
 build-std = ["core", "alloc"]
 build-std-features = ["optimize_for_size"]
-# panic-immediate-abort = true
+panic-immediate-abort = true
 
 [env]
 DEFMT_LOG = "info"
