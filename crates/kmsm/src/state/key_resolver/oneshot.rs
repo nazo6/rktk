@@ -1,6 +1,7 @@
-use crate::{interface::state::input_event::KeyChangeEvent, keycode::KeyCode};
-
-use super::EventType;
+use crate::{
+    interface::state::{input_event::KeyChangeEvent, output_event::EventType},
+    keycode::KeyCode,
+};
 
 #[derive(Debug)]
 struct OneshotKeyState {
@@ -24,24 +25,24 @@ impl<const SIZE: usize> OneshotState<SIZE> {
     pub fn pre_resolve(
         &mut self,
         event: Option<&KeyChangeEvent>,
-        mut cb: impl FnMut(EventType, KeyCode),
+        out: &mut heapless::Vec<(KeyCode, EventType), 16>,
     ) {
         self.oneshot.retain_mut(|oneshot| {
             if let Some(event) = event {
                 if event.pressed {
                     if oneshot.active.is_none() {
                         oneshot.active = Some((event.row, event.col));
-                        cb(EventType::Pressed, oneshot.key);
+                        let _ = out.push((oneshot.key, EventType::Pressed));
                         return true;
                     }
                 } else if oneshot.active == Some((event.row, event.col)) {
-                    cb(EventType::Released, oneshot.key);
+                    let _ = out.push((oneshot.key, EventType::Released));
                     return false;
                 }
             }
 
             if oneshot.active.is_some() {
-                cb(EventType::Pressing, oneshot.key);
+                let _ = out.push((oneshot.key, EventType::Pressing));
             }
 
             true
@@ -57,3 +58,4 @@ impl<const SIZE: usize> OneshotState<SIZE> {
         }
     }
 }
+

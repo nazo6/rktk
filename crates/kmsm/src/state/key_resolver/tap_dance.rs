@@ -1,13 +1,11 @@
 use crate::{
-    interface::state::config::TapDanceConfig,
+    interface::state::{config::TapDanceConfig, output_event::EventType},
     keycode::KeyCode,
     keymap::{TapDanceDefinition, TapDanceDefinitions},
     time::{Duration, Instant},
 };
 
-use super::EventType;
-
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TapDanceKeyState {
     None,
     PressedPending {
@@ -63,7 +61,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
         }
     }
 
-    pub fn post_resolve(&mut self, now: Instant, mut cb: impl FnMut(EventType, KeyCode)) {
+    pub fn post_resolve(&mut self, now: Instant, out: &mut heapless::Vec<(KeyCode, EventType), 16>) {
         for td in &mut self.state {
             match td.state {
                 TapDanceKeyState::None => {}
@@ -74,7 +72,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
                     // If the Pending state continues for a while (if it remains pressed), it will become Hold.
                     if now - hold_start > self.threshold {
                         if let Some(hkc) = td.get_hold_key(tap_count) {
-                            cb(EventType::Pressed, hkc);
+                            let _ = out.push((hkc, EventType::Pressed));
                         }
                         td.state = TapDanceKeyState::Holding { tap_count };
                     }
@@ -86,15 +84,15 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
                     // If the Pending state continues for a while (if it remains released), it will become Tap.
                     if now - last_release > self.threshold {
                         if let Some(tkc) = td.get_tap_key(tap_count) {
-                            cb(EventType::Pressed, tkc);
-                            cb(EventType::Released, tkc);
+                            let _ = out.push((tkc, EventType::Pressed));
+                            let _ = out.push((tkc, EventType::Released));
                         }
                         td.state = TapDanceKeyState::None;
                     }
                 }
                 TapDanceKeyState::Holding { tap_count } => {
                     if let Some(hkc) = td.get_tap_key(tap_count) {
-                        cb(EventType::Pressing, hkc);
+                        let _ = out.push((hkc, EventType::Pressing));
                     }
                 }
             }
@@ -106,7 +104,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
         id: u8,
         now: Instant,
         pressed: bool,
-        mut cb: impl FnMut(EventType, KeyCode),
+        out: &mut heapless::Vec<(KeyCode, EventType), 16>,
     ) {
         if let Some(td) = self.state.get_mut(id as usize) {
             match (pressed, &td.state) {
@@ -124,7 +122,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
                 }
                 (false, TapDanceKeyState::Holding { tap_count }) => {
                     if let Some(hkc) = td.get_hold_key(*tap_count) {
-                        cb(EventType::Released, hkc);
+                        let _ = out.push((hkc, EventType::Released));
                     }
                     td.state = TapDanceKeyState::None;
                 }
@@ -139,3 +137,4 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
         }
     }
 }
+

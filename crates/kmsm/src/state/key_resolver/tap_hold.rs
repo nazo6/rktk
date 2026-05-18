@@ -1,12 +1,10 @@
 use heapless::index_map::FnvIndexMap;
 
 use crate::{
-    interface::state::{config::TapHoldConfig, input_event::KeyChangeEvent},
+    interface::state::{config::TapHoldConfig, input_event::KeyChangeEvent, output_event::EventType},
     keycode::KeyCode,
     time::{Duration, Instant},
 };
-
-use super::EventType;
 
 #[derive(Debug)]
 struct TapHoldKeyState {
@@ -36,9 +34,8 @@ impl TapHoldState {
     pub fn pre_resolve(
         &mut self,
         event: Option<&KeyChangeEvent>,
-
         now: Instant,
-        mut cb: impl FnMut(EventType, KeyCode),
+        out: &mut heapless::Vec<(KeyCode, EventType), 16>,
     ) {
         if let Some(event) = event
             && event.pressed
@@ -55,11 +52,11 @@ impl TapHoldState {
             if let Some(press_start) = state.pending {
                 if now - press_start > self.threshold {
                     // threshold reached, it's a hold.
-                    cb(EventType::Pressed, state.hkc);
+                    let _ = out.push((state.hkc, EventType::Pressed));
                     state.pending = None;
                 }
             } else {
-                cb(EventType::Pressing, state.hkc);
+                let _ = out.push((state.hkc, EventType::Pressing));
             }
         }
     }
@@ -69,7 +66,7 @@ impl TapHoldState {
         now: Instant,
         event: &KeyChangeEvent,
         (tkc, hkc): (KeyCode, KeyCode),
-        mut cb: impl FnMut(EventType, KeyCode),
+        out: &mut heapless::Vec<(KeyCode, EventType), 16>,
     ) {
         if event.pressed {
             let _ = self.pressed.insert(
@@ -83,12 +80,13 @@ impl TapHoldState {
         } else if let Some(state) = self.pressed.remove(&(event.row, event.col)) {
             if state.pending.is_some() {
                 // released in tapping term. it's a tap.
-                cb(EventType::Pressed, state.tkc);
-                cb(EventType::Released, state.tkc);
+                let _ = out.push((state.tkc, EventType::Pressed));
+                let _ = out.push((state.tkc, EventType::Released));
             } else {
                 // released in holding term. it's a hold.
-                cb(EventType::Released, state.hkc);
+                let _ = out.push((state.hkc, EventType::Released));
             }
         }
     }
 }
+

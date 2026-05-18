@@ -1,10 +1,10 @@
-use super::shared::SharedState;
 use crate::{
     interface::state::{
         config::KeyResolverConfig, input_event::KeyChangeEvent, output_event::EventType,
     },
     keycode::{KeyAction, KeyCode},
     keymap::{ComboDefinitions, TapDanceDefinitions},
+    time::Instant,
 };
 
 mod combo;
@@ -67,7 +67,7 @@ impl<
         const ENCODER_COUNT: usize,
     >(
         &mut self,
-        shared_state: &mut SharedState<
+        keymap: &crate::keymap::Keymap<
             LAYER,
             ROW,
             COL,
@@ -77,101 +77,119 @@ impl<
             COMBO_KEY_MAX_DEFINITIONS,
             COMBO_KEY_MAX_SOURCES,
         >,
+        active_layers: &mut [bool; LAYER],
+        now: Instant,
         event: Option<&KeyChangeEvent>,
-        mut cb: impl FnMut(
-            &mut SharedState<
-                LAYER,
-                ROW,
-                COL,
-                ENCODER_COUNT,
-                TAP_DANCE_MAX_DEFINITIONS,
-                TAP_DANCE_MAX_REPEATS,
-                COMBO_KEY_MAX_DEFINITIONS,
-                COMBO_KEY_MAX_SOURCES,
-            >,
-            EventType,
-            KeyCode,
-        ),
-    ) {
-        let now = shared_state.now;
-        macro_rules! with_layer {
-            ($cb:expr) => {
-                |event_type, mut key_code| {
-                    self.combo.process_keycode(&event_type, &mut key_code, now);
-                    $cb(shared_state, event_type, key_code);
-                }
-            };
+    ) -> heapless::Vec<(KeyCode, EventType), 16> {
+        let mut out = heapless::Vec::new();
+
+        // 1. Pre-resolve phase
+        // Oneshot, TapHold and Combo states resolve their pending/time-dependent states.
+
+        // Temporarily collect sub-stage events to run them through combo processing
+        let mut sub_events = heapless::Vec::new();
+        self.oneshot.pre_resolve(event, &mut sub_events);
+        self.tap_hold.pre_resolve(event, now, &mut sub_events);
+
+        for (kc, et) in sub_events {
+            let mut keycode = kc;
+            self.combo.process_keycode(&et, &mut keycode, now);
+            if !matches!(keycode, KeyCode::None) {
+                super::updater::layer::update_layer_by_keycode(active_layers, &keycode, et);
+                let _ = out.push((keycode, et));
+            }
         }
 
-        {
-            let mut cb_with_layer = with_layer!(cb);
-
-            self.oneshot.pre_resolve(event, &mut cb_with_layer);
-            self.tap_hold.pre_resolve(event, now, &mut cb_with_layer);
-
-            self.combo.pre_resolve(now, |event_type, key_code| {
-                cb(shared_state, event_type, key_code);
-            });
+        // Combo pre_resolve events bypass combo filtering
+        let mut combo_events = heapless::Vec::new();
+        self.combo.pre_resolve(now, &mut combo_events);
+        for (kc, et) in combo_events {
+            super::updater::layer::update_layer_by_keycode(active_layers, &kc, et);
+            let _ = out.push((kc, et));
         }
 
-        let highest_layer = shared_state.highest_layer();
+        // Compute highest layer dynamically
+        let mut highest_layer = 0;
+        for (l, &active) in active_layers.iter().enumerate() {
+            if active {
+                highest_layer = l;
+            }
+        }
 
+        // 2. Direct event processing phase
         if let Some(event) = event {
-            let Some(mut key_action) = shared_state
-                .keymap
+            let Some(mut key_action) = keymap
                 .get_keyaction(highest_layer, event.row as usize, event.col as usize)
                 .copied()
             else {
-                return;
+                return out;
             };
 
             if key_action == KeyAction::Inherit {
-                for layer in 0..highest_layer {
-                    let Some(action) = shared_state.keymap.get_keyaction(
+                for layer in (0..highest_layer).rev() {
+                    if let Some(action) = keymap.get_keyaction(
                         layer,
                         event.row as usize,
                         event.col as usize,
-                    ) else {
-                        return;
-                    };
-                    if *action != KeyAction::Inherit {
-                        key_action = *action;
-                        break;
+                    ) {
+                        if *action != KeyAction::Inherit {
+                            key_action = *action;
+                            break;
+                        }
                     }
                 }
             }
 
-            let mut cb_with_layer = with_layer!(cb);
-
+            let mut process_events = heapless::Vec::new();
             match key_action {
                 KeyAction::Inherit => {}
-                KeyAction::Normal(key_code) => {
-                    self.normal_state
-                        .process_event(event, (key_code, None), &mut cb_with_layer);
-                }
-                KeyAction::Normal2(key_code, key_code1) => {
+                KeyAction::Normal(_) | KeyAction::Normal2(_, _) => {
                     self.normal_state.process_event(
                         event,
-                        (key_code, Some(key_code1)),
-                        &mut cb_with_layer,
+                        key_action,
+                        highest_layer,
+                        keymap,
+                        &mut process_events,
                     );
                 }
                 KeyAction::TapHold(tkc, hkc) => {
                     self.tap_hold
-                        .process_event(now, event, (tkc, hkc), &mut cb_with_layer);
+                        .process_event(now, event, (tkc, hkc), &mut process_events);
                 }
                 KeyAction::OneShot(key_code) => {
                     self.oneshot.process_keycode(&key_code, event.pressed);
                 }
                 KeyAction::TapDance(id) => {
                     self.tap_dance
-                        .process_event(id, now, event.pressed, &mut cb_with_layer);
+                        .process_event(id, now, event.pressed, &mut process_events);
+                }
+            }
+
+            for (kc, et) in process_events {
+                let mut keycode = kc;
+                self.combo.process_keycode(&et, &mut keycode, now);
+                if !matches!(keycode, KeyCode::None) {
+                    super::updater::layer::update_layer_by_keycode(active_layers, &keycode, et);
+                    let _ = out.push((keycode, et));
                 }
             }
         }
 
-        let mut cb_with_layer = with_layer!(cb);
-        self.tap_dance.post_resolve(now, &mut cb_with_layer);
-        self.normal_state.post_resolve(&mut cb_with_layer);
+        // 3. Post-resolve phase
+        let mut post_events = heapless::Vec::new();
+        self.tap_dance.post_resolve(now, &mut post_events);
+        self.normal_state.post_resolve(keymap, &mut post_events);
+
+        for (kc, et) in post_events {
+            let mut keycode = kc;
+            self.combo.process_keycode(&et, &mut keycode, now);
+            if !matches!(keycode, KeyCode::None) {
+                super::updater::layer::update_layer_by_keycode(active_layers, &keycode, et);
+                let _ = out.push((keycode, et));
+            }
+        }
+
+        out
     }
 }
+

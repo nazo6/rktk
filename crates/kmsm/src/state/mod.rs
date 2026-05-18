@@ -172,10 +172,17 @@ impl<
             _ => None,
         };
 
-        self.key_resolver
-            .resolve_key(&mut self.shared, key_change.as_ref(), |shared, et, kc| {
-                updater.update_by_keycode(&kc, et, shared, &mut cb);
-            });
+        let mut temp_layers = self.shared.layer_active;
+        let resolved_events = self.key_resolver.resolve_key(
+            &self.shared.keymap,
+            &mut temp_layers,
+            self.shared.now,
+            key_change.as_ref(),
+        );
+
+        for (kc, et) in resolved_events {
+            updater.update_by_keycode(&kc, et, &mut self.shared, &mut cb);
+        }
 
         updater.end(self.shared.highest_layer(), &mut self.shared, cb);
     }

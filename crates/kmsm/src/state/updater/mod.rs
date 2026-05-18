@@ -8,8 +8,8 @@ use crate::{
 
 use super::shared::SharedState;
 
-mod layer;
-mod mouse;
+pub(crate) mod layer;
+pub(crate) mod mouse;
 
 pub struct UpdaterState {
     mouse: mouse::MouseState,

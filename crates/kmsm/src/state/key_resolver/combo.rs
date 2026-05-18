@@ -2,15 +2,13 @@
 #![allow(unused_variables)]
 
 use crate::{
-    interface::state::config::ComboConfig,
+    interface::state::{config::ComboConfig, output_event::EventType},
     keycode::KeyCode,
     keymap::{ComboDefinition, ComboDefinitions},
     time::{Duration, Instant},
 };
 
-use super::EventType;
-
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ComboUnitState<const MAX_SOURCES: usize> {
     None,
     Pending((Instant, [bool; MAX_SOURCES])),
@@ -42,14 +40,14 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
         }
     }
 
-    pub fn pre_resolve(&mut self, now: Instant, mut cb_direct: impl FnMut(EventType, KeyCode)) {
+    pub fn pre_resolve(&mut self, now: Instant, out: &mut heapless::Vec<(KeyCode, EventType), 16>) {
         for unit in self.state.iter_mut() {
             if let Some(def) = &mut unit.def
                 && let ComboUnitState::Pending((start, state)) = unit.state
-                    && now - start > Duration::from_millis(self.config.threshold) {
+                && now - start > Duration::from_millis(self.config.threshold) {
                         for (i, enabled) in state.iter().enumerate() {
                             if *enabled {
-                                cb_direct(EventType::Pressed, def.src[i].unwrap());
+                                let _ = out.push((def.src[i].unwrap(), EventType::Pressed));
                             }
                         }
                         unit.state = ComboUnitState::None;
@@ -112,3 +110,4 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
         }
     }
 }
+
