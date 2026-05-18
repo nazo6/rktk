@@ -1,10 +1,10 @@
 use core::convert::Infallible;
 
-use embassy_rp::dma::Channel;
+use embassy_rp::dma::{self, Channel, ChannelInstance};
 use embassy_rp::pio::{
     Config, FifoJoin, Instance, Pio, PioPin, ShiftConfig, ShiftDirection, StateMachine,
 };
-use embassy_rp::{Peri, clocks};
+use embassy_rp::{Peri, clocks, interrupt};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
@@ -16,10 +16,11 @@ pub struct Ws2812Pio<'a, const MAX_LED_COUNT: usize, I: Instance> {
 }
 
 impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I> {
-    pub fn new<'b: 'a>(
+    pub fn new<'b: 'a, D: ChannelInstance>(
         mut pio: Pio<'a, I>,
         data_pin: Peri<'b, impl PioPin>,
-        dma: Channel<'a>,
+        dma: Peri<'a, D>,
+        irq: impl interrupt::typelevel::Binding<D::Interrupt, dma::InterruptHandler<D>> + 'a,
     ) -> Self {
         // Setup sm0
 
@@ -76,7 +77,10 @@ impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I
         pio.sm0.set_config(&cfg);
         pio.sm0.set_enable(true);
 
-        Self { dma, sm: pio.sm0 }
+        Self {
+            dma: Channel::new(dma, irq),
+            sm: pio.sm0,
+        }
     }
 }
 

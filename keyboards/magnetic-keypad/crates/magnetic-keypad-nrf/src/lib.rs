@@ -22,7 +22,7 @@ use rktk_drivers_common::{
     magnetic::{
         matrix::{MagneticMatrix, MuxScanner},
         mux::sn74lv4051::Sn74lv4051,
-        profile::{SingleProfileMap, LinearProfile},
+        profile::{LinearProfile, SingleProfileMap},
     },
     usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig},
 };
@@ -41,7 +41,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
     let p = embassy_nrf::init(Default::default());
 
     // Spawn XW09D touch controller background task (polling ch0-3 for keys, ch4-8 for slider)
-    spawner.spawn(touch_task(p.TWISPI0, p.P0_06.into(), p.P0_08.into())).unwrap();
+    spawner.spawn(touch_task(p.TWISPI0, p.P0_06.into(), p.P0_08.into()).unwrap());
     // Multiplexer selection pins
     // SEL A: P0.29, SEL B: P0.02, SEL C: P1.15
     let mux_s0 = Output::new(p.P0_29, Level::Low, OutputDrive::Standard);
@@ -92,11 +92,12 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
 
     let flash = embassy_nrf::nvmc::Nvmc::new(p.NVMC);
     let async_flash = embassy_embedded_hal::adapter::BlockingAsync::new(flash);
-    let storage = rktk_drivers_common::storage::flash_sequential_map::FlashSequentialMapStorage::new(
-        async_flash,
-        0xFC000,
-        16 * 1024,
-    );
+    let storage =
+        rktk_drivers_common::storage::flash_sequential_map::FlashSequentialMapStorage::new(
+            async_flash,
+            0xFC000,
+            16 * 1024,
+        );
 
     let drivers = Drivers {
         keyscan,
@@ -182,10 +183,16 @@ pub async fn touch_task(
                 if let Some(prev_pos) = prev_slider_pos {
                     let diff = pos - prev_pos;
                     if diff >= SLIDER_THRESHOLD {
-                        let _ = enc_sender.try_send((1, rktk::drivers::interface::encoder::EncoderDirection::Clockwise));
+                        let _ = enc_sender.try_send((
+                            1,
+                            rktk::drivers::interface::encoder::EncoderDirection::Clockwise,
+                        ));
                         prev_slider_pos = Some(pos);
                     } else if diff <= -SLIDER_THRESHOLD {
-                        let _ = enc_sender.try_send((1, rktk::drivers::interface::encoder::EncoderDirection::CounterClockwise));
+                        let _ = enc_sender.try_send((
+                            1,
+                            rktk::drivers::interface::encoder::EncoderDirection::CounterClockwise,
+                        ));
                         prev_slider_pos = Some(pos);
                     }
                 } else {
