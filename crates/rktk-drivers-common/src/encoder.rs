@@ -21,11 +21,14 @@ impl<PIN: Wait + InputPin, const ENCODER_COUNT: usize> EncoderDriver
     for GeneralEncoder<PIN, ENCODER_COUNT>
 {
     async fn read_wait(&mut self) -> (u8, EncoderDirection) {
-        let futures = self
-            .encoders
-            .iter_mut()
-            .enumerate()
-            .map(|(i, (a, b))| async move {
+        let encoders = self.encoders.each_mut();
+
+        let mut i = 0;
+        let futures = encoders.map(|pins| {
+            i += 1;
+            async move {
+                let a = &mut pins.0;
+                let b = &mut pins.1;
                 let dir = match select(a.wait_for_any_edge(), b.wait_for_any_edge()).await {
                     Either::First(_) => {
                         Timer::after_ticks(100).await;
@@ -45,8 +48,8 @@ impl<PIN: Wait + InputPin, const ENCODER_COUNT: usize> EncoderDriver
                     }
                 };
                 (i as u8, dir)
-            })
-            .collect::<heapless::Vec<_, ENCODER_COUNT>>();
+            }
+        });
 
         select_slice(core::pin::pin!(futures)).await.0
     }
