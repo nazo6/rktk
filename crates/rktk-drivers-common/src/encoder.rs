@@ -25,6 +25,7 @@ impl<PIN: Wait + InputPin, const ENCODER_COUNT: usize> EncoderDriver
 
         let mut i = 0;
         let futures = encoders.map(|pins| {
+            let id = i;
             i += 1;
             async move {
                 let a = &mut pins.0;
@@ -47,7 +48,7 @@ impl<PIN: Wait + InputPin, const ENCODER_COUNT: usize> EncoderDriver
                         }
                     }
                 };
-                (i as u8, dir)
+                (id as u8, dir)
             }
         });
 
