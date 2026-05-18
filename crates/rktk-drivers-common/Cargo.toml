@@ -31,7 +31,6 @@ rktk = { workspace = true }
 rktk-log = { workspace = true }
 sequential-storage = { workspace = true }
 ssd1306 = { workspace = true }
-ssmarshal = { workspace = true, optional = true }
 static_cell = { workspace = true, optional = true }
 # Due to compatibility with nrf-sdc, the revision is currently locked.
 trouble-host = { workspace = true, features = ["security"], optional = true }
@@ -61,7 +60,7 @@ defmt-timestamp = ["defmt"]
 defmt-usb = ["defmt", "dep:critical-section"]
 ## Enables logging using the `log` crate.
 log = ["dep:log"]
-reporter-trouble = ["dep:ssmarshal", "dep:static_cell", "trouble"]
+reporter-trouble = ["dep:static_cell", "trouble"]
 trouble = ["dep:rand_core", "dep:trouble-host"]
 ## Enables remote wakeup feature of USB.
 ## NOTE: Usually, this is automatically enabled by each platform's driver crate and you should not enable this feature manually.

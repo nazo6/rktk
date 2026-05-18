@@ -65,7 +65,7 @@ pub(crate) mod sjoin {
                         $(
                             let ts = Box::leak(Box::new(embassy_executor::raw::TaskStorage::new()));
                             let st = ts.spawn(move || $future);
-                            $spawner.spawn(st).unwrap();
+                            $spawner.spawn(st.unwrap());
                         )*
                     }
                 }

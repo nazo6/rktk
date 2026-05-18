@@ -6,7 +6,7 @@ use embassy_rp::{
     bind_interrupts,
     gpio::{Input, Level, Output},
     i2c::I2c,
-    peripherals::{I2C1, PIO0, PIO1, USB},
+    peripherals::{DMA_CH0, DMA_CH1, DMA_CH2, DMA_CH3, I2C1, PIO0, PIO1, USB},
     pio::Pio,
 };
 
@@ -36,6 +36,8 @@ bind_interrupts!(pub struct Irqs {
     I2C1_IRQ => embassy_rp::i2c::InterruptHandler<I2C1>;
     PIO0_IRQ_0 => embassy_rp::pio::InterruptHandler<PIO0>;
     PIO1_IRQ_0 => embassy_rp::pio::InterruptHandler<PIO1>;
+    DMA_IRQ_0 => embassy_rp::dma::InterruptHandler<DMA_CH0>, embassy_rp::dma::InterruptHandler<DMA_CH1>,
+        embassy_rp::dma::InterruptHandler<DMA_CH2>, embassy_rp::dma::InterruptHandler<DMA_CH3>;
 });
 
 pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) {
@@ -64,6 +66,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         p.PIN_20,
         p.DMA_CH0,
         p.DMA_CH1,
+        Irqs,
         pmw3360::recommended_spi_config(),
     ));
     let spi = EmbassySpiDevice::new(&bus, Output::new(p.PIN_21, embassy_rp::gpio::Level::High));
@@ -107,9 +110,9 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
     let split = PioHalfDuplexSplitDriver::new(pio, p.PIN_1);
 
     let pio = Pio::new(p.PIO1, Irqs);
-    let rgb = Ws2812Pio::<'_, 30, _>::new(pio, p.PIN_0, p.DMA_CH2);
+    let rgb = Ws2812Pio::<'_, 30, _>::new(pio, p.PIN_0, p.DMA_CH2, Irqs);
 
-    let storage = init_storage::<{ 4 * 1024 * 1024 }>(p.FLASH, p.DMA_CH3.into());
+    let storage = init_storage::<_, { 4 * 1024 * 1024 }>(p.FLASH, p.DMA_CH3, Irqs);
 
     let drivers = Drivers {
         keyscan,

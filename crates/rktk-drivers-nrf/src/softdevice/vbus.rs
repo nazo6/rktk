@@ -30,7 +30,7 @@ impl SoftdeviceVbusDetect {
         let d = Self(SoftwareVbusDetect::new(true, false));
         let d = VBUS_DETECT.init(d);
 
-        spawner.must_spawn(sd_vbus_task(d, chan));
+        spawner.spawn(sd_vbus_task(d, chan).unwrap());
 
         d
     }

@@ -88,7 +88,7 @@ pub struct SoftdeviceBlePeripheralSplitDriver {
 
 impl SoftdeviceBlePeripheralSplitDriver {
     pub async fn new(spawner: embassy_executor::Spawner, sd: &'static Softdevice) -> Self {
-        spawner.spawn(ble_split_peripheral_task(sd)).unwrap();
+        spawner.spawn(ble_split_peripheral_task(sd).unwrap());
 
         Self {
             _phantom: PhantomData,

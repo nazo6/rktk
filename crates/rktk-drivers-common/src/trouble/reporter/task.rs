@@ -2,12 +2,12 @@ use embassy_futures::{join::join, select::select};
 use rand_core::{CryptoRng, RngCore};
 use rktk::utils::Receiver;
 use rktk_log::{info, warn};
-use ssmarshal::serialize;
 use trouble_host::{
-    Address, Controller, Error, Host, HostResources,
+    Address, Controller, Error, HostResources,
     gap::{GapConfig, PeripheralConfig},
     prelude::*,
 };
+use usbd_hid::descriptor::AsInputReport;
 
 use super::{Report, TroubleReporterConfig, server::Server};
 
@@ -28,6 +28,7 @@ pub async fn run<
     info!("Our address = {:?}", address);
 
     let mut resources: HostResources<
+        _,
         DefaultPacketPool,
         CONNECTIONS_MAX,
         L2CAP_CHANNELS_MAX,
@@ -35,12 +36,8 @@ pub async fn run<
     > = HostResources::new();
     let stack = trouble_host::new(controller, &mut resources)
         .set_random_address(address)
-        .set_random_generator_seed(rng);
-    let Host {
-        mut peripheral,
-        runner,
-        ..
-    } = stack.build();
+        .set_random_generator_seed(rng)
+        .build();
 
     info!("Starting advertising and GATT service");
     let server = Server::new_with_config(GapConfig::Peripheral(
@@ -51,9 +48,9 @@ pub async fn run<
     ));
     match server {
         Ok(server) => {
-            let _ = join(ble_task(runner), async {
+            let _ = join(ble_task(stack.runner()), async {
                 loop {
-                    match advertise(config.advertise_name, &mut peripheral).await {
+                    match advertise(config.advertise_name, &mut stack.peripheral()).await {
                         Ok(conn) => {
                             let gatt_conn = conn.with_attribute_server(&server).unwrap();
                             select(
@@ -146,7 +143,7 @@ async fn advertise<'a, C: Controller, P: PacketPool>(
     AdStructure::encode_slice(
         &[
             AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-            AdStructure::ServiceUuids16(&[[0x0f, 0x18], [0x0a, 0x18], [0x12, 0x18]]),
+            AdStructure::CompleteServiceUuids16(&[[0x0f, 0x18], [0x0a, 0x18], [0x12, 0x18]]),
             AdStructure::CompleteLocalName(name.as_bytes()),
         ],
         &mut advertiser_data[..],
@@ -178,18 +175,23 @@ async fn hid_task<C: Controller, P: PacketPool>(
         match report {
             Report::Keyboard(keyboard_report) => {
                 let mut buf = [0u8; 8];
-                if let Err(_e) = serialize(&mut buf, &keyboard_report) {
+                if let Err(_e) = keyboard_report.serialize(&mut buf) {
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
-                if let Err(e) = server.hid_service.input_keyboard.notify(conn, &buf).await {
+                if let Err(e) = server
+                    .hid_service
+                    .input_keyboard
+                    .notify(conn, &buf, true)
+                    .await
+                {
                     rktk_log::error!("failed to send keyboard report: {:?}", e);
                     continue;
                 }
             }
             Report::MediaKeyboard(media_keyboard_report) => {
                 let mut buf = [0u8; 8];
-                if let Err(_e) = serialize(&mut buf, &media_keyboard_report) {
+                if let Err(_e) = media_keyboard_report.serialize(&mut buf) {
                     rktk_log::error!("failed to serialize media keyboard report");
                     continue;
                 }
@@ -197,7 +199,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
                 if let Err(e) = server
                     .hid_service
                     .input_media_keyboard
-                    .notify(conn, &usage_id)
+                    .notify(conn, &usage_id, true)
                     .await
                 {
                     rktk_log::error!("failed to send media keyboard report: {:?}", e);
@@ -206,11 +208,16 @@ async fn hid_task<C: Controller, P: PacketPool>(
             }
             Report::Mouse(mouse_report) => {
                 let mut buf = [0u8; 5];
-                if let Err(_e) = serialize(&mut buf, &mouse_report) {
+                if let Err(_e) = mouse_report.serialize(&mut buf) {
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
-                if let Err(e) = server.hid_service.input_mouse.notify(conn, &buf).await {
+                if let Err(e) = server
+                    .hid_service
+                    .input_mouse
+                    .notify(conn, &buf, true)
+                    .await
+                {
                     rktk_log::error!("failed to send keyboard report: {:?}", e);
                     continue;
                 }

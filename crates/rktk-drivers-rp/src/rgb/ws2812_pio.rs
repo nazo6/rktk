@@ -1,25 +1,26 @@
 use core::convert::Infallible;
 
-use embassy_rp::dma::{AnyChannel, Channel};
+use embassy_rp::dma::{self, Channel, ChannelInstance};
 use embassy_rp::pio::{
     Config, FifoJoin, Instance, Pio, PioPin, ShiftConfig, ShiftDirection, StateMachine,
 };
-use embassy_rp::{Peri, clocks};
+use embassy_rp::{Peri, clocks, interrupt};
 use embassy_time::Timer;
 use fixed::types::U24F8;
 use fixed_macro::fixed;
 use rktk::drivers::interface::rgb::{LedRgb, RgbDriver};
 
 pub struct Ws2812Pio<'a, const MAX_LED_COUNT: usize, I: Instance> {
-    dma: Peri<'a, AnyChannel>,
+    dma: Channel<'a>,
     sm: StateMachine<'a, I, 0>,
 }
 
 impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I> {
-    pub fn new<'b: 'a>(
+    pub fn new<'b: 'a, D: ChannelInstance>(
         mut pio: Pio<'a, I>,
         data_pin: Peri<'b, impl PioPin>,
-        dma: Peri<'a, impl Channel>,
+        dma: Peri<'a, D>,
+        irq: impl interrupt::typelevel::Binding<D::Interrupt, dma::InterruptHandler<D>> + 'a,
     ) -> Self {
         // Setup sm0
 
@@ -77,7 +78,7 @@ impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I
         pio.sm0.set_enable(true);
 
         Self {
-            dma: dma.into(),
+            dma: Channel::new(dma, irq),
             sm: pio.sm0,
         }
     }
@@ -98,10 +99,7 @@ impl<const MAX_LED_COUNT: usize, I: Instance + 'static> RgbDriver
         }
 
         // DMA transfer
-        self.sm
-            .tx()
-            .dma_push(self.dma.reborrow(), &words, false)
-            .await;
+        self.sm.tx().dma_push(&mut self.dma, &words, false).await;
 
         Timer::after_micros(55).await;
 

@@ -20,7 +20,6 @@ postcard = { workspace = true, features = [
 ], optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
 serde_with = { workspace = true, features = ["macros"], optional = true }
-ssmarshal = { workspace = true, optional = true }
 strum = { workspace = true, features = ["derive"] }
 usbd-hid = { workspace = true, optional = true }
 
@@ -30,7 +29,7 @@ pretty_assertions = { workspace = true }
 usbd-hid = { workspace = true }
 
 [features]
-_check = ["defmt", "ssmarshal/std", "state"]
+_check = ["defmt", "state"]
 ## Derives defmt's Format trait
 defmt = ["dep:defmt"]
 ## Derives postcard's MaxSize trait

@@ -1,6 +1,6 @@
 use embassy_usb::{
     Builder,
-    class::hid::{HidReaderWriter, HidWriter, State},
+    class::hid::{HidBootProtocol, HidReaderWriter, HidSubclass, HidWriter, State},
     driver::Driver,
 };
 use rktk::{drivers::interface::usb::UsbReporterDriverBuilder, singleton};
@@ -58,6 +58,8 @@ impl<D: Driver<'static>> CommonUsbReporterBuilder<D> {
                 request_handler: None,
                 poll_ms: opts.keyboard_poll_interval,
                 max_packet_size: 64,
+                hid_boot_protocol: HidBootProtocol::Keyboard,
+                hid_subclass: HidSubclass::Boot,
             };
             HidReaderWriter::<_, 1, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
@@ -67,6 +69,8 @@ impl<D: Driver<'static>> CommonUsbReporterBuilder<D> {
                 request_handler: None,
                 poll_ms: opts.mouse_poll_interval,
                 max_packet_size: 64,
+                hid_boot_protocol: HidBootProtocol::Keyboard,
+                hid_subclass: HidSubclass::Boot,
             };
             HidWriter::<_, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
@@ -76,6 +80,8 @@ impl<D: Driver<'static>> CommonUsbReporterBuilder<D> {
                 request_handler: None,
                 poll_ms: opts.keyboard_poll_interval,
                 max_packet_size: 64,
+                hid_boot_protocol: HidBootProtocol::None,
+                hid_subclass: HidSubclass::No,
             };
             HidWriter::<_, 8>::new(&mut builder, singleton!(State::new(), State), config)
         };
@@ -86,6 +92,8 @@ impl<D: Driver<'static>> CommonUsbReporterBuilder<D> {
                 request_handler: None,
                 poll_ms: 1,
                 max_packet_size: 64,
+                hid_boot_protocol: HidBootProtocol::None,
+                hid_subclass: HidSubclass::No,
             };
             HidReaderWriter::<_, RRP_HID_BUFFER_SIZE, RRP_HID_BUFFER_SIZE>::new(
                 &mut builder,
@@ -100,6 +108,8 @@ impl<D: Driver<'static>> CommonUsbReporterBuilder<D> {
                 request_handler: None,
                 poll_ms: 1,
                 max_packet_size: 64,
+                hid_boot_protocol: HidBootProtocol::None,
+                hid_subclass: HidSubclass::No,
             };
             HidReaderWriter::<_, RAW_HID_BUFFER_SIZE, RAW_HID_BUFFER_SIZE>::new(
                 &mut builder,

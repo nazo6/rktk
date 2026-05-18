@@ -23,7 +23,7 @@ cortex-m-rt = { workspace = true }
 defmt = { workspace = true, optional = true }
 embassy-embedded-hal = { workspace = true }
 embassy-executor = { workspace = true, features = [
-  "arch-cortex-m",
+  "platform-cortex-m",
   "executor-interrupt",
   "executor-thread",
 ] }

@@ -22,7 +22,7 @@ test = false
 cortex-m = { workspace = true }
 cortex-m-rt = { workspace = true }
 embassy-executor = { workspace = true, features = [
-  "arch-cortex-m",
+  "platform-cortex-m",
   "executor-interrupt",
   "executor-thread",
 ] }

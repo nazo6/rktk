@@ -44,7 +44,6 @@ schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 smart-default = { workspace = true }
-ssmarshal = { workspace = true, default-features = true }
 
 [features]
 _check = ["alloc", "defmt", "log", "rrp-log"]
