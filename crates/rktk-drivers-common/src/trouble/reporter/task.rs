@@ -2,12 +2,12 @@ use embassy_futures::{join::join, select::select};
 use rand_core::{CryptoRng, RngCore};
 use rktk::utils::Receiver;
 use rktk_log::{info, warn};
-use ssmarshal::serialize;
 use trouble_host::{
     Address, Controller, Error, Host, HostResources,
     gap::{GapConfig, PeripheralConfig},
     prelude::*,
 };
+use usbd_hid::descriptor::AsInputReport;
 
 use super::{Report, TroubleReporterConfig, server::Server};
 
@@ -28,6 +28,7 @@ pub async fn run<
     info!("Our address = {:?}", address);
 
     let mut resources: HostResources<
+        _,
         DefaultPacketPool,
         CONNECTIONS_MAX,
         L2CAP_CHANNELS_MAX,
@@ -146,7 +147,7 @@ async fn advertise<'a, C: Controller, P: PacketPool>(
     AdStructure::encode_slice(
         &[
             AdStructure::Flags(LE_GENERAL_DISCOVERABLE | BR_EDR_NOT_SUPPORTED),
-            AdStructure::ServiceUuids16(&[[0x0f, 0x18], [0x0a, 0x18], [0x12, 0x18]]),
+            AdStructure::CompleteServiceUuids16(&[[0x0f, 0x18], [0x0a, 0x18], [0x12, 0x18]]),
             AdStructure::CompleteLocalName(name.as_bytes()),
         ],
         &mut advertiser_data[..],
@@ -178,7 +179,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
         match report {
             Report::Keyboard(keyboard_report) => {
                 let mut buf = [0u8; 8];
-                if let Err(_e) = serialize(&mut buf, &keyboard_report) {
+                if let Err(_e) = keyboard_report.serialize(&mut buf) {
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
@@ -189,7 +190,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
             }
             Report::MediaKeyboard(media_keyboard_report) => {
                 let mut buf = [0u8; 8];
-                if let Err(_e) = serialize(&mut buf, &media_keyboard_report) {
+                if let Err(_e) = media_keyboard_report.serialize(&mut buf) {
                     rktk_log::error!("failed to serialize media keyboard report");
                     continue;
                 }
@@ -206,7 +207,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
             }
             Report::Mouse(mouse_report) => {
                 let mut buf = [0u8; 5];
-                if let Err(_e) = serialize(&mut buf, &mouse_report) {
+                if let Err(_e) = mouse_report.serialize(&mut buf) {
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }

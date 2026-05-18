@@ -71,7 +71,7 @@ pub fn init_softdevice(ble_gap_name: &'static str) -> &'static mut Softdevice {
 
 /// Starts softdevice task
 pub fn start_softdevice(spawner: embassy_executor::Spawner, sd: &'static Softdevice) {
-    spawner.spawn(softdevice_task(sd)).unwrap();
+    spawner.spawn(softdevice_task(sd).unwrap());
 }
 
 #[embassy_executor::task]

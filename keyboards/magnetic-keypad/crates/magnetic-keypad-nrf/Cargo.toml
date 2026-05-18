@@ -24,7 +24,7 @@ cortex-m = { workspace = true, features = ["critical-section-single-core"] }
 cortex-m-rt = { workspace = true }
 defmt = { workspace = true }
 embassy-executor = { workspace = true, features = [
-  "arch-cortex-m",
+  "platform-cortex-m",
   "executor-interrupt",
   "executor-thread"
 ] }

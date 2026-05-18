@@ -7,7 +7,7 @@ use nrf_softdevice::ble::{
     Connection,
     gatt_server::{self, NotifyValueError},
 };
-use ssmarshal::serialize;
+use usbd_hid::descriptor::AsInputReport as _;
 
 use crate::softdevice::ble::{InputReport, KB_OUTPUT_LED_SIGNAL};
 use descriptor::{HidKind, ReportKind, hid_desc};
@@ -105,7 +105,7 @@ impl HidService {
         match report {
             InputReport::Keyboard(r) => {
                 let mut buf = [0u8; 8];
-                if let Ok(n) = serialize(&mut buf, &r) {
+                if let Ok(n) = r.serialize(&mut buf) {
                     gatt_server::notify_value(
                         conn,
                         self.keyboard_input_report_value_handle,
@@ -115,7 +115,7 @@ impl HidService {
             }
             InputReport::MediaKeyboard(r) => {
                 let mut buf = [0u8; 2];
-                if let Ok(n) = serialize(&mut buf, &r) {
+                if let Ok(n) = r.serialize(&mut buf) {
                     gatt_server::notify_value(
                         conn,
                         self.media_input_report_value_handle,
@@ -125,7 +125,7 @@ impl HidService {
             }
             InputReport::Mouse(r) => {
                 let mut buf = [0u8; 5];
-                if let Ok(n) = serialize(&mut buf, &r) {
+                if let Ok(n) = r.serialize(&mut buf) {
                     gatt_server::notify_value(
                         conn,
                         self.mouse_input_report_value_handle,

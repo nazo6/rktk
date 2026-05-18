@@ -57,7 +57,6 @@ rktk-drivers-common = { workspace = true, features = ["usb-remote-wakeup"] }
 rktk-log = { workspace = true }
 sequential-storage = { workspace = true }
 serde = { workspace = true, optional = true }
-ssmarshal = { workspace = true }
 static_cell = { workspace = true }
 usbd-hid = { workspace = true }
 
