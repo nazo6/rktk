@@ -14,7 +14,7 @@ license = "MIT"
 [workspace.dependencies]
 anyhow = "1.0.90"
 async-channel = "2.3.1"
-async-hid = { version = "0.4.0" }
+async-hid = { version = "0.5.1" }
 atomic-pool = "2.0.0"
 bitvec = { version = "1.0.1", default-features = false }
 blinksy = { version = "0.11.0" }
@@ -87,12 +87,12 @@ serde_json = "1.0.122"
 serde-wasm-bindgen = { version = "0.6.5" }
 serde_with = { version = "3.9.0", default-features = false }
 # This is pinned because of serialport/serialport-rs#300
-serialport = "=4.7.3"
+serialport = "4.9.0"
 smart-default = "0.7.1"
 smol = { version = "2.0.2" }
 ssd1306 = { version = "0.10.0", features = ["async"] }
 static_cell = "2.1.0"
-strum = { version = "0.27.1", default-features = false }
+strum = { version = "0.28.0", default-features = false }
 thiserror = { version = "2.0.3", default-features = false }
 tokio = { version = "1.41.1" }
 tracing-log = { version = "0.2.0" }
