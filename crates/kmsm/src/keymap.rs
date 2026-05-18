@@ -8,6 +8,11 @@ use crate::{
     macros::common_derive,
 };
 
+/// Trait for looking up actions in a keymap.
+pub trait KeymapLookup {
+    fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction>;
+}
+
 /// Root keymap type
 ///
 /// This structure holds all information about keymap.
@@ -25,6 +30,32 @@ pub struct Keymap<
     pub layers: [Layer<ROW, COL, ENCODER_COUNT>; LAYER],
     pub tap_dance: TapDanceDefinitions<TAP_DANCE_MAX_DEFINITIONS, TAP_DANCE_MAX_REPEATS>,
     pub combo: ComboDefinitions<COMBO_KEY_MAX_DEFINITIONS, COMBO_KEY_MAX_SOURCES>,
+}
+
+impl<
+        const LAYER: usize,
+        const ROW: usize,
+        const COL: usize,
+        const ENCODER_COUNT: usize,
+        const TAP_DANCE_MAX_DEFINITIONS: usize,
+        const TAP_DANCE_MAX_REPEATS: usize,
+        const COMBO_KEY_MAX_DEFINITIONS: usize,
+        const COMBO_KEY_MAX_SOURCES: usize,
+    >
+    KeymapLookup for Keymap<
+        LAYER,
+        ROW,
+        COL,
+        ENCODER_COUNT,
+        TAP_DANCE_MAX_DEFINITIONS,
+        TAP_DANCE_MAX_REPEATS,
+        COMBO_KEY_MAX_DEFINITIONS,
+        COMBO_KEY_MAX_SOURCES,
+    >
+{
+    fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
+        self.get_keyaction(layer, row, col)
+    }
 }
 
 impl<

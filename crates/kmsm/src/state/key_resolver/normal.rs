@@ -15,26 +15,8 @@ pub struct NormalState<const MAX_PRESSED_KEYS: usize> {
     pressed: heapless::Vec<ActiveKey, MAX_PRESSED_KEYS>,
 }
 
-fn resolve_action<
-    const LAYER: usize,
-    const ROW: usize,
-    const COL: usize,
-    const ENCODER_COUNT: usize,
-    const TAP_DANCE_MAX_DEFINITIONS: usize,
-    const TAP_DANCE_MAX_REPEATS: usize,
-    const COMBO_KEY_MAX_DEFINITIONS: usize,
-    const COMBO_KEY_MAX_SOURCES: usize,
->(
-    keymap: &crate::keymap::Keymap<
-        LAYER,
-        ROW,
-        COL,
-        ENCODER_COUNT,
-        TAP_DANCE_MAX_DEFINITIONS,
-        TAP_DANCE_MAX_REPEATS,
-        COMBO_KEY_MAX_DEFINITIONS,
-        COMBO_KEY_MAX_SOURCES,
-    >,
+fn resolve_action(
+    keymap: &impl crate::keymap::KeymapLookup,
     layer: usize,
     row: usize,
     col: usize,
@@ -60,30 +42,12 @@ impl<const MAX_PRESSED_KEYS: usize> NormalState<MAX_PRESSED_KEYS> {
         }
     }
 
-    pub fn process_event<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >(
+    pub fn process_event(
         &mut self,
         event: &KeyChangeEvent,
         key_action: KeyAction,
         highest_layer: usize,
-        keymap: &crate::keymap::Keymap<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
+        keymap: &impl crate::keymap::KeymapLookup,
         out: &mut heapless::Vec<(KeyCode, EventType), 16>,
     ) {
         if event.pressed {
@@ -131,27 +95,9 @@ impl<const MAX_PRESSED_KEYS: usize> NormalState<MAX_PRESSED_KEYS> {
         }
     }
 
-    pub fn post_resolve<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >(
+    pub fn post_resolve(
         &self,
-        keymap: &crate::keymap::Keymap<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
+        keymap: &impl crate::keymap::KeymapLookup,
         out: &mut heapless::Vec<(KeyCode, EventType), 16>,
     ) {
         for k in self.pressed.iter() {

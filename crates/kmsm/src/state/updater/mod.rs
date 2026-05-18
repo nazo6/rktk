@@ -6,7 +6,7 @@ use crate::{
     keycode::{KeyCode, special::Special},
 };
 
-use super::shared::SharedState;
+use super::shared::{KeycodeUpdateContext, MouseEndContext};
 
 pub(crate) mod layer;
 pub(crate) mod mouse;
@@ -34,39 +34,21 @@ pub struct Updater<'a> {
 }
 
 impl Updater<'_> {
-    pub fn update_by_keycode<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >(
+    pub fn update_by_keycode(
         &mut self,
         kc: &KeyCode,
         ev: EventType,
-        shared_state: &mut SharedState<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
+        shared_state: &mut impl KeycodeUpdateContext,
         mut cb: impl FnMut(OutputEvent),
     ) {
         if ev == EventType::Pressed && *kc == KeyCode::Special(Special::LockTg) {
-            shared_state.locked = !shared_state.locked;
+            shared_state.toggle_locked();
         }
-        if shared_state.locked && ev != EventType::Released {
+        if shared_state.is_locked() && ev != EventType::Released {
             return;
         }
 
-        layer::update_layer_by_keycode(&mut shared_state.layer_active, kc, ev);
+        shared_state.update_layer(kc, ev);
         self.mouse.update_by_keycode(kc, ev, &mut cb);
 
         let output_event = OutputEvent::KeyCode((*kc, ev));
@@ -77,28 +59,10 @@ impl Updater<'_> {
         self.mouse.update_by_mouse_move(mv);
     }
 
-    pub fn end<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >(
+    pub fn end(
         self,
         highest_layer: usize,
-        shared_state: &mut SharedState<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
+        shared_state: &mut impl MouseEndContext,
         cb: impl FnMut(OutputEvent),
     ) {
         self.mouse.end(highest_layer, shared_state, cb);

@@ -60,24 +60,10 @@ impl<
         }
     }
 
-    pub fn resolve_key<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-    >(
+    pub fn resolve_key(
         &mut self,
-        keymap: &crate::keymap::Keymap<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
-        active_layers: &mut [bool; LAYER],
+        keymap: &impl crate::keymap::KeymapLookup,
+        active_layers: &mut [bool],
         now: Instant,
         event: Option<&KeyChangeEvent>,
     ) -> heapless::Vec<(KeyCode, EventType), 16> {

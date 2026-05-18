@@ -9,6 +9,8 @@ use crate::{
 
 use self::aml::Aml;
 
+use crate::state::shared::MouseEndContext;
+
 mod aml;
 
 /// Global mouse state
@@ -93,31 +95,13 @@ impl<'a> MouseUpdater<'a> {
         self.mouse_move.1 += y;
     }
 
-    pub fn end<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >(
+    pub fn end(
         mut self,
         highest_layer: usize,
-        shared_state: &mut super::super::shared::SharedState<
-            LAYER,
-            ROW,
-            COL,
-            ENCODER_COUNT,
-            TAP_DANCE_MAX_DEFINITIONS,
-            TAP_DANCE_MAX_REPEATS,
-            COMBO_KEY_MAX_DEFINITIONS,
-            COMBO_KEY_MAX_SOURCES,
-        >,
+        shared_state: &mut impl MouseEndContext,
         mut cb: impl FnMut(OutputEvent),
     ) {
-        if shared_state.keymap.layers[highest_layer].arrow_mouse {
+        if shared_state.is_arrow_mouse_layer(highest_layer) {
             self.state.arrow_mouse_move.0 += self.mouse_move.0;
             self.state.arrow_mouse_move.1 += self.mouse_move.1;
 
@@ -145,13 +129,13 @@ impl<'a> MouseUpdater<'a> {
         } else {
             self.state.arrow_mouse_move = (0, 0);
             let (enabled, changed) = self.state.aml.enabled_changed(
-                shared_state.now,
+                shared_state.now(),
                 self.mouse_move,
                 self.extend_aml || self.state.scroll_mode,
                 self.disable_aml,
             );
             if changed {
-                shared_state.layer_active[self.state.auto_mouse_layer] = enabled;
+                shared_state.set_layer_active(self.state.auto_mouse_layer, enabled);
             }
         }
 

@@ -74,3 +74,81 @@ impl<
         self.layer_active.iter().rposition(|&x| x).unwrap_or(0)
     }
 }
+
+pub trait KeycodeUpdateContext {
+    fn is_locked(&self) -> bool;
+    fn toggle_locked(&mut self);
+    fn update_layer(&mut self, kc: &crate::keycode::KeyCode, ev: crate::interface::state::output_event::EventType);
+}
+
+pub trait MouseEndContext {
+    fn is_arrow_mouse_layer(&self, layer: usize) -> bool;
+    fn now(&self) -> Instant;
+    fn set_layer_active(&mut self, layer: usize, active: bool);
+}
+
+impl<
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+> KeycodeUpdateContext for SharedState<
+    LAYER,
+    ROW,
+    COL,
+    ENCODER_COUNT,
+    TAP_DANCE_MAX_DEFINITIONS,
+    TAP_DANCE_MAX_REPEATS,
+    COMBO_KEY_MAX_DEFINITIONS,
+    COMBO_KEY_MAX_SOURCES,
+> {
+    fn is_locked(&self) -> bool {
+        self.locked
+    }
+
+    fn toggle_locked(&mut self) {
+        self.locked = !self.locked;
+    }
+
+    fn update_layer(&mut self, kc: &crate::keycode::KeyCode, ev: crate::interface::state::output_event::EventType) {
+        crate::state::updater::layer::update_layer_by_keycode(&mut self.layer_active, kc, ev);
+    }
+}
+
+impl<
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+> MouseEndContext for SharedState<
+    LAYER,
+    ROW,
+    COL,
+    ENCODER_COUNT,
+    TAP_DANCE_MAX_DEFINITIONS,
+    TAP_DANCE_MAX_REPEATS,
+    COMBO_KEY_MAX_DEFINITIONS,
+    COMBO_KEY_MAX_SOURCES,
+> {
+    fn is_arrow_mouse_layer(&self, layer: usize) -> bool {
+        self.keymap.layers.get(layer).map(|l| l.arrow_mouse).unwrap_or(false)
+    }
+
+    fn now(&self) -> Instant {
+        self.now
+    }
+
+    fn set_layer_active(&mut self, layer: usize, active: bool) {
+        if let Some(slot) = self.layer_active.get_mut(layer) {
+            *slot = active;
+        }
+    }
+}
