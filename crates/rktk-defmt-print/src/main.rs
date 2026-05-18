@@ -102,7 +102,7 @@ fn main() -> anyhow::Result<()> {
     };
 
     let elf_path = if let Some(elf_path) = elf_path {
-        println!("Using elf path '{}' from preset", &elf_path);
+        println!("Using elf path '{}' from preset", elf_path);
         elf_path
     } else {
         dialoguer::Input::<String>::new()

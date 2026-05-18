@@ -120,55 +120,56 @@ const FONT: MonoFont = FONT_8X13;
 /// When None is returned, caller can stop execution using something like [`cortex_m::asm::udf`]
 pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
     if let Some(panic_info) = read_panic_message()
-        && display.init().await.is_ok() {
-            let char_width = FONT.character_size.width as usize;
+        && display.init().await.is_ok()
+    {
+        let char_width = FONT.character_size.width as usize;
 
-            let str = parse_panic_message(&panic_info);
+        let str = parse_panic_message(&panic_info);
 
-            rktk_log::error!("Previous panic detected: {:?}", str);
+        rktk_log::error!("Previous panic detected: {:?}", str);
 
-            let str_len = str
-                .lines()
-                .map(|line| line.chars().count())
-                .max()
-                .unwrap_or(0) as usize;
+        let str_len = str
+            .lines()
+            .map(|line| line.chars().count())
+            .max()
+            .unwrap_or(0);
 
-            let orig_display_size = display.as_mut().bounding_box().size;
-            let rotation = if orig_display_size.width > orig_display_size.height {
-                Rotation::Rotate0
-            } else {
-                Rotation::Rotate90
-            };
+        let orig_display_size = display.as_mut().bounding_box().size;
+        let rotation = if orig_display_size.width > orig_display_size.height {
+            Rotation::Rotate0
+        } else {
+            Rotation::Rotate90
+        };
 
-            let rotated_display = RotatedDrawTarget::new(display.as_mut(), rotation);
-            let display_width = rotated_display.bounding_box().size.width as usize;
-            let overflow_len = if str_len * char_width > display_width {
-                str_len - display_width / char_width + 1
-            } else {
-                0
-            };
+        let rotated_display = RotatedDrawTarget::new(display.as_mut(), rotation);
+        let display_width = rotated_display.bounding_box().size.width as usize;
+        let overflow_len = if str_len * char_width > display_width {
+            str_len - display_width / char_width + 1
+        } else {
+            0
+        };
 
-            display_mes(display, "Panic!", Point::zero(), rotation).await;
-            Timer::after_millis(400).await;
+        display_mes(display, "Panic!", Point::zero(), rotation).await;
+        Timer::after_millis(400).await;
 
-            if overflow_len > 0 {
-                loop {
-                    for i in 0..=overflow_len {
-                        display_mes(
-                            display,
-                            str,
-                            Point::new(-((i * char_width) as i32), 0),
-                            rotation,
-                        )
-                        .await;
-                        Timer::after_millis(200).await;
-                    }
+        if overflow_len > 0 {
+            loop {
+                for i in 0..=overflow_len {
+                    display_mes(
+                        display,
+                        str,
+                        Point::new(-((i * char_width) as i32), 0),
+                        rotation,
+                    )
+                    .await;
+                    Timer::after_millis(200).await;
                 }
-            } else {
-                display_mes(display, str, Point::zero(), rotation).await;
-                Timer::after_secs(100000000).await;
             }
+        } else {
+            display_mes(display, str, Point::zero(), rotation).await;
+            Timer::after_secs(100000000).await;
         }
+    }
 }
 pub async fn display_mes<D: DisplayDriver>(
     display: &mut D,
