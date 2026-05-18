@@ -2942,11 +2942,11 @@ dependencies = [
 [[package]]
 name = "esb-ng"
 version = "0.1.0"
-source = "git+https://github.com/nazo6/esb#4f22aad94391684057ee362952bff01946228ded"
+source = "git+https://github.com/nazo6/esb?rev=0f6afc38313affc9a8dbb97c3a252900450d6003#0f6afc38313affc9a8dbb97c3a252900450d6003"
 dependencies = [
  "bbqueue",
  "cortex-m",
- "nrf-pac 0.2.0",
+ "nrf-pac 0.3.0",
 ]
 
 [[package]]

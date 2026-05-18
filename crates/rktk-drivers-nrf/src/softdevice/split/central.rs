@@ -106,7 +106,7 @@ pub struct SoftdeviceBleCentralSplitDriver {
 
 impl SoftdeviceBleCentralSplitDriver {
     pub async fn new(spawner: embassy_executor::Spawner, sd: &'static Softdevice) -> Self {
-        spawner.spawn(ble_split_central_task(sd)).unwrap();
+        spawner.spawn(ble_split_central_task(sd).unwrap());
 
         Self {
             _phantom: PhantomData,

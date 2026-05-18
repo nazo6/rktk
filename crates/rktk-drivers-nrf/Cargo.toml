@@ -35,7 +35,7 @@ embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
 embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
-esb-ng = { git = "https://github.com/nazo6/esb", optional = true }
+esb-ng = { git = "https://github.com/nazo6/esb", rev = "0f6afc38313affc9a8dbb97c3a252900450d6003", optional = true }
 heapless = { workspace = true }
 log = { workspace = true, optional = true }
 nrf-mpsl = { workspace = true, default-features = false, features = [

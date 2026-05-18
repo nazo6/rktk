@@ -86,11 +86,11 @@ pub fn init_sdc<
     static MPSL: StaticCell<MultiprotocolServiceLayer> = StaticCell::new();
     let mpsl = MPSL.init(mpsl::MultiprotocolServiceLayer::new(
         mpsl_peripherals,
-        irqs.clone(),
+        irqs,
         lfclk_cfg,
     )?);
 
-    spawner.must_spawn(mpsl_task(&*mpsl));
+    spawner.spawn(mpsl_task(&*mpsl).unwrap());
 
     let sdc_mem = singleton!(sdc::Mem::<3312>::new(), sdc::Mem::<3312>);
 

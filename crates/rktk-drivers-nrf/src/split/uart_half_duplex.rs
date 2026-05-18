@@ -104,7 +104,7 @@ impl<
             self.ppi_ch1.reborrow(),
             self.ppi_ch2.reborrow(),
             self.ppi_group.reborrow(),
-            self.irq.clone(),
+            self.irq,
             self.pin.reborrow(),
             config,
             &mut self.read_buffer,
@@ -135,7 +135,7 @@ impl<
         let mut tx = BufferedUarteTx::new(
             self.uarte.reborrow(),
             self.pin.reborrow(),
-            self.irq.clone(),
+            self.irq,
             config,
             &mut self.write_buffer,
         );

@@ -148,7 +148,7 @@ pub async fn init_bonder(
         .await
         .unwrap_or_default();
 
-    spawner.must_spawn(bonder_save_task(storage));
+    spawner.spawn(bonder_save_task(storage).unwrap());
 
     info!("Loaded {} bond info", bond_map.iter().count());
 
