@@ -44,14 +44,15 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
         for unit in self.state.iter_mut() {
             if let Some(def) = &mut unit.def
                 && let ComboUnitState::Pending((start, state)) = unit.state
-                && now - start > Duration::from_millis(self.config.threshold) {
-                        for (i, enabled) in state.iter().enumerate() {
-                            if *enabled {
-                                let _ = out.push((def.src[i].unwrap(), EventType::Pressed));
-                            }
-                        }
-                        unit.state = ComboUnitState::None;
+                && now - start > Duration::from_millis(self.config.threshold)
+            {
+                for (i, enabled) in state.iter().enumerate() {
+                    if *enabled {
+                        let _ = out.push((def.src[i].unwrap(), EventType::Pressed));
                     }
+                }
+                unit.state = ComboUnitState::None;
+            }
         }
     }
 
@@ -60,54 +61,52 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
             if let Some(def) = &mut unit.def {
                 for (i, key) in def.src.iter().enumerate() {
                     if let Some(key) = key
-                        && *keycode == *key {
-                            #[cfg(test)]
-                            match (event_type, &unit.state) {
-                                (EventType::Pressed, ComboUnitState::None) => {
-                                    unit.state =
-                                        ComboUnitState::Pending((now, [false; MAX_SOURCES]));
+                        && *keycode == *key
+                    {
+                        match (event_type, &unit.state) {
+                            (EventType::Pressed, ComboUnitState::None) => {
+                                unit.state = ComboUnitState::Pending((now, [false; MAX_SOURCES]));
+                                *keycode = KeyCode::None;
+                            }
+                            (
+                                EventType::Pressed | EventType::Pressing,
+                                &ComboUnitState::Pending(mut state),
+                            ) => {
+                                state.1[i] = true;
+                                if state
+                                    .1
+                                    .iter()
+                                    .enumerate()
+                                    .all(|(i, &b)| b || def.src[i].is_none())
+                                {
+                                    unit.state = ComboUnitState::Pressing(state.1);
+                                    *keycode = def.dst;
+                                } else {
+                                    unit.state = ComboUnitState::Pending(state);
                                     *keycode = KeyCode::None;
                                 }
-                                (
-                                    EventType::Pressed | EventType::Pressing,
-                                    &ComboUnitState::Pending(mut state),
-                                ) => {
-                                    state.1[i] = true;
-                                    if state
-                                        .1
-                                        .iter()
-                                        .enumerate()
-                                        .all(|(i, &b)| b || def.src[i].is_none())
-                                    {
-                                        unit.state = ComboUnitState::Pressing(state.1);
-                                        *keycode = def.dst;
-                                    } else {
-                                        unit.state = ComboUnitState::Pending(state);
-                                        *keycode = KeyCode::None;
-                                    }
-                                }
-                                (
-                                    EventType::Pressed | EventType::Pressing,
-                                    ComboUnitState::Pressing(_),
-                                ) => {
+                            }
+                            (
+                                EventType::Pressed | EventType::Pressing,
+                                ComboUnitState::Pressing(_),
+                            ) => {
+                                *keycode = def.dst;
+                            }
+                            (EventType::Released, &ComboUnitState::Pressing(mut state)) => {
+                                state[i] = false;
+                                if state.iter().all(|&b| !b) {
+                                    unit.state = ComboUnitState::None;
+                                    *keycode = def.dst;
+                                } else {
+                                    unit.state = ComboUnitState::Pressing(state);
                                     *keycode = def.dst;
                                 }
-                                (EventType::Released, &ComboUnitState::Pressing(mut state)) => {
-                                    state[i] = false;
-                                    if state.iter().all(|&b| !b) {
-                                        unit.state = ComboUnitState::None;
-                                        *keycode = def.dst;
-                                    } else {
-                                        unit.state = ComboUnitState::Pressing(state);
-                                        *keycode = def.dst;
-                                    }
-                                }
-                                _ => {}
                             }
+                            _ => {}
                         }
+                    }
                 }
             }
         }
     }
 }
-
