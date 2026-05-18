@@ -3,7 +3,7 @@ use rand_core::{CryptoRng, RngCore};
 use rktk::utils::Receiver;
 use rktk_log::{info, warn};
 use trouble_host::{
-    Address, Controller, Error, Host, HostResources,
+    Address, Controller, Error, HostResources,
     gap::{GapConfig, PeripheralConfig},
     prelude::*,
 };
@@ -36,12 +36,8 @@ pub async fn run<
     > = HostResources::new();
     let stack = trouble_host::new(controller, &mut resources)
         .set_random_address(address)
-        .set_random_generator_seed(rng);
-    let Host {
-        mut peripheral,
-        runner,
-        ..
-    } = stack.build();
+        .set_random_generator_seed(rng)
+        .build();
 
     info!("Starting advertising and GATT service");
     let server = Server::new_with_config(GapConfig::Peripheral(
@@ -52,9 +48,9 @@ pub async fn run<
     ));
     match server {
         Ok(server) => {
-            let _ = join(ble_task(runner), async {
+            let _ = join(ble_task(stack.runner()), async {
                 loop {
-                    match advertise(config.advertise_name, &mut peripheral).await {
+                    match advertise(config.advertise_name, &mut stack.peripheral()).await {
                         Ok(conn) => {
                             let gatt_conn = conn.with_attribute_server(&server).unwrap();
                             select(
@@ -183,7 +179,12 @@ async fn hid_task<C: Controller, P: PacketPool>(
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
-                if let Err(e) = server.hid_service.input_keyboard.notify(conn, &buf).await {
+                if let Err(e) = server
+                    .hid_service
+                    .input_keyboard
+                    .notify(conn, &buf, true)
+                    .await
+                {
                     rktk_log::error!("failed to send keyboard report: {:?}", e);
                     continue;
                 }
@@ -198,7 +199,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
                 if let Err(e) = server
                     .hid_service
                     .input_media_keyboard
-                    .notify(conn, &usage_id)
+                    .notify(conn, &usage_id, true)
                     .await
                 {
                     rktk_log::error!("failed to send media keyboard report: {:?}", e);
@@ -211,7 +212,12 @@ async fn hid_task<C: Controller, P: PacketPool>(
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
-                if let Err(e) = server.hid_service.input_mouse.notify(conn, &buf).await {
+                if let Err(e) = server
+                    .hid_service
+                    .input_mouse
+                    .notify(conn, &buf, true)
+                    .await
+                {
                     rktk_log::error!("failed to send keyboard report: {:?}", e);
                     continue;
                 }
