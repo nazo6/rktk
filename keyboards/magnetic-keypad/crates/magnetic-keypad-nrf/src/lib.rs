@@ -124,13 +124,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         encoder: Some(encoder),
     };
 
-    rktk::task::start(
-        spawner,
-        drivers,
-        create_empty_hooks(),
-        new_rktk_opts(keymap, None),
-    )
-    .await;
+    rktk::task::start(spawner, drivers, create_empty_hooks(), new_rktk_opts(keymap, None)).await;
 }
 
 #[embassy_executor::task]

@@ -31,11 +31,8 @@ impl DisplayConfig for DefaultDisplayConfig {
         display_dynamic_message_controller: &Signal<heapless::String<N2>>,
     ) {
         loop {
-            match select(
-                display_controller.receive(),
-                display_dynamic_message_controller.wait(),
-            )
-            .await
+            match select(display_controller.receive(), display_dynamic_message_controller.wait())
+                .await
             {
                 Either::First(mes) => match mes {
                     DisplayMessage::Clear => {
@@ -58,11 +55,7 @@ impl DisplayConfig for DefaultDisplayConfig {
                                 Point::new(0, 20 + i as i32 * 13),
                                 MonoTextStyleBuilder::new()
                                     .font(&FONT_8X13)
-                                    .text_color(if *a {
-                                        BinaryColor::Off
-                                    } else {
-                                        BinaryColor::On
-                                    })
+                                    .text_color(if *a { BinaryColor::Off } else { BinaryColor::On })
                                     .background_color(if *a {
                                         BinaryColor::On
                                     } else {
@@ -76,9 +69,8 @@ impl DisplayConfig for DefaultDisplayConfig {
                     }
                     DisplayMessage::MouseAvailable(mouse) => {
                         if mouse {
-                            let _ = IMAGE_MOUSE
-                                .translate(Point::new(16, 35))
-                                .draw(display.as_mut());
+                            let _ =
+                                IMAGE_MOUSE.translate(Point::new(16, 35)).draw(display.as_mut());
                         }
                     }
                     DisplayMessage::NumLock(num_lock) => {

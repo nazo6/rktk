@@ -39,9 +39,7 @@ where
     }
 
     async fn set_brightness(&mut self, brightness: u8) -> Result<(), DisplayError> {
-        self.0
-            .set_brightness(Brightness::custom(1, brightness))
-            .await
+        self.0.set_brightness(Brightness::custom(1, brightness)).await
     }
 
     async fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {

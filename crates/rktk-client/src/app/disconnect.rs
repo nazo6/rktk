@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::backend::RrpHidDevice as _;
 
 use super::{
-    components::notification::{push_notification, Notification, NotificationLevel},
+    components::notification::{Notification, NotificationLevel, push_notification},
     state::CONN,
 };
 

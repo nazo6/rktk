@@ -77,10 +77,7 @@ impl<
         for output_idx in 0..OUTPUT_PIN_COUNT {
             let _ = self
                 .row_shift_register
-                .transaction(&mut [
-                    Operation::DelayNs(1000),
-                    Operation::Write(&[1 << output_idx]),
-                ])
+                .transaction(&mut [Operation::DelayNs(1000), Operation::Write(&[1 << output_idx])])
                 .await;
 
             embassy_time::Timer::after(self.scan_delay).await;
@@ -88,15 +85,10 @@ impl<
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
                 if let Some((row, col)) = (self.map_key_pos)(input_idx, output_idx)
                     && let Some(change) =
-                        self.pressed
-                            .set_pressed(input_pin.is_high().unwrap(), row, col)
-                    {
-                        cb(KeyChangeEvent {
-                            row: row as u8,
-                            col: col as u8,
-                            pressed: change,
-                        });
-                    }
+                        self.pressed.set_pressed(input_pin.is_high().unwrap(), row, col)
+                {
+                    cb(KeyChangeEvent { row: row as u8, col: col as u8, pressed: change });
+                }
             }
         }
     }

@@ -83,11 +83,7 @@ impl EsbDongleDriverBuilder {
         _irqs: impl Binding<<DongleTimer as timer::Instance>::Interrupt, TimerInterruptHandler>,
         config: Config,
     ) -> Self {
-        Self {
-            _timer: timer,
-            _radio: radio,
-            config,
-        }
+        Self { _timer: timer, _radio: radio, config }
     }
 }
 
@@ -102,12 +98,8 @@ impl DongleDriverBuilder for EsbDongleDriverBuilder {
             radio_to_app_buf: BBQueueType::new(),
             timer_flag: AtomicBool::new(false),
         };
-        let config = self
-            .config
-            .config
-            .max_payload_size(192)
-            .check()
-            .map_err(|_| "Invalid config")?;
+        let config =
+            self.config.config.max_payload_size(192).check().map_err(|_| "Invalid config")?;
         let (esb_app, esb_irq, esb_timer) = BUFFER
             .try_split(
                 unsafe { DongleTimerEsb::take() },
@@ -117,9 +109,7 @@ impl DongleDriverBuilder for EsbDongleDriverBuilder {
             )
             .map_err(|_| "Failed to initialize")?;
         let mut esb_irq = esb_irq.into_prx();
-        esb_irq
-            .start_receiving()
-            .map_err(|_| "Failed to start receiving")?;
+        esb_irq.start_receiving().map_err(|_| "Failed to start receiving")?;
         ESB_IRQ.lock().await.replace(esb_irq);
         IRQ_TIMER.lock().await.replace(esb_timer);
 
@@ -128,13 +118,7 @@ impl DongleDriverBuilder for EsbDongleDriverBuilder {
             cortex_m::peripheral::NVIC::unmask(Interrupt::TIMER0);
         }
 
-        Ok((
-            EsbDongleDriver {
-                esb: esb_app,
-                cnt: 0,
-            },
-            async {},
-        ))
+        Ok((EsbDongleDriver { esb: esb_app, cnt: 0 }, async {}))
     }
 }
 

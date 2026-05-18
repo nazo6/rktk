@@ -84,15 +84,10 @@ impl<
             for (input_idx, input_pin) in self.input_pins.iter_mut().enumerate() {
                 if let Some((row, col)) = (self.map_key_pos)(input_idx, output_idx)
                     && let Some(change) =
-                        self.pressed
-                            .set_pressed(input_pin.is_high().unwrap(), row, col)
-                    {
-                        cb(KeyChangeEvent {
-                            row: row as u8,
-                            col: col as u8,
-                            pressed: change,
-                        });
-                    }
+                        self.pressed.set_pressed(input_pin.is_high().unwrap(), row, col)
+                {
+                    cb(KeyChangeEvent { row: row as u8, col: col as u8, pressed: change });
+                }
             }
 
             let _ = self.output_pins[output_idx].set_low();

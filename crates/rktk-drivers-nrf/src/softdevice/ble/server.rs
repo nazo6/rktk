@@ -1,9 +1,9 @@
 use nrf_softdevice::{
-    ble::{
-        gatt_server::{self, RegisterError, WriteOp},
-        Connection,
-    },
     Softdevice,
+    ble::{
+        Connection,
+        gatt_server::{self, RegisterError, WriteOp},
+    },
 };
 
 use super::services::{
@@ -39,11 +39,7 @@ impl Server {
 
         let hid = HidService::new(sd)?;
 
-        Ok(Self {
-            _dis: dis,
-            bas,
-            hid,
-        })
+        Ok(Self { _dis: dis, bas, hid })
     }
 }
 

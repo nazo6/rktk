@@ -1,6 +1,6 @@
 use crate::{
     interface::state::output_event::EventType,
-    keycode::{layer::LayerOp, KeyCode},
+    keycode::{KeyCode, layer::LayerOp},
 };
 
 pub fn update_layer_by_keycode<const LAYER: usize>(

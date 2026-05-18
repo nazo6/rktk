@@ -1,13 +1,13 @@
 use nrf_softdevice::{
+    Softdevice,
     ble::{
+        Uuid,
         gatt_server::{
+            CharacteristicHandles, RegisterError,
             builder::ServiceBuilder,
             characteristic::{Attribute, Metadata, Properties},
-            CharacteristicHandles, RegisterError,
         },
-        Uuid,
     },
-    Softdevice,
 };
 
 use super::super::constant::{

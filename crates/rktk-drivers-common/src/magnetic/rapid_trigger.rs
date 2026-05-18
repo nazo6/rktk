@@ -9,12 +9,7 @@ pub struct RapidTriggerState {
 impl RapidTriggerState {
     #[allow(clippy::new_without_default)]
     pub const fn new() -> Self {
-        Self {
-            last_val: 0,
-            max_val: 0,
-            min_val: 0,
-            pressed: false,
-        }
+        Self { last_val: 0, max_val: 0, min_val: 0, pressed: false }
     }
 
     /// Updates the state with a new travel distance and returns whether the key state changed.

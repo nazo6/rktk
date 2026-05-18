@@ -123,12 +123,8 @@ mod fetcher {
             .await?;
 
         let mut records = Vec::new();
-        let mut current_record = LogRecord {
-            time: 0,
-            level: LogLevel::Info,
-            line: None,
-            message: String::new(),
-        };
+        let mut current_record =
+            LogRecord { time: 0, level: LogLevel::Info, line: None, message: String::new() };
 
         for chunk in log {
             match chunk {
@@ -136,12 +132,7 @@ mod fetcher {
                     if current_record.time != 0 {
                         records.push(current_record);
                     }
-                    current_record = LogRecord {
-                        time,
-                        level,
-                        line,
-                        message: String::new(),
-                    };
+                    current_record = LogRecord { time, level, line, message: String::new() };
                 }
                 LogChunk::Bytes { bytes, len } => {
                     current_record

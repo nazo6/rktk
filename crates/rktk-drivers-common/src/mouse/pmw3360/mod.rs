@@ -66,11 +66,7 @@ pub struct Pmw3360Config {
 
 impl Default for Pmw3360Config {
     fn default() -> Self {
-        Self {
-            srom: Pmw3360Srom::default(),
-            cpi: 1000,
-            auto_reset: true,
-        }
+        Self { srom: Pmw3360Srom::default(), cpi: 1000, auto_reset: true }
     }
 }
 
@@ -91,11 +87,7 @@ pub struct Pmw3360<S: ExtendedSpi> {
 
 impl<S: ExtendedSpi> Pmw3360<S> {
     pub fn new(spi_device: S, config: Pmw3360Config) -> Self {
-        Self {
-            spi_device,
-            in_burst_mode: false,
-            config,
-        }
+        Self { spi_device, in_burst_mode: false, config }
     }
 }
 
@@ -107,9 +99,7 @@ impl<S: ExtendedSpi> MouseDriver for Pmw3360<S> {
     }
 
     async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
-        self.burst_read()
-            .await
-            .map(|data| (data.dx as i8, data.dy as i8))
+        self.burst_read().await.map(|data| (data.dx as i8, data.dy as i8))
     }
 
     async fn set_cpi(&mut self, cpi: u16) -> Result<(), Self::Error> {
@@ -270,10 +260,7 @@ impl<S: ExtendedSpi> Pmw3360<S> {
 
     async fn power_up_inner(&mut self) -> Result<bool, <Self as MouseDriver>::Error> {
         // reset spi port
-        self.spi_device
-            .transaction(&mut [])
-            .await
-            .map_err(Pmw3360Error::Spi)?;
+        self.spi_device.transaction(&mut []).await.map_err(Pmw3360Error::Spi)?;
 
         // Write to reset register
         self.write(reg::POWER_UP_RESET, 0x5A).await?;
@@ -328,19 +315,12 @@ impl<S: ExtendedSpi> Pmw3360<S> {
         // Write 0x18 to SROM_Enable register again to start SROM Download
         self.write(reg::SROM_ENABLE, 0x18).await?;
 
-        let operations = [IterOperation::Write(reg::SROM_LOAD_BURST | 0x80)]
-            .into_iter()
-            .chain(fw.iter().flat_map(|byte| {
-                [
-                    IterOperation::Write(*byte),
-                    IterOperation::DelayNs(15 * 1000),
-                ]
-            }));
+        let operations = [IterOperation::Write(reg::SROM_LOAD_BURST | 0x80)].into_iter().chain(
+            fw.iter()
+                .flat_map(|byte| [IterOperation::Write(*byte), IterOperation::DelayNs(15 * 1000)]),
+        );
 
-        self.spi_device
-            .transaction_iter(operations)
-            .await
-            .map_err(Pmw3360Error::Spi)?;
+        self.spi_device.transaction_iter(operations).await.map_err(Pmw3360Error::Spi)?;
 
         Timer::after_micros(185).await;
 

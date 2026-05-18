@@ -57,7 +57,9 @@ pub struct SingleProfileMap<P: SwitchProfile> {
     pub profile: P,
 }
 
-impl<P: SwitchProfile, const ROWS: usize, const COLS: usize> KeyProfileMap<ROWS, COLS> for SingleProfileMap<P> {
+impl<P: SwitchProfile, const ROWS: usize, const COLS: usize> KeyProfileMap<ROWS, COLS>
+    for SingleProfileMap<P>
+{
     type Profile = P;
     fn get_profile(&self, _row: usize, _col: usize) -> &Self::Profile {
         &self.profile
@@ -68,7 +70,9 @@ pub struct MatrixProfileMap<P: SwitchProfile, const ROWS: usize, const COLS: usi
     pub profiles: [[P; COLS]; ROWS],
 }
 
-impl<P: SwitchProfile, const ROWS: usize, const COLS: usize> KeyProfileMap<ROWS, COLS> for MatrixProfileMap<P, ROWS, COLS> {
+impl<P: SwitchProfile, const ROWS: usize, const COLS: usize> KeyProfileMap<ROWS, COLS>
+    for MatrixProfileMap<P, ROWS, COLS>
+{
     type Profile = P;
     fn get_profile(&self, row: usize, col: usize) -> &Self::Profile {
         &self.profiles[row][col]

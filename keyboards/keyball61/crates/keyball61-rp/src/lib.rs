@@ -130,22 +130,10 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
 
     match hand {
         rktk::config::Hand::Left => {
-            rktk::task::start(
-                spawner,
-                drivers,
-                create_empty_hooks(),
-                get_opts_left(keymap),
-            )
-            .await;
+            rktk::task::start(spawner, drivers, create_empty_hooks(), get_opts_left(keymap)).await;
         }
         rktk::config::Hand::Right => {
-            rktk::task::start(
-                spawner,
-                drivers,
-                create_empty_hooks(),
-                get_opts_right(keymap),
-            )
-            .await;
+            rktk::task::start(spawner, drivers, create_empty_hooks(), get_opts_right(keymap)).await;
         }
     }
 }

@@ -22,10 +22,7 @@ pub(crate) use send_request;
 
 macro_rules! recv_response {
     (normal, $reader:expr) => {
-        $reader
-            .recv_body_normal::<_, BUF_SIZE>()
-            .await
-            .map_err(TransportError::RecvError)?
+        $reader.recv_body_normal::<_, BUF_SIZE>().await.map_err(TransportError::RecvError)?
     };
     (stream, $reader:expr) => {
         $reader.recv_body_stream::<_, BUF_SIZE>().await

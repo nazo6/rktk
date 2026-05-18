@@ -172,10 +172,9 @@ impl<
             _ => None,
         };
 
-        self.key_resolver
-            .resolve_key(&mut self.shared, key_change.as_ref(), |shared, et, kc| {
-                updater.update_by_keycode(&kc, et, shared, &mut cb);
-            });
+        self.key_resolver.resolve_key(&mut self.shared, key_change.as_ref(), |shared, et, kc| {
+            updater.update_by_keycode(&kc, et, shared, &mut cb);
+        });
 
         updater.end(self.shared.highest_layer(), &mut self.shared, cb);
     }

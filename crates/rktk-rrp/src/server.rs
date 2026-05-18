@@ -12,11 +12,7 @@ impl<RT: ReadTransport, WT: WriteTransport, H: ServerHandlers<RT::Error, WT::Err
     Server<RT, WT, H>
 {
     pub fn new(reader: RT, writer: WT, handlers: H) -> Self {
-        Self {
-            reader,
-            writer,
-            handlers,
-        }
+        Self { reader, writer, handlers }
     }
 
     pub async fn start<const BUF_SIZE: usize>(&mut self) {

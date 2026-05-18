@@ -14,11 +14,7 @@ pub struct NrfFlexPin<'a> {
 
 impl<'a> NrfFlexPin<'a> {
     pub fn new(pin: Peri<'a, impl Pin>) -> Self {
-        Self {
-            pin: Flex::new(pin),
-            pull: NrfPull::None,
-            drive: OutputDrive::Standard,
-        }
+        Self { pin: Flex::new(pin), pull: NrfPull::None, drive: OutputDrive::Standard }
     }
 }
 

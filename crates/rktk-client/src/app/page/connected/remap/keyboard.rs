@@ -15,31 +15,13 @@ pub fn Keyboard(
     select_signal: Signal<Option<(usize, usize)>>,
     keymap_changes: ReadSignal<HashMap<(u8, u8, u8), KeyAction>>,
 ) -> Element {
-    let keyboard_width = keymap
-        .iter()
-        .flatten()
-        .flatten()
-        .fold(0 as f64, |max, key| {
-            key.key
-                .as_ref()
-                .map(|k| k.x + k.width)
-                .unwrap_or(0 as f64)
-                .max(max)
-        })
-        * SIZE_AMP
+    let keyboard_width = keymap.iter().flatten().flatten().fold(0 as f64, |max, key| {
+        key.key.as_ref().map(|k| k.x + k.width).unwrap_or(0 as f64).max(max)
+    }) * SIZE_AMP
         + 10.0;
-    let keyboard_height = keymap
-        .iter()
-        .flatten()
-        .flatten()
-        .fold(0 as f64, |max, key| {
-            key.key
-                .as_ref()
-                .map(|k| k.y + k.height)
-                .unwrap_or(0 as f64)
-                .max(max)
-        })
-        * SIZE_AMP
+    let keyboard_height = keymap.iter().flatten().flatten().fold(0 as f64, |max, key| {
+        key.key.as_ref().map(|k| k.y + k.height).unwrap_or(0 as f64).max(max)
+    }) * SIZE_AMP
         + 10.0;
 
     let mut elem_size = use_signal(|| Option::<PixelsSize>::None);

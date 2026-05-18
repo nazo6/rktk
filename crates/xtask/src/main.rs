@@ -106,11 +106,9 @@ fn main() -> ExitCode {
     let res = match args.command {
         Commands::Check { crate_filter } => check::start(crate_filter),
         Commands::Test { crate_name } => test::start(crate_name),
-        Commands::Publish {
-            crate_name,
-            execute,
-            continue_on_error,
-        } => publish::start(crate_name, execute, continue_on_error),
+        Commands::Publish { crate_name, execute, continue_on_error } => {
+            publish::start(crate_name, execute, continue_on_error)
+        }
         Commands::Doc => doc::start(),
         Commands::SizeStats(args) => size_stats::start(args),
     };

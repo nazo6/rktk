@@ -32,10 +32,7 @@ pub fn init_softdevice(ble_gap_name: &'static str) -> &'static mut Softdevice {
             rc_temp_ctiv: 2,
             accuracy: raw::NRF_CLOCK_LF_ACCURACY_500_PPM as u8,
         }),
-        conn_gap: Some(raw::ble_gap_conn_cfg_t {
-            conn_count: 6,
-            event_length: 24,
-        }),
+        conn_gap: Some(raw::ble_gap_conn_cfg_t { conn_count: 6, event_length: 24 }),
         conn_gatt: Some(raw::ble_gatt_conn_cfg_t { att_mtu: 256 }),
         gatts_attr_tab_size: Some(raw::ble_gatts_cfg_attr_tab_size_t {
             attr_tab_size: raw::BLE_GATTS_ATTR_TAB_SIZE_DEFAULT,

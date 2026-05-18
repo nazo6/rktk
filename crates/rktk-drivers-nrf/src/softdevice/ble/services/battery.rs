@@ -1,14 +1,14 @@
 use nrf_softdevice::{
+    Softdevice,
     ble::{
+        Connection,
         gatt_server::{
-            self,
+            self, RegisterError,
             builder::ServiceBuilder,
             characteristic::{Attribute, Metadata, Presentation, Properties},
-            RegisterError,
         },
-        Connection,
     },
-    raw, Softdevice,
+    raw,
 };
 
 use super::super::constant::{BATTERY_LEVEL, BATTERY_SERVICE};

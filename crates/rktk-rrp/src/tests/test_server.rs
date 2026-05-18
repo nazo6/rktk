@@ -1,7 +1,7 @@
 use core::fmt::Display;
 
 use futures::StreamExt as _;
-use futures::{stream, Stream};
+use futures::{Stream, stream};
 
 use crate::macros::server_generated::ServerHandlers;
 use crate::transport::error::ReceiveError;

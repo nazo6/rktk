@@ -37,13 +37,14 @@ impl DebounceDriver for EagerDebounceDriver {
     fn should_ignore_event(&mut self, event: &KeyChangeEvent, now: embassy_time::Instant) -> bool {
         let last = self.last[event.row as usize][event.col as usize];
         if let Some(last) = last
-            && now - last < self.debounce_time {
-                if self.deboune_only_pressed {
-                    return event.pressed;
-                } else {
-                    return true;
-                }
+            && now - last < self.debounce_time
+        {
+            if self.deboune_only_pressed {
+                return event.pressed;
+            } else {
+                return true;
             }
+        }
         self.last[event.row as usize][event.col as usize] = Some(now);
         false
     }
@@ -72,11 +73,7 @@ mod tests {
 
         assert!(
             !d.should_ignore_event(
-                &KeyChangeEvent {
-                    row: 0,
-                    col: 0,
-                    pressed: true,
-                },
+                &KeyChangeEvent { row: 0, col: 0, pressed: true },
                 Instant::from_millis(0),
             ),
             "Key press event should not be ignored"
@@ -84,11 +81,7 @@ mod tests {
 
         assert!(
             !d.should_ignore_event(
-                &KeyChangeEvent {
-                    row: 0,
-                    col: 0,
-                    pressed: false,
-                },
+                &KeyChangeEvent { row: 0, col: 0, pressed: false },
                 Instant::from_millis(5),
             ),
             "Key release event before debounce_time should not be ignored"
@@ -96,11 +89,7 @@ mod tests {
 
         assert!(
             d.should_ignore_event(
-                &KeyChangeEvent {
-                    row: 0,
-                    col: 0,
-                    pressed: true,
-                },
+                &KeyChangeEvent { row: 0, col: 0, pressed: true },
                 Instant::from_millis(8),
             ),
             "Key press event before debounce_time should be ignored"
@@ -108,11 +97,7 @@ mod tests {
 
         assert!(
             !d.should_ignore_event(
-                &KeyChangeEvent {
-                    row: 0,
-                    col: 0,
-                    pressed: true,
-                },
+                &KeyChangeEvent { row: 0, col: 0, pressed: true },
                 Instant::from_millis(100),
             ),
             "Key press event after debounce_time should not be ignored"

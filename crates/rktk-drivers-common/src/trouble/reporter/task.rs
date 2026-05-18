@@ -113,11 +113,8 @@ async fn gatt_events_task<P: PacketPool>(conn: &GattConnection<'_, '_, P>) -> Re
                     _ => None,
                 };
 
-                let result = if let Some(code) = result {
-                    event.reject(code)
-                } else {
-                    event.accept()
-                };
+                let result =
+                    if let Some(code) = result { event.reject(code) } else { event.accept() };
                 match result {
                     Ok(reply) => {
                         reply.send().await;
@@ -179,12 +176,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
-                if let Err(e) = server
-                    .hid_service
-                    .input_keyboard
-                    .notify(conn, &buf, true)
-                    .await
-                {
+                if let Err(e) = server.hid_service.input_keyboard.notify(conn, &buf, true).await {
                     rktk_log::error!("failed to send keyboard report: {:?}", e);
                     continue;
                 }
@@ -196,11 +188,8 @@ async fn hid_task<C: Controller, P: PacketPool>(
                     continue;
                 }
                 let usage_id: u16 = media_keyboard_report.usage_id;
-                if let Err(e) = server
-                    .hid_service
-                    .input_media_keyboard
-                    .notify(conn, &usage_id, true)
-                    .await
+                if let Err(e) =
+                    server.hid_service.input_media_keyboard.notify(conn, &usage_id, true).await
                 {
                     rktk_log::error!("failed to send media keyboard report: {:?}", e);
                     continue;
@@ -212,12 +201,7 @@ async fn hid_task<C: Controller, P: PacketPool>(
                     rktk_log::error!("failed to serialize keyboard report");
                     continue;
                 }
-                if let Err(e) = server
-                    .hid_service
-                    .input_mouse
-                    .notify(conn, &buf, true)
-                    .await
-                {
+                if let Err(e) = server.hid_service.input_mouse.notify(conn, &buf, true).await {
                     rktk_log::error!("failed to send keyboard report: {:?}", e);
                     continue;
                 }

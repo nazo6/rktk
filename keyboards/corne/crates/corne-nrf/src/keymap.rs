@@ -1,12 +1,10 @@
 use rktk::config::keymap::{
-    keymanager::{keycode::prelude::*, keymap::TapDanceDefinition},
     Keymap, Layer, LayerKeymap,
+    keymanager::{keycode::prelude::*, keymap::TapDanceDefinition},
 };
 
-const L2SPC: KeyAction = KeyAction::TapHold(
-    KeyCode::Key(Key::Enter),
-    KeyCode::Layer(LayerOp::Momentary(2)),
-);
+const L2SPC: KeyAction =
+    KeyAction::TapHold(KeyCode::Key(Key::Enter), KeyCode::Layer(LayerOp::Momentary(2)));
 
 #[rustfmt::skip]
 const L0: LayerKeymap = [
@@ -52,26 +50,11 @@ const L4: LayerKeymap = [
 
 pub const KEYMAP: Keymap = Keymap {
     layers: [
-        Layer {
-            keymap: L0,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: L1,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: L2,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: L3,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: L4,
-            ..Layer::const_default()
-        },
+        Layer { keymap: L0, ..Layer::const_default() },
+        Layer { keymap: L1, ..Layer::const_default() },
+        Layer { keymap: L2, ..Layer::const_default() },
+        Layer { keymap: L3, ..Layer::const_default() },
+        Layer { keymap: L4, ..Layer::const_default() },
     ],
     tap_dance: [
         Some(TapDanceDefinition {

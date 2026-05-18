@@ -41,9 +41,7 @@ impl<F: NorFlash + ReadNorFlash + MultiwriteNorFlash> FlashSequentialMapStorage<
             MapConfig::new(start_address..start_address + storage_size),
             NoCache,
         );
-        Self {
-            storage: Mutex::new(storage),
-        }
+        Self { storage: Mutex::new(storage) }
     }
 }
 

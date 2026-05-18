@@ -41,12 +41,7 @@ impl MouseState {
     }
 
     pub fn start_update<'a>(&'a mut self) -> MouseUpdater<'a> {
-        MouseUpdater {
-            state: self,
-            mouse_move: (0, 0),
-            disable_aml: false,
-            extend_aml: false,
-        }
+        MouseUpdater { state: self, mouse_move: (0, 0), disable_aml: false, extend_aml: false }
     }
 }
 
@@ -134,10 +129,7 @@ impl<'a> MouseUpdater<'a> {
             };
 
             if let Some(key) = key {
-                cb(OutputEvent::KeyCode((
-                    KeyCode::Key(key),
-                    EventType::Pressed,
-                )));
+                cb(OutputEvent::KeyCode((KeyCode::Key(key), EventType::Pressed)));
                 self.state.arrow_mouse_move = (0, 0);
             }
 

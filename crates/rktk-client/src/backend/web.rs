@@ -68,21 +68,15 @@ impl RrpHidBackend for WebHidBackend {
         let devices = wasm_bindgen_futures::JsFuture::from(devices_promise)
             .await
             .map_err(|e| anyhow::anyhow!("Cannot get devices: {:?}", e))?;
-        let devs_array = devices
-            .dyn_ref::<js_sys::Array>()
-            .context("Cannot get devices")?;
+        let devs_array = devices.dyn_ref::<js_sys::Array>().context("Cannot get devices")?;
         let device: JsValue = devs_array.at(0);
-        let device: HidDevice = device
-            .dyn_into()
-            .map_err(|_| anyhow::anyhow!("No device selected"))?;
+        let device: HidDevice =
+            device.dyn_into().map_err(|_| anyhow::anyhow!("No device selected"))?;
         wasm_bindgen_futures::JsFuture::from(device.open())
             .await
             .map_err(|e| anyhow::anyhow!("Cannot open device: {:?}", e))?;
 
-        let client = Client::new(
-            HidReader::new(device.clone()),
-            HidWriter::new(device.clone()),
-        );
+        let client = Client::new(HidReader::new(device.clone()), HidWriter::new(device.clone()));
 
         Ok(Self::HidDevice { client, device })
     }
@@ -142,11 +136,7 @@ impl HidReader {
 
         device.set_oninputreport(Some(cb.as_ref().unchecked_ref()));
 
-        Self {
-            device,
-            pipe_recv,
-            _cb: cb,
-        }
+        Self { device, pipe_recv, _cb: cb }
     }
 }
 
@@ -189,9 +179,7 @@ impl WriteTransport for HidWriter {
                 .device
                 .send_report_with_u8_slice(0, &mut data)
                 .map_err(|e| format!("{e:?}"))?;
-            wasm_bindgen_futures::JsFuture::from(p)
-                .await
-                .map_err(|e| format!("{e:?}"))?;
+            wasm_bindgen_futures::JsFuture::from(p).await.map_err(|e| format!("{e:?}"))?;
         }
 
         Ok(buf.len())

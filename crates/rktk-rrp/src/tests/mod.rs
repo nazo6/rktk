@@ -50,10 +50,7 @@ async fn test_stream_normal() {
     let test = |reader, writer| async move {
         let mut client = Client::<_, _>::new(reader, writer);
         let req = vec!["".to_string(), "a".to_string(), "abc".to_string()];
-        let res = client
-            .test_stream_normal(futures::stream::iter(req.clone()))
-            .await
-            .unwrap();
+        let res = client.test_stream_normal(futures::stream::iter(req.clone())).await.unwrap();
         assert_eq!(req, res)
     };
     execute_test!(Handlers, test);
@@ -100,10 +97,8 @@ async fn test_stream_stream() {
     let test = |reader, writer| async move {
         let mut client = Client::<_, _>::new(reader, writer);
         let req = vec!["a".to_string(), "bbb".to_string(), "ccc".to_string()];
-        let res_stream = client
-            .test_stream_stream(futures::stream::iter(req.clone()))
-            .await
-            .unwrap();
+        let res_stream =
+            client.test_stream_stream(futures::stream::iter(req.clone())).await.unwrap();
         let mut res_stream = pin!(res_stream);
 
         let mut i = 0;

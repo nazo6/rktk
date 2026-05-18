@@ -68,19 +68,13 @@ impl<'a, const MAX_LED_COUNT: usize, I: Instance> Ws2812Pio<'a, MAX_LED_COUNT, I
 
         // FIFO config
         cfg.fifo_join = FifoJoin::TxOnly;
-        cfg.shift_out = ShiftConfig {
-            auto_fill: true,
-            threshold: 24,
-            direction: ShiftDirection::Left,
-        };
+        cfg.shift_out =
+            ShiftConfig { auto_fill: true, threshold: 24, direction: ShiftDirection::Left };
 
         pio.sm0.set_config(&cfg);
         pio.sm0.set_enable(true);
 
-        Self {
-            dma: Channel::new(dma, irq),
-            sm: pio.sm0,
-        }
+        Self { dma: Channel::new(dma, irq), sm: pio.sm0 }
     }
 }
 

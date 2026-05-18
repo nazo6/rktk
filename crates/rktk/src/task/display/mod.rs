@@ -48,11 +48,5 @@ pub(crate) async fn start<D: DisplayDriver, C: DisplayConfig>(display: &mut D, c
     let _ = display.as_mut().clear(BinaryColor::Off);
     let _ = display.flush().await;
 
-    config
-        .start(
-            display,
-            &DISPLAY_CONTROLLER,
-            &DISPLAY_DYNAMIC_MESSAGE_CONTROLLER,
-        )
-        .await;
+    config.start(display, &DISPLAY_CONTROLLER, &DISPLAY_DYNAMIC_MESSAGE_CONTROLLER).await;
 }

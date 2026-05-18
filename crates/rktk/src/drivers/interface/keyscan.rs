@@ -1,4 +1,3 @@
-
 pub use kmsm::interface::state::input_event::KeyChangeEvent;
 
 /// Key scanner driver interface.

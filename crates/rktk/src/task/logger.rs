@@ -12,10 +12,9 @@ impl Write for LogWriter {
             let mut buf = [0; 32];
             buf[..chunk.len()].copy_from_slice(chunk);
 
-            if let Err(_e) = LOG_CHANNEL.try_send(LogChunk::Bytes {
-                bytes: buf,
-                len: chunk.len() as u8,
-            }) {
+            if let Err(_e) =
+                LOG_CHANNEL.try_send(LogChunk::Bytes { bytes: buf, len: chunk.len() as u8 })
+            {
                 return Ok(());
             }
         }
@@ -56,13 +55,8 @@ impl log::Log for RrpLogger {
             crate::print!("{}", record.args());
         }
 
-        write!(
-            &mut LogWriter,
-            "{}\t{}",
-            record.module_path().unwrap_or_default(),
-            record.args()
-        )
-        .unwrap();
+        write!(&mut LogWriter, "{}\t{}", record.module_path().unwrap_or_default(), record.args())
+            .unwrap();
 
         let _ = LOG_CHANNEL.try_send(LogChunk::End);
     }

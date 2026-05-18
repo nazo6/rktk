@@ -24,20 +24,12 @@ pub async fn start(config: &'static DynamicConfig, hand: Hand, s2m_rx: S2mRx<'_>
         while let Ok(cmd_from_slave) = s2m_rx.try_receive() {
             match cmd_from_slave {
                 SlaveToMaster::Pressed(row, col) => {
-                    let mut ev = KeyChangeEvent {
-                        col,
-                        row,
-                        pressed: true,
-                    };
+                    let mut ev = KeyChangeEvent { col, row, pressed: true };
                     resolve_entire_key_pos(&mut ev, slave_hand, shift);
                     KEYBOARD_EVENT_REPORT_CHANNEL.send(ev).await;
                 }
                 SlaveToMaster::Released(row, col) => {
-                    let mut ev = KeyChangeEvent {
-                        col,
-                        row,
-                        pressed: false,
-                    };
+                    let mut ev = KeyChangeEvent { col, row, pressed: false };
                     resolve_entire_key_pos(&mut ev, slave_hand, shift);
                     KEYBOARD_EVENT_REPORT_CHANNEL.send(ev).await;
                 }

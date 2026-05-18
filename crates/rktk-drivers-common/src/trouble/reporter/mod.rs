@@ -41,11 +41,7 @@ impl<
 > TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
     pub fn new(controller: C, rng: &'static mut RNG, config: TroubleReporterConfig) -> Self {
-        Self {
-            controller,
-            rng,
-            config,
-        }
+        Self { controller, rng, config }
     }
 }
 
@@ -66,9 +62,7 @@ impl<
         self,
     ) -> Result<(Self::Output, impl Future<Output = ()> + 'static), Self::Error> {
         Ok((
-            TroubleReporter {
-                output_tx: OUTPUT_CHANNEL.sender(),
-            },
+            TroubleReporter { output_tx: OUTPUT_CHANNEL.sender() },
             task::run::<_, _, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>(
                 self.controller,
                 self.rng,

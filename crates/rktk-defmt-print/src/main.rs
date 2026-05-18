@@ -18,17 +18,12 @@ fn main() -> anyhow::Result<()> {
         .collect::<Vec<_>>();
 
     let mut usb_serials_with_name = vec![];
-    for device in rusb::devices()
-        .context("Failed to find usb devices")?
-        .iter()
-    {
+    for device in rusb::devices().context("Failed to find usb devices")?.iter() {
         let device_desc = device.device_descriptor().unwrap();
         let pid = device_desc.product_id();
         let vid = device_desc.vendor_id();
 
-        let matched_serial_port = usb_serials
-            .iter()
-            .find(|d| d.0.pid == pid && d.0.vid == vid);
+        let matched_serial_port = usb_serials.iter().find(|d| d.0.pid == pid && d.0.vid == vid);
 
         if let Some(sp) = matched_serial_port {
             match device.open() {
@@ -94,10 +89,7 @@ fn main() -> anyhow::Result<()> {
         }
         elf_path
     } else {
-        println!(
-            "No ELF path preset found. Config file path: {:?}",
-            elf_config_path
-        );
+        println!("No ELF path preset found. Config file path: {:?}", elf_config_path);
         None
     };
 

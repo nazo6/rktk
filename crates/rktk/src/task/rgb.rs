@@ -40,8 +40,7 @@ pub async fn start<Layout: Layout2d, Driver: RgbDriver>(
     let color_correction = ColorCorrection::default();
     loop {
         let res = select(RGB_CHANNEL.receive(), async {
-            hook.on_rgb_process(&mut driver, &mut current_rgb_mode)
-                .await;
+            hook.on_rgb_process(&mut driver, &mut current_rgb_mode).await;
 
             match &current_rgb_mode {
                 RgbMode::Off => {

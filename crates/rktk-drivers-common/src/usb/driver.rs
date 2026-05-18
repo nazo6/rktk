@@ -40,9 +40,7 @@ impl ReporterDriver for CommonUsbDriver {
         &self,
         _report: usbd_hid::descriptor::KeyboardReport,
     ) -> Result<(), Self::Error> {
-        HID_KEYBOARD_CHANNEL
-            .try_send(_report)
-            .map_err(|_| UsbError::ChannelFull("keyboard"))?;
+        HID_KEYBOARD_CHANNEL.try_send(_report).map_err(|_| UsbError::ChannelFull("keyboard"))?;
         Ok(())
     }
 
@@ -61,9 +59,7 @@ impl ReporterDriver for CommonUsbDriver {
         &self,
         _report: usbd_hid::descriptor::MouseReport,
     ) -> Result<(), Self::Error> {
-        HID_MOUSE_CHANNEL
-            .try_send(_report)
-            .map_err(|_| UsbError::ChannelFull("mouse"))?;
+        HID_MOUSE_CHANNEL.try_send(_report).map_err(|_| UsbError::ChannelFull("mouse"))?;
 
         Ok(())
     }

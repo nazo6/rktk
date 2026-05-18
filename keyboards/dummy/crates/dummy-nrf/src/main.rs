@@ -101,10 +101,8 @@ async fn main(spawner: Spawner) {
         };
         use rktk_drivers_nrf::init_sdc;
 
-        let mut rng = singleton!(
-            embassy_nrf::rng::Rng::new(p.RNG, Irqs),
-            embassy_nrf::rng::Rng<Async>
-        );
+        let mut rng =
+            singleton!(embassy_nrf::rng::Rng::new(p.RNG, Irqs), embassy_nrf::rng::Rng<Async>);
         let rng_2 = singleton!(ChaCha12Rng::from_rng(&mut rng).unwrap(), ChaCha12Rng);
         init_sdc!(
             spawner,
@@ -118,10 +116,7 @@ async fn main(spawner: Spawner) {
         TroubleReporterBuilder::<_, _, 1, 5, 72>::new(
             sdc.unwrap(),
             rng_2,
-            TroubleReporterConfig {
-                advertise_name: "negL Trouble",
-                peripheral_config: None,
-            },
+            TroubleReporterConfig { advertise_name: "negL Trouble", peripheral_config: None },
         )
     };
     cfg_if::cfg_if! {
@@ -161,11 +156,8 @@ async fn main(spawner: Spawner) {
         use embassy_nrf::gpio::{Input, Output, OutputDrive, Pull};
         use rktk_drivers_common::keyscan::shift_register_matrix::ShiftRegisterMatrix;
 
-        let shift_register_cs = Output::new(
-            p.P1_04,
-            embassy_nrf::gpio::Level::High,
-            OutputDrive::Standard,
-        );
+        let shift_register_cs =
+            Output::new(p.P1_04, embassy_nrf::gpio::Level::High, OutputDrive::Standard);
         let shift_register_spi_device = SpiDevice::new(&spi, shift_register_cs);
 
         ShiftRegisterMatrix::<_, _, _, 8, 5, 5, 8>::new(
@@ -187,16 +179,10 @@ async fn main(spawner: Spawner) {
         {
             use embassy_nrf::gpio::{Output, OutputDrive};
             use rktk_drivers_common::mouse::paw3395::{self, Paw3395};
-            let ball_cs = Output::new(
-                p.P1_06,
-                embassy_nrf::gpio::Level::High,
-                OutputDrive::Standard,
-            );
+            let ball_cs =
+                Output::new(p.P1_06, embassy_nrf::gpio::Level::High, OutputDrive::Standard);
             use embassy_embedded_hal::shared_bus::asynch::spi::SpiDevice;
-            Some(Paw3395::new(
-                SpiDevice::new(&spi, ball_cs),
-                paw3395::config::Config::default(),
-            ))
+            Some(Paw3395::new(SpiDevice::new(&spi, ball_cs), paw3395::config::Config::default()))
         }
         #[cfg(not(feature = "mouse"))]
         dummy::mouse()
@@ -310,11 +296,6 @@ async fn main(spawner: Spawner) {
         encoder,
     };
 
-    rktk::task::start(
-        spawner,
-        drivers,
-        create_empty_hooks(),
-        new_rktk_opts(&keymap::KEYMAP, None),
-    )
-    .await;
+    rktk::task::start(spawner, drivers, create_empty_hooks(), new_rktk_opts(&keymap::KEYMAP, None))
+        .await;
 }

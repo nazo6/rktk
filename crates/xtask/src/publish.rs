@@ -8,11 +8,7 @@ pub fn start(
     continue_on_error: bool,
 ) -> anyhow::Result<()> {
     let publish_crates: Vec<&String> = if let Some(crate_name) = crate_name {
-        CRATES_CONFIG
-            .publish_order
-            .iter()
-            .filter(|c| **c == crate_name)
-            .collect()
+        CRATES_CONFIG.publish_order.iter().filter(|c| **c == crate_name).collect()
     } else {
         CRATES_CONFIG.publish_order.iter().collect()
     };
@@ -22,11 +18,8 @@ pub fn start(
     let mut results = Vec::new();
     for package in publish_crates {
         let now = std::time::Instant::now();
-        let use_release_feature = CRATES_CONFIG
-            .crates
-            .get(package)
-            .map(|c| c.use_release_feature)
-            .unwrap_or(false);
+        let use_release_feature =
+            CRATES_CONFIG.crates.get(package).map(|c| c.use_release_feature).unwrap_or(false);
 
         let mut args = vec!["publish", "-p", package, "--features"];
         if use_release_feature {
@@ -57,12 +50,7 @@ pub fn start(
     for (package, result, duration) in results {
         match result {
             Ok(_) => {
-                xprintln!(
-                    "{} `{}` in {}s",
-                    " PASS ".on_green(),
-                    package,
-                    duration.as_secs()
-                );
+                xprintln!("{} `{}` in {}s", " PASS ".on_green(), package, duration.as_secs());
             }
             Err(err) => {
                 xprintln!(

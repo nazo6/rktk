@@ -1,6 +1,6 @@
-use macro_rules_attribute::{apply, attribute_alias};
 pub use kmsm;
 use kmsm::keycode::KeyAction;
+use macro_rules_attribute::{apply, attribute_alias};
 
 #[cfg(test)]
 mod test_endpoints {
@@ -43,8 +43,8 @@ pub struct KeyActionLoc {
 }
 
 pub mod get_keyboard_info {
-    use macro_rules_attribute::apply;
     use kmsm::interface::state::KeymapInfo;
+    use macro_rules_attribute::apply;
 
     #[apply(super::common_derive)]
     pub struct KeyboardInfo {

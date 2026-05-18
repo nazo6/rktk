@@ -19,10 +19,7 @@ impl Packet {
             panic!("PacketPool allocation failed");
         };
         buf[..data.len()].copy_from_slice(data);
-        Packet {
-            len: data.len() as u8,
-            buf,
-        }
+        Packet { len: data.len() as u8, buf }
     }
 
     pub fn as_bytes(&self) -> &[u8] {
@@ -52,9 +49,6 @@ impl l2cap::Packet for Packet {
 
     unsafe fn from_raw_parts(ptr: NonNull<u8>, len: usize) -> Self {
         // info!("from_raw_parts {}", ptr.as_ptr() as u32);
-        Self {
-            len: len as u8,
-            buf: unsafe { Box::from_raw(ptr.cast::<[u8; 64]>()) },
-        }
+        Self { len: len as u8, buf: unsafe { Box::from_raw(ptr.cast::<[u8; 64]>()) } }
     }
 }

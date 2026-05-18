@@ -28,15 +28,15 @@ pub struct Keymap<
 }
 
 impl<
-        const LAYER: usize,
-        const ROW: usize,
-        const COL: usize,
-        const ENCODER_COUNT: usize,
-        const TAP_DANCE_MAX_DEFINITIONS: usize,
-        const TAP_DANCE_MAX_REPEATS: usize,
-        const COMBO_KEY_MAX_DEFINITIONS: usize,
-        const COMBO_KEY_MAX_SOURCES: usize,
-    >
+    const LAYER: usize,
+    const ROW: usize,
+    const COL: usize,
+    const ENCODER_COUNT: usize,
+    const TAP_DANCE_MAX_DEFINITIONS: usize,
+    const TAP_DANCE_MAX_REPEATS: usize,
+    const COMBO_KEY_MAX_DEFINITIONS: usize,
+    const COMBO_KEY_MAX_SOURCES: usize,
+>
     Keymap<
         LAYER,
         ROW,
@@ -59,9 +59,10 @@ impl<
     pub fn get_keyaction(&self, layer: usize, row: usize, col: usize) -> Option<&KeyAction> {
         if let Some(layer) = self.layers.get(layer)
             && let Some(row) = layer.keymap.get(row)
-                && let Some(key) = row.get(col) {
-                    return Some(key);
-                }
+            && let Some(key) = row.get(col)
+        {
+            return Some(key);
+        }
         None
     }
 

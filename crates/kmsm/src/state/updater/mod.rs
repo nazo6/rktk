@@ -17,15 +17,11 @@ pub struct UpdaterState {
 
 impl UpdaterState {
     pub fn new(mouse_config: MouseConfig) -> Self {
-        Self {
-            mouse: mouse::MouseState::new(mouse_config),
-        }
+        Self { mouse: mouse::MouseState::new(mouse_config) }
     }
 
     pub fn start_update<'a>(&'a mut self) -> Updater<'a> {
-        Updater {
-            mouse: self.mouse.start_update(),
-        }
+        Updater { mouse: self.mouse.start_update() }
     }
 }
 

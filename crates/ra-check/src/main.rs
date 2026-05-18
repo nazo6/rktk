@@ -26,9 +26,7 @@ fn run() -> Result<bool> {
     let (subcommand, cargo_args) = parse_args(args)?;
 
     // Get workspace metadata
-    let metadata = MetadataCommand::new()
-        .exec()
-        .context("Failed to get cargo metadata")?;
+    let metadata = MetadataCommand::new().exec().context("Failed to get cargo metadata")?;
 
     // Check if we're in a workspace
     if metadata.workspace_members.is_empty() {
@@ -68,10 +66,9 @@ fn run() -> Result<bool> {
         cmd.args(&cargo_args);
         cmd.current_dir(&package_dir);
 
-        let status = cmd.status().context(format!(
-            "Failed to run cargo {} for {}",
-            subcommand, package.name
-        ))?;
+        let status = cmd
+            .status()
+            .context(format!("Failed to run cargo {} for {}", subcommand, package.name))?;
 
         if status.success() {
             println!("  ✓ Success\n");

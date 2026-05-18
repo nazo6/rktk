@@ -16,26 +16,11 @@ pub const EMPTY_LAYER: LayerKeymap<ROWS, COLS> = [
 
 pub const EMPTY_KEYMAP: Keymap<LAYER_COUNT, ROWS, COLS, ENC_COUNT, 2, 4, 2, 3> = Keymap {
     layers: [
-        Layer {
-            keymap: EMPTY_LAYER,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            ..Layer::const_default()
-        },
-        Layer {
-            keymap: EMPTY_LAYER,
-            ..Layer::const_default()
-        },
+        Layer { keymap: EMPTY_LAYER, ..Layer::const_default() },
+        Layer { keymap: EMPTY_LAYER, ..Layer::const_default() },
+        Layer { keymap: EMPTY_LAYER, ..Layer::const_default() },
+        Layer { keymap: EMPTY_LAYER, ..Layer::const_default() },
+        Layer { keymap: EMPTY_LAYER, ..Layer::const_default() },
     ],
     tap_dance: [
         Some(TapDanceDefinition {

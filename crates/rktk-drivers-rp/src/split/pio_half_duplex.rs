@@ -105,11 +105,7 @@ impl<'a, I: Instance> PioHalfDuplexSplitDriver<'a, I> {
         rx_init(&mut common, &mut sm0, &out_pin);
         tx_init(&mut common, &mut sm1, &out_pin);
 
-        Self {
-            rx_sm: sm0,
-            tx_sm: sm1,
-            pin: out_pin,
-        }
+        Self { rx_sm: sm0, tx_sm: sm1, pin: out_pin }
     }
 
     async fn enter_rx(&mut self) {

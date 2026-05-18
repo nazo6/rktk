@@ -62,10 +62,7 @@ pub fn start() -> anyhow::Result<()> {
                 eprintln!("No stats found in comment for commit {}", comment.commit_id);
                 None
             } else {
-                Some(ParsedComment {
-                    commit_id: comment.commit_id,
-                    stats,
-                })
+                Some(ParsedComment { commit_id: comment.commit_id, stats })
             }
         })
         .collect();
@@ -85,20 +82,14 @@ fn generate_html(parsed_comments: &[ParsedComment]) -> anyhow::Result<()> {
     let mut config_names: Vec<String> = config_names.into_iter().collect();
     config_names.sort();
 
-    let labels: Vec<String> = parsed_comments
-        .iter()
-        .map(|c| c.commit_id.split_at(7).0.to_string())
-        .collect();
+    let labels: Vec<String> =
+        parsed_comments.iter().map(|c| c.commit_id.split_at(7).0.to_string()).collect();
 
     let mut datasets = Vec::new();
     for name in config_names {
         let mut data = Vec::new();
         for comment in parsed_comments {
-            let size = comment
-                .stats
-                .iter()
-                .find(|s| s.get_label() == name)
-                .map(|s| s.bin_size);
+            let size = comment.stats.iter().find(|s| s.get_label() == name).map(|s| s.bin_size);
             data.push(size);
         }
 
@@ -135,15 +126,9 @@ pub fn parse_binary_stats(input: &str) -> Vec<ParsedStat> {
     let re_uf2_size = Regex::new(r"UF2: (\d+) bytes").unwrap();
 
     for section in sections {
-        let name = re_name
-            .captures(section)
-            .map(|c| c[1].to_string())
-            .unwrap_or_default();
+        let name = re_name.captures(section).map(|c| c[1].to_string()).unwrap_or_default();
 
-        let binary_name = re_binary
-            .captures(section)
-            .map(|c| c[1].to_string())
-            .unwrap_or_default();
+        let binary_name = re_binary.captures(section).map(|c| c[1].to_string()).unwrap_or_default();
 
         let mut features: Vec<String> = re_features
             .captures(section)
@@ -151,23 +136,11 @@ pub fn parse_binary_stats(input: &str) -> Vec<ParsedStat> {
             .unwrap_or_default();
         features.sort();
 
-        let bin_size = re_bin_size
-            .captures(section)
-            .and_then(|c| c[1].parse().ok())
-            .unwrap_or(0);
+        let bin_size = re_bin_size.captures(section).and_then(|c| c[1].parse().ok()).unwrap_or(0);
 
-        let uf2_size = re_uf2_size
-            .captures(section)
-            .and_then(|c| c[1].parse().ok())
-            .unwrap_or(0);
+        let uf2_size = re_uf2_size.captures(section).and_then(|c| c[1].parse().ok()).unwrap_or(0);
 
-        stats.push(ParsedStat {
-            name,
-            features,
-            binary_name,
-            bin_size,
-            uf2_size,
-        });
+        stats.push(ParsedStat { name, features, binary_name, bin_size, uf2_size });
     }
 
     stats

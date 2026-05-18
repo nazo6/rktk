@@ -15,10 +15,7 @@ pub fn encoder_clockwise() {
 
     let _ = update!(state, time(0));
 
-    let report = state.update(
-        InputEvent::Encoder((0, EncoderDirection::Clockwise)),
-        time(0),
-    );
+    let report = state.update(InputEvent::Encoder((0, EncoderDirection::Clockwise)), time(0));
 
     assert_eq!(
         report,
@@ -27,10 +24,7 @@ pub fn encoder_clockwise() {
     );
 
     let report = update!(state, time(10));
-    assert_eq!(
-        report, KEYBOARD_ONLY_REPORT,
-        "In second send, empty should not be sent"
-    );
+    assert_eq!(report, KEYBOARD_ONLY_REPORT, "In second send, empty should not be sent");
 }
 
 #[test]
@@ -39,10 +33,8 @@ pub fn encoder_counterclockwise() {
 
     let _ = update!(state, time(0));
 
-    let report = state.update(
-        InputEvent::Encoder((0, EncoderDirection::CounterClockwise)),
-        time(0),
-    );
+    let report =
+        state.update(InputEvent::Encoder((0, EncoderDirection::CounterClockwise)), time(0));
 
     assert_eq!(
         report,
@@ -51,8 +43,5 @@ pub fn encoder_counterclockwise() {
     );
 
     let report = update!(state, time(0));
-    assert_eq!(
-        report, KEYBOARD_ONLY_REPORT,
-        "In second send, empty report should be sent"
-    );
+    assert_eq!(report, KEYBOARD_ONLY_REPORT, "In second send, empty report should be sent");
 }

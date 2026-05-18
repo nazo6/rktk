@@ -180,12 +180,7 @@ impl<
             keyboard_report: if keyboard_change {
                 keys.resize_default(6).unwrap();
                 let keycodes = keys.into_array().unwrap();
-                Some(KeyboardReport {
-                    keycodes,
-                    modifier,
-                    leds: 0,
-                    reserved: 0,
-                })
+                Some(KeyboardReport { keycodes, modifier, leds: 0, reserved: 0 })
             } else {
                 None
             },
@@ -201,9 +196,7 @@ impl<
                 None
             },
             media_keyboard_report: if media_keyboard_change {
-                Some(MediaKeyboardReport {
-                    usage_id: media_keys,
-                })
+                Some(MediaKeyboardReport { usage_id: media_keys })
             } else {
                 None
             },

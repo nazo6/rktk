@@ -8,13 +8,9 @@ mod per_feature;
 
 pub fn start(args: SizeStatsArgs) -> anyhow::Result<()> {
     match args.command {
-        SizeStatsCommands::Crate {
-            crate_name,
-            bin,
-            features,
-            gh_output,
-            extra,
-        } => crate_stats::start(crate_name, bin, features, gh_output, extra),
+        SizeStatsCommands::Crate { crate_name, bin, features, gh_output, extra } => {
+            crate_stats::start(crate_name, bin, features, gh_output, extra)
+        }
         SizeStatsCommands::GenHistory => gen_history::start(),
         SizeStatsCommands::PerFeature { gh_output } => per_feature::start(gh_output),
     }
@@ -46,8 +42,7 @@ impl GhStatsWriter {
 
     fn write(&mut self, title: &str, value: &str, collapse: bool) {
         if collapse {
-            self.text
-                .push_str(&format!("<details>\n<summary>{title}</summary>\n\n"));
+            self.text.push_str(&format!("<details>\n<summary>{title}</summary>\n\n"));
         }
         self.text.push_str(&format!("### {title}\n"));
         self.text.push_str(&format!("```\n{value}\n```\n"));

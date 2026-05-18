@@ -11,11 +11,7 @@ pub fn lock() {
 
     dbg!("T1");
     let report = update!(state, time(0), (0, 1, true));
-    assert_eq!(
-        report,
-        report_with_keycodes([0x04, 0, 0, 0, 0, 0]),
-        "Not locked. Key 'a' pressed"
-    );
+    assert_eq!(report, report_with_keycodes([0x04, 0, 0, 0, 0, 0]), "Not locked. Key 'a' pressed");
 
     dbg!("T2");
     let report = update!(state, time(10), (0, 0, true));
@@ -43,11 +39,7 @@ pub fn lock() {
     assert_eq!(report, NONE_REPORT, "Lock released");
 
     let report = update!(state, time(80), (0, 1, true));
-    assert_eq!(
-        report,
-        report_with_keycodes([0x04, 0, 0, 0, 0, 0]),
-        "Unlocked. Key 'a' pressed"
-    );
+    assert_eq!(report, report_with_keycodes([0x04, 0, 0, 0, 0, 0]), "Unlocked. Key 'a' pressed");
     let report = update!(state, time(90), (0, 1, false));
     assert_eq!(report, KEYBOARD_ONLY_REPORT, "Unlocked. Key 'a' released");
 }

@@ -41,14 +41,8 @@ pub async fn init_reporters<W: WirelessReporterDriverBuilder, U: UsbReporterDriv
     wireless_builder: Option<W>,
     usb_builder: Option<U>,
 ) -> (
-    (
-        Option<W::Output>,
-        Option<impl Future<Output = ()> + 'static>,
-    ),
-    (
-        Option<U::Output>,
-        Option<impl Future<Output = ()> + 'static>,
-    ),
+    (Option<W::Output>, Option<impl Future<Output = ()> + 'static>),
+    (Option<U::Output>, Option<impl Future<Output = ()> + 'static>),
 ) {
     let w = if let Some(w_builder) = wireless_builder {
         debug!("Wireless init");
@@ -82,16 +76,8 @@ pub async fn init_reporters<W: WirelessReporterDriverBuilder, U: UsbReporterDriv
 }
 
 pub enum KeyboardRoleRes<'a, F1, F2> {
-    Master {
-        sender: M2sTx<'a>,
-        receiver: S2mRx<'a>,
-        task: Option<F1>,
-    },
-    Slave {
-        sender: S2mTx<'a>,
-        receiver: M2sRx<'a>,
-        task: Option<F2>,
-    },
+    Master { sender: M2sTx<'a>, receiver: S2mRx<'a>, task: Option<F1> },
+    Slave { sender: S2mTx<'a>, receiver: M2sRx<'a>, task: Option<F2> },
 }
 
 impl<'a, F1, F2> KeyboardRoleRes<'a, F1, F2> {

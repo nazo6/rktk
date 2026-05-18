@@ -16,9 +16,7 @@ pub struct OneshotState<const SIZE: usize> {
 
 impl<const SIZE: usize> OneshotState<SIZE> {
     pub fn new() -> Self {
-        Self {
-            oneshot: heapless::Vec::new(),
-        }
+        Self { oneshot: heapless::Vec::new() }
     }
 
     pub fn pre_resolve(
@@ -50,10 +48,7 @@ impl<const SIZE: usize> OneshotState<SIZE> {
 
     pub fn process_keycode(&mut self, kc: &KeyCode, pressed: bool) {
         if pressed {
-            let _ = self.oneshot.push(OneshotKeyState {
-                key: *kc,
-                active: None,
-            });
+            let _ = self.oneshot.push(OneshotKeyState { key: *kc, active: None });
         }
     }
 }

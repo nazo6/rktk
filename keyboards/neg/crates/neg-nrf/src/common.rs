@@ -66,9 +66,6 @@ mod sd {
         rktk_drivers_nrf::softdevice::start_softdevice(spawner, sd);
         embassy_time::Timer::after_millis(200).await;
 
-        (
-            SoftdeviceBleReporterBuilder::new(spawner, sd, server, "negL", part_bond),
-            part_main,
-        )
+        (SoftdeviceBleReporterBuilder::new(spawner, sd, server, "negL", part_bond), part_main)
     }
 }

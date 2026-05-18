@@ -47,10 +47,7 @@ fn main() {
     let out = generate(&config).unwrap();
     let gen_path = Path::new(env::var("OUT_DIR").unwrap().as_str()).join("config.rs");
     fs::write(&gen_path, out).expect("Failed to write generated code");
-    std::process::Command::new("rustfmt")
-        .arg(&gen_path)
-        .output()
-        .expect("Failed to run rustfmt");
+    std::process::Command::new("rustfmt").arg(&gen_path).output().expect("Failed to run rustfmt");
 }
 
 macro_rules! definitions {

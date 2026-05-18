@@ -75,10 +75,7 @@ pub struct CalibrationEntry {
 
 impl CalibrationEntry {
     pub const fn new() -> Self {
-        Self {
-            min: u16::MAX,
-            max: u16::MIN,
-        }
+        Self { min: u16::MAX, max: u16::MIN }
     }
 }
 
@@ -156,7 +153,6 @@ impl core::fmt::Display for CalibrationError {
     }
 }
 impl core::error::Error for CalibrationError {}
-
 
 impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const COLS: usize>
     KeyscanDriver for MagneticMatrix<S, M, ROWS, COLS>
@@ -244,11 +240,7 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
                                         distance,
                                         normalized
                                     );
-                                    cb(KeyChangeEvent {
-                                        row: row as u8,
-                                        col: col as u8,
-                                        pressed,
-                                    });
+                                    cb(KeyChangeEvent { row: row as u8, col: col as u8, pressed });
                                 }
                             }
                         }

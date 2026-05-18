@@ -28,9 +28,7 @@ pub async fn start<KS: KeyscanDriver, M: MouseDriver, DB: DebounceDriver, SH: Sl
 ) {
     crate::print!("Slave start");
 
-    slave_hooks
-        .on_slave_init(&mut keyscan, mouse.as_mut())
-        .await;
+    slave_hooks.on_slave_init(&mut keyscan, mouse.as_mut()).await;
 
     join3(
         async {

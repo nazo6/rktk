@@ -30,10 +30,6 @@ pub trait DisplayDriver: AsRef<Self::Display> + AsMut<Self::Display> + 'static {
     }
 
     async fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {
-        if on {
-            self.set_brightness(255).await
-        } else {
-            self.set_brightness(0).await
-        }
+        if on { self.set_brightness(255).await } else { self.set_brightness(0).await }
     }
 }

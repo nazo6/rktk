@@ -25,11 +25,7 @@ fn layer_change_during_press() {
     );
 
     let report = update!(state, time(200), (0, 0, false));
-    assert_eq!(
-        report.keyboard_report.unwrap().keycodes,
-        [0, 0, 0, 0, 0, 0],
-        "Key released"
-    );
+    assert_eq!(report.keyboard_report.unwrap().keycodes, [0, 0, 0, 0, 0, 0], "Key released");
 
     let _report = state.update(InputEvent::None, time(1000));
     assert_eq!(

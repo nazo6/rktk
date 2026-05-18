@@ -26,11 +26,7 @@ pub async fn detect_hand_from_matrix<E, O: OutputPin<Error = E>, I: InputPin<Err
 
     output.set_high()?;
     embassy_time::Timer::after(input_delay.unwrap_or(Duration::from_millis(10))).await;
-    let hand = if input.is_high()? {
-        high_hand
-    } else {
-        high_hand.other()
-    };
+    let hand = if input.is_high()? { high_hand } else { high_hand.other() };
     output.set_low()?;
 
     Ok(hand)

@@ -1,7 +1,7 @@
 pub mod key_manager;
 pub mod keyboard;
-pub mod rktk;
 pub mod magnetic;
+pub mod rktk;
 
 /// Root struct of the "dynamic" config
 #[derive(serde::Deserialize, schemars::JsonSchema, const_gen::CompileConst)]

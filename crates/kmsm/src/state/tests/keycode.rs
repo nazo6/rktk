@@ -61,8 +61,5 @@ fn layer_toggle_key() {
     let report = update!(state, time(0), (0, 0, true));
     let mut expected = NONE_REPORT;
     expected.highest_layer = 0;
-    assert_eq!(
-        report, expected,
-        "Toggle 1 is pressed again, layer is now 0"
-    );
+    assert_eq!(report, expected, "Toggle 1 is pressed again, layer is now 0");
 }

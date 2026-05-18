@@ -16,10 +16,7 @@ fn combo_1() {
 
     let report = update!(state, time(20), (0, 1, true));
     let expected = report_with_keycodes([Key::I as u8, 0, 0, 0, 0, 0]);
-    assert_eq!(
-        report, expected,
-        "Key 'H' is pressed before combo timeout. Combo key sent."
-    );
+    assert_eq!(report, expected, "Key 'H' is pressed before combo timeout. Combo key sent.");
 
     let report = update!(state, time(100));
     assert_eq!(report, NONE_REPORT, "Both key still pressed.");
@@ -45,10 +42,7 @@ fn combo_sideeffect() {
     let _ = update!(state, time(0));
 
     let report = update!(state, time(0), (0, 0, true));
-    assert_eq!(
-        report, NONE_REPORT,
-        "Key 'G' is pressed. Before combo timeout"
-    );
+    assert_eq!(report, NONE_REPORT, "Key 'G' is pressed. Before combo timeout");
 
     let report = update!(state, time(100), (0, 0, true));
     assert_eq!(
@@ -61,8 +55,5 @@ fn combo_sideeffect() {
     assert_eq!(report, NONE_REPORT, "Time elapsed. Still 'G' is pressed.");
 
     let report = update!(state, time(200), (0, 0, false));
-    assert_eq!(
-        report, KEYBOARD_ONLY_REPORT,
-        "Key 'A' released. Stop sending"
-    );
+    assert_eq!(report, KEYBOARD_ONLY_REPORT, "Key 'A' released. Stop sending");
 }

@@ -18,11 +18,8 @@ fn get_crates(crate_filter: &CrateFilter) -> Vec<Package> {
 
     let mut crates = Vec::new();
     for package in packages {
-        let crate_config = CRATES_CONFIG
-            .crates
-            .get(package.name.as_str())
-            .cloned()
-            .unwrap_or_default();
+        let crate_config =
+            CRATES_CONFIG.crates.get(package.name.as_str()).cloned().unwrap_or_default();
 
         match crate_filter {
             CrateFilter::All => {
@@ -50,11 +47,7 @@ fn get_crates(crate_filter: &CrateFilter) -> Vec<Package> {
 }
 
 fn build_args(crate_name: &str) -> Vec<String> {
-    let config = CRATES_CONFIG
-        .crates
-        .get(crate_name)
-        .cloned()
-        .unwrap_or_default();
+    let config = CRATES_CONFIG.crates.get(crate_name).cloned().unwrap_or_default();
 
     let mut args = vec!["hack".to_string()];
 
@@ -111,11 +104,7 @@ fn build_args(crate_name: &str) -> Vec<String> {
 fn run_check(package: &Package) -> (&Utf8Path, Result<std::process::Output, std::io::Error>) {
     let envs = CRATES_CONFIG.check_env.clone();
 
-    let crate_path = package
-        .manifest_path
-        .parent()
-        .context("no parent dir")
-        .unwrap();
+    let crate_path = package.manifest_path.parent().context("no parent dir").unwrap();
 
     let mut cmd = cmd("cargo", build_args(&package.name));
 
@@ -134,10 +123,7 @@ fn run_check(package: &Package) -> (&Utf8Path, Result<std::process::Output, std:
 pub fn start(crate_filter: CrateFilter) -> anyhow::Result<()> {
     let packages = get_crates(&crate_filter);
     if packages.is_empty() {
-        return Err(anyhow::anyhow!(
-            "No crates found for the filter {:?}",
-            crate_filter
-        ));
+        return Err(anyhow::anyhow!("No crates found for the filter {:?}", crate_filter));
     }
     xprintln!("Checking {} crates...", packages.len());
     for package in &packages {
@@ -147,11 +133,7 @@ pub fn start(crate_filter: CrateFilter) -> anyhow::Result<()> {
     let mut results = Vec::new();
     for package in &packages {
         eprintln!();
-        xprintln!(
-            "Checking crate `{}` ({})",
-            package.name,
-            package.manifest_path
-        );
+        xprintln!("Checking crate `{}` ({})", package.name, package.manifest_path);
 
         let now = std::time::Instant::now();
 

@@ -10,17 +10,9 @@ use super::EventType;
 #[derive(Debug)]
 enum TapDanceKeyState {
     None,
-    PressedPending {
-        tap_count: u8,
-        hold_start: Instant,
-    },
-    ReleasedPending {
-        tap_count: u8,
-        last_release: Instant,
-    },
-    Holding {
-        tap_count: u8,
-    },
+    PressedPending { tap_count: u8, hold_start: Instant },
+    ReleasedPending { tap_count: u8, last_release: Instant },
+    Holding { tap_count: u8 },
 }
 
 struct TapDanceUnit<const MAX_REPEATS: usize> {
@@ -30,15 +22,11 @@ struct TapDanceUnit<const MAX_REPEATS: usize> {
 
 impl<const MAX_REPEATS: usize> TapDanceUnit<MAX_REPEATS> {
     fn get_tap_key(&self, tap_count: u8) -> Option<KeyCode> {
-        self.config
-            .as_ref()
-            .and_then(|def| def.tap.get(tap_count as usize).copied().flatten())
+        self.config.as_ref().and_then(|def| def.tap.get(tap_count as usize).copied().flatten())
     }
 
     fn get_hold_key(&self, tap_count: u8) -> Option<KeyCode> {
-        self.config
-            .as_ref()
-            .and_then(|def| def.hold.get(tap_count as usize).copied().flatten())
+        self.config.as_ref().and_then(|def| def.hold.get(tap_count as usize).copied().flatten())
     }
 }
 
@@ -55,10 +43,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
         config: TapDanceConfig,
     ) -> Self {
         Self {
-            state: def.map(|def| TapDanceUnit {
-                state: TapDanceKeyState::None,
-                config: def,
-            }),
+            state: def.map(|def| TapDanceUnit { state: TapDanceKeyState::None, config: def }),
             threshold: Duration::from_millis(config.threshold),
         }
     }
@@ -67,10 +52,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
         for td in &mut self.state {
             match td.state {
                 TapDanceKeyState::None => {}
-                TapDanceKeyState::PressedPending {
-                    tap_count,
-                    hold_start,
-                } => {
+                TapDanceKeyState::PressedPending { tap_count, hold_start } => {
                     // If the Pending state continues for a while (if it remains pressed), it will become Hold.
                     if now - hold_start > self.threshold {
                         if let Some(hkc) = td.get_hold_key(tap_count) {
@@ -79,10 +61,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
                         td.state = TapDanceKeyState::Holding { tap_count };
                     }
                 }
-                TapDanceKeyState::ReleasedPending {
-                    tap_count,
-                    last_release,
-                } => {
+                TapDanceKeyState::ReleasedPending { tap_count, last_release } => {
                     // If the Pending state continues for a while (if it remains released), it will become Tap.
                     if now - last_release > self.threshold {
                         if let Some(tkc) = td.get_tap_key(tap_count) {
@@ -111,10 +90,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_REPEATS: usize>
         if let Some(td) = self.state.get_mut(id as usize) {
             match (pressed, &td.state) {
                 (true, TapDanceKeyState::None) => {
-                    td.state = TapDanceKeyState::PressedPending {
-                        tap_count: 0,
-                        hold_start: now,
-                    };
+                    td.state = TapDanceKeyState::PressedPending { tap_count: 0, hold_start: now };
                 }
                 (true, TapDanceKeyState::ReleasedPending { tap_count, .. }) => {
                     td.state = TapDanceKeyState::PressedPending {

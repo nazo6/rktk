@@ -7,9 +7,7 @@ pub struct NrfSystemDriver<'d> {
 
 impl<'d> NrfSystemDriver<'d> {
     pub fn new(vcc_cutoff: Option<(Output<'d>, Level)>) -> Self {
-        Self {
-            vcc_cutoff: vcc_cutoff.map(|(pin, level)| Mutex::new((pin, level))),
-        }
+        Self { vcc_cutoff: vcc_cutoff.map(|(pin, level)| Mutex::new((pin, level))) }
     }
 }
 

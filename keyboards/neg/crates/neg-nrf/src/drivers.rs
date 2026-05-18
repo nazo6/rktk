@@ -78,11 +78,7 @@ macro_rules! driver_mouse {
         #[cfg(feature = "pmw3360")]
         use rktk_drivers_common::mouse::pmw3360::Pmw3360;
 
-        let ball_cs = Output::new(
-            $p.P1_06,
-            embassy_nrf::gpio::Level::High,
-            OutputDrive::Standard,
-        );
+        let ball_cs = Output::new($p.P1_06, embassy_nrf::gpio::Level::High, OutputDrive::Standard);
 
         #[cfg(feature = "paw3395")]
         {
@@ -105,11 +101,8 @@ macro_rules! driver_keyscan {
         use embassy_nrf::gpio::{Input, Output, OutputDrive, Pull};
         use rktk_drivers_common::keyscan::shift_register_matrix::ShiftRegisterMatrix;
 
-        let shift_register_cs = Output::new(
-            $p.P1_04,
-            embassy_nrf::gpio::Level::High,
-            OutputDrive::Standard,
-        );
+        let shift_register_cs =
+            Output::new($p.P1_04, embassy_nrf::gpio::Level::High, OutputDrive::Standard);
         let shift_register_spi_device = SpiDevice::new(&$spi, shift_register_cs);
 
         ShiftRegisterMatrix::<_, _, _, 8, 5, 5, 8>::new(
@@ -133,10 +126,7 @@ macro_rules! driver_encoder {
         use embassy_nrf::gpio::{Input, Pull};
         use rktk_drivers_common::encoder::GeneralEncoder;
 
-        GeneralEncoder::new([(
-            Input::new($p.P0_02, Pull::Down),
-            Input::new($p.P0_29, Pull::Down),
-        )])
+        GeneralEncoder::new([(Input::new($p.P0_02, Pull::Down), Input::new($p.P0_29, Pull::Down))])
     }};
 }
 
@@ -146,10 +136,7 @@ macro_rules! driver_system {
         use embassy_nrf::gpio::{Level, Output, OutputDrive};
         use rktk_drivers_nrf::system::NrfSystemDriver;
 
-        let vcc_cutoff = (
-            Output::new($p.P0_13, Level::High, OutputDrive::Standard),
-            Level::Low,
-        );
+        let vcc_cutoff = (Output::new($p.P0_13, Level::High, OutputDrive::Standard), Level::Low);
         NrfSystemDriver::new(Some(vcc_cutoff))
     }};
 }

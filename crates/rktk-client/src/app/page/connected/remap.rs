@@ -33,12 +33,7 @@ pub fn Remap() -> Element {
         }
     });
 
-    let keyboard = CONN
-        .read()
-        .as_ref()
-        .context("Not connected")?
-        .keyboard
-        .clone();
+    let keyboard = CONN.read().as_ref().context("Not connected")?.keyboard.clone();
 
     match &*res.value().read() {
         Some(Ok((keymap, time))) => {

@@ -1,6 +1,6 @@
 //! Utility functions to define keymap.
 
-use super::{modifier::Modifier, KeyAction, KeyCode};
+use super::{KeyAction, KeyCode, modifier::Modifier};
 
 /// Press key with shift
 #[allow(non_snake_case)]

@@ -153,13 +153,7 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         let part_main_size = part_main.size();
         (
             Some(FlashSequentialMapStorage::new(part_main, 0, part_main_size)),
-            Some(SoftdeviceBleReporterBuilder::new(
-                spawner,
-                sd,
-                server,
-                "keyball61",
-                part_bond,
-            )),
+            Some(SoftdeviceBleReporterBuilder::new(spawner, sd, server, "keyball61", part_bond)),
         )
     };
     #[cfg(not(feature = "ble"))]
@@ -193,31 +187,16 @@ pub async fn start(spawner: embassy_executor::Spawner, keymap: &'static Keymap) 
         rgb: Some(rgb),
         storage,
         ble_builder,
-        debounce: Some(EagerDebounceDriver::new(
-            embassy_time::Duration::from_millis(20),
-            true,
-        )),
+        debounce: Some(EagerDebounceDriver::new(embassy_time::Duration::from_millis(20), true)),
         encoder: dummy::encoder(),
     };
 
     match hand {
         rktk::config::Hand::Left => {
-            rktk::task::start(
-                spawner,
-                drivers,
-                create_empty_hooks(),
-                get_opts_left(keymap),
-            )
-            .await;
+            rktk::task::start(spawner, drivers, create_empty_hooks(), get_opts_left(keymap)).await;
         }
         rktk::config::Hand::Right => {
-            rktk::task::start(
-                spawner,
-                drivers,
-                create_empty_hooks(),
-                get_opts_right(keymap),
-            )
-            .await;
+            rktk::task::start(spawner, drivers, create_empty_hooks(), get_opts_right(keymap)).await;
         }
     }
 }

@@ -50,15 +50,9 @@ mod conn {
 
     pub async fn connect() -> anyhow::Result<ConnectedState> {
         let mut device = BACKEND.0.open_device(0xFF70, 0x71).await?;
-        let keyboard = device
-            .get_client()
-            .get_keyboard_info(())
-            .await
-            .context("Cannot get keyboard info")?;
+        let keyboard =
+            device.get_client().get_keyboard_info(()).await.context("Cannot get keyboard info")?;
 
-        Ok(ConnectedState {
-            device: Mutex::new(device),
-            keyboard,
-        })
+        Ok(ConnectedState { device: Mutex::new(device), keyboard })
     }
 }

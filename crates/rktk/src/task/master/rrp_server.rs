@@ -33,11 +33,7 @@ pub async fn start(
         let mut server = rktk_rrp::server::Server::<_, _, _>::new(
             ServerTransport::new(usb),
             ServerTransport::new(usb),
-            Handlers {
-                state,
-                storage: config_store.as_ref(),
-                config,
-            },
+            Handlers { state, storage: config_store.as_ref(), config },
         );
         server.start::<{ CONST_CONFIG.buffer.rrp }>().await;
     }
@@ -71,13 +67,11 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         _req: (),
     ) -> Result<impl Stream<Item = get_layout_json::Response>, Self::Error> {
         if let Some(layout) = self.config.keyboard.layout {
-            Ok(futures::stream::iter(layout.as_bytes().chunks(64).map(
-                |chunk| {
-                    let mut vec = heapless::Vec::new();
-                    vec.extend_from_slice(chunk).unwrap();
-                    vec
-                },
-            )))
+            Ok(futures::stream::iter(layout.as_bytes().chunks(64).map(|chunk| {
+                let mut vec = heapless::Vec::new();
+                vec.extend_from_slice(chunk).unwrap();
+                vec
+            })))
         } else {
             Err("Layout is not defined")
         }
@@ -111,18 +105,14 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
 
         let (mut keymap, config) = {
             let state = self.state.lock().await;
-            (
-                state.inner().get_keymap().clone(),
-                state.inner().get_config().clone(),
-            )
+            (state.inner().get_keymap().clone(), state.inner().get_config().clone())
         };
 
         while let Some(Ok(key)) = req.next().await {
             keymap.layers[key.layer as usize].keymap[key.row as usize][key.col as usize] = key.key;
             if let Some(storage) = self.storage
-                && let Err(_e) = storage
-                    .write_keymap(key.layer, &keymap.layers[key.layer as usize])
-                    .await
+                && let Err(_e) =
+                    storage.write_keymap(key.layer, &keymap.layers[key.layer as usize]).await
             {
                 crate::print!("set_keymaps failed");
             }
@@ -179,11 +169,8 @@ impl<RE: Display, WE: Display, S: StorageDriver> ServerHandlers<RE, WE> for Hand
         &mut self,
         req: set_calibration_mode::Request,
     ) -> Result<set_calibration_mode::Response, Self::Error> {
-        let cmd = if req {
-            KeyboardCommand::StartCalibration
-        } else {
-            KeyboardCommand::EndCalibration
-        };
+        let cmd =
+            if req { KeyboardCommand::StartCalibration } else { KeyboardCommand::EndCalibration };
         let _ = KEYBOARD_CONTROL_CHANNEL.try_send(cmd);
         Ok(())
     }
@@ -203,20 +190,14 @@ impl<R: ReporterDriver> ReadTransport for ServerTransport<'_, R> {
     type Error = &'static str;
 
     async fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        self.reporter
-            .recv_rrp_data(buf)
-            .await
-            .map_err(|_| "Read failed")
+        self.reporter.recv_rrp_data(buf).await.map_err(|_| "Read failed")
     }
 }
 impl<R: ReporterDriver> WriteTransport for ServerTransport<'_, R> {
     type Error = &'static str;
 
     async fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        self.reporter
-            .send_rrp_data(buf)
-            .await
-            .map_err(|_| "Write failed")?;
+        self.reporter.send_rrp_data(buf).await.map_err(|_| "Write failed")?;
         Ok(buf.len())
     }
 }

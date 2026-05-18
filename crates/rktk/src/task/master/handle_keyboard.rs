@@ -1,13 +1,17 @@
-use rktk_log::{debug, warn, helper::Debug2Format};
-use embassy_futures::select::{select, Either};
+use embassy_futures::select::{Either, select};
+use rktk_log::{debug, helper::Debug2Format, warn};
 
 use super::utils::get_split_right_shift;
 use crate::{
     config::Hand,
     config::schema::DynamicConfig,
     config::storage::StorageConfigManager,
-    drivers::interface::{debounce::DebounceDriver, keyscan::KeyscanDriver, storage::StorageDriver},
-    task::channels::report::{KEYBOARD_EVENT_REPORT_CHANNEL, KEYBOARD_CONTROL_CHANNEL, KeyboardCommand},
+    drivers::interface::{
+        debounce::DebounceDriver, keyscan::KeyscanDriver, storage::StorageDriver,
+    },
+    task::channels::report::{
+        KEYBOARD_CONTROL_CHANNEL, KEYBOARD_EVENT_REPORT_CHANNEL, KeyboardCommand,
+    },
 };
 
 use super::utils::resolve_entire_key_pos;
@@ -24,47 +28,46 @@ pub async fn start<KeyScan: KeyscanDriver, Debounce: DebounceDriver, S: StorageD
     let interval = embassy_time::Duration::from_millis(config.rktk.scan_interval_keyboard);
     let shift = get_split_right_shift(config);
     loop {
-        match select(
-            KEYBOARD_CONTROL_CHANNEL.receive(),
-            async {
-                let elapsed = latest.elapsed();
-                if elapsed < interval {
-                    embassy_time::Timer::after(interval - elapsed).await;
-                }
-
-                keyscan
-                    .scan(|mut event| {
-                        if let Some(debounce) = debounce.as_mut()
-                            && debounce.should_ignore_event(&event, embassy_time::Instant::now())
-                        {
-                            debug!("Debounced");
-                            return;
-                        }
-                        resolve_entire_key_pos(&mut event, hand, shift);
-
-                        if KEYBOARD_EVENT_REPORT_CHANNEL.try_send(event).is_err() {
-                            warn!("Keyboard full");
-                        }
-                    })
-                    .await;
-                latest = embassy_time::Instant::now();
+        match select(KEYBOARD_CONTROL_CHANNEL.receive(), async {
+            let elapsed = latest.elapsed();
+            if elapsed < interval {
+                embassy_time::Timer::after(interval - elapsed).await;
             }
-        ).await {
-            Either::First(cmd) => {
-                match cmd {
-                    KeyboardCommand::StartCalibration => {
-                        debug!("Starting calibration");
-                        keyscan.start_calibration();
+
+            keyscan
+                .scan(|mut event| {
+                    if let Some(debounce) = debounce.as_mut()
+                        && debounce.should_ignore_event(&event, embassy_time::Instant::now())
+                    {
+                        debug!("Debounced");
+                        return;
                     }
-                    KeyboardCommand::EndCalibration => {
-                        debug!("Ending calibration");
-                        keyscan.end_calibration();
-                        
-                        if KeyScan::CALIBRATION_SIZE > 0
-                            && let Some(store) = config_store.as_ref() {
-                                let mut buf = [0u8; crate::config::CONST_CONFIG.buffer.calibration];
-                                if keyscan.save_calibration(&mut buf[..KeyScan::CALIBRATION_SIZE]).is_ok() {
-                                    match store.write_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&buf).await {
+                    resolve_entire_key_pos(&mut event, hand, shift);
+
+                    if KEYBOARD_EVENT_REPORT_CHANNEL.try_send(event).is_err() {
+                        warn!("Keyboard full");
+                    }
+                })
+                .await;
+            latest = embassy_time::Instant::now();
+        })
+        .await
+        {
+            Either::First(cmd) => match cmd {
+                KeyboardCommand::StartCalibration => {
+                    debug!("Starting calibration");
+                    keyscan.start_calibration();
+                }
+                KeyboardCommand::EndCalibration => {
+                    debug!("Ending calibration");
+                    keyscan.end_calibration();
+
+                    if KeyScan::CALIBRATION_SIZE > 0
+                        && let Some(store) = config_store.as_ref()
+                    {
+                        let mut buf = [0u8; crate::config::CONST_CONFIG.buffer.calibration];
+                        if keyscan.save_calibration(&mut buf[..KeyScan::CALIBRATION_SIZE]).is_ok() {
+                            match store.write_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&buf).await {
                                         Ok(()) => {
                                             debug!("Calibration data saved to flash successfully");
                                         }
@@ -72,11 +75,10 @@ pub async fn start<KeyScan: KeyscanDriver, Debounce: DebounceDriver, S: StorageD
                                             warn!("Failed to save calibration data: {:?}", Debug2Format(&e));
                                         }
                                     }
-                                }
-                            }
+                        }
                     }
                 }
-            }
+            },
             Either::Second(_) => {}
         }
     }

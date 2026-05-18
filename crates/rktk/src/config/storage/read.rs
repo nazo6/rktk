@@ -1,6 +1,6 @@
 use core::fmt::Debug;
-use postcard::experimental::max_size::MaxSize as _;
 use kmsm::interface::state::config::StateConfig;
+use postcard::experimental::max_size::MaxSize as _;
 
 use crate::{config::keymap::Layer, drivers::interface::storage::StorageDriver};
 
@@ -29,9 +29,7 @@ impl<S: StorageDriver> StorageConfigManager<S> {
     pub async fn read_state_config(&self) -> Result<StateConfig, ConfigReadError<S::Error>> {
         let mut buf = [0; StateConfig::POSTCARD_MAX_SIZE];
         let key = u64::from_le_bytes([ConfigKey::StateConfig as u8, 0, 0, 0, 0, 0, 0, 0]);
-        self.storage
-            .read::<{ StateConfig::POSTCARD_MAX_SIZE }>(key, &mut buf)
-            .await?;
+        self.storage.read::<{ StateConfig::POSTCARD_MAX_SIZE }>(key, &mut buf).await?;
         let res = postcard::from_bytes(&buf).map_err(ConfigReadError::DecodeError)?;
         Ok(res)
     }
@@ -39,14 +37,15 @@ impl<S: StorageDriver> StorageConfigManager<S> {
     pub async fn read_keymap(&self, layer: u8) -> Result<Layer, ConfigReadError<S::Error>> {
         let mut buf = [0; Layer::POSTCARD_MAX_SIZE];
         let key = u64::from_le_bytes([ConfigKey::StateKeymap as u8, layer, 0, 0, 0, 0, 0, 0]);
-        self.storage
-            .read::<{ Layer::POSTCARD_MAX_SIZE }>(key, &mut buf)
-            .await?;
+        self.storage.read::<{ Layer::POSTCARD_MAX_SIZE }>(key, &mut buf).await?;
         let res = postcard::from_bytes(&buf).map_err(ConfigReadError::DecodeError)?;
         Ok(res)
     }
 
-    pub async fn read_calibration<const N: usize>(&self, buf: &mut [u8]) -> Result<(), ConfigReadError<S::Error>> {
+    pub async fn read_calibration<const N: usize>(
+        &self,
+        buf: &mut [u8],
+    ) -> Result<(), ConfigReadError<S::Error>> {
         let key = u64::from_le_bytes([ConfigKey::Calibration as u8, 0, 0, 0, 0, 0, 0, 0]);
         self.storage.read::<N>(key, buf).await?;
         Ok(())

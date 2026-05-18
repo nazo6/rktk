@@ -1,6 +1,6 @@
 use core::fmt::Debug;
-use postcard::experimental::max_size::MaxSize as _;
 use kmsm::interface::state::config::StateConfig;
+use postcard::experimental::max_size::MaxSize as _;
 
 use crate::{config::keymap::Layer, drivers::interface::storage::StorageDriver};
 
@@ -34,9 +34,7 @@ impl<S: StorageDriver> StorageConfigManager<S> {
 
         let mut buf = [0; StateConfig::POSTCARD_MAX_SIZE];
         let _slice = postcard::to_slice(data, &mut buf).map_err(ConfigWriteError::EncodeError)?;
-        self.storage
-            .write::<{ StateConfig::POSTCARD_MAX_SIZE }>(key, &buf)
-            .await?;
+        self.storage.write::<{ StateConfig::POSTCARD_MAX_SIZE }>(key, &buf).await?;
         Ok(())
     }
 
@@ -49,13 +47,14 @@ impl<S: StorageDriver> StorageConfigManager<S> {
 
         let mut buf = [0; Layer::POSTCARD_MAX_SIZE];
         let _slice = postcard::to_slice(data, &mut buf).map_err(ConfigWriteError::EncodeError)?;
-        self.storage
-            .write::<{ Layer::POSTCARD_MAX_SIZE }>(key, &buf)
-            .await?;
+        self.storage.write::<{ Layer::POSTCARD_MAX_SIZE }>(key, &buf).await?;
         Ok(())
     }
 
-    pub async fn write_calibration<const N: usize>(&self, data: &[u8]) -> Result<(), ConfigWriteError<S::Error>> {
+    pub async fn write_calibration<const N: usize>(
+        &self,
+        data: &[u8],
+    ) -> Result<(), ConfigWriteError<S::Error>> {
         let key = u64::from_le_bytes([ConfigKey::Calibration as u8, 0, 0, 0, 0, 0, 0, 0]);
         self.storage.write::<N>(key, data).await?;
         Ok(())

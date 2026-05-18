@@ -58,9 +58,7 @@ impl<S: SpiDevice> MouseDriver for Paw3395<S> {
     }
 
     async fn read(&mut self) -> Result<(i8, i8), Self::Error> {
-        self.burst_read()
-            .await
-            .map(|data| (data.dx as i8, data.dy as i8))
+        self.burst_read().await.map(|data| (data.dx as i8, data.dy as i8))
     }
 
     async fn set_cpi(&mut self, cpi: u16) -> Result<(), Self::Error> {

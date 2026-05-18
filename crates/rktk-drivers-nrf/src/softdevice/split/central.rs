@@ -20,11 +20,8 @@ async fn ble_split_central_task(sd: &'static Softdevice) {
     embassy_time::Timer::after_secs(3).await;
     error!("Scanning for peer...");
 
-    let config = central::ScanConfig {
-        whitelist: None,
-        tx_power: TxPower::ZerodBm,
-        ..Default::default()
-    };
+    let config =
+        central::ScanConfig { whitelist: None, tx_power: TxPower::ZerodBm, ..Default::default() };
     let res = central::scan(sd, &config, |params| {
         let mut data =
             unsafe { slice::from_raw_parts(params.data.p_data, params.data.len as usize) };
@@ -108,9 +105,7 @@ impl SoftdeviceBleCentralSplitDriver {
     pub async fn new(spawner: embassy_executor::Spawner, sd: &'static Softdevice) -> Self {
         spawner.spawn(ble_split_central_task(sd).unwrap());
 
-        Self {
-            _phantom: PhantomData,
-        }
+        Self { _phantom: PhantomData }
     }
 }
 

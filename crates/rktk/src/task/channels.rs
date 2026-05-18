@@ -40,8 +40,8 @@ pub mod split {
 pub mod report {
     use core::sync::atomic::Ordering;
 
-    use portable_atomic::AtomicI8;
     use kmsm::interface::state::input_event::{EncoderDirection, KeyChangeEvent};
+    use portable_atomic::AtomicI8;
 
     use crate::{config::CONST_CONFIG, utils::Signal};
 

@@ -150,11 +150,7 @@ impl<
                     (self.map_key_pos)(ScanDir::Row2Col, row_pin_idx, col_pin_idx)
                     && let Some(change) = self.pressed.set_pressed(pressed, row, col)
                 {
-                    cb(KeyChangeEvent {
-                        row: row as u8,
-                        col: col as u8,
-                        pressed: change,
-                    });
+                    cb(KeyChangeEvent { row: row as u8, col: col as u8, pressed: change });
                 }
             },
         )
@@ -169,11 +165,7 @@ impl<
                     (self.map_key_pos)(ScanDir::Col2Row, row_pin_idx, col_pin_idx)
                     && let Some(change) = self.pressed.set_pressed(pressed, row, col)
                 {
-                    cb(KeyChangeEvent {
-                        row: row as u8,
-                        col: col as u8,
-                        pressed: change,
-                    });
+                    cb(KeyChangeEvent { row: row as u8, col: col as u8, pressed: change });
                 }
             },
         )

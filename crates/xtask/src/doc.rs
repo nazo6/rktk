@@ -48,11 +48,7 @@ fn run_doc(
         "-Zrustdoc-map".to_string(),
     ];
     let crate_dir = p.manifest_path.parent().context("no parent dir")?;
-    let features = CRATES_CONFIG
-        .doc_features_global
-        .clone()
-        .unwrap_or_default()
-        .join(",");
+    let features = CRATES_CONFIG.doc_features_global.clone().unwrap_or_default().join(",");
     if !features.is_empty() {
         args.push("--features".to_string());
         args.push(features);
@@ -89,11 +85,7 @@ fn run_doc(
             && val.reason == "compiler-artifact"
             && val.package_id == p.id.repr
         {
-            doc_index_html = val
-                .filenames
-                .iter()
-                .find(|f| f.ends_with("index.html"))
-                .cloned();
+            doc_index_html = val.filenames.iter().find(|f| f.ends_with("index.html")).cloned();
             break;
         }
     }
@@ -104,17 +96,9 @@ fn run_doc(
     let doc_index_html = PathBuf::from(doc_index_html);
     let doc_dir = doc_index_html.parent().context("no parent dir")?;
 
-    xprintln!(
-        "Doc for `{}` is available at: {}",
-        p.name,
-        doc_dir.display()
-    );
+    xprintln!("Doc for `{}` is available at: {}", p.name, doc_dir.display());
 
-    let src_dir = doc_dir
-        .parent()
-        .unwrap()
-        .join("src")
-        .join(p.name.replace("-", "_"));
+    let src_dir = doc_dir.parent().unwrap().join("src").join(p.name.replace("-", "_"));
 
     Ok((doc_dir.to_path_buf(), part_dir, src_dir))
 }
@@ -136,21 +120,13 @@ pub fn start() -> anyhow::Result<()> {
 
     let mut doc_dirs = Vec::new();
     for package in packages {
-        let config = CRATES_CONFIG
-            .crates
-            .get(package.name.as_str())
-            .cloned()
-            .unwrap_or_default();
+        let config = CRATES_CONFIG.crates.get(package.name.as_str()).cloned().unwrap_or_default();
         if !config.doc_enabled {
             continue;
         }
 
         eprintln!();
-        xprintln!(
-            "Documenting crate `{}` ({})",
-            package.name,
-            package.manifest_path
-        );
+        xprintln!("Documenting crate `{}` ({})", package.name, package.manifest_path);
 
         let (doc_dir, part_dir, src_dir) = run_doc(package, &parts_root)?;
         doc_dirs.push((doc_dir, part_dir, src_dir));
@@ -186,10 +162,7 @@ pub fn start() -> anyhow::Result<()> {
     cmd("rustdoc", rustdoc_args).run()?;
 
     let index_html = merged_root.join("index.html");
-    std::fs::write(
-        &index_html,
-        r#"<meta http-equiv="refresh" content="0;URL=rktk/index.html">"#,
-    )?;
+    std::fs::write(&index_html, r#"<meta http-equiv="refresh" content="0;URL=rktk/index.html">"#)?;
 
     std::fs::remove_file(&*HTML_BEFORE_PATH).unwrap();
 

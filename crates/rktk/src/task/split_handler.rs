@@ -22,9 +22,7 @@ pub struct CobsReceiver {
 }
 impl CobsReceiver {
     fn new() -> Self {
-        Self {
-            buf: heapless::Vec::new(),
-        }
+        Self { buf: heapless::Vec::new() }
     }
 
     #[inline(always)]
@@ -49,10 +47,7 @@ impl CobsReceiver {
 
         loop {
             let mut tmp_buf = [0u8; 64];
-            let size = driver
-                .recv(&mut tmp_buf, is_master)
-                .await
-                .map_err(|_e| "recv error")?;
+            let size = driver.recv(&mut tmp_buf, is_master).await.map_err(|_e| "recv error")?;
 
             if size == 0 {
                 continue;

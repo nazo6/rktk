@@ -54,10 +54,7 @@ pub async fn start<
     DC: DisplayConfig + 'static,
     RL: blinksy::layout::Layout2d + 'static,
 >(
-    #[allow(
-        unused_variables,
-        reason = "`spawner` is unused when `alloc` is disabled"
-    )]
+    #[allow(unused_variables, reason = "`spawner` is unused when `alloc` is disabled")]
     spawner: embassy_executor::Spawner,
     mut drivers: Drivers<
         System,
@@ -122,11 +119,7 @@ pub async fn start<
                     crate::utils::display_state!(Master, Some(role.is_master()));
 
                     match role {
-                        initializers::KeyboardRoleRes::Master {
-                            sender,
-                            receiver,
-                            task,
-                        } => {
+                        initializers::KeyboardRoleRes::Master { sender, receiver, task } => {
                             info!("Master start");
                             sjoin::join!(
                                 spawner,
@@ -135,16 +128,18 @@ pub async fn start<
                                         master::utils::init_storage(drivers.storage).await;
 
                                     if KeyScan::CALIBRATION_SIZE > 0
-                                        && let Some(ref store) = config_store {
-                                            let mut buf = [0u8; crate::config::CONST_CONFIG.buffer.calibration];
-                                            if let Ok(()) = store.read_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&mut buf).await {
+                                        && let Some(ref store) = config_store
+                                    {
+                                        let mut buf =
+                                            [0u8; crate::config::CONST_CONFIG.buffer.calibration];
+                                        if let Ok(()) = store.read_calibration::<{ crate::config::CONST_CONFIG.buffer.calibration }>(&mut buf).await {
                                                 if drivers.keyscan.load_calibration(&buf[..KeyScan::CALIBRATION_SIZE]).is_err() {
                                                     rktk_log::error!("Failed to load calibration data into keyscan driver");
                                                 } else {
                                                     rktk_log::info!("Calibration data loaded successfully");
                                                 }
                                             }
-                                        }
+                                    }
 
                                     let state = master::utils::load_state(
                                         &opts.config.key_manager,
@@ -214,11 +209,7 @@ pub async fn start<
                                 }
                             );
                         }
-                        initializers::KeyboardRoleRes::Slave {
-                            sender,
-                            receiver,
-                            task,
-                        } => {
+                        initializers::KeyboardRoleRes::Slave { sender, receiver, task } => {
                             debug!("Slave start");
                             sjoin::join!(
                                 spawner,

@@ -92,10 +92,7 @@ impl EsbReporterDriverBuilder {
         + Binding<<DongleRadio as radio::Instance>::Interrupt, EsbInterruptHandler>,
         config: super::Config,
     ) -> Self {
-        Self {
-            _phantom: PhantomData,
-            config,
-        }
+        Self { _phantom: PhantomData, config }
     }
 }
 
@@ -110,12 +107,8 @@ impl ReporterDriverBuilder for EsbReporterDriverBuilder {
             radio_to_app_buf: BBQueueType::new(),
             timer_flag: AtomicBool::new(false),
         };
-        let config = self
-            .config
-            .config
-            .max_payload_size(192)
-            .check()
-            .map_err(|_| "Config error")?;
+        let config =
+            self.config.config.max_payload_size(192).check().map_err(|_| "Config error")?;
 
         let (esb_app, esb_irq, esb_timer) = BUFFER
             .try_split(

@@ -55,10 +55,7 @@ pub async fn init_storage<S: StorageDriver>(storage: Option<S>) -> Option<Storag
                     config_storage = Some(s);
                 }
                 Err(e) => {
-                    rktk_log::error!(
-                        "Storage to write version to storage: {:?}",
-                        Debug2Format(&e)
-                    );
+                    rktk_log::error!("Storage to write version to storage: {:?}", Debug2Format(&e));
                     crate::print!("Failed to access storage: {:?}", e);
                 }
             },

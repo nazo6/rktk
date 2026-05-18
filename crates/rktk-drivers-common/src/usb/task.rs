@@ -155,10 +155,7 @@ pub async fn rrp<'d, D: Driver<'d>>(
                 let to_send_bytes = RRP_SEND_PIPE.read(&mut data[1..]).await;
                 data[0] = to_send_bytes as u8;
                 let _ = writer
-                    .write_serialize(&RrpReport {
-                        input_data: data,
-                        output_data: [0; 32],
-                    })
+                    .write_serialize(&RrpReport { input_data: data, output_data: [0; 32] })
                     .await;
             }
         },
@@ -191,10 +188,7 @@ pub async fn raw_hid_task<'d, D: Driver<'d>>(
             loop {
                 let data = RAW_HID_SEND_CHANNEL.receive().await;
                 let _ = writer
-                    .write_serialize(&RawHidReport {
-                        input_data: data,
-                        output_data: [0; 32],
-                    })
+                    .write_serialize(&RawHidReport { input_data: data, output_data: [0; 32] })
                     .await;
             }
         },

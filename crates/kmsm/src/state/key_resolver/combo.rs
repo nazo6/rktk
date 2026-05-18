@@ -33,13 +33,7 @@ impl<const MAX_DEFINITIONS: usize, const MAX_SOURCES: usize>
     ComboState<MAX_DEFINITIONS, MAX_SOURCES>
 {
     pub fn new(def: ComboDefinitions<MAX_DEFINITIONS, MAX_SOURCES>, config: ComboConfig) -> Self {
-        Self {
-            state: def.map(|def| ComboUnit {
-                state: ComboUnitState::None,
-                def,
-            }),
-            config,
-        }
+        Self { state: def.map(|def| ComboUnit { state: ComboUnitState::None, def }), config }
     }
 
     pub fn pre_resolve(&mut self, now: Instant, mut cb_direct: impl FnMut(EventType, KeyCode)) {

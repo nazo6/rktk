@@ -63,11 +63,7 @@ impl<'a, M: RawMutex, BUS: SpiBus<Word>, CS: OutputPin, Word: Copy + 'static>
     EmbassySpiDevice<'a, M, BUS, CS, Word>
 {
     pub fn new(bus: &'a Mutex<M, BUS>, cs: CS) -> Self {
-        Self {
-            bus,
-            cs,
-            _word: core::marker::PhantomData,
-        }
+        Self { bus, cs, _word: core::marker::PhantomData }
     }
 }
 

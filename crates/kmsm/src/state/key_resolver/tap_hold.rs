@@ -72,14 +72,9 @@ impl TapHoldState {
         mut cb: impl FnMut(EventType, KeyCode),
     ) {
         if event.pressed {
-            let _ = self.pressed.insert(
-                (event.row, event.col),
-                TapHoldKeyState {
-                    tkc,
-                    hkc,
-                    pending: Some(now),
-                },
-            );
+            let _ = self
+                .pressed
+                .insert((event.row, event.col), TapHoldKeyState { tkc, hkc, pending: Some(now) });
         } else if let Some(state) = self.pressed.remove(&(event.row, event.col)) {
             if state.pending.is_some() {
                 // released in tapping term. it's a tap.

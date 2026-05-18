@@ -68,10 +68,6 @@ impl<const ROWS: usize, const COLS: usize> Iterator for PressedIter<'_, ROWS, CO
 
 impl<const ROWS: usize, const COLS: usize> Pressed<ROWS, COLS> {
     pub fn iter(&self) -> PressedIter<'_, ROWS, COLS> {
-        PressedIter {
-            pressed: self,
-            idx_row: 0,
-            idx_col: 0,
-        }
+        PressedIter { pressed: self, idx_row: 0, idx_col: 0 }
     }
 }

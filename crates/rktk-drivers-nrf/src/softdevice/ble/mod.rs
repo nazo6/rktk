@@ -53,13 +53,7 @@ impl SoftdeviceBleReporterBuilder {
         name: &'static str,
         flash: SoftdeviceFlashPartition,
     ) -> Self {
-        Self {
-            sd,
-            server,
-            name,
-            flash,
-            spawner,
-        }
+        Self { sd, server, name, flash, spawner }
     }
 }
 

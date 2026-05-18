@@ -45,19 +45,10 @@ pub fn push_notification(notification: Notification) {
     NOTIFICATION_ID.with_mut(|id| {
         *id += 1;
     });
-    let notification = NotificationData {
-        id: *NOTIFICATION_ID.read(),
-        record: notification,
-    };
+    let notification = NotificationData { id: *NOTIFICATION_ID.read(), record: notification };
 
     spawn_forever(async move {
-        sleep(
-            notification
-                .record
-                .duration
-                .unwrap_or_else(|| Duration::from_secs(3)),
-        )
-        .await;
+        sleep(notification.record.duration.unwrap_or_else(|| Duration::from_secs(3))).await;
         NOTFICATIONS.with_mut(|notifications| {
             notifications.retain(|n| n.id != notification.id);
         });

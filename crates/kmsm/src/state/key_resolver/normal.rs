@@ -17,9 +17,7 @@ pub struct NormalState<const MAX_PRESSED_KEYS: usize> {
 
 impl<const MAX_PRESSED_KEYS: usize> NormalState<MAX_PRESSED_KEYS> {
     pub fn new() -> Self {
-        Self {
-            pressed: heapless::Vec::new(),
-        }
+        Self { pressed: heapless::Vec::new() }
     }
 
     pub fn process_event(
@@ -28,12 +26,7 @@ impl<const MAX_PRESSED_KEYS: usize> NormalState<MAX_PRESSED_KEYS> {
         kc: (KeyCode, Option<KeyCode>),
         mut cb: impl FnMut(EventType, KeyCode),
     ) {
-        let new_key_state = NormalKeyState {
-            col: event.col,
-            row: event.row,
-            k1: kc.0,
-            k2: kc.1,
-        };
+        let new_key_state = NormalKeyState { col: event.col, row: event.row, k1: kc.0, k2: kc.1 };
 
         if event.pressed && !self.pressed.contains(&new_key_state) {
             self.pressed.push(new_key_state).ok();

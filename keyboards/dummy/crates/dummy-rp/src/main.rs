@@ -46,13 +46,8 @@ async fn main(spawner: Spawner) {
         encoder: dummy::encoder(),
     };
 
-    rktk::task::start(
-        spawner,
-        drivers,
-        create_empty_hooks(),
-        new_rktk_opts(&keymap::KEYMAP, None),
-    )
-    .await;
+    rktk::task::start(spawner, drivers, create_empty_hooks(), new_rktk_opts(&keymap::KEYMAP, None))
+        .await;
 }
 
 #[panic_handler]

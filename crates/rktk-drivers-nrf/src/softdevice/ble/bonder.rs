@@ -54,12 +54,8 @@ impl SecurityHandler for Bonder {
         let len = get_sys_attrs(conn, &mut sys_attrs).unwrap() as u16;
         sys_attrs.truncate(usize::from(len));
 
-        let device_data = DeviceData {
-            peer_id,
-            master_id,
-            encryption_info: enc,
-            sys_attrs: Some(sys_attrs),
-        };
+        let device_data =
+            DeviceData { peer_id, master_id, encryption_info: enc, sys_attrs: Some(sys_attrs) };
 
         if let Err(data) = devices.push(device_data) {
             devices.remove(0);
@@ -95,10 +91,7 @@ impl SecurityHandler for Bonder {
     fn save_sys_attrs(&self, conn: &Connection) {
         let mut devices = self.devices.borrow_mut();
 
-        if let Some(device) = devices
-            .iter_mut()
-            .find(|d| d.peer_id.is_match(conn.peer_address()))
-        {
+        if let Some(device) = devices.iter_mut().find(|d| d.peer_id.is_match(conn.peer_address())) {
             let mut sys_attrs = heapless::Vec::new();
             sys_attrs.resize(sys_attrs.capacity(), 0).unwrap();
             let len = get_sys_attrs(conn, &mut sys_attrs).unwrap() as u16;
@@ -144,15 +137,11 @@ pub async fn init_bonder(
     let mut storage: SoftdeviceFlashStorage =
         MapStorage::new(flash, MapConfig::new(0..size), NoCache);
 
-    let bond_map = storage::read_bond_map(&mut storage)
-        .await
-        .unwrap_or_default();
+    let bond_map = storage::read_bond_map(&mut storage).await.unwrap_or_default();
 
     spawner.spawn(bonder_save_task(storage).unwrap());
 
     info!("Loaded {} bond info", bond_map.iter().count());
 
-    SEC.init(Bonder {
-        devices: RefCell::new(bond_map),
-    })
+    SEC.init(Bonder { devices: RefCell::new(bond_map) })
 }

@@ -61,13 +61,7 @@ mod prelude {
     };
     pub const MOUSE_ONLY_REPORT: Report = Report {
         keyboard_report: None,
-        mouse_report: Some(MouseReport {
-            buttons: 0,
-            x: 0,
-            y: 0,
-            wheel: 0,
-            pan: 0,
-        }),
+        mouse_report: Some(MouseReport { buttons: 0, x: 0, y: 0, wheel: 0, pan: 0 }),
         media_keyboard_report: None,
         highest_layer: 0,
     };
@@ -81,11 +75,7 @@ mod prelude {
     macro_rules! update {
         ($state:expr, $now:expr, ($row:expr, $col:expr, $pressed:expr)) => {
             $state.update(
-                InputEvent::Key(KeyChangeEvent {
-                    row: $row,
-                    col: $col,
-                    pressed: $pressed,
-                }),
+                InputEvent::Key(KeyChangeEvent { row: $row, col: $col, pressed: $pressed }),
                 $now,
             )
         };
@@ -108,10 +98,7 @@ mod prelude {
                     scroll_divider_y: -12,
                 },
                 key_resolver: KeyResolverConfig {
-                    tap_hold: TapHoldConfig {
-                        threshold: 300,
-                        hold_on_other_key: true,
-                    },
+                    tap_hold: TapHoldConfig { threshold: 300, hold_on_other_key: true },
                     tap_dance: TapDanceConfig { threshold: 100 },
                     combo: ComboConfig { threshold: 20 },
                 },

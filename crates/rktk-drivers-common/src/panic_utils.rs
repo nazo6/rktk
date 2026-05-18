@@ -53,21 +53,13 @@ impl Write for PanicMessage {
 
 impl Default for PanicMessage {
     fn default() -> Self {
-        Self {
-            magic: PANIC_INFO_MAGIC,
-            len: 0,
-            data: [0; 1024],
-        }
+        Self { magic: PANIC_INFO_MAGIC, len: 0, data: [0; 1024] }
     }
 }
 
 impl PanicMessage {
     fn reset() -> Self {
-        Self {
-            magic: 0,
-            len: 0,
-            data: [0; 1024],
-        }
+        Self { magic: 0, len: 0, data: [0; 1024] }
     }
 }
 
@@ -128,11 +120,7 @@ pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
 
         rktk_log::error!("Previous panic detected: {:?}", str);
 
-        let str_len = str
-            .lines()
-            .map(|line| line.chars().count())
-            .max()
-            .unwrap_or(0);
+        let str_len = str.lines().map(|line| line.chars().count()).max().unwrap_or(0);
 
         let orig_display_size = display.as_mut().bounding_box().size;
         let rotation = if orig_display_size.width > orig_display_size.height {
@@ -155,13 +143,8 @@ pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
         if overflow_len > 0 {
             loop {
                 for i in 0..=overflow_len {
-                    display_mes(
-                        display,
-                        str,
-                        Point::new(-((i * char_width) as i32), 0),
-                        rotation,
-                    )
-                    .await;
+                    display_mes(display, str, Point::new(-((i * char_width) as i32), 0), rotation)
+                        .await;
                     Timer::after_millis(200).await;
                 }
             }

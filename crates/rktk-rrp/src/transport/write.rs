@@ -35,13 +35,9 @@ pub trait WriteTransportExt: WriteTransport {
         &mut self,
         header: RequestHeader,
     ) -> Result<(), SendError<Self::Error>> {
-        self.write_all(&[
-            Indicator::Start as u8,
-            header.request_id,
-            header.endpoint_id,
-        ])
-        .await
-        .map_err(SendError::Write)?;
+        self.write_all(&[Indicator::Start as u8, header.request_id, header.endpoint_id])
+            .await
+            .map_err(SendError::Write)?;
         Ok(())
     }
 
@@ -64,13 +60,9 @@ pub trait WriteTransportExt: WriteTransport {
     ) -> Result<(), SendError<Self::Error>> {
         let mut buf = [0u8; BUF_SIZE];
         let serialized = postcard::to_slice(data, &mut buf).map_err(SendError::Serialization)?;
-        self.write_all(&[Indicator::Continue as u8])
-            .await
-            .map_err(SendError::Write)?;
+        self.write_all(&[Indicator::Continue as u8]).await.map_err(SendError::Write)?;
         self.send_response_body(serialized).await?;
-        self.write_all(&[Indicator::End as u8])
-            .await
-            .map_err(SendError::Write)?;
+        self.write_all(&[Indicator::End as u8]).await.map_err(SendError::Write)?;
         Ok(())
     }
 
@@ -84,15 +76,11 @@ pub trait WriteTransportExt: WriteTransport {
             let mut buf = [0u8; BUF_SIZE];
             let serialized =
                 postcard::to_slice(&data, &mut buf).map_err(SendError::Serialization)?;
-            self.write_all(&[Indicator::Continue as u8])
-                .await
-                .map_err(SendError::Write)?;
+            self.write_all(&[Indicator::Continue as u8]).await.map_err(SendError::Write)?;
             self.send_response_body(serialized).await?;
         }
 
-        self.write_all(&[Indicator::End as u8])
-            .await
-            .map_err(SendError::Write)?;
+        self.write_all(&[Indicator::End as u8]).await.map_err(SendError::Write)?;
 
         Ok(())
     }
@@ -101,9 +89,7 @@ pub trait WriteTransportExt: WriteTransport {
 
     // Step 5,6: Send response body
     async fn send_response_body(&mut self, data: &[u8]) -> Result<(), SendError<Self::Error>> {
-        self.write_all(&(data.len() as u32).to_le_bytes())
-            .await
-            .map_err(SendError::Write)?;
+        self.write_all(&(data.len() as u32).to_le_bytes()).await.map_err(SendError::Write)?;
         self.write_all(data).await.map_err(SendError::Write)?;
         Ok(())
     }

@@ -29,23 +29,14 @@ pub async fn get_keymap() -> anyhow::Result<KeymapData> {
     let client = be.get_client();
 
     let json = client.get_layout_json(()).await?;
-    let json = json
-        .try_collect::<Vec<_>>()
-        .await?
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>();
+    let json = json.try_collect::<Vec<_>>().await?.into_iter().flatten().collect::<Vec<_>>();
     let json_str = std::str::from_utf8(&json[..]).context("Invalid UTF-8")?;
     let layout: LayoutJson = serde_json::from_str(json_str).context("Invalid JSON")?;
 
     let keymaps = client.get_keymaps(()).await?;
     let keymaps = keymaps.try_collect::<Vec<_>>().await?;
 
-    Ok(process_keymap(
-        conn.keyboard.clone(),
-        layout.keymap,
-        keymaps,
-    ))
+    Ok(process_keymap(conn.keyboard.clone(), layout.keymap, keymaps))
 }
 
 fn get_keymap_mut(keymap: &mut KeymapData, layer: u8, row: u8, col: u8) -> Option<&mut KeyData> {
@@ -60,19 +51,14 @@ fn process_keymap(
     layout: kle_serial::Keyboard,
     key_data: Vec<KeyActionLoc>,
 ) -> KeymapData {
-    let mut keymap: KeymapData = vec![
+    let mut keymap: KeymapData =
         vec![
             vec![
-                KeyData {
-                    key: None,
-                    action: None,
-                };
-                keyboard.cols as usize
+                vec![KeyData { key: None, action: None }; keyboard.cols as usize];
+                keyboard.rows as usize
             ];
-            keyboard.rows as usize
+            keyboard.keymap.layer_count as usize
         ];
-        keyboard.keymap.layer_count as usize
-    ];
 
     for key in key_data {
         if let Some(key_data) = get_keymap_mut(&mut keymap, key.layer, key.row, key.col) {
@@ -108,13 +94,9 @@ pub async fn set_keymap(changes: &HashMap<(u8, u8, u8), KeyAction>) -> anyhow::R
     let mut d = conn.device.lock().await;
     let client = d.get_client();
 
-    let stream =
-        futures::stream::iter(changes.iter().map(|((layer, row, col), key)| KeyActionLoc {
-            layer: *layer,
-            row: *row,
-            col: *col,
-            key: *key,
-        }));
+    let stream = futures::stream::iter(changes.iter().map(|((layer, row, col), key)| {
+        KeyActionLoc { layer: *layer, row: *row, col: *col, key: *key }
+    }));
 
     client.set_keymaps(stream).await?;
 

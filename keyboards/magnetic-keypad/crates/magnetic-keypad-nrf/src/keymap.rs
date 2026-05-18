@@ -1,7 +1,4 @@
-use rktk::config::keymap::{
-    prelude::*,
-    Keymap, Layer, LayerKeymap,
-};
+use rktk::config::keymap::{Keymap, Layer, LayerKeymap, prelude::*};
 
 #[rustfmt::skip]
 const L0: LayerKeymap = [
@@ -16,8 +13,14 @@ pub const KEYMAP: Keymap = Keymap {
         Layer {
             keymap: L0,
             encoder_keys: [
-                (Some(KeyCode::Media(Media::VolumeDecrement)), Some(KeyCode::Media(Media::VolumeIncrement))),
-                (Some(KeyCode::Media(Media::VolumeDecrement)), Some(KeyCode::Media(Media::VolumeIncrement))),
+                (
+                    Some(KeyCode::Media(Media::VolumeDecrement)),
+                    Some(KeyCode::Media(Media::VolumeIncrement)),
+                ),
+                (
+                    Some(KeyCode::Media(Media::VolumeDecrement)),
+                    Some(KeyCode::Media(Media::VolumeIncrement)),
+                ),
             ],
             arrow_mouse: false,
         },

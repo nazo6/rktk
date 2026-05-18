@@ -20,13 +20,8 @@ pub fn build_cmd(
     args: &[String],
     dir: impl Into<PathBuf> + std::fmt::Debug,
 ) -> duct::Expression {
-    let cmd = cmd(
-        cmd_array[0],
-        cmd_array[1..]
-            .iter()
-            .copied()
-            .chain(args.iter().map(|a| a.as_str())),
-    );
+    let cmd =
+        cmd(cmd_array[0], cmd_array[1..].iter().copied().chain(args.iter().map(|a| a.as_str())));
     xprintln!("Running command: {:?} at {:?}", cmd, dir);
     cmd.dir(dir)
 }
@@ -88,12 +83,8 @@ pub fn start(
         // eprintln!("{}", cargo_bloat_res);
         // ghw.write("Cargo bloat", &cargo_bloat_res, true);
 
-        let cargo_bloat_crate_res = build_cmd(
-            &["cargo", "bloat", "--crates", "-n", "20"],
-            &common_args,
-            dir,
-        )
-        .read()?;
+        let cargo_bloat_crate_res =
+            build_cmd(&["cargo", "bloat", "--crates", "-n", "20"], &common_args, dir).read()?;
         eprintln!("{}", cargo_bloat_crate_res);
         ghw.write("Cargo bloat (crates)", &cargo_bloat_crate_res, true);
 
@@ -102,46 +93,18 @@ pub fn start(
         xprintln!("Analyzing using `elf-size-analyze`");
         let elf_size_analyze_rom_res = cmd(
             "pipx",
-            [
-                "run",
-                "elf-size-analyze",
-                "-HaF",
-                &elf_path,
-                "-w",
-                "150",
-                "-m",
-                "500",
-                "--no-color",
-            ],
+            ["run", "elf-size-analyze", "-HaF", &elf_path, "-w", "150", "-m", "500", "--no-color"],
         )
         .read()?;
         eprintln!("{}", elf_size_analyze_rom_res);
-        ghw.write(
-            "ELF size analyze (ROM, binary usage)",
-            &elf_size_analyze_rom_res,
-            true,
-        );
+        ghw.write("ELF size analyze (ROM, binary usage)", &elf_size_analyze_rom_res, true);
         let elf_size_analyze_ram_res = cmd(
             "pipx",
-            [
-                "run",
-                "elf-size-analyze",
-                "-HaR",
-                &elf_path,
-                "-w",
-                "150",
-                "-m",
-                "200",
-                "--no-color",
-            ],
+            ["run", "elf-size-analyze", "-HaR", &elf_path, "-w", "150", "-m", "200", "--no-color"],
         )
         .read()?;
         eprintln!("{}", elf_size_analyze_ram_res);
-        ghw.write(
-            "ELF size analyze (RAM, memory usage)",
-            &elf_size_analyze_ram_res,
-            true,
-        );
+        ghw.write("ELF size analyze (RAM, memory usage)", &elf_size_analyze_ram_res, true);
 
         /* Analyze using `cargo llvm-lines` */
 
@@ -183,9 +146,7 @@ pub(super) fn build_and_get_binary_size(
     /* Analyze bin and uf2 files */
 
     // NOTE: This command is just for stats, so any family name is fine.
-    cmd("uf2deploy", ["deploy", "-f", "nrf52840", &elf_path])
-        .stderr_capture()
-        .read()?;
+    cmd("uf2deploy", ["deploy", "-f", "nrf52840", &elf_path]).stderr_capture().read()?;
     let bin_file_size = std::fs::metadata(elf_path.clone() + ".bin")
         .context("failed to get binary file metadata")?
         .len();

@@ -17,11 +17,7 @@ pub struct Aml {
 
 impl Aml {
     pub fn new(auto_mouse_duration: Duration, auto_mouse_threshold: u8) -> Self {
-        Self {
-            state: AmlState::Inactive(0),
-            auto_mouse_duration,
-            auto_mouse_threshold,
-        }
+        Self { state: AmlState::Inactive(0), auto_mouse_duration, auto_mouse_threshold }
     }
 
     pub fn enabled_changed(

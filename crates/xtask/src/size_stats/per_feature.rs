@@ -86,11 +86,7 @@ pub fn start(gh_output: bool) -> anyhow::Result<()> {
     }
 
     println!("{}", table);
-    ghw.write(
-        &format!("Crate `{}`", TARGET_CRATE),
-        &table.to_string(),
-        false,
-    );
+    ghw.write(&format!("Crate `{}`", TARGET_CRATE), &table.to_string(), false);
     if gh_output {
         ghw.flush()?;
     }

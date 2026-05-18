@@ -28,10 +28,8 @@ pub async fn start_master(
         };
         use rktk_drivers_nrf::init_sdc;
 
-        let mut rng = singleton!(
-            embassy_nrf::rng::Rng::new(p.RNG, Irqs),
-            embassy_nrf::rng::Rng<Async>
-        );
+        let mut rng =
+            singleton!(embassy_nrf::rng::Rng::new(p.RNG, Irqs), embassy_nrf::rng::Rng<Async>);
         let rng_2 = singleton!(ChaCha12Rng::from_rng(&mut rng).unwrap(), ChaCha12Rng);
         init_sdc!(
             spawner,
@@ -45,10 +43,7 @@ pub async fn start_master(
         TroubleReporterBuilder::<_, _, 1, 5, 72>::new(
             sdc.unwrap(),
             rng_2,
-            TroubleReporterConfig {
-                advertise_name: "negL Trouble",
-                peripheral_config: None,
-            },
+            TroubleReporterConfig { advertise_name: "negL Trouble", peripheral_config: None },
         )
     };
 

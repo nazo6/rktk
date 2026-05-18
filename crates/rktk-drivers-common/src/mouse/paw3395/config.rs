@@ -5,10 +5,7 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self {
-            mode: HP_MODE,
-            lift_cutoff: LiftCutoff::_1mm,
-        }
+        Self { mode: HP_MODE, lift_cutoff: LiftCutoff::_1mm }
     }
 }
 

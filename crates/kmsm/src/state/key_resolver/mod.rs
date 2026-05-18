@@ -146,8 +146,7 @@ impl<
             match key_action {
                 KeyAction::Inherit => {}
                 KeyAction::Normal(key_code) => {
-                    self.normal_state
-                        .process_event(event, (key_code, None), &mut cb_with_layer);
+                    self.normal_state.process_event(event, (key_code, None), &mut cb_with_layer);
                 }
                 KeyAction::Normal2(key_code, key_code1) => {
                     self.normal_state.process_event(
@@ -157,15 +156,13 @@ impl<
                     );
                 }
                 KeyAction::TapHold(tkc, hkc) => {
-                    self.tap_hold
-                        .process_event(now, event, (tkc, hkc), &mut cb_with_layer);
+                    self.tap_hold.process_event(now, event, (tkc, hkc), &mut cb_with_layer);
                 }
                 KeyAction::OneShot(key_code) => {
                     self.oneshot.process_keycode(&key_code, event.pressed);
                 }
                 KeyAction::TapDance(id) => {
-                    self.tap_dance
-                        .process_event(id, now, event.pressed, &mut cb_with_layer);
+                    self.tap_dance.process_event(id, now, event.pressed, &mut cb_with_layer);
                 }
             }
         }

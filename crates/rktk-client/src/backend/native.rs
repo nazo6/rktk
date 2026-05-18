@@ -36,10 +36,7 @@ impl RrpHidBackend for NativeBackend {
 
         Ok(NativeHidDevice {
             client: rktk_rrp::client::Client::new(
-                HidReader {
-                    device: reader,
-                    remained: Vec::new(),
-                },
+                HidReader { device: reader, remained: Vec::new() },
                 HidWriter { device: writer },
             ),
         })
@@ -57,13 +54,7 @@ impl RrpHidBackend for NativeBackend {
             }
         });
 
-        (
-            Self {
-                backend,
-                _watch_task,
-            },
-            rx,
-        )
+        (Self { backend, _watch_task }, rx)
     }
 }
 

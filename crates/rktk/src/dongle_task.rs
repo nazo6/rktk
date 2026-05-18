@@ -14,10 +14,7 @@ use crate::{
 
 /// Runs dongle with the given drivers.
 pub async fn start_dongle<D: display::DisplayConfig + 'static>(
-    #[allow(
-        unused_variables,
-        reason = "`spawner` is unused when `alloc` is disabled"
-    )]
+    #[allow(unused_variables, reason = "`spawner` is unused when `alloc` is disabled")]
     spawner: embassy_executor::Spawner,
     usb: impl UsbReporterDriverBuilder,
     dongle: impl DongleDriverBuilder,

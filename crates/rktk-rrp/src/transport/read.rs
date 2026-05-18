@@ -3,7 +3,7 @@ use core::fmt::Display;
 use futures::Stream;
 use serde::de::DeserializeOwned;
 
-use super::{error::ReceiveError, Indicator};
+use super::{Indicator, error::ReceiveError};
 
 #[cfg(feature = "server")]
 use super::RequestHeader;
@@ -34,13 +34,8 @@ pub trait ReadTransportExt: ReadTransport {
             return Err(ReceiveError::FrameError("Invalid start signal"));
         }
         let mut request_header = [0u8; 2];
-        self.read_exact(&mut request_header)
-            .await
-            .map_err(ReceiveError::Read)?;
-        Ok(RequestHeader {
-            request_id: request_header[0],
-            endpoint_id: request_header[1],
-        })
+        self.read_exact(&mut request_header).await.map_err(ReceiveError::Read)?;
+        Ok(RequestHeader { request_id: request_header[0], endpoint_id: request_header[1] })
     }
 
     #[cfg(feature = "client")]
@@ -50,13 +45,8 @@ pub trait ReadTransportExt: ReadTransport {
             return Err(ReceiveError::FrameError("Invalid start signal"));
         }
         let mut response_header = [0u8; 2];
-        self.read_exact(&mut response_header)
-            .await
-            .map_err(ReceiveError::Read)?;
-        Ok(ResponseHeader {
-            request_id: response_header[0],
-            status: response_header[1],
-        })
+        self.read_exact(&mut response_header).await.map_err(ReceiveError::Read)?;
+        Ok(ResponseHeader { request_id: response_header[0], status: response_header[1] })
     }
 
     // Step 4-7 (normal): Receive body
@@ -96,12 +86,8 @@ pub trait ReadTransportExt: ReadTransport {
 
     async fn recv_indicator(&mut self) -> Result<Indicator, ReceiveError<Self::Error>> {
         let mut buf = [0u8; 1];
-        self.read_exact(&mut buf)
-            .await
-            .map_err(ReceiveError::Read)?;
-        buf[0]
-            .try_into()
-            .map_err(|_| ReceiveError::FrameError("Invalid indicator"))
+        self.read_exact(&mut buf).await.map_err(ReceiveError::Read)?;
+        buf[0].try_into().map_err(|_| ReceiveError::FrameError("Invalid indicator"))
     }
 
     // Step 5,6
@@ -109,9 +95,7 @@ pub trait ReadTransportExt: ReadTransport {
         &mut self,
     ) -> Result<R, ReceiveError<Self::Error>> {
         let mut request_size = [0u8; 4];
-        self.read_exact(&mut request_size)
-            .await
-            .map_err(ReceiveError::Read)?;
+        self.read_exact(&mut request_size).await.map_err(ReceiveError::Read)?;
         let request_size = u32::from_le_bytes(request_size);
 
         #[cfg(not(feature = "std"))]
@@ -125,9 +109,7 @@ pub trait ReadTransportExt: ReadTransport {
         #[cfg(feature = "std")]
         let mut buf = vec![0; request_size as usize];
 
-        self.read_exact(&mut buf[0..request_size as usize])
-            .await
-            .map_err(ReceiveError::Read)?;
+        self.read_exact(&mut buf[0..request_size as usize]).await.map_err(ReceiveError::Read)?;
 
         let deserialized = postcard::from_bytes::<R>(&buf[0..request_size as usize])?;
 

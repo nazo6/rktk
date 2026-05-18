@@ -49,11 +49,7 @@ pub async fn report_task<
     debug!("report task start");
 
     let mut prev_update_time = embassy_time::Instant::now();
-    let mut current_output = if usb.is_some() {
-        Output::Usb
-    } else {
-        Output::Ble
-    };
+    let mut current_output = if usb.is_some() { Output::Usb } else { Output::Ble };
     let mut display_off =
         DisplayOffController::new(Duration::from_millis(config.rktk.display_timeout));
     let mut mag_cal_enabled = false;
@@ -174,10 +170,7 @@ pub async fn report_task<
 
         prev_update_time = embassy_time::Instant::now();
 
-        if !master_hooks
-            .on_state_update(&mut state_report, usb, ble)
-            .await
-        {
+        if !master_hooks.on_state_update(&mut state_report, usb, ble).await {
             display_off.update(false);
             continue;
         }
@@ -226,19 +219,11 @@ pub async fn report_task<
         let reported = match current_output {
             Output::Usb => {
                 crate::utils::display_state!(Output, Output::Usb);
-                if let Some(usb) = &usb {
-                    send_report(usb, state_report).await
-                } else {
-                    false
-                }
+                if let Some(usb) = &usb { send_report(usb, state_report).await } else { false }
             }
             Output::Ble => {
                 crate::utils::display_state!(Output, Output::Ble);
-                if let Some(ble) = &ble {
-                    send_report(ble, state_report).await
-                } else {
-                    false
-                }
+                if let Some(ble) = &ble { send_report(ble, state_report).await } else { false }
             }
         };
         display_off.update(reported);
@@ -273,10 +258,7 @@ async fn send_report(reporter: &impl ReporterDriver, state_report: Report) -> bo
     if let Some(report) = state_report.media_keyboard_report {
         reported = true;
         if let Err(e) = reporter.try_send_media_keyboard_report(report) {
-            rktk_log::warn!(
-                "Failed to send media keyboard report: {:?}",
-                Debug2Format(&e)
-            );
+            rktk_log::warn!("Failed to send media keyboard report: {:?}", Debug2Format(&e));
         }
     }
 
@@ -322,11 +304,7 @@ struct DisplayOffController {
 
 impl DisplayOffController {
     fn new(timeout: Duration) -> Self {
-        Self {
-            display_off: false,
-            latest_report_time: Instant::now(),
-            display_timeout: timeout,
-        }
+        Self { display_off: false, latest_report_time: Instant::now(), display_timeout: timeout }
     }
     fn update(&mut self, reported: bool) {
         if reported {

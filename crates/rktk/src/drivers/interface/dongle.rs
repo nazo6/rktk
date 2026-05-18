@@ -49,39 +49,23 @@ impl From<descriptor::KeyboardReport> for KeyboardReport {
 
 impl From<MouseReport> for descriptor::MouseReport {
     fn from(value: MouseReport) -> Self {
-        Self {
-            buttons: value.buttons,
-            x: value.x,
-            y: value.y,
-            wheel: value.wheel,
-            pan: value.pan,
-        }
+        Self { buttons: value.buttons, x: value.x, y: value.y, wheel: value.wheel, pan: value.pan }
     }
 }
 impl From<descriptor::MouseReport> for MouseReport {
     fn from(value: descriptor::MouseReport) -> Self {
-        Self {
-            buttons: value.buttons,
-            x: value.x,
-            y: value.y,
-            wheel: value.wheel,
-            pan: value.pan,
-        }
+        Self { buttons: value.buttons, x: value.x, y: value.y, wheel: value.wheel, pan: value.pan }
     }
 }
 
 impl From<MediaKeyboardReport> for descriptor::MediaKeyboardReport {
     fn from(value: MediaKeyboardReport) -> Self {
-        Self {
-            usage_id: value.usage_id,
-        }
+        Self { usage_id: value.usage_id }
     }
 }
 impl From<descriptor::MediaKeyboardReport> for MediaKeyboardReport {
     fn from(value: descriptor::MediaKeyboardReport) -> Self {
-        Self {
-            usage_id: value.usage_id,
-        }
+        Self { usage_id: value.usage_id }
     }
 }
 

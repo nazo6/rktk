@@ -28,10 +28,7 @@ fn normal2_action() {
     let report = update!(state, time(0), (0, 0, true));
     let mut expected = KEYBOARD_ONLY_REPORT;
     expected.keyboard_report.as_mut().unwrap().keycodes = [0x04, 0x05, 0, 0, 0, 0];
-    assert_eq!(
-        report, expected,
-        "Normal2 action key 'a' and 'b' are pressed"
-    );
+    assert_eq!(report, expected, "Normal2 action key 'a' and 'b' are pressed");
 }
 
 #[test]
@@ -46,23 +43,13 @@ fn taphold_action_hold() {
     assert_eq!(report, NONE_REPORT, "TapHold action key, Just tapped");
 
     let report = update!(state, time(50));
-    assert_eq!(
-        report, NONE_REPORT,
-        "TapHold action key, Sill in tapping term"
-    );
+    assert_eq!(report, NONE_REPORT, "TapHold action key, Sill in tapping term");
 
     let report = update!(state, time(1000));
     let mut expected = NONE_REPORT;
-    expected.keyboard_report = Some(KeyboardReport {
-        keycodes: [0x05, 0, 0, 0, 0, 0],
-        modifier: 0,
-        reserved: 0,
-        leds: 0,
-    });
-    assert_eq!(
-        report, expected,
-        "TapHold action key, tapping term exceeded, hold mode"
-    );
+    expected.keyboard_report =
+        Some(KeyboardReport { keycodes: [0x05, 0, 0, 0, 0, 0], modifier: 0, reserved: 0, leds: 0 });
+    assert_eq!(report, expected, "TapHold action key, tapping term exceeded, hold mode");
 }
 
 #[test]
@@ -78,16 +65,9 @@ fn taphold_action_tap() {
 
     let report = update!(state, time(200), (0, 0, false));
     let mut expected = NONE_REPORT;
-    expected.keyboard_report = Some(KeyboardReport {
-        keycodes: [0x04, 0, 0, 0, 0, 0],
-        modifier: 0,
-        reserved: 0,
-        leds: 0,
-    });
-    assert_eq!(
-        report, expected,
-        "TapHold action key, released before tapping term, tap key sent"
-    );
+    expected.keyboard_report =
+        Some(KeyboardReport { keycodes: [0x04, 0, 0, 0, 0, 0], modifier: 0, reserved: 0, leds: 0 });
+    assert_eq!(report, expected, "TapHold action key, released before tapping term, tap key sent");
 }
 
 #[test]
@@ -105,17 +85,10 @@ fn taphold_action_other_key_press() {
 
     let report = update!(state, time(0), (0, 1, true));
     let mut expected = NONE_REPORT;
-    expected.keyboard_report = Some(KeyboardReport {
-        keycodes: [0x06, 0, 0, 0, 0, 0],
-        modifier: 0,
-        reserved: 0,
-        leds: 0,
-    });
+    expected.keyboard_report =
+        Some(KeyboardReport { keycodes: [0x06, 0, 0, 0, 0, 0], modifier: 0, reserved: 0, leds: 0 });
     expected.highest_layer = 1;
-    assert_eq!(
-        report, expected,
-        "In tapping term, but act as hold because another key is pressed"
-    );
+    assert_eq!(report, expected, "In tapping term, but act as hold because another key is pressed");
 }
 
 #[test]
@@ -145,24 +118,14 @@ fn oneshot_action_mod() {
     assert_eq!(report, expected, "Key 'a' is pressed with lctrl modifier");
 
     let report = update!(state, time(0));
-    assert_eq!(
-        report, NONE_REPORT,
-        "Key 'a' is still pressed with lctrl modifier"
-    );
+    assert_eq!(report, NONE_REPORT, "Key 'a' is still pressed with lctrl modifier");
 
     let report = update!(state, time(0), (0, 1, false));
-    assert_eq!(
-        report, KEYBOARD_ONLY_REPORT,
-        "Oneshot lctrl and 'a' is released"
-    );
+    assert_eq!(report, KEYBOARD_ONLY_REPORT, "Oneshot lctrl and 'a' is released");
 
     let report = update!(state, time(0), (0, 2, true));
     let mut expected = NONE_REPORT;
-    expected.keyboard_report = Some(KeyboardReport {
-        keycodes: [0x05, 0, 0, 0, 0, 0],
-        modifier: 0,
-        reserved: 0,
-        leds: 0,
-    });
+    expected.keyboard_report =
+        Some(KeyboardReport { keycodes: [0x05, 0, 0, 0, 0, 0], modifier: 0, reserved: 0, leds: 0 });
     assert_eq!(report, expected, "Key 'b' is pressed without modifier");
 }
