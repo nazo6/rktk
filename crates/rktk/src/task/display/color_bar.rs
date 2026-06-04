@@ -1,5 +1,5 @@
 use embassy_futures::select::{Either3, select3};
-use embassy_time::{Duration, Ticker, Timer};
+use embassy_time::{Duration, Ticker};
 use embedded_graphics::{
     mono_font::{MonoTextStyleBuilder, ascii::{FONT_6X10, FONT_8X13, FONT_9X15}},
     pixelcolor::{Rgb565, Rgb888},
