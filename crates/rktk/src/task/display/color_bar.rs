@@ -1,5 +1,6 @@
 use embassy_futures::select::{Either3, select3};
 use embassy_time::{Duration, Ticker};
+use core::fmt::Write as _;
 use embedded_graphics::{
     mono_font::{MonoTextStyleBuilder, ascii::{FONT_6X10, FONT_8X13, FONT_9X15}},
     pixelcolor::{Rgb565, Rgb888},
@@ -262,6 +263,213 @@ async fn draw_dashboard<D: DisplayDriver<Color = Rgb565>>(
     }
 }
 
+async fn draw_analog_monitor<D: DisplayDriver<Color = Rgb565>>(
+    display: &mut D,
+    _anim_tick: u32,
+) {
+    let target = display.draw_target();
+
+    // 1. Draw Background (Synthwave Dark Slate)
+    let bg_style = PrimitiveStyleBuilder::new()
+        .fill_color(rgb(10, 10, 15))
+        .build();
+    let _ = Rectangle::new(Point::zero(), Size::new(284, 76)).into_styled(bg_style).draw(target);
+
+    // 2. Outer border
+    let border_style = PrimitiveStyleBuilder::new()
+        .stroke_color(rgb(0, 180, 216))
+        .stroke_width(1)
+        .build();
+    let _ = RoundedRectangle::new(
+        Rectangle::new(Point::new(4, 4), Size::new(276, 68)),
+        CornerRadii::new(Size::new(6, 6)),
+    )
+    .into_styled(border_style)
+    .draw(target);
+
+    // 3. Title Badge
+    let badge_rect = Rectangle::new(Point::new(10, 8), Size::new(84, 12));
+    let badge_style = PrimitiveStyleBuilder::new()
+        .fill_color(rgb(0, 40, 70))
+        .build();
+    let _ = RoundedRectangle::new(badge_rect, CornerRadii::new(Size::new(3, 3)))
+        .into_styled(badge_style)
+        .draw(target);
+    let _ = draw_centered_text(target, "ANALOG KEYS", &FONT_6X10, badge_rect, rgb(0, 220, 255));
+
+    // 4. Help Text
+    let label_style = MonoTextStyleBuilder::new()
+        .font(&FONT_6X10)
+        .text_color(rgb(100, 110, 120))
+        .build();
+    let _ = Text::with_baseline("HOLD MUTE: SWITCH PAGE", Point::new(135, 9), label_style, Baseline::Top).draw(target);
+
+    // 5. Divider Line
+    let line_style = PrimitiveStyleBuilder::new()
+        .stroke_color(rgb(0, 70, 90))
+        .stroke_width(1)
+        .build();
+    let _ = Line::new(Point::new(10, 22), Point::new(274, 22)).into_styled(line_style).draw(target);
+
+    // 6. Draw 8 bars
+    let bar_outline_style = PrimitiveStyleBuilder::new()
+        .stroke_color(rgb(30, 40, 50))
+        .stroke_width(1)
+        .build();
+
+    let bar_fill_style = PrimitiveStyleBuilder::new()
+        .fill_color(rgb(0, 240, 180))
+        .build();
+
+    let key_labels = ["1:A", "2:B", "3:C", "4:D", "5:E", "6:F", "7:G", "8:H"];
+    const KEY_FLAT_INDICES: [usize; 8] = [8, 9, 10, 4, 5, 6, 0, 1];
+
+    for i in 0..8 {
+        let x = 12 + (i as i32 * 33);
+        
+        // Draw outline box
+        let _ = Rectangle::new(Point::new(x, 26), Size::new(26, 32))
+            .into_styled(bar_outline_style)
+            .draw(target);
+
+        // Get current distance (0 to 400)
+        let dist = super::KEY_DISTANCES[KEY_FLAT_INDICES[i]].load(core::sync::atomic::Ordering::Relaxed);
+        // Normalize 0..400 to 0..30
+        let fill_h = ((dist as i32 * 30) / 400).clamp(0, 30) as u32;
+
+        if fill_h > 0 {
+            let _ = Rectangle::new(
+                Point::new(x + 2, 57 - fill_h as i32),
+                Size::new(22, fill_h),
+            )
+            .into_styled(bar_fill_style)
+            .draw(target);
+        }
+
+        // Draw distance text above bar: e.g. "2.4"
+        let mm = dist / 100;
+        let frac = (dist % 100) / 10;
+        let mut text_buf = heapless::String::<8>::new();
+        let _ = write!(&mut text_buf, "{}.{}", mm, frac);
+        
+        let val_rect = Rectangle::new(Point::new(x, 13), Size::new(26, 10));
+        let _ = draw_centered_text(target, &text_buf, &FONT_6X10, val_rect, rgb(200, 200, 200));
+
+        // Draw key label below bar
+        let label_rect = Rectangle::new(Point::new(x - 2, 60), Size::new(30, 10));
+        let _ = draw_centered_text(target, key_labels[i], &FONT_6X10, label_rect, rgb(0, 180, 216));
+    }
+}
+
+async fn draw_calibration_monitor<D: DisplayDriver<Color = Rgb565>>(
+    display: &mut D,
+    anim_tick: u32,
+) {
+    let target = display.draw_target();
+
+    // 1. Draw Background
+    let bg_style = PrimitiveStyleBuilder::new()
+        .fill_color(rgb(10, 10, 15))
+        .build();
+    let _ = Rectangle::new(Point::zero(), Size::new(284, 76)).into_styled(bg_style).draw(target);
+
+    // 2. Outer border
+    let border_color = if super::CALIBRATION_MODE.load(core::sync::atomic::Ordering::Relaxed) {
+        // Red border if calibrating
+        if (anim_tick % 10) < 5 {
+            rgb(255, 0, 50)
+        } else {
+            rgb(100, 0, 20)
+        }
+    } else {
+        rgb(0, 180, 216)
+    };
+
+    let border_style = PrimitiveStyleBuilder::new()
+        .stroke_color(border_color)
+        .stroke_width(1)
+        .build();
+    let _ = RoundedRectangle::new(
+        Rectangle::new(Point::new(4, 4), Size::new(276, 68)),
+        CornerRadii::new(Size::new(6, 6)),
+    )
+    .into_styled(border_style)
+    .draw(target);
+
+    // 3. Title Badge
+    let badge_rect = Rectangle::new(Point::new(10, 8), Size::new(84, 12));
+    let badge_style = PrimitiveStyleBuilder::new()
+        .fill_color(rgb(0, 40, 70))
+        .build();
+    let _ = RoundedRectangle::new(badge_rect, CornerRadii::new(Size::new(3, 3)))
+        .into_styled(badge_style)
+        .draw(target);
+    let _ = draw_centered_text(target, "CALIBRATION", &FONT_6X10, badge_rect, rgb(0, 220, 255));
+
+    // 4. Calibration status or Help Text
+    if super::CALIBRATION_MODE.load(core::sync::atomic::Ordering::Relaxed) {
+        let status_style = MonoTextStyleBuilder::new()
+            .font(&FONT_6X10)
+            .text_color(rgb(255, 50, 50))
+            .build();
+        let _ = Text::with_baseline("CALIBRATING...", Point::new(140, 9), status_style, Baseline::Top).draw(target);
+    } else {
+        let label_style = MonoTextStyleBuilder::new()
+            .font(&FONT_6X10)
+            .text_color(rgb(100, 110, 120))
+            .build();
+        let _ = Text::with_baseline("HOLD MUTE: SWITCH PAGE", Point::new(135, 9), label_style, Baseline::Top).draw(target);
+    }
+
+    // 5. Divider Line
+    let line_style = PrimitiveStyleBuilder::new()
+        .stroke_color(rgb(0, 70, 90))
+        .stroke_width(1)
+        .build();
+    let _ = Line::new(Point::new(10, 22), Point::new(274, 22)).into_styled(line_style).draw(target);
+
+    // 6. Draw Key Ranges (2 columns of 4 keys)
+    let key_labels = ["K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8"];
+    const KEY_FLAT_INDICES: [usize; 8] = [8, 9, 10, 4, 5, 6, 0, 1];
+
+    let text_style = MonoTextStyleBuilder::new()
+        .font(&FONT_6X10)
+        .text_color(rgb(255, 255, 255))
+        .build();
+    
+    let key_style = MonoTextStyleBuilder::new()
+        .font(&FONT_6X10)
+        .text_color(rgb(0, 180, 216))
+        .build();
+
+    for i in 0..8 {
+        let col = (i / 4) as i32;
+        let row = (i % 4) as i32;
+        let x = 14 + col * 136;
+        let y = 26 + row * 11;
+
+        let flat_idx = KEY_FLAT_INDICES[i];
+        let raw = super::KEY_RAW_VALS[flat_idx].load(core::sync::atomic::Ordering::Relaxed);
+        let min = super::KEY_CALIB_MIN[flat_idx].load(core::sync::atomic::Ordering::Relaxed);
+        let max = super::KEY_CALIB_MAX[flat_idx].load(core::sync::atomic::Ordering::Relaxed);
+
+        // Label: "K1(A)"
+        let key_chars = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        let mut label_buf = heapless::String::<12>::new();
+        let _ = write!(&mut label_buf, "{}({})", key_labels[i], key_chars[i]);
+        let _ = Text::with_baseline(&label_buf, Point::new(x, y), key_style, Baseline::Top).draw(target);
+
+        // Range: "min-max (raw)"
+        let mut range_buf = heapless::String::<32>::new();
+        if min < max && (max - min) >= 300 {
+            let _ = write!(&mut range_buf, "{:3}-{:3} ({:3})", min, max, raw);
+        } else {
+            let _ = write!(&mut range_buf, "--- ({:3})", raw);
+        }
+        let _ = Text::with_baseline(&range_buf, Point::new(x + 50, y), text_style, Baseline::Top).draw(target);
+    }
+}
+
 pub struct ColorBarDisplayConfig;
 
 impl DisplayConfig for ColorBarDisplayConfig {
@@ -281,6 +489,7 @@ impl DisplayConfig for ColorBarDisplayConfig {
         let mut mouse_available = false;
         let mut anim_tick = 0u32;
         let mut anim_ticker = Ticker::every(Duration::from_millis(50));
+        let mut active_page = 0u8;
 
         // Render initial static screen
         let _ = display.clear().await;
@@ -342,6 +551,16 @@ impl DisplayConfig for ColorBarDisplayConfig {
                     DisplayMessage::On(on) => {
                         let _ = display.set_display_on(on).await;
                     }
+                    DisplayMessage::NextPage => {
+                        active_page = (active_page + 1) % 3;
+                        let _ = display.clear().await;
+                        state_changed = true;
+                    }
+                    DisplayMessage::PrevPage => {
+                        active_page = (active_page + 2) % 3;
+                        let _ = display.clear().await;
+                        state_changed = true;
+                    }
                     _ => {}
                 },
                 Either3::Second(_str) => {
@@ -355,18 +574,30 @@ impl DisplayConfig for ColorBarDisplayConfig {
             }
 
             if state_changed {
-                draw_dashboard(
-                    display,
-                    &layer_state,
-                    caps_lock,
-                    num_lock,
-                    output_mode,
-                    mouse_available,
-                    anim_tick,
-                )
-                .await;
+                match active_page {
+                    0 => {
+                        draw_dashboard(
+                            display,
+                            &layer_state,
+                            caps_lock,
+                            num_lock,
+                            output_mode,
+                            mouse_available,
+                            anim_tick,
+                        )
+                        .await;
+                    }
+                    1 => {
+                        draw_analog_monitor(display, anim_tick).await;
+                    }
+                    2 => {
+                        draw_calibration_monitor(display, anim_tick).await;
+                    }
+                    _ => {}
+                }
                 let _ = display.flush().await;
             }
         }
     }
 }
+

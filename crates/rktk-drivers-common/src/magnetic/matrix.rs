@@ -125,6 +125,7 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
 
     pub fn set_calibration_mode(&mut self, enabled: bool) {
         self.calibration_mode = enabled;
+        rktk::task::display::CALIBRATION_MODE.store(enabled, core::sync::atomic::Ordering::Relaxed);
         if enabled {
             // Reset calibration data when starting
             self.calibration_data = [[CalibrationEntry::new(); COLS]; ROWS];
@@ -137,6 +138,16 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
 
     pub fn set_calibration_data(&mut self, data: [[CalibrationEntry; COLS]; ROWS]) {
         self.calibration_data = data;
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                let entry = data[row][col];
+                let idx = row * COLS + col;
+                if idx < 16 {
+                    rktk::task::display::KEY_CALIB_MIN[idx].store(entry.min, core::sync::atomic::Ordering::Relaxed);
+                    rktk::task::display::KEY_CALIB_MAX[idx].store(entry.max, core::sync::atomic::Ordering::Relaxed);
+                }
+            }
+        }
     }
 }
 
@@ -201,6 +212,11 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
             for col in 0..COLS {
                 match self.scanner.scan(row, col).await {
                     Ok(val) => {
+                        let idx = row * COLS + col;
+                        if idx < 16 {
+                            rktk::task::display::KEY_RAW_VALS[idx].store(val, core::sync::atomic::Ordering::Relaxed);
+                        }
+
                         if self.calibration_mode {
                             let entry = &mut self.calibration_data[row][col];
                             if val < entry.min {
@@ -209,8 +225,16 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
                             if val > entry.max {
                                 entry.max = val;
                             }
+                            if idx < 16 {
+                                rktk::task::display::KEY_CALIB_MIN[idx].store(entry.min, core::sync::atomic::Ordering::Relaxed);
+                                rktk::task::display::KEY_CALIB_MAX[idx].store(entry.max, core::sync::atomic::Ordering::Relaxed);
+                            }
                         } else {
                             let entry = &self.calibration_data[row][col];
+                            if idx < 16 {
+                                rktk::task::display::KEY_CALIB_MIN[idx].store(entry.min, core::sync::atomic::Ordering::Relaxed);
+                                rktk::task::display::KEY_CALIB_MAX[idx].store(entry.max, core::sync::atomic::Ordering::Relaxed);
+                            }
                             if entry.min < entry.max && (entry.max - entry.min) >= 300 {
                                 // Normalize value to 0-65535
                                 let normalized = if val <= entry.min {
@@ -225,6 +249,10 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
 
                                 let profile = self.profiles.get_profile(row, col);
                                 let distance = profile.normalized_to_distance(normalized);
+
+                                if idx < 16 {
+                                    rktk::task::display::KEY_DISTANCES[idx].store(distance, core::sync::atomic::Ordering::Relaxed);
+                                }
 
                                 if let Some(pressed) = self.states[row][col].update(
                                     distance,
@@ -241,6 +269,10 @@ impl<S: MagneticScanner, M: KeyProfileMap<ROWS, COLS>, const ROWS: usize, const 
                                         normalized
                                     );
                                     cb(KeyChangeEvent { row: row as u8, col: col as u8, pressed });
+                                }
+                            } else {
+                                if idx < 16 {
+                                    rktk::task::display::KEY_DISTANCES[idx].store(0, core::sync::atomic::Ordering::Relaxed);
                                 }
                             }
                         }

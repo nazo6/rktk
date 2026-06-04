@@ -24,7 +24,42 @@ pub enum DisplayMessage {
     CapsLock(bool),
     Brightness(u8),
     On(bool),
+    NextPage,
+    PrevPage,
 }
+
+use portable_atomic::{AtomicU16, AtomicBool};
+
+pub static KEY_RAW_VALS: [AtomicU16; 16] = [
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+];
+
+pub static KEY_DISTANCES: [AtomicU16; 16] = [
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+    AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0), AtomicU16::new(0),
+];
+
+pub static KEY_CALIB_MIN: [AtomicU16; 16] = [
+    AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX),
+    AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX),
+    AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX),
+    AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX), AtomicU16::new(u16::MAX),
+];
+
+pub static KEY_CALIB_MAX: [AtomicU16; 16] = [
+    AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN),
+    AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN),
+    AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN),
+    AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN), AtomicU16::new(u16::MIN),
+];
+
+pub static CALIBRATION_MODE: AtomicBool = AtomicBool::new(false);
+
 
 use embedded_graphics::prelude::PixelColor;
 

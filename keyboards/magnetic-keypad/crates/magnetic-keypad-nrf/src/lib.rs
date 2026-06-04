@@ -278,19 +278,59 @@ pub async fn touch_task(
     let mut prev_slider_pos: Option<i32> = None;
     const SLIDER_THRESHOLD: i32 = 25; // 0.25 of one pad spacing
 
+    let mut mute_press_time: Option<embassy_time::Instant> = None;
+    let mut mute_handled = false;
+
     loop {
         if let Ok(state) = touch_sensor.read_touch().await {
             // 1. Right-side Buttons (ch0 - ch3)
             for i in 0..4 {
                 let current = state.pads[i];
-                if current != prev_buttons[i] {
-                    let ev = rktk::drivers::interface::keyscan::KeyChangeEvent {
-                        row: i as u8,
-                        col: 3, // Column 3 is the virtual column
-                        pressed: current,
-                    };
-                    let _ = kb_sender.try_send(ev);
-                    prev_buttons[i] = current;
+                if i == 0 {
+                    // MUTE button custom logic for display control
+                    if current && !prev_buttons[0] {
+                        mute_press_time = Some(embassy_time::Instant::now());
+                        mute_handled = false;
+                        prev_buttons[0] = true;
+                    } else if !current && prev_buttons[0] {
+                        if !mute_handled {
+                            // Quick tap: send press and release
+                            let ev_press = rktk::drivers::interface::keyscan::KeyChangeEvent {
+                                row: 0,
+                                col: 3,
+                                pressed: true,
+                            };
+                            let _ = kb_sender.try_send(ev_press);
+                            let ev_release = rktk::drivers::interface::keyscan::KeyChangeEvent {
+                                row: 0,
+                                col: 3,
+                                pressed: false,
+                            };
+                            let _ = kb_sender.try_send(ev_release);
+                        }
+                        mute_press_time = None;
+                        prev_buttons[0] = false;
+                    } else if current && !mute_handled {
+                        if let Some(press_time) = mute_press_time {
+                            if press_time.elapsed() >= embassy_time::Duration::from_millis(800) {
+                                // Long press: change display page!
+                                let _ = rktk::task::display::DISPLAY_CONTROLLER.try_send(
+                                    rktk::task::display::DisplayMessage::NextPage
+                                );
+                                mute_handled = true;
+                            }
+                        }
+                    }
+                } else {
+                    if current != prev_buttons[i] {
+                        let ev = rktk::drivers::interface::keyscan::KeyChangeEvent {
+                            row: i as u8,
+                            col: 3, // Column 3 is the virtual column
+                            pressed: current,
+                        };
+                        let _ = kb_sender.try_send(ev);
+                        prev_buttons[i] = current;
+                    }
                 }
             }
 
