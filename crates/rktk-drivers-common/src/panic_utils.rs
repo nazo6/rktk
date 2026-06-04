@@ -122,14 +122,14 @@ pub async fn display_message_if_panicked<D: DisplayDriver<Color = BinaryColor>>(
 
         let str_len = str.lines().map(|line| line.chars().count()).max().unwrap_or(0);
 
-        let orig_display_size = display.as_mut().bounding_box().size;
+        let orig_display_size = display.draw_target().bounding_box().size;
         let rotation = if orig_display_size.width > orig_display_size.height {
             Rotation::Rotate0
         } else {
             Rotation::Rotate90
         };
 
-        let rotated_display = RotatedDrawTarget::new(display.as_mut(), rotation);
+        let rotated_display = RotatedDrawTarget::new(display.draw_target(), rotation);
         let display_width = rotated_display.bounding_box().size.width as usize;
         let overflow_len = if str_len * char_width > display_width {
             str_len - display_width / char_width + 1
@@ -161,7 +161,7 @@ pub async fn display_mes<D: DisplayDriver<Color = BinaryColor>>(
     rotation: Rotation,
 ) {
     {
-        let mut rotated_display = RotatedDrawTarget::new(display.as_mut(), rotation);
+        let mut rotated_display = RotatedDrawTarget::new(display.draw_target(), rotation);
 
         let _ = rotated_display.clear(BinaryColor::Off);
         let _ = Text::with_baseline(

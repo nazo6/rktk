@@ -70,19 +70,13 @@ pub fn display() -> Option<impl DisplayDriver<Color = BinaryColor>> {
             unreachable!()
         }
     }
-    impl AsMut<Self> for Display {
-        fn as_mut(&mut self) -> &mut Self {
-            self
-        }
-    }
-    impl AsRef<Self> for Display {
-        fn as_ref(&self) -> &Self {
-            self
-        }
-    }
     impl DisplayDriver for Display {
         type Color = BinaryColor;
         type Display = Self;
+
+        fn draw_target(&mut self) -> &mut Self::Display {
+            self
+        }
 
         async fn clear(&mut self) -> Result<(), display_interface::DisplayError> {
             Ok(())

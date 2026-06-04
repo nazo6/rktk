@@ -38,7 +38,7 @@ impl DisplayConfig for DefaultDisplayConfig {
             {
                 Either::First(mes) => match mes {
                     DisplayMessage::Clear => {
-                        let _ = display.as_mut().clear(BinaryColor::Off);
+                        let _ = display.draw_target().clear(BinaryColor::Off);
                     }
                     DisplayMessage::Message(_msg) => {
                         // TODO: Implement this
@@ -48,7 +48,7 @@ impl DisplayConfig for DefaultDisplayConfig {
                             Output::Usb => IMAGE_USB,
                             Output::Ble => IMAGE_BLUETOOTH,
                         };
-                        let _ = image.translate(Point::new(8, 0)).draw(display.as_mut());
+                        let _ = image.translate(Point::new(8, 0)).draw(display.draw_target());
                     }
                     DisplayMessage::LayerState(layers) => {
                         for (i, a) in layers.iter().enumerate() {
@@ -66,13 +66,13 @@ impl DisplayConfig for DefaultDisplayConfig {
                                     .build(),
                                 Baseline::Top,
                             )
-                            .draw(display.as_mut());
+                            .draw(display.draw_target());
                         }
                     }
                     DisplayMessage::MouseAvailable(mouse) => {
                         if mouse {
                             let _ =
-                                IMAGE_MOUSE.translate(Point::new(16, 35)).draw(display.as_mut());
+                                IMAGE_MOUSE.translate(Point::new(16, 35)).draw(display.draw_target());
                         }
                     }
                     DisplayMessage::NumLock(num_lock) => {
@@ -94,7 +94,7 @@ impl DisplayConfig for DefaultDisplayConfig {
                                 .build(),
                             Baseline::Top,
                         )
-                        .draw(display.as_mut());
+                        .draw(display.draw_target());
                     }
                     DisplayMessage::CapsLock(caps_lock) => {
                         let _ = Text::with_baseline(
@@ -115,7 +115,7 @@ impl DisplayConfig for DefaultDisplayConfig {
                                 .build(),
                             Baseline::Top,
                         )
-                        .draw(display.as_mut());
+                        .draw(display.draw_target());
                     }
                     DisplayMessage::Brightness(brightness) => {
                         let _ = display.set_brightness(brightness).await;

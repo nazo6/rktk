@@ -83,6 +83,10 @@ where
     type Color = Rgb565;
     type Display = MipiDisplayWrapper<W, H, SIZE>;
 
+    fn draw_target(&mut self) -> &mut Self::Display {
+        &mut self.wrapper
+    }
+
     async fn init(&mut self) -> Result<(), DisplayError> {
         self.display.init(&mut embassy_time::Delay)
             .await
@@ -106,27 +110,5 @@ where
 
     async fn set_display_on(&mut self, _on: bool) -> Result<(), DisplayError> {
         Ok(())
-    }
-}
-
-impl<BUS, PANEL, const W: usize, const H: usize, const SIZE: usize> AsRef<MipiDisplayWrapper<W, H, SIZE>>
-    for MipiDisplayDriver<BUS, PANEL, W, H, SIZE>
-where
-    BUS: display_driver::DisplayBus,
-    PANEL: display_driver::Panel<BUS>,
-{
-    fn as_ref(&self) -> &MipiDisplayWrapper<W, H, SIZE> {
-        &self.wrapper
-    }
-}
-
-impl<BUS, PANEL, const W: usize, const H: usize, const SIZE: usize> AsMut<MipiDisplayWrapper<W, H, SIZE>>
-    for MipiDisplayDriver<BUS, PANEL, W, H, SIZE>
-where
-    BUS: display_driver::DisplayBus,
-    PANEL: display_driver::Panel<BUS>,
-{
-    fn as_mut(&mut self) -> &mut MipiDisplayWrapper<W, H, SIZE> {
-        &mut self.wrapper
     }
 }

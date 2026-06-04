@@ -36,6 +36,10 @@ where
     type Color = BinaryColor;
     type Display = Ssd1306Async<I2CInterface<I2C>, SIZE, BufferedGraphicsModeAsync<SIZE>>;
 
+    fn draw_target(&mut self) -> &mut Self::Display {
+        &mut self.0
+    }
+
     async fn init(&mut self) -> Result<(), DisplayError> {
         self.0.init().await
     }
@@ -54,25 +58,5 @@ where
 
     async fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         self.0.set_display_on(on).await
-    }
-}
-
-impl<I2C, SIZE> AsRef<Ssd1306<I2C, SIZE>> for Ssd1306Driver<I2C, SIZE>
-where
-    I2C: I2cAsync + I2cSync + 'static,
-    SIZE: DisplaySizeAsync + DisplaySize + 'static,
-{
-    fn as_ref(&self) -> &Ssd1306<I2C, SIZE> {
-        &self.0
-    }
-}
-
-impl<I2C, SIZE> AsMut<Ssd1306<I2C, SIZE>> for Ssd1306Driver<I2C, SIZE>
-where
-    I2C: I2cAsync + I2cSync + 'static,
-    SIZE: DisplaySizeAsync + DisplaySize + 'static,
-{
-    fn as_mut(&mut self) -> &mut Ssd1306<I2C, SIZE> {
-        &mut self.0
     }
 }

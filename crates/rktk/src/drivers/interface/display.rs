@@ -4,9 +4,11 @@ use embedded_graphics::prelude::*;
 /// Interface for display drivers.
 ///
 /// TODO: Allow sync-only drivers?
-pub trait DisplayDriver: AsRef<Self::Display> + AsMut<Self::Display> + 'static {
+pub trait DisplayDriver: 'static {
     type Color: PixelColor;
     type Display: DrawTarget<Color = Self::Color>;
+
+    fn draw_target(&mut self) -> &mut Self::Display;
 
     /// Called when the display is initialized.
     ///
