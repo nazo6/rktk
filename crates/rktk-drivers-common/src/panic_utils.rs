@@ -110,7 +110,7 @@ const FONT: MonoFont = FONT_8X13;
 /// Otherwise, it will return the display builder.
 ///
 /// When None is returned, caller can stop execution using something like [`cortex_m::asm::udf`]
-pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
+pub async fn display_message_if_panicked<D: DisplayDriver<Color = BinaryColor>>(display: &mut D) {
     if let Some(panic_info) = read_panic_message()
         && display.init().await.is_ok()
     {
@@ -154,7 +154,7 @@ pub async fn display_message_if_panicked<D: DisplayDriver>(display: &mut D) {
         }
     }
 }
-pub async fn display_mes<D: DisplayDriver>(
+pub async fn display_mes<D: DisplayDriver<Color = BinaryColor>>(
     display: &mut D,
     str: &str,
     pos: Point,

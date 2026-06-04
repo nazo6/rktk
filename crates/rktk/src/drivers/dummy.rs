@@ -51,7 +51,7 @@ pub fn debounce() -> Option<impl DebounceDriver> {
 }
 
 // Display
-pub fn display() -> Option<impl DisplayDriver> {
+pub fn display() -> Option<impl DisplayDriver<Color = BinaryColor>> {
     pub enum Display {}
     impl Dimensions for Display {
         fn bounding_box(&self) -> embedded_graphics::primitives::Rectangle {
@@ -81,7 +81,12 @@ pub fn display() -> Option<impl DisplayDriver> {
         }
     }
     impl DisplayDriver for Display {
+        type Color = BinaryColor;
         type Display = Self;
+
+        async fn clear(&mut self) -> Result<(), display_interface::DisplayError> {
+            Ok(())
+        }
     }
 
     Option::<Display>::None

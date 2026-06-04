@@ -90,6 +90,9 @@ serde_with = { version = "3.9.0", default-features = false }
 serialport = "4.9.0"
 smart-default = "0.7.1"
 smol = { version = "2.0.2" }
+display-driver = "0.1.0"
+display-driver-spi = "0.1.1"
+display-driver-st7789 = "0.1.0"
 ssd1306 = { version = "0.10.0", features = ["async"] }
 static_cell = "2.1.0"
 strum = { version = "0.28.0", default-features = false }

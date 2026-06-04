@@ -1,11 +1,12 @@
 use display_interface::DisplayError;
-use embedded_graphics::{pixelcolor::BinaryColor, prelude::*};
+use embedded_graphics::prelude::*;
 
 /// Interface for display drivers.
 ///
 /// TODO: Allow sync-only drivers?
 pub trait DisplayDriver: AsRef<Self::Display> + AsMut<Self::Display> + 'static {
-    type Display: DrawTarget<Color = BinaryColor>;
+    type Color: PixelColor;
+    type Display: DrawTarget<Color = Self::Color>;
 
     /// Called when the display is initialized.
     ///
@@ -19,6 +20,11 @@ pub trait DisplayDriver: AsRef<Self::Display> + AsMut<Self::Display> + 'static {
     }
 
     async fn flush(&mut self) -> Result<(), DisplayError> {
+        Ok(())
+    }
+
+    /// Clear the display.
+    async fn clear(&mut self) -> Result<(), DisplayError> {
         Ok(())
     }
 

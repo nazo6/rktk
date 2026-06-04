@@ -7,3 +7,13 @@ pub mod ssd1306 {
         i2c_config
     }
 }
+
+pub mod st7789 {
+    use embassy_rp::spi::Config;
+
+    pub fn recommended_spi_config() -> Config {
+        let mut spi_config = Config::default();
+        spi_config.frequency = 8_000_000;
+        spi_config
+    }
+}

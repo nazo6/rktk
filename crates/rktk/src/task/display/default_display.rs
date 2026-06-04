@@ -24,7 +24,9 @@ fn get_last_digit_str(n: u8) -> &'static str {
 
 pub struct DefaultDisplayConfig;
 impl DisplayConfig for DefaultDisplayConfig {
-    async fn start<D: DisplayDriver, const N1: usize, const N2: usize>(
+    type Color = BinaryColor;
+
+    async fn start<D: DisplayDriver<Color = BinaryColor>, const N1: usize, const N2: usize>(
         &mut self,
         display: &mut D,
         display_controller: &Channel<DisplayMessage, N1>,

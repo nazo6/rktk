@@ -30,6 +30,7 @@ rand_core = { workspace = true, optional = true }
 rktk = { workspace = true }
 rktk-log = { workspace = true }
 sequential-storage = { workspace = true }
+display-driver = { workspace = true }
 ssd1306 = { workspace = true }
 static_cell = { workspace = true, optional = true }
 # Due to compatibility with nrf-sdc, the revision is currently locked.

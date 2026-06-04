@@ -1,6 +1,7 @@
 //! SSD1306 OLED display driver
 
 use display_interface::DisplayError;
+use embedded_graphics::draw_target::DrawTarget;
 use embedded_hal::i2c::I2c as I2cSync;
 use embedded_hal_async::i2c::I2c as I2cAsync;
 use rktk::drivers::interface::display::DisplayDriver;
@@ -9,6 +10,8 @@ use ssd1306::{
     I2CDisplayInterface, Ssd1306Async, mode::BufferedGraphicsModeAsync, prelude::*,
     size::DisplaySizeAsync,
 };
+
+use embedded_graphics::pixelcolor::BinaryColor;
 
 type Ssd1306<I2C, SIZE> = Ssd1306Async<I2CInterface<I2C>, SIZE, BufferedGraphicsModeAsync<SIZE>>;
 
@@ -30,12 +33,19 @@ where
     I2C: I2cAsync + I2cSync + 'static,
     SIZE: DisplaySizeAsync + DisplaySize + 'static,
 {
+    type Color = BinaryColor;
+    type Display = Ssd1306Async<I2CInterface<I2C>, SIZE, BufferedGraphicsModeAsync<SIZE>>;
+
     async fn init(&mut self) -> Result<(), DisplayError> {
         self.0.init().await
     }
 
     async fn flush(&mut self) -> Result<(), DisplayError> {
         self.0.flush().await
+    }
+
+    async fn clear(&mut self) -> Result<(), DisplayError> {
+        self.0.clear(BinaryColor::Off).map_err(|_| DisplayError::BusWriteError)
     }
 
     async fn set_brightness(&mut self, brightness: u8) -> Result<(), DisplayError> {
@@ -45,8 +55,6 @@ where
     async fn set_display_on(&mut self, on: bool) -> Result<(), DisplayError> {
         self.0.set_display_on(on).await
     }
-
-    type Display = Ssd1306Async<I2CInterface<I2C>, SIZE, BufferedGraphicsModeAsync<SIZE>>;
 }
 
 impl<I2C, SIZE> AsRef<Ssd1306<I2C, SIZE>> for Ssd1306Driver<I2C, SIZE>

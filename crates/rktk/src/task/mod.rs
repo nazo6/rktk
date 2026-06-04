@@ -51,7 +51,7 @@ pub async fn start<
     Display: DisplayDriver,
     Mouse: MouseDriver,
     H: AllHooks,
-    DC: DisplayConfig + 'static,
+    DC: DisplayConfig<Color = Display::Color> + 'static,
     RL: blinksy::layout::Layout2d + 'static,
 >(
     #[allow(unused_variables, reason = "`spawner` is unused when `alloc` is disabled")]

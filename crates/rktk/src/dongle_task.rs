@@ -13,14 +13,17 @@ use crate::{
 };
 
 /// Runs dongle with the given drivers.
-pub async fn start_dongle<D: display::DisplayConfig + 'static>(
+pub async fn start_dongle<
+    Display: DisplayDriver,
+    D: display::DisplayConfig<Color = Display::Color> + 'static,
+>(
     #[allow(unused_variables, reason = "`spawner` is unused when `alloc` is disabled")]
     spawner: embassy_executor::Spawner,
     usb: impl UsbReporterDriverBuilder,
     dongle: impl DongleDriverBuilder,
     mut hooks: impl DongleHooks,
-    display: Option<impl DisplayDriver>,
-    mut display_config: impl display::DisplayConfig + 'static,
+    display: Option<Display>,
+    mut display_config: D,
 ) {
     let (usb, usb_task) = usb.build().await.unwrap();
     let (mut dongle, dongle_task) = dongle.build().await.unwrap();

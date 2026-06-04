@@ -2390,6 +2390,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "display-driver"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "543e45928e0344811c429556d103ba12549c809f18576feff38914029a93a67b"
+dependencies = [
+ "display-interface",
+ "embedded-graphics-core",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
+]
+
+[[package]]
 name = "display-interface"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7055,6 +7067,7 @@ version = "0.2.0"
 dependencies = [
  "critical-section",
  "defmt 1.1.0",
+ "display-driver",
  "display-interface",
  "document-features",
  "embassy-embedded-hal",
