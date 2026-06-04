@@ -54,6 +54,9 @@ pub async fn report_task<
         DisplayOffController::new(Duration::from_millis(config.rktk.display_timeout));
     let mut mag_cal_enabled = false;
 
+    let mut last_layer_active = None;
+    let mut last_output = None;
+
     loop {
         let event = match select4(
             MOUSE_CHANGE_SIGNAL.wait(),
@@ -175,7 +178,10 @@ pub async fn report_task<
             continue;
         }
 
-        crate::utils::display_state!(LayerState, layer_active);
+        if last_layer_active != Some(layer_active) {
+            crate::utils::display_state!(LayerState, layer_active);
+            last_layer_active = Some(layer_active);
+        }
 
         if rktk_key_state.bootloader {
             system.reset_to_bootloader();
@@ -216,13 +222,23 @@ pub async fn report_task<
             }
         }
 
+        if last_output != Some(current_output) {
+            match current_output {
+                Output::Usb => {
+                    crate::utils::display_state!(Output, Output::Usb);
+                }
+                Output::Ble => {
+                    crate::utils::display_state!(Output, Output::Ble);
+                }
+            }
+            last_output = Some(current_output);
+        }
+
         let reported = match current_output {
             Output::Usb => {
-                crate::utils::display_state!(Output, Output::Usb);
                 if let Some(usb) = &usb { send_report(usb, state_report).await } else { false }
             }
             Output::Ble => {
-                crate::utils::display_state!(Output, Output::Ble);
                 if let Some(ble) = &ble { send_report(ble, state_report).await } else { false }
             }
         };

@@ -1,5 +1,5 @@
 use embassy_futures::select::{Either3, select3};
-use embassy_time::Timer;
+use embassy_time::{Duration, Ticker, Timer};
 use embedded_graphics::{
     mono_font::{MonoTextStyleBuilder, ascii::{FONT_6X10, FONT_8X13, FONT_9X15}},
     pixelcolor::{Rgb565, Rgb888},
@@ -280,6 +280,7 @@ impl DisplayConfig for ColorBarDisplayConfig {
         let mut output_mode = Output::Usb;
         let mut mouse_available = false;
         let mut anim_tick = 0u32;
+        let mut anim_ticker = Ticker::every(Duration::from_millis(50));
 
         // Render initial static screen
         let _ = display.clear().await;
@@ -300,7 +301,7 @@ impl DisplayConfig for ColorBarDisplayConfig {
             let select_res = select3(
                 display_controller.receive(),
                 display_dynamic_message_controller.wait(),
-                Timer::after_millis(50),
+                anim_ticker.next(),
             )
             .await;
 
