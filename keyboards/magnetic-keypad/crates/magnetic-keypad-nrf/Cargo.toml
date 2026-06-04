@@ -44,7 +44,13 @@ rktk-drivers-common = { workspace = true, features = [
 ] }
 rktk-drivers-nrf = { workspace = true, features = ["_nrfxx", "defmt"] }
 rktk-log = { workspace = true }
-static_cell = { workspace = true }
+static_cell = { workspace = true, features = ["nightly"] }
+display-driver = { workspace = true }
+display-driver-spi = { workspace = true }
+display-driver-st7789 = { workspace = true }
+display-interface = { workspace = true }
+embedded-graphics = { workspace = true }
+embedded-hal-bus = { version = "0.3.0", features = ["async"] }
 
 [features]
 default = []

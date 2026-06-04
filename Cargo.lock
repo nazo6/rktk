@@ -1761,6 +1761,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "delegate"
+version = "0.13.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "780eb241654bf097afb00fc5f054a09b687dad862e485fdcf8399bb056565370"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
+]
+
+[[package]]
 name = "der"
 version = "0.7.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2402,6 +2413,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "display-driver-mipidcs"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ebae28ed86a14809fb30855c0abb8bbdf6e1ea283bed86f06dfe550d24607a0"
+dependencies = [
+ "bitflags 2.11.1",
+ "display-driver",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
+]
+
+[[package]]
+name = "display-driver-spi"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "951e6e11ce16277c6c74aef7a6c859685d8c57f9d884a153c86ba7da0d6cee58"
+dependencies = [
+ "display-driver",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
+]
+
+[[package]]
+name = "display-driver-st7789"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57aa235958aa3ac0fb20102442c8f52769b3e39ba4fedaa95e393c4046d5818b"
+dependencies = [
+ "delegate",
+ "display-driver",
+ "display-driver-mipidcs",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
+]
+
+[[package]]
 name = "display-interface"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2910,6 +2957,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c4c685bbef7fe13c3c6dd4da26841ed3980ef33e841cddfa15ce8a8fb3f1884"
 dependencies = [
  "embedded-hal 1.0.0",
+]
+
+[[package]]
+name = "embedded-hal-bus"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "513e0b3a8fb7d3013a8ae17a834283f170deaf7d0eeab0a7c1a36ad4dd356d22"
+dependencies = [
+ "critical-section",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
 ]
 
 [[package]]
@@ -5013,11 +5071,17 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.1.0",
+ "display-driver",
+ "display-driver-spi",
+ "display-driver-st7789",
+ "display-interface",
  "embassy-embedded-hal",
  "embassy-executor",
  "embassy-nrf",
  "embassy-time",
+ "embedded-graphics",
  "embedded-hal-async",
+ "embedded-hal-bus",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-nrf",

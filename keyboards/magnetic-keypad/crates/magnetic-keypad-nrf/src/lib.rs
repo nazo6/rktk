@@ -13,12 +13,12 @@ use embassy_nrf::{
 };
 use rktk::{
     config::keymap::Keymap,
-    config::new_rktk_opts,
     drivers::{Drivers, dummy},
     hooks::empty_hooks::create_empty_hooks,
 };
 
 use rktk_drivers_common::{
+    display::mipi_display::MipiDisplayDriver,
     magnetic::{
         matrix::{MagneticMatrix, MuxScanner},
         mux::sn74lv4051::Sn74lv4051,
@@ -35,7 +35,98 @@ bind_interrupts!(struct Irqs {
     SAADC => saadc::InterruptHandler;
     CLOCK_POWER => embassy_nrf::usb::vbus_detect::InterruptHandler;
     TWISPI0 => embassy_nrf::twim::InterruptHandler<embassy_nrf::peripherals::TWISPI0>;
+    TWISPI1 => embassy_nrf::spim::InterruptHandler<embassy_nrf::peripherals::TWISPI1>;
 });
+
+mod display {
+    use display_driver_st7789::{St7789Spec, impl_st7789_generic, spec::PanelSpec};
+
+    pub struct MyCustomPanel;
+
+    impl PanelSpec for MyCustomPanel {
+        const PHYSICAL_WIDTH: u16 = 76;
+        const PHYSICAL_HEIGHT: u16 = 284;
+
+        const PHYSICAL_X_OFFSET: u16 = 82;
+        const PHYSICAL_Y_OFFSET: u16 = 18;
+
+        const INVERTED: bool = false;
+        const BGR: bool = false;
+    }
+
+    impl_st7789_generic!(MyCustomPanel);
+}
+
+type DisplayType = MipiDisplayDriver<
+    display_driver_spi::SpiDisplayBus<
+        embedded_hal_bus::spi::ExclusiveDevice<
+            embassy_nrf::spim::Spim<'static>,
+            embassy_nrf::gpio::Output<'static>,
+            embassy_time::Delay,
+        >,
+        embassy_nrf::gpio::Output<'static>,
+    >,
+    display_driver_st7789::St7789<
+        display::MyCustomPanel,
+        embassy_nrf::gpio::Output<'static>,
+        display_driver_spi::SpiDisplayBus<
+            embedded_hal_bus::spi::ExclusiveDevice<
+                embassy_nrf::spim::Spim<'static>,
+                embassy_nrf::gpio::Output<'static>,
+                embassy_time::Delay,
+            >,
+            embassy_nrf::gpio::Output<'static>,
+        >,
+    >,
+    284,
+    76,
+    43168,
+>;
+
+pub struct DisplayWrapper(pub &'static mut DisplayType);
+
+impl rktk::drivers::interface::display::DisplayDriver for DisplayWrapper {
+    type Color = embedded_graphics::pixelcolor::Rgb565;
+    type Display = rktk_drivers_common::display::mipi_display::MipiDisplayWrapper<284, 76, 43168>;
+
+    fn draw_target(&mut self) -> &mut Self::Display {
+        self.0.draw_target()
+    }
+
+    async fn init(&mut self) -> Result<(), display_interface::DisplayError> {
+        self.0.init().await?;
+        self.0
+            .display
+            .set_color_format(display_driver::ColorFormat::RGB565)
+            .await
+            .map_err(|_| display_interface::DisplayError::BusWriteError)?;
+        self.0
+            .display
+            .set_orientation(display_driver::Orientation::Deg270)
+            .await
+            .map_err(|_| display_interface::DisplayError::BusWriteError)?;
+        Ok(())
+    }
+
+    async fn flush(&mut self) -> Result<(), display_interface::DisplayError> {
+        self.0.flush().await
+    }
+
+    async fn clear(&mut self) -> Result<(), display_interface::DisplayError> {
+        self.0.clear().await
+    }
+
+    async fn set_brightness(
+        &mut self,
+        brightness: u8,
+    ) -> Result<(), display_interface::DisplayError> {
+        self.0.set_brightness(brightness).await
+    }
+
+    async fn set_display_on(&mut self, on: bool) -> Result<(), display_interface::DisplayError> {
+        self.0.set_display_on(on).await
+    }
+}
 
 pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
     let p = embassy_nrf::init(Default::default());
@@ -99,6 +190,39 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
             16 * 1024,
         );
 
+    // Turn on backlight
+    let mut bl = Output::new(p.P0_22, Level::High, OutputDrive::Standard);
+    bl.set_low();
+
+    let reset_opt = display_driver::LCDResetOption::new_pin(Output::new(
+        p.P1_06,
+        Level::Low,
+        OutputDrive::Standard,
+    ));
+    let panel = display_driver_st7789::St7789::<display::MyCustomPanel, _, _>::new(reset_opt);
+
+    let mut spi_config = embassy_nrf::spim::Config::default();
+    spi_config.frequency = embassy_nrf::spim::Frequency::M8;
+    let spi = embassy_nrf::spim::Spim::new_txonly(p.TWISPI1, Irqs, p.P0_17, p.P0_20, spi_config);
+
+    let cs = Output::new(p.P0_24, Level::High, OutputDrive::Standard);
+    let device = embedded_hal_bus::spi::ExclusiveDevice::new(spi, cs, embassy_time::Delay).unwrap();
+
+    let dc = Output::new(p.P1_00, Level::Low, OutputDrive::Standard);
+    let bus = display_driver_spi::SpiDisplayBus::new(device, dc);
+
+    let disp = display_driver::DisplayDriver::builder(bus, panel)
+        .with_color_format(display_driver::ColorFormat::RGB565)
+        .with_orientation(display_driver::Orientation::Deg270)
+        .init(&mut embassy_time::Delay)
+        .await
+        .unwrap();
+
+    let disp_drv = {
+        static DISPLAY: static_cell::StaticCell<DisplayType> = static_cell::StaticCell::new();
+        DISPLAY.init(MipiDisplayDriver::new(disp))
+    };
+
     let drivers = Drivers {
         keyscan,
         system: NrfSystemDriver::new(None),
@@ -115,7 +239,7 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
 
             CommonUsbReporterBuilder::new(opts)
         }),
-        display: dummy::display(),
+        display: Some(DisplayWrapper(disp_drv)),
         split: dummy::split(),
         rgb: Some(rgb),
         ble_builder: dummy::ble_builder(),
@@ -124,7 +248,15 @@ pub async fn run(spawner: Spawner, keymap: &'static Keymap) {
         encoder: Some(encoder),
     };
 
-    rktk::task::start(spawner, drivers, create_empty_hooks(), new_rktk_opts(keymap, None)).await;
+    let opts = rktk::config::RktkOpts {
+        keymap,
+        config: &rktk::config::DYNAMIC_CONFIG_FROM_FILE,
+        display: rktk::task::display::color_bar::ColorBarDisplayConfig,
+        rgb_layout: rktk::config::rgb::DummyLayout,
+        hand: None,
+    };
+
+    rktk::task::start(spawner, drivers, create_empty_hooks(), opts).await;
 }
 
 #[embassy_executor::task]
