@@ -22,6 +22,7 @@ embassy-rp = { workspace = true, features = [
 embassy-sync = { workspace = true }
 embassy-time = { workspace = true }
 embassy-usb = { workspace = true }
+embedded-io-async = { workspace = true }
 embedded-storage-async = { workspace = true }
 fixed = { workspace = true }
 fixed-macro = { workspace = true }

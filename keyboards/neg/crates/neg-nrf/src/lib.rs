@@ -8,7 +8,6 @@ use rktk_drivers_common::panic_utils;
 mod common;
 mod drivers;
 mod master;
-mod misc;
 mod slave;
 
 // ===== Global linkages =====

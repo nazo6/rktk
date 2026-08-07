@@ -1,3 +1,5 @@
+#![no_std]
+
 use rktk::{
     config::{Hand, RktkOpts, keymap::Keymap},
     task::display::default_display::DefaultDisplayConfig,
@@ -5,10 +7,25 @@ use rktk::{
 
 #[cfg(feature = "paw3395")]
 use rktk_drivers_common::mouse::paw3395;
+use rktk_drivers_common::usb::UsbDriverConfig;
+
 #[cfg(feature = "paw3395")]
 pub const PAW3395_CONFIG: paw3395::config::Config = paw3395::config::Config {
     mode: paw3395::config::HP_MODE,
     lift_cutoff: paw3395::config::LiftCutoff::_2mm,
+};
+
+pub const USB_CONFIG: UsbDriverConfig = {
+    let mut config = UsbDriverConfig::new(0xc0de, 0xcafe);
+
+    config.manufacturer = Some("nazo6");
+    config.product = Some("negL");
+    config.serial_number = Some("12345678");
+    config.max_power = 100;
+    config.max_packet_size_0 = 64;
+    config.supports_remote_wakeup = true;
+
+    config
 };
 
 pub fn translate_key_position(row: usize, col: usize) -> Option<(usize, usize)> {

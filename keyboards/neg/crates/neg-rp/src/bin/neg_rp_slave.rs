@@ -1,0 +1,12 @@
+#![no_std]
+#![no_main]
+
+use embassy_executor::Spawner;
+use neg_rp::{init_peri, start_slave};
+use rktk::hooks::create_empty_hooks;
+
+#[embassy_executor::main]
+async fn main(spawner: Spawner) {
+    let p = init_peri();
+    start_slave(spawner, p, create_empty_hooks()).await;
+}

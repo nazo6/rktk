@@ -3,7 +3,7 @@ use rktk::{
     drivers::{Drivers, dummy},
     hooks::AllHooks,
 };
-use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder, UsbDriverConfig};
+use rktk_drivers_common::usb::{CommonUsbDriverConfig, CommonUsbReporterBuilder};
 
 use crate::*;
 
@@ -57,9 +57,7 @@ pub async fn start_master(
     let usb = {
         let embassy_driver =
             embassy_nrf::usb::Driver::new(p.USBD, Irqs, rktk_drivers_nrf::get_vbus!(spawner, Irqs));
-        let mut driver_config = UsbDriverConfig::new(0xc0de, 0xcafe);
-        driver_config.product = Some("negL");
-        let opts = CommonUsbDriverConfig::new(embassy_driver, driver_config);
+        let opts = CommonUsbDriverConfig::new(embassy_driver, neg_common::USB_CONFIG);
         Some(CommonUsbReporterBuilder::new(opts))
     };
 
@@ -79,5 +77,5 @@ pub async fn start_master(
         encoder: Some(driver_encoder!(p)),
     };
 
-    rktk::task::start(spawner, drivers, hooks, misc::get_opts(keymap)).await;
+    rktk::task::start(spawner, drivers, hooks, neg_common::get_opts(keymap)).await;
 }

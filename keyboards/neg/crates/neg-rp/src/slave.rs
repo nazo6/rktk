@@ -1,25 +1,20 @@
-use embassy_nrf::Peripherals;
+use embassy_rp::Peripherals;
 use rktk::{
     config::keymap::Keymap,
     drivers::{Drivers, dummy},
     hooks::AllHooks,
 };
 
-#[cfg(feature = "sd")]
-use crate::common::init_sd;
 use crate::*;
 
 const EMPTY_KM: Keymap = Keymap::const_default();
 
 pub async fn start_slave(spawner: embassy_executor::Spawner, p: Peripherals, hooks: impl AllHooks) {
-    #[cfg(feature = "sd")]
-    let _ = init_sd(spawner).await;
-
     let spi = create_spi!(p);
 
     let drivers = Drivers {
         keyscan: driver_keyscan!(p, spi),
-        system: driver_system!(p),
+        system: driver_system!(),
         mouse: Some(driver_mouse!(p, spi)),
         usb_builder: dummy::usb_builder(),
         display: Some(driver_display!(p)),

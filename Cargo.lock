@@ -5427,6 +5427,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "neg-common"
+version = "0.2.0"
+dependencies = [
+ "rktk",
+ "rktk-drivers-common",
+]
+
+[[package]]
 name = "neg-nrf"
 version = "0.2.0"
 dependencies = [
@@ -5441,11 +5449,35 @@ dependencies = [
  "embassy-time",
  "embedded-alloc",
  "log",
+ "neg-common",
  "nrf-sdc",
  "nrf-softdevice",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-nrf",
+ "rktk-log",
+]
+
+[[package]]
+name = "neg-rp"
+version = "0.2.0"
+dependencies = [
+ "cfg-if",
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt 1.1.1",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-rp",
+ "embassy-sync",
+ "embassy-time",
+ "embedded-alloc",
+ "log",
+ "neg-common",
+ "portable-atomic",
+ "rktk",
+ "rktk-drivers-common",
+ "rktk-drivers-rp",
  "rktk-log",
 ]
 
@@ -7277,6 +7309,7 @@ dependencies = [
  "embassy-sync",
  "embassy-time",
  "embassy-usb",
+ "embedded-io-async 0.7.0",
  "embedded-storage-async",
  "fixed",
  "fixed-macro",
