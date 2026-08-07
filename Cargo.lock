@@ -677,9 +677,9 @@ dependencies = [
 
 [[package]]
 name = "bt-hci"
-version = "0.8.1"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "211713d2e9fb4793ce4360a712c0764264aff6be48932ccf02ca2a331c0436a9"
+checksum = "8f3c66fd0a41a3b3a5906847b1bf5516048ce083e24fa9341a0fa31d3b4cd73d"
 dependencies = [
  "btuuid",
  "defmt 1.1.1",
@@ -2593,7 +2593,6 @@ dependencies = [
  "log",
  "nrf-sdc",
  "nrf-softdevice",
- "rand_chacha 0.3.1",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-nrf",
@@ -2747,9 +2746,9 @@ dependencies = [
 
 [[package]]
 name = "embassy-nrf"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b715380574504335c40ec3016bc44598fac3c385f82959b26c41b25c30b7648d"
+checksum = "82051f67e8a06a8faebd183f62cfade184c96be68126c5f064abb8223a591ff1"
 dependencies = [
  "bitflags 2.13.1",
  "cfg-if",
@@ -2765,6 +2764,7 @@ dependencies = [
  "embassy-time-driver",
  "embassy-time-queue-utils",
  "embassy-usb-driver",
+ "embassy-usb-synopsys-otg",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-async",
@@ -2774,6 +2774,7 @@ dependencies = [
  "embedded-storage-async",
  "fixed",
  "nrf-pac",
+ "rand_core 0.10.1",
  "rand_core 0.6.4",
  "rand_core 0.9.5",
 ]
@@ -2909,6 +2910,20 @@ dependencies = [
  "defmt 1.1.1",
  "embedded-io-async 0.6.1",
  "embedded-io-async 0.7.0",
+]
+
+[[package]]
+name = "embassy-usb-synopsys-otg"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6efd0c0e0b21bcf91b475b8fa47347c1df32c9a99728ae1e1b0e6625862dfd1a"
+dependencies = [
+ "critical-section",
+ "defmt 1.1.1",
+ "embassy-sync 0.8.0",
+ "embassy-time",
+ "embassy-usb-driver",
+ "portable-atomic",
 ]
 
 [[package]]
@@ -3137,7 +3152,7 @@ dependencies = [
 [[package]]
 name = "esb-ng"
 version = "0.1.0"
-source = "git+https://github.com/nazo6/esb?rev=0f6afc38313affc9a8dbb97c3a252900450d6003#0f6afc38313affc9a8dbb97c3a252900450d6003"
+source = "git+https://github.com/nazo6/esb?rev=fef56ebcb7effe1d6be86f4481b3196e7371a41d#fef56ebcb7effe1d6be86f4481b3196e7371a41d"
 dependencies = [
  "bbqueue",
  "cortex-m",
@@ -5442,7 +5457,6 @@ dependencies = [
  "log",
  "nrf-sdc",
  "nrf-softdevice",
- "rand_chacha 0.3.1",
  "rktk",
  "rktk-drivers-common",
  "rktk-drivers-nrf",
@@ -5531,7 +5545,7 @@ checksum = "0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8"
 [[package]]
 name = "nrf-mpsl"
 version = "0.3.0"
-source = "git+https://github.com/alexmoon/nrf-sdc?rev=08620f00fa54e1423c4d54d2da073fb819602d27#08620f00fa54e1423c4d54d2da073fb819602d27"
+source = "git+https://github.com/alexmoon/nrf-sdc?rev=f54b6389ffa2750d4d3a4f5435660cb66b47e51a#f54b6389ffa2750d4d3a4f5435660cb66b47e51a"
 dependencies = [
  "cfg-if",
  "cortex-m",
@@ -5548,7 +5562,7 @@ dependencies = [
 [[package]]
 name = "nrf-mpsl-sys"
 version = "0.2.1"
-source = "git+https://github.com/alexmoon/nrf-sdc?rev=08620f00fa54e1423c4d54d2da073fb819602d27#08620f00fa54e1423c4d54d2da073fb819602d27"
+source = "git+https://github.com/alexmoon/nrf-sdc?rev=f54b6389ffa2750d4d3a4f5435660cb66b47e51a#f54b6389ffa2750d4d3a4f5435660cb66b47e51a"
 dependencies = [
  "bindgen",
  "doxygen-rs",
@@ -5556,9 +5570,9 @@ dependencies = [
 
 [[package]]
 name = "nrf-pac"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bddd547fab92b0553ff37032034fd04ce8b8b60d3f9a83f89ea815dfd0400336"
+checksum = "83531b9f1e19f493018da9b8b20359e4cedd6d1357553b1ac50f3fa27a0104fa"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
@@ -5567,7 +5581,7 @@ dependencies = [
 [[package]]
 name = "nrf-sdc"
 version = "0.4.0"
-source = "git+https://github.com/alexmoon/nrf-sdc?rev=08620f00fa54e1423c4d54d2da073fb819602d27#08620f00fa54e1423c4d54d2da073fb819602d27"
+source = "git+https://github.com/alexmoon/nrf-sdc?rev=f54b6389ffa2750d4d3a4f5435660cb66b47e51a#f54b6389ffa2750d4d3a4f5435660cb66b47e51a"
 dependencies = [
  "bt-hci",
  "critical-section",
@@ -5584,7 +5598,7 @@ dependencies = [
 [[package]]
 name = "nrf-sdc-sys"
 version = "0.2.1"
-source = "git+https://github.com/alexmoon/nrf-sdc?rev=08620f00fa54e1423c4d54d2da073fb819602d27#08620f00fa54e1423c4d54d2da073fb819602d27"
+source = "git+https://github.com/alexmoon/nrf-sdc?rev=f54b6389ffa2750d4d3a4f5435660cb66b47e51a#f54b6389ffa2750d4d3a4f5435660cb66b47e51a"
 dependencies = [
  "bindgen",
  "doxygen-rs",
@@ -7221,7 +7235,6 @@ dependencies = [
  "embedded-storage-async",
  "heapless 0.9.3",
  "log",
- "rand_core 0.6.4",
  "rktk",
  "rktk-log",
  "sequential-storage",
@@ -8758,8 +8771,9 @@ dependencies = [
 
 [[package]]
 name = "trouble-host"
-version = "0.6.0"
-source = "git+https://github.com/embassy-rs/trouble?rev=9a317aa6a53716faa2efa75633aa7dbde92eea76#9a317aa6a53716faa2efa75633aa7dbde92eea76"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bb9fe2be24000037431b036ba244cdb1d26f40e1719548553fb43c3fc62d496b"
 dependencies = [
  "aes",
  "bt-hci",
@@ -8782,8 +8796,9 @@ dependencies = [
 
 [[package]]
 name = "trouble-host-macros"
-version = "0.4.0"
-source = "git+https://github.com/embassy-rs/trouble?rev=9a317aa6a53716faa2efa75633aa7dbde92eea76#9a317aa6a53716faa2efa75633aa7dbde92eea76"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2562dc74f79ad12f7bf088da55c936d5eb1d022f2caac9849175326307a5eec1"
 dependencies = [
  "convert_case 0.8.0",
  "darling 0.20.11",

@@ -46,7 +46,6 @@ nrf-softdevice = { workspace = true, features = [
   "s140",
 ], optional = true }
 # trouble
-rand_chacha = { version = "0.3", default-features = false, optional = true }
 rktk = { workspace = true }
 rktk-drivers-common = { workspace = true }
 rktk-drivers-nrf = { workspace = true }
@@ -72,7 +71,6 @@ ble-none = ["cortex-m/critical-section-single-core"]
 ble-sd = ["dep:nrf-softdevice", "rktk-drivers-nrf/softdevice-ble"]
 ble-trouble = [
   "dep:nrf-sdc",
-  "dep:rand_chacha",
   "rktk-drivers-common/reporter-trouble",
   "rktk-drivers-nrf/sdc",
 ]

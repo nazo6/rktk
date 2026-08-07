@@ -1,5 +1,4 @@
 use embassy_futures::{join::join, select::select};
-use rand_core::{CryptoRng, RngCore};
 use rktk::utils::Receiver;
 use rktk_log::{info, warn};
 use trouble_host::{
@@ -13,13 +12,11 @@ use super::{Report, TroubleReporterConfig, server::Server};
 
 pub async fn run<
     C: Controller + 'static,
-    RNG: RngCore + CryptoRng,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
 >(
     controller: C,
-    rng: &mut RNG,
     output_rx: Receiver<'static, Report, 4>,
     config: TroubleReporterConfig,
 ) {
@@ -34,10 +31,7 @@ pub async fn run<
         L2CAP_CHANNELS_MAX,
         L2CAP_MTU,
     > = HostResources::new();
-    let stack = trouble_host::new(controller, &mut resources)
-        .set_random_address(address)
-        .set_random_generator_seed(rng)
-        .build();
+    let stack = trouble_host::new(controller, &mut resources).set_random_address(address).build();
 
     info!("Starting advertising and GATT service");
     let server = Server::new_with_config(GapConfig::Peripheral(

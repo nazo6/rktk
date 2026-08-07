@@ -1,5 +1,4 @@
 use driver::TroubleReporter;
-use rand_core::{CryptoRng, RngCore};
 use rktk::{drivers::interface::wireless::WirelessReporterDriverBuilder, utils::Channel};
 use trouble_host::{Controller, gap::PeripheralConfig};
 
@@ -22,37 +21,33 @@ pub struct TroubleReporterConfig {
 
 pub struct TroubleReporterBuilder<
     C: Controller + 'static,
-    RNG: RngCore + CryptoRng + 'static,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
 > {
     controller: C,
-    rng: &'static mut RNG,
     config: TroubleReporterConfig,
 }
 
 impl<
     C: Controller + 'static,
-    RNG: RngCore + CryptoRng,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
-> TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+> TroubleReporterBuilder<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
-    pub fn new(controller: C, rng: &'static mut RNG, config: TroubleReporterConfig) -> Self {
-        Self { controller, rng, config }
+    pub fn new(controller: C, config: TroubleReporterConfig) -> Self {
+        Self { controller, config }
     }
 }
 
 impl<
     C: Controller + 'static,
-    RNG: RngCore + CryptoRng,
     const CONNECTIONS_MAX: usize,
     const L2CAP_CHANNELS_MAX: usize,
     const L2CAP_MTU: usize,
 > WirelessReporterDriverBuilder
-    for TroubleReporterBuilder<C, RNG, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
+    for TroubleReporterBuilder<C, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>
 {
     type Output = TroubleReporter;
 
@@ -63,9 +58,8 @@ impl<
     ) -> Result<(Self::Output, impl Future<Output = ()> + 'static), Self::Error> {
         Ok((
             TroubleReporter { output_tx: OUTPUT_CHANNEL.sender() },
-            task::run::<_, _, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>(
+            task::run::<_, CONNECTIONS_MAX, L2CAP_CHANNELS_MAX, L2CAP_MTU>(
                 self.controller,
-                self.rng,
                 OUTPUT_CHANNEL.receiver(),
                 self.config,
             ),

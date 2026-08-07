@@ -94,16 +94,14 @@ async fn main(spawner: Spawner) {
     #[cfg_attr(feature = "_check", allow(unused_variables))]
     let trouble_ble_reporter = {
         use embassy_nrf::mode::Async;
-        use rand_chacha::{ChaCha12Rng, rand_core::SeedableRng as _};
         use rktk::singleton;
         use rktk_drivers_common::trouble::reporter::{
             TroubleReporterBuilder, TroubleReporterConfig,
         };
         use rktk_drivers_nrf::init_sdc;
 
-        let mut rng =
+        let rng =
             singleton!(embassy_nrf::rng::Rng::new(p.RNG, Irqs), embassy_nrf::rng::Rng<Async>);
-        let rng_2 = singleton!(ChaCha12Rng::from_rng(&mut rng).unwrap(), ChaCha12Rng);
         init_sdc!(
             spawner,
             sdc, Irqs, rng,
@@ -113,9 +111,8 @@ async fn main(spawner: Spawner) {
             txq: 3,
             rxq: 3
         );
-        TroubleReporterBuilder::<_, _, 1, 5, 72>::new(
+        TroubleReporterBuilder::<_, 1, 5, 72>::new(
             sdc.unwrap(),
-            rng_2,
             TroubleReporterConfig { advertise_name: "negL Trouble", peripheral_config: None },
         )
     };

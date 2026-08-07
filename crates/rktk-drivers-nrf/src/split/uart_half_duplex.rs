@@ -96,8 +96,8 @@ impl<
 
     async fn recv(&mut self, buf: &mut [u8], _is_master: bool) -> Result<usize, Self::Error> {
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD1M;
-        config.parity = Parity::EXCLUDED;
+        config.baudrate = Baudrate::Baud1m;
+        config.parity = Parity::Excluded;
         let mut rx = BufferedUarteRx::new(
             self.uarte.reborrow(),
             self.timer.reborrow(),
@@ -130,8 +130,8 @@ impl<
 
     async fn send_all(&mut self, buf: &[u8], _is_master: bool) -> Result<(), Self::Error> {
         let mut config = embassy_nrf::uarte::Config::default();
-        config.baudrate = Baudrate::BAUD1M;
-        config.parity = Parity::EXCLUDED;
+        config.baudrate = Baudrate::Baud1m;
+        config.parity = Parity::Excluded;
         let mut tx = BufferedUarteTx::new(
             self.uarte.reborrow(),
             self.pin.reborrow(),
