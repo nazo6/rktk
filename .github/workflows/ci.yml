@@ -37,11 +37,18 @@ jobs:
           components: "clippy,rust-src"
           target: "thumbv6m-none-eabi,thumbv7em-none-eabihf"
 
-      - name: Install deps
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libudev-dev libglib2.0-dev
-          version: 1.0
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pkg-config \
+            libglib2.0-dev \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl wget file \
+            libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev libudev-dev
 
       - uses: taiki-e/install-action@v2
         with:
