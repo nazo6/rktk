@@ -22,7 +22,7 @@ cargo_metadata = "0.23.0"
 cfg-if = "1.0.4"
 clap = { version = "4.5.20", features = ["derive"] }
 colored = "3.0.0"
-comfy-table = "7.2.2"
+comfy-table = "8.0.0"
 const-gen = "1.6.5"
 cortex-m = "0.7.6"
 cortex-m-rt = "0.7.0"
@@ -32,6 +32,9 @@ dialoguer = "0.12.0"
 dioxus = { version = "0.7.0" }
 dircpy = { version = "0.3.19", default-features = false }
 dirs = "6.0.0"
+display-driver = "0.1.0"
+display-driver-spi = "0.1.1"
+display-driver-st7789 = "0.1.0"
 display-interface = "0.5.0"
 document-features = "0.2.11"
 duct = "1.0.0"
@@ -53,7 +56,7 @@ fixed-macro = "1.2.0"
 futures = { version = "0.3.30", default-features = false }
 heapless = "0.9.1"
 human_bytes = { version = "0.4.3" }
-itertools = { version = "0.14.0", default-features = false }
+itertools = { version = "0.15.0", default-features = false }
 jiff = { version = "0.2.1" }
 js-sys = { version = "0.3.77" }
 kle-serial = { version = "0.3.1" }
@@ -61,15 +64,30 @@ kmsm = { path = "crates/kmsm", version = "0.2.0" }
 kmsm-rktk = { path = "crates/kmsm-rktk", version = "0.2.0" }
 log = "0.4.25"
 macro_rules_attribute = "0.2.0"
-nrf-mpsl = { git = "https://github.com/alexmoon/nrf-sdc", rev = "08620f00fa54e1423c4d54d2da073fb819602d27", default-features = false }
-nrf-sdc = { git = "https://github.com/alexmoon/nrf-sdc", rev = "08620f00fa54e1423c4d54d2da073fb819602d27", default-features = false }
-nrf-softdevice = { git = "https://github.com/embassy-rs/nrf-softdevice", rev = "5949a5b1445cc907745c6449a35577e4544cd255" }
+nrf-mpsl = {
+  git = "https://github.com/alexmoon/nrf-sdc",
+  rev = "08620f00fa54e1423c4d54d2da073fb819602d27",
+  default-features = false
+}
+nrf-sdc = {
+  git = "https://github.com/alexmoon/nrf-sdc",
+  rev = "08620f00fa54e1423c4d54d2da073fb819602d27",
+  default-features = false
+}
+nrf-softdevice = {
+  git = "https://github.com/embassy-rs/nrf-softdevice",
+  rev = "5949a5b1445cc907745c6449a35577e4544cd255"
+}
 paste = "1.0.15"
 pio = "0.3.0"
 portable-atomic = "1.11.0"
-postcard = { git = "https://github.com/jamesmunns/postcard", rev = "07b436d972fc92c21e7e310cc12b334ef0be6a44", features = [
-  "heapless-v0_9",
-] }
+postcard = {
+  git = "https://github.com/jamesmunns/postcard",
+  rev = "07b436d972fc92c21e7e310cc12b334ef0be6a44",
+  features = [
+    "heapless-v0_9",
+  ]
+}
 pretty_assertions = "1.4.1"
 rand_core = { version = "0.6.4" }
 regex = "1.12.2"
@@ -81,7 +99,7 @@ rktk-log = { path = "crates/rktk-log", version = "0.2.0" }
 rktk-rrp = { path = "crates/rktk-rrp", version = "0.2.0" }
 rusb = "0.9.4"
 schemars = "1.0.0"
-sequential-storage = "7.1.0"
+sequential-storage = "8.0.1"
 serde = { version = "1.0.207", default-features = false }
 serde_json = "1.0.122"
 serde-wasm-bindgen = { version = "0.6.5" }
@@ -90,16 +108,16 @@ serde_with = { version = "3.9.0", default-features = false }
 serialport = "4.9.0"
 smart-default = "0.7.1"
 smol = { version = "2.0.2" }
-display-driver = "0.1.0"
-display-driver-spi = "0.1.1"
-display-driver-st7789 = "0.1.0"
 ssd1306 = { version = "0.10.0", features = ["async"] }
 static_cell = "2.1.0"
 strum = { version = "0.28.0", default-features = false }
 thiserror = { version = "2.0.3", default-features = false }
 tokio = { version = "1.41.1" }
 tracing-log = { version = "0.2.0" }
-trouble-host = { git = "https://github.com/embassy-rs/trouble", rev = "9a317aa6a53716faa2efa75633aa7dbde92eea76" }
+trouble-host = {
+  git = "https://github.com/embassy-rs/trouble",
+  rev = "9a317aa6a53716faa2efa75633aa7dbde92eea76"
+}
 usbd-hid = "0.10.0"
 wasm-bindgen = "0.2.99"
 wasm-bindgen-futures = "0.4.49"

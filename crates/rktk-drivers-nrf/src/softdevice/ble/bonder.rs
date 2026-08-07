@@ -9,7 +9,7 @@ use nrf_softdevice::ble::{
 };
 use rktk_log::{info, warn};
 use sequential_storage::{
-    cache::NoCache,
+    cache::Cache,
     map::{MapConfig, MapStorage},
 };
 use storage::{BOND_SAVE, bonder_save_task};
@@ -135,7 +135,7 @@ pub async fn init_bonder(
 ) -> &'static Bonder {
     let size = flash.size();
     let mut storage: SoftdeviceFlashStorage =
-        MapStorage::new(flash, MapConfig::new(0..size), NoCache);
+        MapStorage::<u8, _, _>::new(flash, MapConfig::new(0..size), Cache::new_uncached());
 
     let bond_map = storage::read_bond_map(&mut storage).await.unwrap_or_default();
 

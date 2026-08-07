@@ -8,9 +8,11 @@ use rktk::{
 };
 pub use sequential_storage;
 use sequential_storage::{
-    cache::NoCache,
+    cache::{Cache, Uncached},
     map::{MapConfig, MapStorage},
 };
+
+type NoCache = Cache<Uncached, Uncached, Uncached, u64>;
 
 // error type
 
@@ -39,7 +41,7 @@ impl<F: NorFlash + ReadNorFlash + MultiwriteNorFlash> FlashSequentialMapStorage<
         let storage = MapStorage::new(
             flash,
             MapConfig::new(start_address..start_address + storage_size),
-            NoCache,
+            Cache::new_uncached(),
         );
         Self { storage: Mutex::new(storage) }
     }

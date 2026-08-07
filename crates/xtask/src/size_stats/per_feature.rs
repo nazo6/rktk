@@ -46,7 +46,7 @@ pub fn start(gh_output: bool) -> anyhow::Result<()> {
     xprintln!("Analyzing crate `{}` ({})", package.name, dir);
     let mut table = Table::new();
     table
-        .load_preset(comfy_table::presets::UTF8_FULL_CONDENSED)
+        .load_style(comfy_table::presets::UTF8_FULL_CONDENSED)
         .set_header(vec!["features", "elf size", "uf2 size", "diff"]);
 
     let mut baseline = 0;

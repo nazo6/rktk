@@ -1,10 +1,14 @@
 use embassy_embedded_hal::flash::partition::Partition;
 use nrf_softdevice::{Flash, Softdevice};
 use rktk::utils::{Mutex, RawMutex};
-use sequential_storage::{cache::NoCache, map::MapStorage};
+use sequential_storage::{
+    cache::{Cache, Uncached},
+    map::MapStorage,
+};
 use static_cell::StaticCell;
 
-pub type SoftdeviceFlashStorage = MapStorage<u8, Partition<'static, RawMutex, Flash>, NoCache>;
+pub type SoftdeviceFlashStorage =
+    MapStorage<u8, Partition<'static, RawMutex, Flash>, Cache<Uncached, Uncached, Uncached, u8>>;
 pub type SoftdeviceFlashPartition = Partition<'static, RawMutex, Flash>;
 
 static FLASH: StaticCell<Mutex<Flash>> = StaticCell::new();

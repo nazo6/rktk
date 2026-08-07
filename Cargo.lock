@@ -1064,9 +1064,9 @@ dependencies = [
 
 [[package]]
 name = "comfy-table"
-version = "7.2.2"
+version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "958c5d6ecf1f214b4c2bbbbf6ab9523a864bd136dcf71a7e8904799acfe1ad47"
+checksum = "136c8c4c3823846e8ba6d4bda011b4e5d5827b8bb0ac26c31f9ab31abe9f54f2"
 dependencies = [
  "crossterm",
  "unicode-segmentation",
@@ -4449,6 +4449,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b4baf93f58d4425749ca49a51c50ebab072c5df6994d08fed93541c331481dc"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7134,7 +7143,7 @@ dependencies = [
  "embedded-graphics",
  "futures",
  "heapless 0.9.3",
- "itertools 0.14.0",
+ "itertools 0.15.0",
  "kmsm",
  "kmsm-rktk",
  "log",
@@ -7581,9 +7590,9 @@ dependencies = [
 
 [[package]]
 name = "sequential-storage"
-version = "7.2.0"
+version = "8.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "574e5a379bf43653079b34cb4cf32958404b5f42e0ed5b5adcdff02c2de04d4d"
+checksum = "e750f14f4f6e5a81277c66311713a56106c8df0196df62a634d1fc806556832b"
 dependencies = [
  "embedded-storage-async",
 ]
