@@ -26,11 +26,9 @@ pub fn init_peri() -> Peripherals {
     }
 
     #[cfg(feature = "alloc")]
-    {
-        use core::mem::MaybeUninit;
-        const HEAP_SIZE: usize = 32768;
-        static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
-        unsafe { crate::HEAP.init(&raw mut HEAP_MEM as usize, HEAP_SIZE) }
+    unsafe {
+        use crate::HEAP;
+        embedded_alloc::init!(HEAP, 32768);
     }
 
     p

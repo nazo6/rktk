@@ -67,11 +67,8 @@ async fn main(spawner: Spawner) {
     };
 
     #[cfg(feature = "alloc")]
-    {
-        use core::mem::MaybeUninit;
-        const HEAP_SIZE: usize = 32768;
-        static mut HEAP_MEM: [MaybeUninit<u8>; HEAP_SIZE] = [MaybeUninit::uninit(); HEAP_SIZE];
-        unsafe { crate::HEAP.init(&raw mut HEAP_MEM as usize, HEAP_SIZE) }
+    unsafe {
+        embedded_alloc::init!(HEAP, 32768);
     }
 
     let spi = {
@@ -100,8 +97,7 @@ async fn main(spawner: Spawner) {
         };
         use rktk_drivers_nrf::init_sdc;
 
-        let rng =
-            singleton!(embassy_nrf::rng::Rng::new(p.RNG, Irqs), embassy_nrf::rng::Rng<Async>);
+        let rng = singleton!(embassy_nrf::rng::Rng::new(p.RNG, Irqs), embassy_nrf::rng::Rng<Async>);
         init_sdc!(
             spawner,
             sdc, Irqs, rng,

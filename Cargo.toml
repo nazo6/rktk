@@ -38,6 +38,7 @@ display-driver-st7789 = "0.1.0"
 display-interface = "0.5.0"
 document-features = "0.2.11"
 duct = "1.0.0"
+embedded-alloc = { version = "0.7.0" }
 embassy-embedded-hal = { version = "0.6.0" }
 embassy-executor = { version = "0.10.0" }
 embassy-futures = { version = "0.1.2" }
