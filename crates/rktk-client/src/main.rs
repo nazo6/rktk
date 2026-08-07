@@ -1,3 +1,5 @@
+#![allow(clippy::useless_format)]
+
 mod app;
 mod backend;
 mod utils;

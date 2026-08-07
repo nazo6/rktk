@@ -281,16 +281,16 @@ pub async fn touch_task(
     loop {
         if let Ok(state) = touch_sensor.read_touch().await {
             // 1. Right-side Buttons (ch0 - ch3)
-            for i in 0..4 {
+            for (i, prev_button) in prev_buttons.iter_mut().enumerate() {
                 let current = state.pads[i];
-                if current != prev_buttons[i] {
+                if current != *prev_button {
                     let ev = rktk::drivers::interface::keyscan::KeyChangeEvent {
                         row: i as u8,
                         col: 3, // Column 3 is the virtual column
                         pressed: current,
                     };
                     let _ = kb_sender.try_send(ev);
-                    prev_buttons[i] = current;
+                    *prev_button = current;
                 }
             }
 

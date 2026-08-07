@@ -212,14 +212,14 @@ impl<S: ExtendedSpi> Pmw3360<S> {
 
     pub async fn set_cpi(&mut self, cpi: u16) -> Result<(), <Self as MouseDriver>::Error> {
         self.config.cpi = cpi;
-        let val: u16;
-        if cpi < 100 {
-            val = 0
+
+        let val: u16 = if cpi < 100 {
+            0
         } else if cpi > 12000 {
-            val = 0x77
+            0x77
         } else {
-            val = (cpi - 100) / 100;
-        }
+            (cpi - 100) / 100
+        };
         self.write(reg::CONFIG_1, val as u8).await?;
         Ok(())
     }
