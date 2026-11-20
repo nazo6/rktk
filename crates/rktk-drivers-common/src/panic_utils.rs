@@ -20,7 +20,9 @@ use rktk::{
     task::display::utils::{RotatedDrawTarget, Rotation},
 };
 
-#[unsafe(link_section = ".uninit.PANICINFO")]
+// The `.uninit` section only exists on bare-metal targets. On host targets (used for
+// clippy/tests) Mach-O rejects this section name, so only apply it for bare-metal builds.
+#[cfg_attr(target_os = "none", unsafe(link_section = ".uninit.PANICINFO"))]
 static mut PANIC_INFO: MaybeUninit<PanicMessage> = MaybeUninit::uninit();
 const PANIC_INFO_MAGIC: u32 = 0x54_41_43_4B;
 

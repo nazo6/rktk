@@ -1,0 +1,8 @@
+# This crate is normally checked/built on the host, where bare-metal section
+# names are not valid (Mach-O on macOS). Build it for the actual chip instead.
+[build]
+target = "thumbv6m-none-eabi"
+
+# portable-atomic needs to know RP2040 is single-core for its atomics.
+[target.thumbv6m-none-eabi]
+rustflags = ["--cfg", "portable_atomic_unsafe_assume_single_core"]
